@@ -15,7 +15,7 @@
             <!-- Định nghĩa màu tùy chỉnh #0066b1 -->
             
             <!--Màu Background chính-->
-            <Color x:Key="Primary">#0066b1</Color>
+            <Color x:Key="Primary">#0071f5</Color>
             <Color x:Key="PrimaryLight">#3387c8</Color>
             <Color x:Key="PrimaryDark">#004f8a</Color>
 
