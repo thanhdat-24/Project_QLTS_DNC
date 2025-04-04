@@ -20,5 +20,19 @@ namespace Project_QLTS_DNC
         {
             InitializeComponent();
         }
+
+        private void btnThoat_Click(object sender, RoutedEventArgs e)
+        {
+           this.Close();
+        }
+
+        private void btnNhaCungCap_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.NhaCungCap.NhaCungCapForm();
+        }
+        private void btnTraCuuTaiSan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLySanPham.DanhSachSanPham();
+        }
     }
 }

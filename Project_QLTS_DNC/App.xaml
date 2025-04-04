@@ -13,16 +13,24 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Định nghĩa màu tùy chỉnh #0066b1 -->
-            <Color x:Key="Primary">#0066b1</Color>
+            
+            <!--Màu Background chính-->
+            <Color x:Key="Primary">#0071f5</Color>
             <Color x:Key="PrimaryLight">#3387c8</Color>
             <Color x:Key="PrimaryDark">#004f8a</Color>
 
+            <!--Màu Background Button Chính, Thêm, Sửa, Xóa-->
             <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource Primary}"/>
             <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource PrimaryDark}"/>
             <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryLight}"/>
-
+            
+            <!--Nền Các nút phụ như , In PDF, Excel-->
             <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#90CAF9"/>
             <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="SecondaryFileExcel" Color="#00ac48"/> <!--nền Excel-->
+            <SolidColorBrush x:Key="SecondaryFileFDP" Color="#fc9a13"/>
+            <SolidColorBrush x:Key="SecondaryBack" Color="#000000"/>
+            <SolidColorBrush x:Key="SecondaryCreate" Color="#4CAF50"/> <!--Nềm Thêm mới-->
         </ResourceDictionary>
     </Application.Resources>
 

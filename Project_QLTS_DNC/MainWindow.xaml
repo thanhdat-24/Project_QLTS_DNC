@@ -1,12 +1,142 @@
 ﻿<Window x:Class="Project_QLTS_DNC.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Project_QLTS_DNC"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:local="clr-namespace:Project_QLTS_DNC"
 
-    </Grid>
+    
+    Title="Trang Chủ - Quản Lý Tài Sản" Height="640" Width="900" WindowState="Maximized" WindowStartupLocation="CenterScreen">
+
+    <DockPanel>
+        <Border Background="#0066b1" Width="220" DockPanel.Dock="Left">
+            <StackPanel>
+                <!-- Logo trên thanh điều hướng -->
+                <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
+                <!-- ScrollViewer để thanh điều hướng có thể cuộn -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600">
+                    <TreeView Background="Transparent" BorderThickness="0" Foreground="White"
+      FontSize="14" Padding="10" Height="498" >
+                        <TreeViewItem Header="🏠 Trang chủ"/>
+                        <TreeViewItem Header="👥 Quản lý tài khoản" IsExpanded="False">
+                            <TreeViewItem x:Name="btnNhanVien" Header="🔎 Nhân viên" />
+
+                        </TreeViewItem>
+                        <TreeViewItem Header="📂 Quản lý loại tài sản"/>
+                        <TreeViewItem Header="🏢 Quản lý tòa nhà" IsExpanded="False">
+                            <TreeViewItem Header="🏢 Tòa nhà"/>
+                            <TreeViewItem Header="🏬 Tầng"/>
+                            <TreeViewItem Header="🚪 Phòng"/>
+                            <TreeViewItem Header="🏢 Phòng ban"/>
+                        </TreeViewItem>
+                        <TreeViewItem Header="📦 Quản lý kho"/>
+                        <TreeViewItem x:Name="btnNhaCungCap" Header="🏭 Quản lý nhà cung cấp" Selected="btnNhaCungCap_Selected"/>
+                        <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected"/>
+                        <TreeViewItem Header="📊 Báo cáo thống kê"/>
+                        <TreeViewItem Header="📝 Lập phiếu" IsExpanded="False">
+                            <TreeViewItem Header="📥 Phiếu nhập"/>
+                            <TreeViewItem Header="📤 Phiếu xuất"/>
+                            <TreeViewItem Header="🛠️ Phiếu bảo trì"/>
+                        </TreeViewItem>
+                        <TreeViewItem Header="📜 Duyệt phiếu"/>
+                        <TreeViewItem Header="⚙️ Cài đặt"/>
+                    </TreeView>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+
+
+        <!-- Thanh tiêu đề (Header) trên cùng -->
+
+        <materialDesign:ColorZone Mode="PrimaryMid" Height="59" DockPanel.Dock="Top"
+       Padding="10" materialDesign:ShadowAssist.ShadowDepth="Depth3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+
+                <!-- Các nút bên phải -->
+                <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Center">
+                    <Button Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Thông báo" Foreground="White">
+                        <materialDesign:PackIcon Kind="Bell" />
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Tài khoản" Foreground="White">
+                        <materialDesign:PackIcon Kind="Account" />
+                    </Button>
+                    <Button x:Name="btnThoat" Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Đăng xuất" Foreground="White" Click="btnThoat_Click"
+                    >
+                        <materialDesign:PackIcon Kind="Power" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:ColorZone>
+
+        <!-- Nội dung chính bên phải -->
+        <ContentControl x:Name="MainContentPanel" Margin="10" Background="#FAFAFA">
+            <Grid x:Name="MainContent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Padding="20" Background="White" CornerRadius="10" 
+            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="Chào mừng đến với hệ thống quản lý tài sản"
+                       FontSize="22" FontWeight="Bold" Foreground="#37474F"
+                       TextAlignment="Center" Margin="0,10,0,20"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Background="#ECEFF1" CornerRadius="10" Padding="20"
+                        Grid.Column="1" Margin="10">
+                                <TextBlock Text="Biểu đồ thống kê tài sản" FontSize="16"
+                               FontWeight="Bold" Foreground="#37474F"/>
+                            </Border>
+
+                            <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right">
+                                <Border Background="#FFAB40" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                                    <StackPanel>
+                                        <TextBlock Text="Tổng tài sản" FontSize="14" Foreground="White"/>
+                                        <TextBlock Text="150" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#66BB6A" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                                    <StackPanel>
+                                        <TextBlock Text="Tài sản đang sử dụng" FontSize="14" Foreground="White"/>
+                                        <TextBlock Text="120" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#E57373" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                                    <StackPanel>
+                                        <TextBlock Text="Tài sản cần bảo trì" FontSize="14" Foreground="White"/>
+                                        <TextBlock Text="10" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#FFA726" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                                    <StackPanel>
+                                        <TextBlock Text="Sửa chữa tài sản" FontSize="14" Foreground="White"/>
+                                        <TextBlock Text="5" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ContentControl>
+
+    </DockPanel>
 </Window>
