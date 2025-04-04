@@ -6,14 +6,29 @@
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLySanPham"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Danh Sách Sản Phẩm" Height="650" Width="1300"
+        Title="Danh Sách Sản Phẩm" Height="750" Width="1400"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="HoverRowStyle" TargetType="{x:Type DataGridRow}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryHueLightBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
     <Grid>
+        <Grid.Effect>
+            <BlurEffect Radius="0"/>
+        </Grid.Effect>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -21,17 +36,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="FormatListBulleted" VerticalAlignment="Center" Width="30" Height="30" Margin="0 0 10 0"/>
-                <TextBlock Text="DANH SÁCH SẢN PHẨM" VerticalAlignment="Center" FontSize="22" FontWeight="Medium"/>
-            </StackPanel>
-            
-        </materialDesign:ColorZone>
-
         <!-- Search and Filter Area -->
-        <Grid Grid.Row="1" Margin="16">
+        <Grid Grid.Row="1" Margin="16" Background="{DynamicResource MaterialDesignBackground}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -40,23 +46,37 @@
             </Grid.ColumnDefinitions>
 
             <!-- Search Box -->
-            <materialDesign:Card Grid.Column="0" Padding="8" Margin="0 0 16 0" UniformCornerRadius="4">
+            <materialDesign:Card Grid.Column="0" Padding="8" Margin="0 0 16 0" UniformCornerRadius="8">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Kind="Search" Grid.Column="0" VerticalAlignment="Center" Margin="8 0" Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                    <TextBox Grid.Column="1" x:Name="txtSearch" materialDesign:HintAssist.Hint="Tìm kiếm theo tên sản phẩm" BorderThickness="0" VerticalAlignment="Center" Margin="8 0"/>
-                    <Button Grid.Column="2" Style="{StaticResource MaterialDesignIconButton}" x:Name="btnSearch" ToolTip="Tìm kiếm">
+                    <materialDesign:PackIcon Kind="Search" Grid.Column="0" VerticalAlignment="Center" Margin="8 0" 
+                                              Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    <TextBox Grid.Column="1" x:Name="txtSearch" 
+                             materialDesign:HintAssist.Hint="Tìm kiếm theo tên sản phẩm" 
+                             BorderThickness="0" 
+                             VerticalAlignment="Center" 
+                             Margin="8 0"
+                             materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
+                    <Button Grid.Column="2" 
+                            Style="{StaticResource MaterialDesignIconButton}" 
+                            x:Name="btnSearch" 
+                            ToolTip="Tìm kiếm">
                         <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                     </Button>
                 </Grid>
             </materialDesign:Card>
 
             <!-- Filter by MaPhong -->
-            <ComboBox Grid.Column="1" x:Name="cboPhong" materialDesign:HintAssist.Hint="Mã phòng" Style="{StaticResource MaterialDesignOutlinedComboBox}" Width="150" Margin="0 0 16 0">
+            <ComboBox Grid.Column="1" 
+                      x:Name="cboPhong" 
+                      materialDesign:HintAssist.Hint="Mã phòng" 
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                      Width="150" 
+                      Margin="0 0 16 0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding MaPhong}"/>
@@ -65,7 +85,12 @@
             </ComboBox>
 
             <!-- Filter by MaNhomTS -->
-            <ComboBox Grid.Column="2" x:Name="cboNhomTS" materialDesign:HintAssist.Hint="Mã nhóm TS" Style="{StaticResource MaterialDesignOutlinedComboBox}" Width="150" Margin="0 0 16 0">
+            <ComboBox Grid.Column="2" 
+                      x:Name="cboNhomTS" 
+                      materialDesign:HintAssist.Hint="Mã nhóm TS" 
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                      Width="150" 
+                      Margin="0 0 16 0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding MaNhomTS}"/>
@@ -74,7 +99,13 @@
             </ComboBox>
 
             <!-- Add Button -->
-            <Button Grid.Column="3" x:Name="btnAdd" Style="{StaticResource MaterialDesignRaisedButton}" materialDesign:ButtonAssist.CornerRadius="4" Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" ToolTip="Thêm sản phẩm mới">
+            <Button Grid.Column="3" 
+                    x:Name="btnAdd" 
+                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                    materialDesign:ButtonAssist.CornerRadius="8" 
+                    Background="{StaticResource PrimaryHueMidBrush}" 
+                    Foreground="White" 
+                    ToolTip="Thêm sản phẩm mới">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="Plus" Margin="0 0 8 0"/>
                     <TextBlock Text="THÊM SẢN PHẨM"/>
@@ -83,12 +114,19 @@
         </Grid>
 
         <!-- DataGrid -->
-        <materialDesign:Card Grid.Row="2" Margin="16" UniformCornerRadius="4" materialDesign:ShadowAssist.ShadowDepth="Depth1">
-            <DataGrid x:Name="dgSanPham" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+        <materialDesign:Card Grid.Row="2" Margin="16" UniformCornerRadius="8">
+            <DataGrid x:Name="dgSanPham" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True" 
+                      CanUserAddRows="False"
                       materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
                       materialDesign:DataGridAssist.ColumnHeaderPadding="8"
-                      BorderThickness="0" GridLinesVisibility="All" 
-                      VerticalScrollBarVisibility="Auto">
+                      BorderThickness="0" 
+                      GridLinesVisibility="All" 
+                      VerticalScrollBarVisibility="Auto"
+                      RowStyle="{StaticResource HoverRowStyle}"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Mã SP" Binding="{Binding MaSP}" Width="70"/>
                     <DataGridTextColumn Header="Mã phòng" Binding="{Binding MaPhong}" Width="100"/>
@@ -104,10 +142,15 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Chỉnh sửa" Margin="0 0 8 0">
+                                    <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                            ToolTip="Chỉnh sửa" 
+                                            Margin="0 0 8 0" 
+                                            Click="BtnEdit_Click">
                                         <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                                     </Button>
-                                    <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Xóa">
+                                    <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                            ToolTip="Xóa" 
+                                            Click="BtnDelete_Click">
                                         <materialDesign:PackIcon Kind="Delete" Foreground="#F44336"/>
                                     </Button>
                                 </StackPanel>
@@ -119,12 +162,47 @@
         </materialDesign:Card>
 
         <!-- Footer/Status Bar -->
-        <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth1">
+        <materialDesign:ColorZone Grid.Row="3" 
+                                  Mode="Standard" 
+                                  Padding="16" 
+                                  Name="StatusBar">
             <DockPanel>
-                <TextBlock x:Name="txtStatus" Text="Tổng số sản phẩm: 0" VerticalAlignment="Center"/>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource MaterialDesignFlatButton}" Content="XUẤT EXCEL" Foreground="{StaticResource PrimaryHueMidBrush}" Margin="0 0 8 0"/>
-                    <Button Style="{StaticResource MaterialDesignFlatButton}" Content="XUẤT PDF" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                <TextBlock x:Name="txtStatus" 
+                           Text="Tổng số sản phẩm: 0" 
+                           VerticalAlignment="Center" 
+                           FontWeight="Medium"/>
+                <StackPanel DockPanel.Dock="Right" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right">
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}" 
+                            materialDesign:ButtonAssist.CornerRadius="8" 
+                            Background="{DynamicResource SecondaryAccentForegroundBrush}" 
+                            Foreground="{DynamicResource SecondaryBack}" 
+                            Margin="0 0 8 0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="QrcodeScan" Margin="0 0 8 0"/>
+                            <TextBlock Text="XUẤT QRCODE"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}" 
+                        materialDesign:ButtonAssist.CornerRadius="8" 
+                        Background="{DynamicResource SecondaryFileExcel}" 
+                        Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+                        Margin="0 0 8 0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
+                            <TextBlock Text="XUẤT EXCEL"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}" 
+                            materialDesign:ButtonAssist.CornerRadius="8" 
+                            Background="{DynamicResource SecondaryFileFDP}" 
+                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FilePdfBox" Margin="0 0 8 0"/>
+                            <TextBlock Text="XUẤT PDF"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </DockPanel>
         </materialDesign:ColorZone>

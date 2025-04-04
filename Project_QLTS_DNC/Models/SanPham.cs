@@ -5,6 +5,17 @@ namespace Project_QLTS_DNC.Model
 {
     public class SanPham : INotifyPropertyChanged
     {
+
+        public class PhongFilter
+        {
+            public int MaPhong { get; set; }
+        }
+
+        public class NhomTSFilter
+        {
+            public int MaNhomTS { get; set; }
+        }
+
         private int _maSP;
         private int _maPhong;
         private int _maNhomTS;
