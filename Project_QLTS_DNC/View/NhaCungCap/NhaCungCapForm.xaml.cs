@@ -10,14 +10,13 @@ namespace Project_QLTS_DNC.View.NhaCungCap
     /// </summary>
     public partial class NhaCungCapForm : UserControl
     {
-
         public NhaCungCapForm()
         {
             InitializeComponent();
-           
+          
         }
+
+        
+        
     }
-
-    
-
 }
