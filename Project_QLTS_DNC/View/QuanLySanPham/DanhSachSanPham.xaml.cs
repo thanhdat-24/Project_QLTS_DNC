@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Project_QLTS_DNC.Model;
+using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -14,6 +15,8 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
     {
         private ObservableCollection<SanPham> _listSanPham;
         private CollectionViewSource _viewSource;
+        private List<PhongFilter> _phongList;
+        private List<NhomTSFilter> _nhomTSList;
 
         public DanhSachSanPham()
         {
@@ -55,17 +58,17 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         private void InitializeFilters()
         {
             // Load unique MaPhong values for filter
-            var uniquePhongs = _listSanPham.Select(x => x.MaPhong).Distinct().OrderBy(x => x)
-                .Select(x => new { MaPhong = x }).ToList();
-            uniquePhongs.Insert(0, new { MaPhong = 0 }); // Add "All" option
-            cboPhong.ItemsSource = uniquePhongs;
+            _phongList = _listSanPham.Select(x => x.MaPhong).Distinct().OrderBy(x => x)
+                .Select(x => new PhongFilter { MaPhong = x }).ToList();
+            _phongList.Insert(0, new PhongFilter { MaPhong = 0 }); // Add "All" option
+            cboPhong.ItemsSource = _phongList;
             cboPhong.SelectedIndex = 0;
 
             // Load unique MaNhomTS values for filter
-            var uniqueNhoms = _listSanPham.Select(x => x.MaNhomTS).Distinct().OrderBy(x => x)
-                .Select(x => new { MaNhomTS = x }).ToList();
-            uniqueNhoms.Insert(0, new { MaNhomTS = 0 }); // Add "All" option
-            cboNhomTS.ItemsSource = uniqueNhoms;
+            _nhomTSList = _listSanPham.Select(x => x.MaNhomTS).Distinct().OrderBy(x => x)
+                .Select(x => new NhomTSFilter { MaNhomTS = x }).ToList();
+            _nhomTSList.Insert(0, new NhomTSFilter { MaNhomTS = 0 }); // Add "All" option
+            cboNhomTS.ItemsSource = _nhomTSList;
             cboNhomTS.SelectedIndex = 0;
         }
 
@@ -98,10 +101,10 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                                     sanPham.TenSanPham.ToLower().Contains(txtSearch.Text.ToLower());
 
                 bool matchesPhong = cboPhong.SelectedIndex == 0 ||
-                                    sanPham.MaPhong == ((dynamic)cboPhong.SelectedItem).MaPhong;
+                                    sanPham.MaPhong == ((PhongFilter)cboPhong.SelectedItem).MaPhong;
 
                 bool matchesNhom = cboNhomTS.SelectedIndex == 0 ||
-                                  sanPham.MaNhomTS == ((dynamic)cboNhomTS.SelectedItem).MaNhomTS;
+                                  sanPham.MaNhomTS == ((NhomTSFilter)cboNhomTS.SelectedItem).MaNhomTS;
 
                 return matchesSearch && matchesPhong && matchesNhom;
             };
@@ -117,7 +120,103 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             // Mở form thêm mới sản phẩm
-            MessageBox.Show("Chức năng thêm sản phẩm sẽ được triển khai sau.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            ThemSanPham themSanPhamDialog = new ThemSanPham(
+                this,
+                _phongList.Where(p => p.MaPhong != 0).ToList(),
+                _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
+            );
+
+            themSanPhamDialog.ShowDialog();
+        }
+
+        // Phương thức để lấy mã sản phẩm mới
+        public int GetNewMaSP()
+        {
+            return _listSanPham.Count > 0 ? _listSanPham.Max(sp => sp.MaSP) + 1 : 1;
+        }
+
+        // Phương thức để thêm sản phẩm mới vào danh sách
+        public void AddSanPham(SanPham sanPham)
+        {
+            _listSanPham.Add(sanPham);
+
+            // Cập nhật lại bộ lọc nếu có phòng mới hoặc nhóm tài sản mới
+            if (!_phongList.Any(p => p.MaPhong == sanPham.MaPhong && p.MaPhong != 0))
+            {
+                _phongList.Add(new PhongFilter { MaPhong = sanPham.MaPhong });
+                _phongList = _phongList.OrderBy(p => p.MaPhong).ToList();
+                cboPhong.ItemsSource = null;
+                cboPhong.ItemsSource = _phongList;
+            }
+
+            if (!_nhomTSList.Any(n => n.MaNhomTS == sanPham.MaNhomTS && n.MaNhomTS != 0))
+            {
+                _nhomTSList.Add(new NhomTSFilter { MaNhomTS = sanPham.MaNhomTS });
+                _nhomTSList = _nhomTSList.OrderBy(n => n.MaNhomTS).ToList();
+                cboNhomTS.ItemsSource = null;
+                cboNhomTS.ItemsSource = _nhomTSList;
+            }
+
+            // Cập nhật lại status bar
+            UpdateStatusBar();
+        }
+
+        // Xử lý sự kiện khi nhấn nút Edit (chỉnh sửa sản phẩm)
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy sản phẩm được chọn
+            Button button = sender as Button;
+            SanPham selectedSanPham = button.DataContext as SanPham;
+
+            if (selectedSanPham != null)
+            {
+                // Mở form chỉnh sửa sản phẩm
+                EditSanPham editDialog = new EditSanPham(
+                    this,
+                    selectedSanPham,
+                    _phongList.Where(p => p.MaPhong != 0).ToList(),
+                    _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
+                );
+
+                editDialog.ShowDialog();
+            }
+        }
+
+        // Phương thức để cập nhật sản phẩm
+        public void UpdateSanPham(SanPham sanPham)
+        {
+            // Sản phẩm đã được cập nhật từ EditSanPham, chỉ cần refresh DataGrid và cập nhật UI
+            _viewSource.View.Refresh();
+            UpdateStatusBar();
+        }
+
+        // Xử lý sự kiện khi nhấn nút Delete (xóa sản phẩm)
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy sản phẩm được chọn để xóa
+            Button button = sender as Button;
+            SanPham selectedSanPham = button.DataContext as SanPham;
+
+            if (selectedSanPham != null)
+            {
+                // Hiển thị hộp thoại xác nhận xóa
+                MessageBoxResult result = MessageBox.Show(
+                    $"Bạn có chắc chắn muốn xóa sản phẩm '{selectedSanPham.TenSanPham}'?",
+                    "Xác nhận xóa",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Xóa sản phẩm
+                    _listSanPham.Remove(selectedSanPham);
+
+                    // Cập nhật lại status bar
+                    UpdateStatusBar();
+
+                    MessageBox.Show("Đã xóa sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
         }
     }
 }
