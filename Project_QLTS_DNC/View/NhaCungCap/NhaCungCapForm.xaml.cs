@@ -9,12 +9,13 @@ namespace Project_QLTS_DNC.View.NhaCungCap
     /// Interaction logic for NhaCungCapForm.xaml
     /// </summary>
     public partial class NhaCungCapForm : UserControl
-       public NhaCungCapForm()
+    {
+        public NhaCungCapForm()
         {
             InitializeComponent();
-           
+
         }
 
-    
+    }
 
 }
