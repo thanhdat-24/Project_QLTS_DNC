@@ -14,8 +14,7 @@
         TextOptions.TextRenderingMode="Auto"
         FontFamily="{DynamicResource MaterialDesignFont}"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
-
+        ResizeMode="CanResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
