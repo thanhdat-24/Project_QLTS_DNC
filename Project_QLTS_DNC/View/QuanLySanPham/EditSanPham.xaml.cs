@@ -8,7 +8,7 @@ using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
-    public partial class EditSanPham : UserControl
+    public partial class EditSanPham : Window
     {
         private DanhSachSanPham _parentWindow;
         private SanPham _sanPham;
@@ -67,12 +67,12 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            _parentWindow.CloseEditForm();
+            this.Close();
         }
 
         private void BtnHuy_Click(object sender, RoutedEventArgs e)
         {
-            _parentWindow.CloseEditForm();
+            this.Close();
         }
 
         private void BtnCapNhat_Click(object sender, RoutedEventArgs e)
@@ -114,7 +114,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             _parentWindow.UpdateSanPham(_sanPham);
 
             MessageBox.Show("Cập nhật sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            _parentWindow.CloseEditForm();
+            this.Close();
         }
     }
 }

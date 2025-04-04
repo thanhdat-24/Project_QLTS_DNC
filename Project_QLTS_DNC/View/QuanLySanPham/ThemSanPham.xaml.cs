@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.Model;
@@ -8,7 +7,7 @@ using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
-    public partial class ThemSanPham : UserControl
+    public partial class ThemSanPham : Window
     {
         private DanhSachSanPham _parentWindow;
 
@@ -33,12 +32,12 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            _parentWindow.CloseAddForm();
+            this.Close();
         }
 
         private void BtnHuy_Click(object sender, RoutedEventArgs e)
         {
-            _parentWindow.CloseAddForm();
+            this.Close();
         }
 
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
@@ -84,7 +83,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             _parentWindow.AddSanPham(sanPhamMoi);
 
             MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            _parentWindow.CloseAddForm();
+            this.Close();
         }
     }
 }
