@@ -13,10 +13,14 @@ namespace Project_QLTS_DNC.View.NhaCungCap
         public NhaCungCapForm()
         {
             InitializeComponent();
-          
+
         }
 
-        
-        
+        private void btnThemMoi_Click(object sender, RoutedEventArgs e)
+        {
+            ThemNhaCungCapForm frmthemNhaCungCap = new ThemNhaCungCapForm();
+            frmthemNhaCungCap.ShowDialog();
+        }
     }
+
 }

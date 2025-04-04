@@ -44,6 +44,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            
         </Grid.RowDefinitions>
 
         <!-- Top Bar - Title and Buttons -->
@@ -52,6 +53,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>  <!-- Load du lieu -->
             </Grid.ColumnDefinitions>
 
             <!-- Title with icon -->
@@ -65,7 +67,7 @@
             <!-- Thêm mới -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="btnThemMoi" Style="{StaticResource ActionButton}" Width="130" 
-                      Background="#4CAF50" >
+                      Background="#4CAF50" Click="btnThemMoi_Click"  >
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0"/>
                         <TextBlock Text="Thêm mới" VerticalAlignment="Center" FontWeight="SemiBold" />
@@ -81,30 +83,43 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Thêm cột cho btnLoadDuLieu -->
                 </Grid.ColumnDefinitions>
 
                 <!-- Search Icon -->
                 <materialDesign:PackIcon Grid.Column="0" Kind="Magnify" Width="20" Height="20" 
-                                       Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                 Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
                 <!-- Search TextBox with Material Design -->
                 <TextBox x:Name="txtSearch" Grid.Column="1" 
-                         materialDesign:HintAssist.Hint="Tìm theo mã, tên nhà cung cấp hoặc email..."
-                         Style="{StaticResource MaterialDesignTextBox}"
-                         VerticalAlignment="Center" Margin="0,0,20,0"/>
+                 materialDesign:HintAssist.Hint="Tìm theo mã, tên nhà cung cấp hoặc email..."
+                 Style="{StaticResource MaterialDesignTextBox}"
+                 VerticalAlignment="Center" Margin="0,0,20,0"/>
 
                 <!-- Search Button with Material Design -->
                 <Button x:Name="btnSearch" Grid.Column="2" Style="{StaticResource MaterialDesignRaisedButton}"
-                        Background="{DynamicResource PrimaryHueMidBrush}" Foreground="{DynamicResource MaterialDesignPaper}" 
-                        materialDesign:ButtonAssist.CornerRadius="4"
-                        Height="36" Width="120" >
+                Background="{DynamicResource PrimaryHueMidBrush}" Foreground="{DynamicResource MaterialDesignPaper}" 
+                materialDesign:ButtonAssist.CornerRadius="4"
+                Height="36" Width="120" >
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Margin="0,0,8,0"/>
                         <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
+
+                <!-- Load Data Button with Material Design -->
+                <Button x:Name="btnLoadDuLieu" Grid.Column="3"  Background="#B0BEC5" Height="36">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
             </Grid>
         </materialDesign:Card>
+
 
         <!-- DataGrid for Supplier List with Material Design -->
         <DataGrid x:Name="supplierDataGrid" Grid.Row="2" Margin="15,0,15,15" 
