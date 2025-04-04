@@ -11,12 +11,13 @@ using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
-    public partial class DanhSachSanPham : Window
+    public partial class DanhSachSanPham : UserControl
     {
         private ObservableCollection<SanPham> _listSanPham;
         private CollectionViewSource _viewSource;
         private List<PhongFilter> _phongList;
         private List<NhomTSFilter> _nhomTSList;
+        private UserControl _currentForm;
 
         public DanhSachSanPham()
         {
@@ -119,14 +120,16 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            // Mở form thêm mới sản phẩm
-            ThemSanPham themSanPhamDialog = new ThemSanPham(
+            // Tạo form thêm mới sản phẩm
+            ThemSanPham themSanPhamForm = new ThemSanPham(
                 this,
                 _phongList.Where(p => p.MaPhong != 0).ToList(),
                 _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
             );
 
-            themSanPhamDialog.ShowDialog();
+            // Hiển thị form thêm mới dưới dạng Dialog
+            MainDialogHost.DialogContent = themSanPhamForm;
+            MainDialogHost.IsOpen = true;
         }
 
         // Phương thức để lấy mã sản phẩm mới
@@ -170,7 +173,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
             if (selectedSanPham != null)
             {
-                // Mở form chỉnh sửa sản phẩm
+                // Mở form chỉnh sửa sản phẩm dưới dạng Dialog
                 EditSanPham editDialog = new EditSanPham(
                     this,
                     selectedSanPham,
@@ -178,7 +181,9 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                     _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
                 );
 
-                editDialog.ShowDialog();
+                // Hiển thị form chỉnh sửa
+                MainDialogHost.DialogContent = editDialog;
+                MainDialogHost.IsOpen = true;
             }
         }
 
@@ -216,6 +221,27 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
                     MessageBox.Show("Đã xóa sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+            }
+        }
+
+        // Đóng form thêm hoặc chỉnh sửa
+        public void CloseAddForm()
+        {
+            MainDialogHost.IsOpen = false;
+        }
+
+        public void CloseEditForm()
+        {
+            MainDialogHost.IsOpen = false;
+        }
+
+        private void CloseCurrentForm()
+        {
+            if (_currentForm != null)
+            {
+                FormContent.Content = null;
+                FormContainer.Visibility = Visibility.Collapsed;
+                _currentForm = null;
             }
         }
     }

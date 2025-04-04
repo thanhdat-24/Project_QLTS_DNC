@@ -30,5 +30,9 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.NhaCungCap.NhaCungCapForm();
         }
+        private void btnTraCuuTaiSan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLySanPham.DanhSachSanPham();
+        }
     }
 }

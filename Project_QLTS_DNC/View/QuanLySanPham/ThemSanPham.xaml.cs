@@ -8,7 +8,7 @@ using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
-    public partial class ThemSanPham : Window
+    public partial class ThemSanPham : UserControl
     {
         private DanhSachSanPham _parentWindow;
 
@@ -29,19 +29,16 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             if (nhomTSList.Count > 0) cboMaNhomTS.SelectedIndex = 0;
 
             cboTinhTrang.SelectedIndex = 0; // Mặc định là "Tốt"
-
-            // Set owner để dialog nằm trên parent window
-            Owner = parentWindow;
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            _parentWindow.CloseAddForm();
         }
 
         private void BtnHuy_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            _parentWindow.CloseAddForm();
         }
 
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
@@ -87,7 +84,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             _parentWindow.AddSanPham(sanPhamMoi);
 
             MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.Close();
+            _parentWindow.CloseAddForm();
         }
     }
 }

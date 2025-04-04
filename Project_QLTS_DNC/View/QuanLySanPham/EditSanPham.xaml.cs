@@ -8,7 +8,7 @@ using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
-    public partial class EditSanPham : Window
+    public partial class EditSanPham : UserControl
     {
         private DanhSachSanPham _parentWindow;
         private SanPham _sanPham;
@@ -25,9 +25,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
             // Hiển thị thông tin sản phẩm hiện tại
             LoadSanPhamData();
-
-            // Set owner để dialog nằm trên parent window
-            Owner = parentWindow;
         }
 
         private void LoadSanPhamData()
@@ -70,12 +67,12 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            _parentWindow.CloseEditForm();
         }
 
         private void BtnHuy_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            _parentWindow.CloseEditForm();
         }
 
         private void BtnCapNhat_Click(object sender, RoutedEventArgs e)
@@ -117,7 +114,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             _parentWindow.UpdateSanPham(_sanPham);
 
             MessageBox.Show("Cập nhật sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.Close();
+            _parentWindow.CloseEditForm();
         }
     }
 }
