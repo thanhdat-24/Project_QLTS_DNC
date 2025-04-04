@@ -67,7 +67,7 @@
             <!-- Thêm mới -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="btnThemMoi" Style="{StaticResource ActionButton}" Width="130" 
-                      Background="#4CAF50" Click="btnThemMoi_Click" >
+                      Background="#4CAF50" Click="btnThemMoi_Click"  >
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0"/>
                         <TextBlock Text="Thêm mới" VerticalAlignment="Center" FontWeight="SemiBold" />

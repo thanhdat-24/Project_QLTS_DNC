@@ -16,6 +16,11 @@ namespace Project_QLTS_DNC.View.NhaCungCap
 
         }
 
+        private void btnThemMoi_Click(object sender, RoutedEventArgs e)
+        {
+            ThemNhaCungCapForm frmthemNhaCungCap = new ThemNhaCungCapForm();
+            frmthemNhaCungCap.ShowDialog();
+        }
     }
 
 }
