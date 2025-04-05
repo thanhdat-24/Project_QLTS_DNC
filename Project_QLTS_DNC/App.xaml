@@ -10,7 +10,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.LightBlue.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+                        </ResourceDictionary.MergedDictionaries>
 
             <!-- Định nghĩa màu tùy chỉnh #0066b1 -->
             
@@ -30,7 +30,6 @@
             <SolidColorBrush x:Key="SecondaryFileExcel" Color="#00ac48"/> <!--nền Excel-->
             <SolidColorBrush x:Key="SecondaryFileFDP" Color="#fc9a13"/>
             <SolidColorBrush x:Key="SecondaryBack" Color="#000000"/>
-            <SolidColorBrush x:Key="SecondaryCreate" Color="#4CAF50"/> <!--Nềm Thêm mới-->
         </ResourceDictionary>
     </Application.Resources>
 
