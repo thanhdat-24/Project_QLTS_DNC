@@ -34,5 +34,13 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.QuanLySanPham.DanhSachSanPham();
         }
+
+        private void btnPhieuBaoHong_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoHongView();
+
+        }
+
+    
     }
 }

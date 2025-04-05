@@ -33,9 +33,12 @@
                         <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected"/>
                         <TreeViewItem Header="📊 Báo cáo thống kê"/>
                         <TreeViewItem Header="📝 Lập phiếu" IsExpanded="False">
-                            <TreeViewItem Header="📥 Phiếu nhập"/>
-                            <TreeViewItem Header="📤 Phiếu xuất"/>
+                            <TreeViewItem Header="📥 Phiếu nhập kho" />
+                            <TreeViewItem Header="📤 Phiếu xuất kho"/>
                             <TreeViewItem Header="🛠️ Phiếu bảo trì"/>
+                            <TreeViewItem x:Name="btnPhieuBaoHong" Header="⚠️ Phiếu báo hỏng" Selected="btnPhieuBaoHong_Selected"/>
+                            <TreeViewItem Header="🛒 Phiếu đề nghị mua"/>
+                            <TreeViewItem Header="📊 Phiếu kiểm kê tài sản"/>
                         </TreeViewItem>
                         <TreeViewItem Header="📜 Duyệt phiếu"/>
                         <TreeViewItem Header="⚙️ Cài đặt"/>
