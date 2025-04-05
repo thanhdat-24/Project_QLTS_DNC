@@ -15,13 +15,21 @@ using System.Windows.Shapes;
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// Interaction logic for frmTang.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class frmTang : UserControl
     {
-        public Window1()
+        public frmTang()
         {
             InitializeComponent();
         }
+
+        private void btnThemMoi_Click(object sender, RoutedEventArgs e)
+        {
+            frmThemTang frmThemTang = new frmThemTang();
+            frmThemTang.ShowDialog();
+        }
+
+       
     }
 }

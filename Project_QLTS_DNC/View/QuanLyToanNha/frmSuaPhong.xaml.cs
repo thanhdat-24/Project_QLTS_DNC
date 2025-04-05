@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// Interaction logic for frmSuaPhong.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class frmSuaPhong : Window
     {
-        public Window1()
+        public frmSuaPhong()
         {
             InitializeComponent();
         }
