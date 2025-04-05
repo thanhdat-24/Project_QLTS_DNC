@@ -25,9 +25,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
             // Hiển thị thông tin sản phẩm hiện tại
             LoadSanPhamData();
-
-            // Set owner để dialog nằm trên parent window
-            Owner = parentWindow;
         }
 
         private void LoadSanPhamData()

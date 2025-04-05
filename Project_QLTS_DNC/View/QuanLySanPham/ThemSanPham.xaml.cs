@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.Model;
@@ -29,9 +28,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             if (nhomTSList.Count > 0) cboMaNhomTS.SelectedIndex = 0;
 
             cboTinhTrang.SelectedIndex = 0; // Mặc định là "Tốt"
-
-            // Set owner để dialog nằm trên parent window
-            Owner = parentWindow;
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)

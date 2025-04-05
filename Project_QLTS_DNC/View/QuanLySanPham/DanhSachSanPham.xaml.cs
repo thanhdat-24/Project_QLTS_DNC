@@ -11,12 +11,13 @@ using static Project_QLTS_DNC.Model.SanPham;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
-    public partial class DanhSachSanPham : Window
+    public partial class DanhSachSanPham : UserControl
     {
         private ObservableCollection<SanPham> _listSanPham;
         private CollectionViewSource _viewSource;
         private List<PhongFilter> _phongList;
         private List<NhomTSFilter> _nhomTSList;
+        private UserControl _currentForm;
 
         public DanhSachSanPham()
         {
@@ -119,14 +120,38 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            // Mở form thêm mới sản phẩm
-            ThemSanPham themSanPhamDialog = new ThemSanPham(
+            // Tạo form thêm mới sản phẩm
+            ThemSanPham themSanPhamForm = new ThemSanPham(
                 this,
                 _phongList.Where(p => p.MaPhong != 0).ToList(),
                 _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
             );
 
-            themSanPhamDialog.ShowDialog();
+            // Hiển thị form thêm mới
+            themSanPhamForm.Owner = Application.Current.MainWindow;
+            themSanPhamForm.ShowDialog();
+        }
+
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy sản phẩm được chọn
+            Button button = sender as Button;
+            SanPham selectedSanPham = button.DataContext as SanPham;
+
+            if (selectedSanPham != null)
+            {
+                // Mở form chỉnh sửa sản phẩm
+                EditSanPham editDialog = new EditSanPham(
+                    this,
+                    selectedSanPham,
+                    _phongList.Where(p => p.MaPhong != 0).ToList(),
+                    _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
+                );
+
+                // Hiển thị form chỉnh sửa
+                editDialog.Owner = Application.Current.MainWindow;
+                editDialog.ShowDialog();
+            }
         }
 
         // Phương thức để lấy mã sản phẩm mới
@@ -159,27 +184,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
             // Cập nhật lại status bar
             UpdateStatusBar();
-        }
-
-        // Xử lý sự kiện khi nhấn nút Edit (chỉnh sửa sản phẩm)
-        private void BtnEdit_Click(object sender, RoutedEventArgs e)
-        {
-            // Lấy sản phẩm được chọn
-            Button button = sender as Button;
-            SanPham selectedSanPham = button.DataContext as SanPham;
-
-            if (selectedSanPham != null)
-            {
-                // Mở form chỉnh sửa sản phẩm
-                EditSanPham editDialog = new EditSanPham(
-                    this,
-                    selectedSanPham,
-                    _phongList.Where(p => p.MaPhong != 0).ToList(),
-                    _nhomTSList.Where(n => n.MaNhomTS != 0).ToList()
-                );
-
-                editDialog.ShowDialog();
-            }
         }
 
         // Phương thức để cập nhật sản phẩm

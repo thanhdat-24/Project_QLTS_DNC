@@ -30,7 +30,7 @@
                         </TreeViewItem>
                         <TreeViewItem Header="📦 Quản lý kho"/>
                         <TreeViewItem x:Name="btnNhaCungCap" Header="🏭 Quản lý nhà cung cấp" Selected="btnNhaCungCap_Selected"/>
-                        <TreeViewItem Header="🔍 Tra cứu tài sản"/>
+                        <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected"/>
                         <TreeViewItem Header="📊 Báo cáo thống kê"/>
                         <TreeViewItem Header="📝 Lập phiếu" IsExpanded="False">
                             <TreeViewItem Header="📥 Phiếu nhập"/>
