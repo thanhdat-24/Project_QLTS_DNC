@@ -6,7 +6,7 @@ using Project_QLTS_DNC.Commands;
 using System.Windows.Input;
 using System.Windows;
 
-namespace Project_QLTS_DNC.ViewModels
+namespace Project_QLTS_DNC.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {

@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using ClosedXML.Excel;
+using Microsoft.Win32;
+using System.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Project_QLTS_DNC.Models; 
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -21,7 +19,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
     {
         private ObservableCollection<PhieuBaoTri> _danhSachPhieuBaoTri;
         private PhieuBaoTri _phieuBaoTriHienTai;
-        private bool _isEditing = false;
+        private string _searchText;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -45,6 +43,17 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        public string SearchText
+        {
+            get { return _searchText; }
+            set
+            {
+                _searchText = value;
+                OnPropertyChanged("SearchText");
+                ApplyFilter();
+            }
+        }
+
         public PhieuBaoTriView()
         {
             InitializeComponent();
@@ -60,9 +69,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             // Đăng ký sự kiện
             DangKySuKien();
-
-            // Thiết lập trạng thái ban đầu
-            ThietLapTrangThaiBanDau();
         }
 
         private void KhoiTaoDuLieuMau()
@@ -115,157 +121,191 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
         private void DangKySuKien()
         {
-            // Sự kiện cho các nút
+            // Sự kiện cho nút thêm
             btnThem.Click += BtnThem_Click;
-            btnLuu.Click += BtnLuu_Click;
-            btnHuy.Click += BtnHuy_Click;
-            btnIn.Click += BtnIn_Click;
+            btnInPhieu.Click += BtnInPhieu_Click;
+            btnIn.Click += BtnXuatExcel_Click;
 
-            // Sự kiện cho DataGrid
-            dgPhieuBaoTri.SelectionChanged += DgPhieuBaoTri_SelectionChanged;
+            // Sự kiện tìm kiếm
+            txtTimKiem.TextChanged += TxtTimKiem_TextChanged;
 
-            // Sự kiện validate nhập liệu
-            txtChiPhiDuKien.PreviewTextInput += TxtChiPhiDuKien_PreviewTextInput;
+            cboTrangThai.SelectionChanged += LocDuLieu;
+            cboLoaiBaoTri.SelectionChanged += LocDuLieu;
 
-            // Sự kiện khi chọn một dòng trong DataGrid
+            // Sự kiện DataGrid
             dgPhieuBaoTri.MouseDoubleClick += DgPhieuBaoTri_MouseDoubleClick;
+
+        }
+
+        private void TxtTimKiem_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SearchText = txtTimKiem.Text;
+        }
+
+        private void LocDuLieu(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            if (dgPhieuBaoTri.ItemsSource == null) return;
+
+            ICollectionView view = CollectionViewSource.GetDefaultView(dgPhieuBaoTri.ItemsSource);
+
+            view.Filter = item =>
+            {
+                var phieuBaoTri = item as PhieuBaoTri;
+                if (phieuBaoTri == null) return false;
+
+                // Lọc theo từ khóa
+                bool matchKeyword = string.IsNullOrEmpty(txtTimKiem.Text) ||
+                    (phieuBaoTri.MaPhieu.Contains(txtTimKiem.Text, StringComparison.OrdinalIgnoreCase) ||
+                     phieuBaoTri.MaTaiSan.Contains(txtTimKiem.Text, StringComparison.OrdinalIgnoreCase) ||
+                     phieuBaoTri.TenTaiSan.Contains(txtTimKiem.Text, StringComparison.OrdinalIgnoreCase) ||
+                     phieuBaoTri.NguoiPhuTrach.Contains(txtTimKiem.Text, StringComparison.OrdinalIgnoreCase));
+
+                // Lọc theo trạng thái
+                bool matchTrangThai = cboTrangThai.SelectedIndex == 0 ||
+                    phieuBaoTri.TrangThai == cboTrangThai.Text;
+
+                // Lọc theo loại bảo trì
+                bool matchLoaiBaoTri = cboLoaiBaoTri.SelectedIndex == 0 ||
+                    phieuBaoTri.LoaiBaoTri == cboLoaiBaoTri.Text;
+
+                return matchKeyword && matchTrangThai && matchLoaiBaoTri;
+            };
+
+            view.Refresh();
+        }
+
+        private void BtnThem_Click(object sender, RoutedEventArgs e)
+        {
+            // Mở form nhập liệu
+            PhieuBaoTriInputForm inputForm = new PhieuBaoTriInputForm(null);
+            inputForm.Owner = this;
+            if (inputForm.ShowDialog() == true)
+            {
+                // Nếu người dùng lưu thành công, thêm phiếu mới vào danh sách
+                PhieuBaoTri phieuMoi = inputForm.PhieuBaoTri;
+                DanhSachPhieuBaoTri.Add(phieuMoi);
+
+                // Refresh DataGrid
+                dgPhieuBaoTri.Items.Refresh();
+
+                // Thông báo thành công
+                MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnInPhieu_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = dgPhieuBaoTri.SelectedItem as PhieuBaoTri;
+            if (selectedItem != null)
+            {
+                MessageBox.Show($"Đang in phiếu bảo trì {selectedItem.MaPhieu}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                // TODO: Thêm mã in phiếu tại đây
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn phiếu bảo trì để in!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void BtnXuatExcel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Kiểm tra danh sách có dữ liệu không
+                if (DanhSachPhieuBaoTri == null || DanhSachPhieuBaoTri.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu để xuất!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Mở dialog lưu file
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Excel files (*.xlsx)|*.xlsx",
+                    FileName = $"DanhSachPhieuBaoTri_{DateTime.Now:yyyyMMdd}.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    // Tạo workbook mới
+                    var workbook = new XLWorkbook();
+                    var worksheet = workbook.Worksheets.Add("Danh Sách Phiếu Bảo Trì");
+
+                    // Tạo header
+                    worksheet.Cell(1, 1).Value = "Mã Phiếu";
+                    worksheet.Cell(1, 2).Value = "Mã Tài Sản";
+                    worksheet.Cell(1, 3).Value = "Tên Tài Sản";
+                    worksheet.Cell(1, 4).Value = "Loại Bảo Trì";
+                    worksheet.Cell(1, 5).Value = "Ngày Bảo Trì";
+                    worksheet.Cell(1, 6).Value = "Ngày Hoàn Thành";
+                    worksheet.Cell(1, 7).Value = "Người Phụ Trách";
+                    worksheet.Cell(1, 8).Value = "Trạng Thái";
+                    worksheet.Cell(1, 9).Value = "Chi Phí Dự Kiến";
+
+                    // Định dạng header
+                    var headerRange = worksheet.Range(1, 1, 1, 9);
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                    // Điền dữ liệu
+                    for (int i = 0; i < DanhSachPhieuBaoTri.Count; i++)
+                    {
+                        var phieu = DanhSachPhieuBaoTri[i];
+                        worksheet.Cell(i + 2, 1).Value = phieu.MaPhieu;
+                        worksheet.Cell(i + 2, 2).Value = phieu.MaTaiSan;
+                        worksheet.Cell(i + 2, 3).Value = phieu.TenTaiSan;
+                        worksheet.Cell(i + 2, 4).Value = phieu.LoaiBaoTri;
+                        worksheet.Cell(i + 2, 5).Value = phieu.NgayBaoTri.ToString("dd/MM/yyyy");
+                        worksheet.Cell(i + 2, 6).Value = phieu.NgayHoanThanh?.ToString("dd/MM/yyyy") ?? "";
+                        worksheet.Cell(i + 2, 7).Value = phieu.NguoiPhuTrach;
+                        worksheet.Cell(i + 2, 8).Value = phieu.TrangThai;
+                        worksheet.Cell(i + 2, 9).Value = phieu.ChiPhiDuKien;
+                    }
+
+                    // Tự động điều chỉnh độ rộng cột
+                    worksheet.Columns().AdjustToContents();
+
+                    // Lưu file
+                    workbook.SaveAs(saveFileDialog.FileName);
+
+                    MessageBox.Show("Xuất Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DgPhieuBaoTri_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (dgPhieuBaoTri.SelectedItem != null)
+            var selectedItem = dgPhieuBaoTri.SelectedItem as PhieuBaoTri;
+            if (selectedItem != null)
             {
-                _isEditing = true;
-                SetReadOnlyMode(false);
-            }
-        }
-
-        private void ThietLapTrangThaiBanDau()
-        {
-            // Thiết lập trạng thái ban đầu cho các controls
-            SetReadOnlyMode(true);
-            LamMoiPhieuBaoTri();
-
-            // Thiết lập ngày mặc định
-            dtpNgayBaoTri.SelectedDate = DateTime.Now;
-            dtpNgayHoanThanh.SelectedDate = DateTime.Now.AddDays(7);
-
-            // Thiết lập giá trị mặc định cho combobox
-            if (cboLoaiBaoTri.Items.Count > 0)
-                cboLoaiBaoTri.SelectedIndex = 0;
-
-            if (cboDonViBaoTri.Items.Count > 0)
-                cboDonViBaoTri.SelectedIndex = 0;
-
-            if (cboTrangThai.Items.Count > 0)
-                cboTrangThai.SelectedIndex = 0;
-        }
-
-        private void LamMoiPhieuBaoTri()
-        {
-            PhieuBaoTriHienTai = new PhieuBaoTri();
-
-            txtMaPhieu.Text = TaoMaPhieuMoi();
-            txtMaTaiSan.Text = string.Empty;
-            txtTenTaiSan.Text = string.Empty;
-            txtNguoiPhuTrach.Text = string.Empty;
-            txtChiPhiDuKien.Text = "0";
-            txtNoiDungBaoTri.Text = string.Empty;
-
-            if (cboLoaiBaoTri.Items.Count > 0)
-                cboLoaiBaoTri.SelectedIndex = 0;
-
-            if (cboDonViBaoTri.Items.Count > 0)
-                cboDonViBaoTri.SelectedIndex = 0;
-
-            if (cboTrangThai.Items.Count > 0)
-                cboTrangThai.SelectedIndex = 0;
-
-            dtpNgayBaoTri.SelectedDate = DateTime.Now;
-            dtpNgayHoanThanh.SelectedDate = DateTime.Now.AddDays(7);
-        }
-
-        private string TaoMaPhieuMoi()
-        {
-            // Logic tạo mã phiếu tự động
-            int soPhieu = DanhSachPhieuBaoTri.Count + 1;
-            return $"BT{soPhieu:000}";
-        }
-
-        private void SetReadOnlyMode(bool isReadOnly)
-        {
-            // Thiết lập trạng thái readonly cho các controls
-            txtMaPhieu.IsReadOnly = true; // Mã phiếu luôn readonly
-            txtMaTaiSan.IsReadOnly = isReadOnly;
-            txtTenTaiSan.IsReadOnly = true; // Tên tài sản luôn readonly vì lấy từ database
-            txtNguoiPhuTrach.IsReadOnly = isReadOnly;
-            txtChiPhiDuKien.IsReadOnly = isReadOnly;
-            txtNoiDungBaoTri.IsReadOnly = isReadOnly;
-
-            cboLoaiBaoTri.IsEnabled = !isReadOnly;
-            cboDonViBaoTri.IsEnabled = !isReadOnly;
-            cboTrangThai.IsEnabled = !isReadOnly;
-
-            dtpNgayBaoTri.IsEnabled = !isReadOnly;
-            dtpNgayHoanThanh.IsEnabled = !isReadOnly;
-
-            // Thiết lập trạng thái cho các nút
-            btnLuu.IsEnabled = !isReadOnly;
-            btnHuy.IsEnabled = !isReadOnly;
-            btnThem.IsEnabled = isReadOnly;
-            btnIn.IsEnabled = isReadOnly && !string.IsNullOrEmpty(txtMaPhieu.Text);
-        }
-
-        #region Xử lý sự kiện
-
-        private void BtnThem_Click(object sender, RoutedEventArgs e)
-        {
-            _isEditing = false;
-            LamMoiPhieuBaoTri();
-            SetReadOnlyMode(false);
-        }
-
-        private void BtnLuu_Click(object sender, RoutedEventArgs e)
-        {
-            if (!KiemTraDuLieu())
-            {
-                return;
-            }
-
-            // Cập nhật dữ liệu từ form vào đối tượng
-            PhieuBaoTri phieuMoi = new PhieuBaoTri
-            {
-                MaPhieu = txtMaPhieu.Text,
-                MaTaiSan = txtMaTaiSan.Text,
-                TenTaiSan = txtTenTaiSan.Text,
-                LoaiBaoTri = cboLoaiBaoTri.SelectedItem != null ? ((ComboBoxItem)cboLoaiBaoTri.SelectedItem).Content.ToString() : string.Empty,
-                NgayBaoTri = dtpNgayBaoTri.SelectedDate ?? DateTime.Now,
-                NgayHoanThanh = dtpNgayHoanThanh.SelectedDate,
-                NguoiPhuTrach = txtNguoiPhuTrach.Text,
-                TrangThai = cboTrangThai.SelectedItem != null ? ((ComboBoxItem)cboTrangThai.SelectedItem).Content.ToString() : string.Empty,
-                ChiPhiDuKien = decimal.TryParse(txtChiPhiDuKien.Text, out decimal chiPhi) ? chiPhi : 0,
-                NoiDungBaoTri = txtNoiDungBaoTri.Text
-            };
-
-            if (_isEditing)
-            {
-                // Cập nhật phiếu đã có
-                int index = TimChiSoPhieuBaoTri(PhieuBaoTriHienTai.MaPhieu);
-                if (index >= 0)
+                // Mở form nhập liệu với phiếu đã chọn để chỉnh sửa
+                PhieuBaoTriInputForm inputForm = new PhieuBaoTriInputForm(selectedItem);
+                inputForm.Owner = this;
+                if (inputForm.ShowDialog() == true)
                 {
-                    DanhSachPhieuBaoTri[index] = phieuMoi;
+                    // Nếu người dùng lưu thành công, cập nhật phiếu trong danh sách
+                    int index = TimChiSoPhieuBaoTri(selectedItem.MaPhieu);
+                    if (index >= 0)
+                    {
+                        DanhSachPhieuBaoTri[index] = inputForm.PhieuBaoTri;
+                    }
+
+                    // Refresh DataGrid
+                    dgPhieuBaoTri.Items.Refresh();
+
+                    // Thông báo thành công
+                    MessageBox.Show("Cập nhật phiếu bảo trì thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-            else
-            {
-                // Thêm phiếu mới
-                DanhSachPhieuBaoTri.Add(phieuMoi);
-            }
-
-            // Cập nhật lại DataGrid
-            dgPhieuBaoTri.Items.Refresh();
-            SetReadOnlyMode(true);
-            MessageBox.Show("Lưu phiếu bảo trì thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private int TimChiSoPhieuBaoTri(string maPhieu)
@@ -278,261 +318,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 }
             }
             return -1;
-        }
-
-        private void BtnHuy_Click(object sender, RoutedEventArgs e)
-        {
-            SetReadOnlyMode(true);
-
-            if (_isEditing && PhieuBaoTriHienTai != null)
-            {
-                HienThiThongTinPhieu(PhieuBaoTriHienTai);
-            }
-            else
-            {
-                LamMoiPhieuBaoTri();
-            }
-        }
-
-        private void BtnIn_Click(object sender, RoutedEventArgs e)
-        {
-            if (PhieuBaoTriHienTai != null && !string.IsNullOrEmpty(PhieuBaoTriHienTai.MaPhieu))
-            {
-                MessageBox.Show($"Đang in phiếu bảo trì {PhieuBaoTriHienTai.MaPhieu}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                // TODO: Thêm mã in phiếu tại đây
-            }
-            else
-            {
-                MessageBox.Show("Vui lòng chọn phiếu bảo trì để in!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private void DgPhieuBaoTri_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selectedItem = dgPhieuBaoTri.SelectedItem as PhieuBaoTri;
-            if (selectedItem != null)
-            {
-                PhieuBaoTriHienTai = selectedItem;
-                HienThiThongTinPhieu(selectedItem);
-                // Cập nhật trạng thái nút In
-                btnIn.IsEnabled = true;
-            }
-        }
-
-        private void TxtChiPhiDuKien_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            // Chỉ cho phép nhập số
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
-        }
-
-        #endregion
-
-        private bool KiemTraDuLieu()
-        {
-            if (string.IsNullOrWhiteSpace(txtMaPhieu.Text))
-            {
-                MessageBox.Show("Vui lòng nhập Mã phiếu!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                txtMaPhieu.Focus();
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtMaTaiSan.Text))
-            {
-                MessageBox.Show("Vui lòng nhập Mã tài sản!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                txtMaTaiSan.Focus();
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtNguoiPhuTrach.Text))
-            {
-                MessageBox.Show("Vui lòng nhập Người phụ trách!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                txtNguoiPhuTrach.Focus();
-                return false;
-            }
-
-            if (dtpNgayBaoTri.SelectedDate == null)
-            {
-                MessageBox.Show("Vui lòng chọn Ngày bảo trì!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                dtpNgayBaoTri.Focus();
-                return false;
-            }
-
-            if (dtpNgayHoanThanh.SelectedDate != null && dtpNgayHoanThanh.SelectedDate < dtpNgayBaoTri.SelectedDate)
-            {
-                MessageBox.Show("Ngày hoàn thành không thể trước Ngày bảo trì!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                dtpNgayHoanThanh.Focus();
-                return false;
-            }
-
-            return true;
-        }
-
-        private void HienThiThongTinPhieu(PhieuBaoTri phieu)
-        {
-            if (phieu == null) return;
-
-            txtMaPhieu.Text = phieu.MaPhieu;
-            txtMaTaiSan.Text = phieu.MaTaiSan;
-            txtTenTaiSan.Text = phieu.TenTaiSan;
-            txtNguoiPhuTrach.Text = phieu.NguoiPhuTrach;
-            txtChiPhiDuKien.Text = phieu.ChiPhiDuKien.ToString("N0");
-            txtNoiDungBaoTri.Text = phieu.NoiDungBaoTri;
-
-            dtpNgayBaoTri.SelectedDate = phieu.NgayBaoTri;
-            dtpNgayHoanThanh.SelectedDate = phieu.NgayHoanThanh;
-
-            // Tìm và chọn giá trị tương ứng trong ComboBox
-            SelectComboBoxItem(cboLoaiBaoTri, phieu.LoaiBaoTri);
-            SelectComboBoxItem(cboTrangThai, phieu.TrangThai);
-
-            // Đơn vị bảo trì mặc định chọn đầu tiên
-            if (cboDonViBaoTri.Items.Count > 0)
-                cboDonViBaoTri.SelectedIndex = 0;
-        }
-
-        private void SelectComboBoxItem(ComboBox comboBox, string value)
-        {
-            foreach (ComboBoxItem item in comboBox.Items)
-            {
-                if (item.Content.ToString() == value)
-                {
-                    comboBox.SelectedItem = item;
-                    break;
-                }
-            }
-        }
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    public class PhieuBaoTri : INotifyPropertyChanged
-    {
-        private string _maPhieu;
-        private string _maTaiSan;
-        private string _tenTaiSan;
-        private string _loaiBaoTri;
-        private DateTime _ngayBaoTri;
-        private DateTime? _ngayHoanThanh;
-        private string _nguoiPhuTrach;
-        private string _trangThai;
-        private decimal _chiPhiDuKien;
-        private string _noiDungBaoTri;
-        private string _donViBaoTri;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public string MaPhieu
-        {
-            get { return _maPhieu; }
-            set
-            {
-                _maPhieu = value;
-                OnPropertyChanged("MaPhieu");
-            }
-        }
-
-        public string MaTaiSan
-        {
-            get { return _maTaiSan; }
-            set
-            {
-                _maTaiSan = value;
-                OnPropertyChanged("MaTaiSan");
-            }
-        }
-
-        public string TenTaiSan
-        {
-            get { return _tenTaiSan; }
-            set
-            {
-                _tenTaiSan = value;
-                OnPropertyChanged("TenTaiSan");
-            }
-        }
-
-        public string LoaiBaoTri
-        {
-            get { return _loaiBaoTri; }
-            set
-            {
-                _loaiBaoTri = value;
-                OnPropertyChanged("LoaiBaoTri");
-            }
-        }
-
-        public DateTime NgayBaoTri
-        {
-            get { return _ngayBaoTri; }
-            set
-            {
-                _ngayBaoTri = value;
-                OnPropertyChanged("NgayBaoTri");
-            }
-        }
-
-        public DateTime? NgayHoanThanh
-        {
-            get { return _ngayHoanThanh; }
-            set
-            {
-                _ngayHoanThanh = value;
-                OnPropertyChanged("NgayHoanThanh");
-            }
-        }
-
-        public string NguoiPhuTrach
-        {
-            get { return _nguoiPhuTrach; }
-            set
-            {
-                _nguoiPhuTrach = value;
-                OnPropertyChanged("NguoiPhuTrach");
-            }
-        }
-
-        public string TrangThai
-        {
-            get { return _trangThai; }
-            set
-            {
-                _trangThai = value;
-                OnPropertyChanged("TrangThai");
-            }
-        }
-
-        public decimal ChiPhiDuKien
-        {
-            get { return _chiPhiDuKien; }
-            set
-            {
-                _chiPhiDuKien = value;
-                OnPropertyChanged("ChiPhiDuKien");
-            }
-        }
-
-        public string NoiDungBaoTri
-        {
-            get { return _noiDungBaoTri; }
-            set
-            {
-                _noiDungBaoTri = value;
-                OnPropertyChanged("NoiDungBaoTri");
-            }
-        }
-
-        public string DonViBaoTri
-        {
-            get { return _donViBaoTri; }
-            set
-            {
-                _donViBaoTri = value;
-                OnPropertyChanged("DonViBaoTri");
-            }
         }
 
         private void OnPropertyChanged(string propertyName)
