@@ -21,7 +21,7 @@
                             <TreeViewItem x:Name="btnNhanVien" Header="🔎 Nhân viên" />
 
                         </TreeViewItem>
-                        <TreeViewItem Header="📦 Quản lý loại tài sản"/>
+                        <TreeViewItem x:Name="btnQuanLyLoaiTaiSan" Header="📦 Quản lý loại tài sản" Selected="btnQuanLyLoaiTaiSan_Selected"/>
                         <TreeViewItem Header="🏢 Quản lý tòa nhà" IsExpanded="False">
                             <TreeViewItem Header="🏢 Tòa nhà"/>
                             <TreeViewItem Header="🏬 Tầng"/>

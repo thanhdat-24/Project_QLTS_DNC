@@ -109,7 +109,7 @@
                 </Button>
 
                 <!-- Load Data Button with Material Design -->
-                <Button x:Name="btnLoadDuLieu" Grid.Column="3"  Background="#B0BEC5" Height="36">
+                <Button x:Name="btnLoadDuLieu"   Grid.Column="3"  Background="#B0BEC5" Height="36">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>

@@ -23,7 +23,18 @@ namespace Project_QLTS_DNC
 
         private void btnThoat_Click(object sender, RoutedEventArgs e)
         {
-           this.Close();
+            // Hiển thị hộp thoại xác nhận trước khi đóng ứng dụng
+            MessageBoxResult result = MessageBox.Show(
+                "Bạn có chắc chắn muốn đăng xuất và đóng chương trình không?",
+                "Xác nhận đăng xuất",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            // Chỉ đóng cửa sổ nếu người dùng chọn "Yes"
+            if (result == MessageBoxResult.Yes)
+            {
+                this.Close();
+            }
         }
 
         private void btnNhaCungCap_Selected(object sender, RoutedEventArgs e)
@@ -40,7 +51,10 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoHongView();
 
         }
-
+        private void btnQuanLyLoaiTaiSan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyTaiSan.QuanLyTaiSan();
+        }
 
     }
 }
