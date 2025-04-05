@@ -17,11 +17,11 @@
                     <TreeView Background="Transparent" BorderThickness="0" Foreground="White"
       FontSize="14" Padding="10" Height="498" >
                         <TreeViewItem Header="🏠 Trang chủ"/>
-                        <TreeViewItem Header="👥 Quản lý tài khoản" IsExpanded="False">
+                        <TreeViewItem  Header="👥 Quản lý tài khoản" IsExpanded="False">
                             <TreeViewItem x:Name="btnNhanVien" Header="🔎 Nhân viên" />
 
                         </TreeViewItem>
-                        <TreeViewItem Header="📂 Quản lý loại tài sản"/>
+                        <TreeViewItem Header="📦 Quản lý loại tài sản"/>
                         <TreeViewItem Header="🏢 Quản lý tòa nhà" IsExpanded="False">
                             <TreeViewItem Header="🏢 Tòa nhà"/>
                             <TreeViewItem Header="🏬 Tầng"/>

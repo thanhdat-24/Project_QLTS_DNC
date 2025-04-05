@@ -1,7 +1,8 @@
 ﻿<Application x:Class="Project_QLTS_DNC.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Project_QLTS_DNC">
+             xmlns:local="clr-namespace:Project_QLTS_DNC"
+             StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -27,9 +28,8 @@
             <!--Nền Các nút phụ như , In PDF, Excel-->
             <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#90CAF9"/>
             <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="SecondaryFileExcel" Color="#00ac48"/>
+            <SolidColorBrush x:Key="SecondaryFileExcel" Color="#00ac48"/><!--nền Excel-->
             <SolidColorBrush x:Key="SecondaryCreate" Color="#4CAF50"/> <!--út Thêm--> 
-            <!--nền Excel-->
             <SolidColorBrush x:Key="SecondaryFileFDP" Color="#fc9a13"/>
             <SolidColorBrush x:Key="SecondaryBack" Color="#000000"/>
         </ResourceDictionary>
