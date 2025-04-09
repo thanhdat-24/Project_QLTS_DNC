@@ -1,0 +1,413 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyPhieu.PhieuBaoTriInputForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyPhieu"
+        mc:Ignorable="d"
+        Title="Thêm Phiếu Bảo Trì" Height="840" Width="750"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5">
+
+    <Window.Resources>
+        <!-- Định nghĩa màu tùy chỉnh #0071f5 -->
+        <Color x:Key="Primary">#0071f5</Color>
+        <Color x:Key="PrimaryLight">#3387c8</Color>
+        <Color x:Key="PrimaryDark">#004f8a</Color>
+        <!--Màu Background Button Chính, Thêm, Sửa, Xóa-->
+        <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource Primary}"/>
+        <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource PrimaryDark}"/>
+        <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryLight}"/>
+
+        <!--Nền Các nút phụ như , In PDF, Excel-->
+        <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#90CAF9"/>
+        <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SecondaryFileExcel" Color="#00ac48"/>
+        <!--nền Excel-->
+        <SolidColorBrush x:Key="SecondaryFileFDP" Color="#fc9a13"/>
+        <SolidColorBrush x:Key="SecondaryBack" Color="#000000"/>
+
+        <Style TargetType="TextBlock" x:Key="LabelStyle">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,5,10,5"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,5,0,15"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border x:Name="border" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" 
+                                         HorizontalScrollBarVisibility="Hidden" 
+                                         VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,5,0,15"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <Border x:Name="border" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="5">
+                                <Grid>
+                                    <ToggleButton x:Name="toggleButton" 
+                                                 BorderBrush="Transparent"
+                                                 Background="Transparent"
+                                                 IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                <Border Background="Transparent">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ContentPresenter x:Name="contentPresenter"
+                                                                         ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                         Content="{TemplateBinding Content}"
+                                                                         HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                         VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                         Margin="{TemplateBinding Padding}"/>
+                                                        <Path x:Name="arrow" 
+                                                             Grid.Column="1"
+                                                             Fill="#666666"
+                                                             Data="M0,0 L10,0 L5,5 Z"
+                                                             Width="10"
+                                                             Height="5"
+                                                             Margin="0,0,10,0"/>
+                                                    </Grid>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <ContentPresenter x:Name="contentPresenter"
+                                                     Content="{TemplateBinding SelectionBoxItem}"
+                                                     ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                     Margin="{TemplateBinding Padding}"
+                                                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    <Popup x:Name="PART_Popup"
+                                          AllowsTransparency="true"
+                                          IsOpen="{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Placement="Bottom"
+                                          PopupAnimation="Slide">
+                                        <Border x:Name="dropDownBorder"
+                                               BorderBrush="#CCCCCC"
+                                               BorderThickness="1"
+                                               Background="White"
+                                               CornerRadius="0,0,5,5">
+                                            <ScrollViewer x:Name="DropDownScrollViewer">
+                                                <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DatePicker">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,5,0,15"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="PrimaryButton">
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="{StaticResource PrimaryHueMidBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryHueDarkBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Button" x:Key="SecondaryButton">
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="#e74c3c"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#c0392b"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style cho DataGrid -->
+        <Style TargetType="{x:Type DataGrid}">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F8F8F8"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="ColumnHeaderHeight" Value="40"/>
+            <Setter Property="RowHeight" Value="35"/>
+        </Style>
+
+        <Style TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style TargetType="{x:Type DataGridRow}">
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#EEEEEE"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EBF5FB"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#D4E6F1"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="White" Margin="15" CornerRadius="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
+        </Border.Effect>
+
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Tiêu đề -->
+            <Border Grid.Row="0" Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="5" Padding="15">
+                <TextBlock Text="THÔNG TIN PHIẾU BẢO TRÌ" FontSize="20" FontWeight="Bold" 
+                           HorizontalAlignment="Center" Foreground="White"/>
+            </Border>
+
+            <!-- Form nhập liệu -->
+            <ScrollViewer Grid.Row="1" Margin="0,20,0,0" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Cột trái -->
+                    <StackPanel Grid.Column="0">
+                        <!-- Mã phiếu -->
+                        <TextBlock Text="Mã phiếu:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="txtMaPhieu" IsReadOnly="True" Background="#F8F8F8"/>
+
+                        <!-- Mã tài sản -->
+                        <TextBlock Text="Mã tài sản:" Style="{StaticResource LabelStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="txtMaTaiSan"/>
+                            <Button Grid.Column="1" Content="..." Width="40" Height="40" Margin="5,5,0,15" 
+                                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" BorderThickness="0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="5">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+
+                        <!-- Tên tài sản -->
+                        <TextBlock Text="Tên tài sản:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="txtTenTaiSan" IsReadOnly="True" Background="#F8F8F8"/>
+
+                        <!-- Loại bảo trì -->
+                        <TextBlock Text="Loại bảo trì:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="cboLoaiBaoTri">
+                            <ComboBoxItem Content="Định kỳ"/>
+                            <ComboBoxItem Content="Đột xuất"/>
+                            <ComboBoxItem Content="Bảo hành"/>
+                        </ComboBox>
+
+                        <!-- Chi phí dự kiến -->
+                        <TextBlock Text="Chi phí dự kiến (VNĐ):" Style="{StaticResource LabelStyle}"/>
+                        <TextBox x:Name="txtChiPhiDuKien"/>
+                    </StackPanel>
+
+                    <!-- Cột phải -->
+                    <StackPanel Grid.Column="2">
+                        <!-- Ngày bảo trì -->
+                        <TextBlock Text="Ngày bảo trì:" Style="{StaticResource LabelStyle}"/>
+                        <DatePicker x:Name="dtpNgayBaoTri"/>
+
+                        <!-- Người phụ trách -->
+                        <TextBlock Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="txtNguoiPhuTrach"/>
+                            <Button Grid.Column="1" Content="..." Width="40" Height="40" Margin="5,5,0,15" 
+                                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" BorderThickness="0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="5">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+
+                        <!-- Đơn vị bảo trì -->
+                        <TextBlock Text="Đơn vị bảo trì:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="cboDonViBaoTri">
+                            <ComboBoxItem Content="Nội bộ"/>
+                            <ComboBoxItem Content="Đối tác bên ngoài"/>
+                        </ComboBox>
+
+                        <!-- Trạng thái -->
+                        <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox x:Name="cboTrangThai">
+                            <ComboBoxItem Content="Chờ thực hiện"/>
+                            <ComboBoxItem Content="Đang thực hiện"/>
+                            <ComboBoxItem Content="Hoàn thành"/>
+                            <ComboBoxItem Content="Hủy bỏ"/>
+                        </ComboBox>
+
+                        <!-- Ngày hoàn thành -->
+                        <TextBlock Text="Ngày hoàn thành:" Style="{StaticResource LabelStyle}"/>
+                        <DatePicker x:Name="dtpNgayHoanThanh"/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- Danh sách tài sản (mặc định ẩn) -->
+            <StackPanel Grid.Row="2" Margin="0,15,0,0" Visibility="Collapsed" x:Name="pnlDanhSachTaiSan">
+                <TextBlock Text="Danh sách tài sản được chọn:" FontSize="14" FontWeight="Bold" Margin="0,0,0,5"/>
+                <DataGrid x:Name="dgDanhSachTaiSan" Height="150" Margin="0,0,0,10"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Mã tài sản" Binding="{Binding MaTaiSan}" Width="100"/>
+                        <DataGridTextColumn Header="Tên tài sản" Binding="{Binding TenTaiSan}" Width="*"/>
+                        <DataGridTextColumn Header="Tình trạng" Binding="{Binding TinhTrangPhanTram, StringFormat={}{0}%}" Width="80"/>
+                        <DataGridTextColumn Header="Ghi chú" Binding="{Binding GhiChu}" Width="200"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+
+            <!-- Nội dung bảo trì -->
+            <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                <TextBlock Text="Nội dung bảo trì:" Style="{StaticResource LabelStyle}" Margin="0,10,0,5"/>
+                <TextBox x:Name="txtNoiDungBaoTri" Height="100" TextWrapping="Wrap" AcceptsReturn="True" 
+                         VerticalContentAlignment="Top" Padding="12" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- Các nút điều khiển -->
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+                <Button x:Name="btnLuu" Content="Lưu" Style="{StaticResource PrimaryButton}"/>
+                <Button x:Name="btnHuy" Content="Hủy" Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

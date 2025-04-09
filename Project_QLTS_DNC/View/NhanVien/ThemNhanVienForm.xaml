@@ -1,0 +1,198 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.NhanVien.ThemNhanVienForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Thêm Nhân Viên" Height="650" Width="800"
+        ResizeMode="NoResize">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:ColorZone Grid.Row="0" Mode="SecondaryMid" Padding="16" CornerRadius="0">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="AccountPlus" Height="24" Width="24" Foreground="White" Margin="0,0,10,0"/>
+                <TextBlock VerticalAlignment="Center" Text="THÊM NHÂN VIÊN MỚI" FontSize="18" FontWeight="Bold" Foreground="White"/>
+            </StackPanel>
+        </materialDesign:ColorZone>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" Margin="40,20,40,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Mã Nhân Viên -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Mã Nhân Viên:" Margin="0,10,15,0" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}" 
+                           FontWeight="Medium" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" x:Name="txtMaNV"
+                         materialDesign:HintAssist.Hint="Mã nhân viên tự động"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         IsEnabled="False"
+                         Height="48"
+                         Width="500"
+                         HorizontalAlignment="Left"
+                         Margin="0,10,0,16"/>
+            </Grid>
+
+            <!-- Phòng Ban ComboBox -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Phòng Ban:" Margin="0,0,15,0" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           FontWeight="Medium" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" x:Name="cboPhongBan" 
+                          materialDesign:HintAssist.Hint="Chọn phòng ban"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          DisplayMemberPath="TenPhongBan"
+                          SelectedValuePath="MaPhongBan"
+                          Height="48"
+                          Width="500"
+                          HorizontalAlignment="Left"
+                          Margin="0,0,0,16"/>
+            </Grid>
+
+            <!-- Tên Nhân Viên -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Tên Nhân Viên:" Margin="0,0,15,0" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           FontWeight="Medium" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" x:Name="txtTenNV"
+                         materialDesign:HintAssist.Hint="Nhập tên nhân viên"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Height="48"
+                         Width="500"
+                         HorizontalAlignment="Left"
+                         Margin="0,0,0,16"/>
+            </Grid>
+
+            <!-- Địa chỉ -->
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Địa chỉ:" Margin="0,0,15,0" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           FontWeight="Medium" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" x:Name="txtDiaChi" 
+                         materialDesign:HintAssist.Hint="Nhập địa chỉ" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Height="48"
+                         Width="500"
+                         HorizontalAlignment="Left"
+                         Margin="0,0,0,16"/>
+            </Grid>
+
+            <!-- SDT -->
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Số điện thoại:" Margin="0,0,15,0" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           FontWeight="Medium" VerticalAlignment="Center"/>
+                <Grid Grid.Column="1" Width="500" HorizontalAlignment="Left">
+                    <TextBox x:Name="txtSDT"
+                             materialDesign:HintAssist.Hint="Nhập số điện thoại"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Height="48"
+                             Padding="12,12,40,12"
+                             Margin="0,0,0,16"/>
+                    <materialDesign:PackIcon Kind="Phone" 
+                                             VerticalAlignment="Center" 
+                                             HorizontalAlignment="Right"
+                                             Margin="0,0,10,16" 
+                                             Width="24" 
+                                             Height="24"
+                                             Opacity="0.6"/>
+                </Grid>
+            </Grid>
+
+            <!-- Email -->
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Email:" Margin="0,0,15,0" 
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           FontWeight="Medium" VerticalAlignment="Center"/>
+                <Grid Grid.Column="1" Width="500" HorizontalAlignment="Left">
+                    <TextBox x:Name="txtEmail"
+                             materialDesign:HintAssist.Hint="example@gmail.com"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Height="48"
+                             Padding="12,12,40,12"
+                             Margin="0,0,0,16"/>
+                    <materialDesign:PackIcon Kind="Email" 
+                                             VerticalAlignment="Center" 
+                                             HorizontalAlignment="Right"
+                                             Margin="0,0,10,16" 
+                                             Width="24" 
+                                             Height="24"
+                                             Opacity="0.6"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Action Buttons -->
+        <Grid Grid.Row="2" Margin="40,0,40,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" x:Name="btnHuy" Content="HỦY" Margin="0,0,10,0" Width="150" Height="48"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+            <Button Grid.Column="2" x:Name="btnLuu" Width="150" Height="48"
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Background="#007BFF"
+                    Foreground="White">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="ContentSave" Width="20" Height="20" Margin="0,0,8,0"/>
+                    <TextBlock Text="LƯU" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,144 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.DangNhap.DangNhapForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Đăng nhập hệ thống" Height="350" Width="550" WindowStartupLocation="CenterScreen" Background="#F8F9FA">
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2.5*"/>
+        </Grid.ColumnDefinitions>
+
+        <ProgressBar x:Name="loadingIndicator" HorizontalAlignment="Center" VerticalAlignment="Center" 
+             Height="50" Width="50" IsIndeterminate="True" Visibility="Collapsed">
+            <ProgressBar.Style>
+                <Style TargetType="ProgressBar">
+                    <Setter Property="Foreground" Value="RoyalBlue"/>
+                    <Setter Property="Height" Value="50"/>
+                    <Setter Property="Width" Value="50"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ProgressBar">
+                                <Grid>
+                                    <Ellipse Stroke="{TemplateBinding BorderBrush}" StrokeThickness="4" Width="50" Height="50"/>
+                                    <Path Data="M25,0 A25,25 0 1,1 24.99,0"
+                                  Stroke="{TemplateBinding Foreground}"
+                                  StrokeThickness="4" Fill="Transparent"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Path.RenderTransform>
+                                            <RotateTransform x:Name="rotateTransform" Angle="0" CenterX="25" CenterY="25"/>
+                                        </Path.RenderTransform>
+                                    </Path>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ProgressBar.Style>
+        </ProgressBar>
+
+        <!-- Avatar Section -->
+        <Border Grid.Column="0" Background="#0066b1" VerticalAlignment="Stretch">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Border Width="120" Height="120" Background="#E0E0E0" CornerRadius="60" Margin="0 0 0 15">
+                    <Image Source="/Resources/Logo/Logo_Login.png" Stretch="Uniform"/>
+                </Border>
+                <TextBlock Text="DNC Asset Management System" 
+                           FontSize="16" FontWeight="Medium" Foreground="White" 
+                           HorizontalAlignment="Center" Margin="0 10 0 0"
+                           TextWrapping="Wrap" TextAlignment="Center"
+                           MaxWidth="120"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Login Form Section -->
+        <Border Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="320" 
+                Background="White" Padding="25 20" CornerRadius="12" 
+                materialDesign:ElevationAssist.Elevation="Dp4" Margin="0 0 20 0">
+            <StackPanel>
+                <TextBlock Text="Đăng nhập hệ thống" FontSize="22" FontWeight="Bold" 
+                         HorizontalAlignment="Center" Margin="0 0 0 25"/>
+
+                <!-- Username Field -->
+                <StackPanel Margin="0 0 0 15">
+                    <TextBlock Text="Tên đăng nhập" FontSize="12" Margin="0 0 0 5" Foreground="#555"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Grid.Column="0" Kind="Account" Width="16" Height="16" Foreground="#555" 
+                                        Margin="8 0" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtUsername" Grid.Column="1" Height="35" FontSize="13" BorderThickness="0"
+                                    materialDesign:TextFieldAssist.UnderlineBrush="#0066b1"
+                                    materialDesign:HintAssist.Hint="example@gmail.com"
+                                    Padding="0 4" Margin="0" VerticalContentAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Password Field -->
+                <StackPanel Margin="0 0 0 20">
+                    <TextBlock Text="Mật khẩu" FontSize="12" Margin="0 0 0 5" Foreground="#555"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <materialDesign:PackIcon Grid.Column="0" Kind="Lock" Width="16" Height="16" Foreground="#555" 
+                                        Margin="8 0" VerticalAlignment="Center"/>
+
+                        <PasswordBox Grid.Column="1" x:Name="passwordBox" Height="35" FontSize="13" 
+                                    BorderThickness="0" Padding="5 8"
+                                    materialDesign:TextFieldAssist.UnderlineBrush="#0066b1" 
+                                     materialDesign:HintAssist.Hint="Nhập mật khẩu" 
+                                    PasswordChar="*" Visibility="Visible" />
+
+                        <TextBox Grid.Column="1" x:Name="txtVisiblePassword" Height="30" FontSize="13" 
+                                BorderThickness="0" Padding="5 8"
+                                materialDesign:TextFieldAssist.UnderlineBrush="#0066b1" 
+                                Visibility="Collapsed"/>
+
+                        <Button Grid.Column="2" x:Name="btnShowPassword" Width="25" Height="25" 
+                                HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                Background="Transparent" BorderThickness="0" Margin="0 0 0 0"
+                                Padding="0" Click="btnShowPassword_Click"   >
+                            <materialDesign:PackIcon x:Name="TogglePasswordVisibility" Kind="EyeOff" Width="15" Height="15" Foreground="#555"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Login Button -->
+                <Button x:Name="btnDangNhap" Content="ĐĂNG NHẬP" Height="42" Background="#0066b1" Foreground="White" 
+                      BorderThickness="0" Margin="0 0 0 5" FontSize="14" FontWeight="Medium" Click="btnDangNhap_Click"   />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0 0 0 7">
+                    <!-- Checkbox "Ghi nhớ tài khoản" -->
+                    <CheckBox x:Name="unchkRemember" Content="Ghi nhớ tài khoản" FontSize="14"
+                              Foreground="#555" VerticalAlignment="Center"
+                              HorizontalAlignment="Left"   IsChecked="False"
+                               />
+
+                    <!--"Quên mật khẩu?" -->
+                    <Button x:Name="btnForgotPass" Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            HorizontalAlignment="Center"
+                            Padding="0"
+                            Margin="20 0 0 0" Click="btnForgotPass_Click"  >
+                        <TextBlock Text="Quên mật khẩu?" 
+                               Foreground="#0066b1" 
+                               FontSize="14" 
+                               FontWeight="Medium"
+                               TextDecorations="Underline"/>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

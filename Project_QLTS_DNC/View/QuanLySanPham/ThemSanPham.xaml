@@ -1,0 +1,149 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLySanPham.ThemSanPham"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="THÊM SẢN PHẨM MỚI" 
+        Height="600" 
+        Width="800"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <materialDesign:Card UniformCornerRadius="5" Margin="16" materialDesign:ShadowAssist.ShadowDepth="Depth3">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Tiêu đề -->
+            <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth1">
+                <DockPanel>
+                    <TextBlock Text="THÊM SẢN PHẨM MỚI" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource MaterialDesignIconButton}" 
+                            ToolTip="Đóng" x:Name="btnClose" Click="BtnClose_Click">
+                        <materialDesign:PackIcon Kind="Close" Width="24" Height="24" />
+                    </Button>
+                </DockPanel>
+            </materialDesign:ColorZone>
+
+            <!-- Form nhập thông tin -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="16">
+                <StackPanel>
+                    <Grid Margin="0 8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Cột 1 -->
+                        <TextBox Grid.Row="0" Grid.Column="0" Margin="0 8 8 8" 
+                                x:Name="txtTenSanPham"
+                                materialDesign:HintAssist.Hint="Tên sản phẩm"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+                        <TextBox Grid.Row="1" Grid.Column="0" Margin="0 8 8 8" 
+                                x:Name="txtSoSeri"
+                                materialDesign:HintAssist.Hint="Số seri"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+                        <ComboBox Grid.Row="2" Grid.Column="0" Margin="0 8 8 8"
+                                x:Name="cboMaPhong"
+                                materialDesign:HintAssist.Hint="Mã phòng"
+                                Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding MaPhong}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <DatePicker Grid.Row="3" Grid.Column="0" Margin="0 8 8 8"
+                                    x:Name="dpNgaySuDung"
+                                    materialDesign:HintAssist.Hint="Ngày sử dụng"
+                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+                        <TextBox Grid.Row="4" Grid.Column="0" Margin="0 8 8 8" 
+                                x:Name="txtGiaTri"
+                                materialDesign:HintAssist.Hint="Giá trị sản phẩm (VNĐ)"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+                        <!-- Cột 2 -->
+                        <ComboBox Grid.Row="0" Grid.Column="1" Margin="8 8 0 8"
+                                x:Name="cboMaNhomTS"
+                                materialDesign:HintAssist.Hint="Mã nhóm tài sản"
+                                Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding MaNhomTS}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <DatePicker Grid.Row="1" Grid.Column="1" Margin="8 8 0 8"
+                                    x:Name="dpHanBH"
+                                    materialDesign:HintAssist.Hint="Hạn bảo hành"
+                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+                        <ComboBox Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
+                                x:Name="cboTinhTrang"
+                                materialDesign:HintAssist.Hint="Tình trạng sản phẩm"
+                                Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                            <ComboBoxItem Content="Tốt"/>
+                            <ComboBoxItem Content="Trung bình"/>
+                            <ComboBoxItem Content="Kém"/>
+                        </ComboBox>
+
+                        <TextBox Grid.Row="3" Grid.Column="1" Grid.RowSpan="2" Margin="8 8 0 8" 
+                                x:Name="txtGhiChu"
+                                materialDesign:HintAssist.Hint="Ghi chú"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Stretch"
+                                MinHeight="100"
+                                AcceptsReturn="True"/>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Buttons -->
+            <Grid Grid.Row="2" Margin="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="1" Margin="0 0 16 0" x:Name="btnHuy" Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="BtnHuy_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
+                        <TextBlock Text="HUỶ BỎ"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="2" x:Name="btnLuu" Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="{StaticResource PrimaryHueMidBrush}" Foreground="White"
+                        Click="BtnLuu_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Margin="0 0 8 0"/>
+                        <TextBlock Text="LƯU LẠI"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </materialDesign:Card>
+</Window>

@@ -1,0 +1,77 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyKho.ThemKho"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="THÔNG TIN KHO" 
+        Width="400" Height="450"
+        Background="White">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <!-- Hàng tiêu đề và nút -->
+            <RowDefinition Height="Auto"/>
+            <!-- Hàng nhập liệu -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Hàng tiêu đề và nút -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <!-- Cột cho tiêu đề -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Cột cho nút -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Tiêu đề -->
+            <TextBlock Grid.Column="0" Text="THÔNG TIN KHO"
+                       FontSize="24" FontWeight="Bold"
+                       Foreground="{DynamicResource PrimaryHueMidBrush}"
+                       VerticalAlignment="Center"/>
+
+            <!-- Nút Lưu Kho -->
+            <Button Grid.Column="1" Content="+ Lưu Kho " 
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{DynamicResource SecondaryCreate}"
+                    Foreground="White"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Hàng nhập liệu -->
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" MinWidth="184"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Dòng 1: Mã Kho và Tên Kho -->
+            <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,8"
+                     x:Name="txtMaKho"
+                     materialDesign:HintAssist.Hint="Mã kho"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     IsEnabled="False"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"
+                     x:Name="txtTenKho"
+                     materialDesign:HintAssist.Hint="Tên kho"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <!-- Dòng 2: Mô Tả và Tòa Nhà -->
+            <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
+                     x:Name="txtMoTa"
+                     materialDesign:HintAssist.Hint="Mô tả"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+            <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,0"
+                      x:Name="cboToaNha"
+                      materialDesign:HintAssist.Hint="Chọn tòa nhà"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                <ComboBoxItem Content="Tòa nhà A"/>
+                <ComboBoxItem Content="Tòa nhà B"/>
+            </ComboBox>
+        </Grid>
+    </Grid>
+</Window>

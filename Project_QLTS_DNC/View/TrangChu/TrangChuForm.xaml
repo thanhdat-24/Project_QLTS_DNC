@@ -1,0 +1,72 @@
+﻿<UserControl x:Class="Project_QLTS_DNC.View.TrangChu.TrangChuForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Project_QLTS_DNC.View.TrangChu"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid x:Name="MainContent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Padding="20" Background="White" CornerRadius="10"
+            HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="Chào mừng đến với hệ thống quản lý tài sản"
+                       FontSize="22" FontWeight="Bold" Foreground="#37474F"
+                       TextAlignment="Center" Margin="0,10,0,20"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Biểu đồ -->
+                    <lvc:CartesianChart x:Name="assetChart"
+                                    Grid.Column="1"
+                                    Margin="10"
+                                    Width="400"
+                                    Height="300"/>
+
+                    <!-- Các thẻ thống kê -->
+                    <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right">
+                        <Border Background="#FFAB40" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                            <StackPanel>
+                                <TextBlock Text="Tổng tài sản" FontSize="14" Foreground="White"/>
+                                <TextBlock x:Name="txtTong" Text="150" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#66BB6A" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                            <StackPanel>
+                                <TextBlock Text="Tài sản đang sử dụng" FontSize="14" Foreground="White"/>
+                                <TextBlock x:Name="txtDangDung" Text="120" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#E57373" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                            <StackPanel>
+                                <TextBlock Text="Tài sản cần bảo trì" FontSize="14" Foreground="White"/>
+                                <TextBlock x:Name="txtBaoTri" Text="10" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#FFA726" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                            <StackPanel>
+                                <TextBlock Text="Sửa chữa tài sản" FontSize="14" Foreground="White"/>
+                                <TextBlock x:Name="txtSuaChua" Text="5" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

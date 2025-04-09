@@ -1,0 +1,157 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyKho.PhieuNhapKhoInput"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="THÔNG TIN PHIẾU NHẬP" 
+        Width="430" Height="495"
+        Background="White">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Tiêu đề: Thông tin chi tiết sản phẩm -->
+            <RowDefinition Height="Auto"/>
+            <!-- Các ô nhập liệu chi tiết sản phẩm -->
+            <RowDefinition Height="Auto"/>
+            <!-- Tiêu đề: Thông tin phiếu nhập kho -->
+            <RowDefinition Height="Auto"/>
+            <!-- Các ô nhập liệu phiếu nhập kho -->
+            <RowDefinition Height="Auto"/>
+            <!-- Các nút thao tác -->
+        </Grid.RowDefinitions>
+
+        <!-- Phần: Thông tin chi tiết sản phẩm -->
+        <TextBlock Grid.Row="0" Text="THÔNG TIN CHI TIẾT PHIẾU NHẬP" 
+                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                   FontSize="24" FontWeight="Bold" Margin="0,0,0,8"/>
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.RowDefinitions>
+                <!-- Row chứa thanh tìm kiếm -->
+                <RowDefinition Height="Auto"/>
+                <!-- Row chứa các thông tin sản phẩm (mã sản phẩm, mã nhóm) -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!-- Thanh tìm kiếm -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="1" 
+                         x:Name="txtTimKiemSP" 
+                         materialDesign:HintAssist.Hint="Tìm kiếm theo tên sản phẩm" 
+                         BorderThickness="0" 
+                         VerticalAlignment="Center" 
+                         Margin="8,0"
+                         materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
+                <Button Grid.Column="2" 
+                        Style="{StaticResource MaterialDesignIconButton}" 
+                        x:Name="btnSearch" 
+                        ToolTip="Tìm kiếm">
+                    <materialDesign:PackIcon Kind="ArrowRight" 
+                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                </Button>
+            </Grid>
+            <!-- Hiển thị mã sản phẩm và mã nhóm (chỉ đọc) -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto" MinWidth="184"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Margin="0,0,8,0"
+                         x:Name="txtMaSP"
+                         materialDesign:HintAssist.Hint="Mã sản phẩm"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         IsReadOnly="True"/>
+                <TextBox Grid.Column="1"
+                         x:Name="txtMaNhom"
+                         materialDesign:HintAssist.Hint="Mã nhóm"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         IsReadOnly="True"/>
+            </Grid>
+        </Grid>
+
+        <!-- Phần: Thông tin phiếu nhập kho -->
+        <Grid Grid.Row="3" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <!-- Hàng chứa Mã kho và Ngày nhập -->
+                <RowDefinition Height="Auto"/>
+                <!-- Hàng chứa Nhà cung cấp và Người lập phiếu -->
+                <RowDefinition Height="Auto"/>
+                <!-- Hàng chứa Số lượng và Đơn giá -->
+                <RowDefinition Height="Auto"/>
+                <!-- Hàng mới chứa Tổng tiền -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!-- Mã kho và Ngày nhập -->
+            <ComboBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,8"
+                      x:Name="cboMaKho"
+                      materialDesign:HintAssist.Hint="Mã kho"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                <ComboBoxItem Content="Kho A"/>
+                <ComboBoxItem Content="Kho B"/>
+            </ComboBox>
+            <DatePicker Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"
+                        x:Name="dpNgayNhap"
+                        materialDesign:HintAssist.Hint="Ngày nhập"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+            <!-- Nhà cung cấp và Người lập phiếu -->
+            <ComboBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
+                      x:Name="cboNhaCungCap"
+                      materialDesign:HintAssist.Hint="Mã nhà cung cấp"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                <ComboBoxItem Content="Nhà cung cấp A"/>
+                <ComboBoxItem Content="Nhà cung cấp B"/>
+            </ComboBox>
+            <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,0"
+                      x:Name="cboNguoiLapPhieu"
+                      materialDesign:HintAssist.Hint="Người lập phiếu"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                <ComboBoxItem Content="Nhân viên A"/>
+                <ComboBoxItem Content="Nhân viên B"/>
+            </ComboBox>
+            <!-- Ô nhập Số lượng và Đơn giá -->
+            <TextBox Grid.Row="2" Grid.Column="0" Margin="0,8,8,0"
+                     x:Name="txtSoLuong"
+                     materialDesign:HintAssist.Hint="Số lượng"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Margin="0,8,0,0"
+                     x:Name="txtDonGia"
+                     materialDesign:HintAssist.Hint="Đơn giá"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+            <!-- Ô nhập Tổng tiền (chiếm cả 2 cột) -->
+            <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                     x:Name="txtTongTien"
+                     materialDesign:HintAssist.Hint="Tổng tiền"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+        </Grid>
+
+        <!-- Các nút thao tác -->
+        <Grid Grid.Row="4" Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Margin="0,0,16,0" x:Name="btnHuy" Style="{StaticResource MaterialDesignOutlinedButton}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
+                    <TextBlock Text="HUỶ BỎ"/>
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="2" x:Name="btnCapNhat" Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
+                    <TextBlock Text="LƯU"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

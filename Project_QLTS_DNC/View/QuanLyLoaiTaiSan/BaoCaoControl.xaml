@@ -1,0 +1,74 @@
+﻿<UserControl x:Class="Project_QLTS_DNC.View.QuanLyTaiSan.BaoCaoControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyTaiSan"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1280"
+             Background="White">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- Style cho các action button -->
+            <Style x:Key="ActionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="Height" Value="36"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="4"/>
+                <Setter Property="Padding" Value="12,0"/>
+                <Setter Property="Margin" Value="8,0,0,0"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Report Controls -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <ComboBox Grid.Column="0" Width="200" Margin="0,0,15,0"
+                      materialDesign:HintAssist.Hint="Loại báo cáo"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                <ComboBoxItem Content="Báo cáo tổng hợp tài sản"/>
+                <ComboBoxItem Content="Báo cáo theo loại tài sản"/>
+                <ComboBoxItem Content="Báo cáo theo nhóm tài sản"/>
+            </ComboBox>
+
+            <DatePicker Grid.Column="1" Width="150" Margin="0,0,15,0"
+                        materialDesign:HintAssist.Hint="Từ ngày"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+            <DatePicker Grid.Column="2" Width="150" HorizontalAlignment="Left"
+                        materialDesign:HintAssist.Hint="Đến ngày"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+            <Button Grid.Column="3" Style="{StaticResource ActionButton}" 
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    Width="150">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="FileChart" Width="18" Height="18" Margin="0,0,8,0"/>
+                    <TextBlock Text="Tạo báo cáo" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Report Content Area -->
+        <materialDesign:Card Grid.Row="1" Margin="0,15,0,0" UniformCornerRadius="8" Padding="15">
+            <Grid>
+                <TextBlock Text="Nội dung báo cáo sẽ hiển thị tại đây" 
+                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                         FontSize="16" Foreground="#757575"/>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

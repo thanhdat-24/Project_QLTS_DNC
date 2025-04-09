@@ -1,0 +1,66 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyToanNha.frmSuaPhong"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyToanNha"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Cập nhật phòng" Height="450" Width="450"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+
+
+        <!-- Main Content -->
+        <materialDesign:Card Grid.Row="0" Margin="16,0,10,10" Padding="5">
+            <StackPanel>
+                <!-- Tên phòng ban -->
+                <TextBlock Text="Tên phòng:" Margin="0,8,0,0"/>
+                <TextBox x:Name="txtTenPhong" 
+                         materialDesign:HintAssist.Hint="Nhập tên phòng ban" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="0,5,0,5" />
+                <!-- Sức chứa -->
+                <TextBlock Text="Sức chứa:" Margin="0,8,0,0"/>
+                <TextBox x:Name="txtSucChuaPhong" 
+           materialDesign:HintAssist.Hint="Nhập sức chứa" 
+           Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+           Margin="0,8,0,16" VerticalScrollBarVisibility="Auto"/>
+
+                <!-- Mô Tả -->
+                <TextBlock Text="Mô tả:" Margin="0,8,0,0"/>
+                <TextBox x:Name="txtMoTaPhong" 
+                         materialDesign:HintAssist.Hint="Nhập mô tả" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="0,8,0,16" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+        </materialDesign:Card>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,50">
+            <Button x:Name="btnHuy" 
+                    Content="HỦY" 
+                    Width="100"
+                    Margin="8,0"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="btnHuy_Click"/>
+
+            <Button x:Name="btnSua" 
+                    Content="CẬP NHẬT" 
+                    Width="100" 
+                    Style="{StaticResource MaterialDesignRaisedButton}" Click="btnSua_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

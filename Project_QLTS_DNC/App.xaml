@@ -1,0 +1,43 @@
+﻿<Application x:Class="Project_QLTS_DNC.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Project_QLTS_DNC"
+            >
+    <Application.Resources>
+       <ResourceDictionary>
+           <ResourceDictionary.MergedDictionaries>
+               <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+               <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+               <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+               <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.LightBlue.xaml" />
+           </ResourceDictionary.MergedDictionaries>
+
+           <!-- Định nghĩa màu tùy chỉnh  -->
+
+           <!--Màu Background chính-->
+           <Color x:Key="Primary">#0071f5</Color>
+           <!--Background tiêu đề-->
+           <Color x:Key="PrimaryLight">#3387c8</Color>
+           <Color x:Key="PrimaryDark">#004f8a</Color>
+
+           <!--Màu Background Button Chính, Thêm, Sửa, Xóa-->
+           <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource Primary}"/>
+           <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource PrimaryDark}"/>
+           <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryLight}"/>
+
+           <SolidColorBrush x:Key="SecondaryCreate" Color="#4CAF50"/>
+           <!--Nút Thêm-->
+           <SolidColorBrush x:Key="SecondaryDelete" Color="#F44336"/>
+           <!--Nút Xóa-->
+
+           <!--Nền Các nút phụ như , In PDF, Excel-->
+           <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#90CAF9"/>
+           <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
+           <SolidColorBrush x:Key="SecondaryFileExcel" Color="#00ac48"/>
+           <!--nền Excel-->
+
+           <SolidColorBrush x:Key="SecondaryFileFDP" Color="#fc9a13"/>
+           <SolidColorBrush x:Key="SecondaryBack" Color="#000000"/>
+       </ResourceDictionary>
+   </Application.Resources>
+</Application>
