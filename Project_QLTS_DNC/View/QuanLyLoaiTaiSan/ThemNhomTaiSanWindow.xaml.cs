@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
-using System.Text.RegularExpressions;
 using Project_QLTS_DNC.Models;
 using System.Collections.ObjectModel;
+using Project_QLTS_DNC.Services;
+using System.Linq;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -12,36 +12,27 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
     {
         public NhomTaiSan NhomTaiSanMoi { get; private set; }
         private ObservableCollection<LoaiTaiSan> _dsLoaiTaiSan;
+        private bool _isProcessing = false;
 
         public ThemNhomTaiSanWindow(ObservableCollection<LoaiTaiSan> dsLoaiTaiSan)
         {
             InitializeComponent();
 
-            // Lưu danh sách Loại Tài Sản
             _dsLoaiTaiSan = dsLoaiTaiSan;
 
-            // Nạp dữ liệu vào ComboBox Loại Tài Sản
+            // Gán danh sách loại tài sản cho ComboBox
             cboLoaiTaiSan.ItemsSource = _dsLoaiTaiSan;
             cboLoaiTaiSan.DisplayMemberPath = "TenLoaiTaiSan";
             cboLoaiTaiSan.SelectedValuePath = "MaLoaiTaiSan";
 
-            // Đóng window khi nhấn nút đóng
-            btnDong.Click += (s, e) => Close();
+            // Chọn loại tài sản đầu tiên nếu có
+            if (_dsLoaiTaiSan.Count > 0)
+            {
+                cboLoaiTaiSan.SelectedIndex = 0;
+            }
 
-            // Cho phép di chuyển cửa sổ
-            MouseLeftButtonDown += Window_MouseLeftButtonDown;
-        }
-
-        // Chỉ cho phép nhập số
-        private void txtSoLuong_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text);
-        }
-
-        private bool IsTextAllowed(string text)
-        {
-            Regex regex = new Regex("[^0-9]+"); // regex that matches disallowed text
-            return !regex.IsMatch(text);
+            // Gán sự kiện cho nút đóng
+            btnDong.Click += btnDong_Click;
         }
 
         // Cho phép di chuyển cửa sổ
@@ -56,46 +47,66 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         // Phương thức xử lý sự kiện khi nhấn nút Hủy
         private void btnDong_Click(object sender, RoutedEventArgs e)
         {
+            DialogResult = false;
             Close();
         }
 
-        private void btnLuu_Click(object sender, RoutedEventArgs e)
+        private async void btnLuu_Click(object sender, RoutedEventArgs e)
         {
-            // Kiểm tra và xác nhận các trường nhập liệu
-            if (cboLoaiTaiSan.SelectedItem == null)
-            {
-                MessageBox.Show("Vui lòng chọn Loại Tài Sản", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            // Tránh người dùng nhấn nút nhiều lần
+            if (_isProcessing)
                 return;
-            }
 
-            if (string.IsNullOrWhiteSpace(txtTenNhom.Text))
+            try
             {
-                MessageBox.Show("Vui lòng nhập tên nhóm tài sản", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            int soLuong = 0;
-            if (!string.IsNullOrWhiteSpace(txtSoLuong.Text))
-            {
-                if (!int.TryParse(txtSoLuong.Text, out soLuong))
+                // Kiểm tra dữ liệu nhập
+                if (cboLoaiTaiSan.SelectedItem == null)
                 {
-                    MessageBox.Show("Số lượng phải là số nguyên", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Vui lòng chọn loại tài sản!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    cboLoaiTaiSan.Focus();
                     return;
                 }
+
+                if (string.IsNullOrWhiteSpace(txtTenNhom.Text))
+                {
+                    MessageBox.Show("Vui lòng nhập tên nhóm tài sản!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    txtTenNhom.Focus();
+                    return;
+                }
+
+                _isProcessing = true;
+
+                // Hiển thị trạng thái đang xử lý nếu cần
+                // loadingIndicator.Visibility = Visibility.Visible;
+
+                // Lấy loại tài sản đã chọn
+                var loaiTaiSan = cboLoaiTaiSan.SelectedItem as LoaiTaiSan;
+
+                // Tạo đối tượng NhomTaiSan mới
+                NhomTaiSanMoi = new NhomTaiSan
+                {
+                    ma_loai_ts = loaiTaiSan.MaLoaiTaiSan,
+                    TenNhom = txtTenNhom.Text.Trim(),
+                    MoTa = txtMoTa.Text.Trim()
+                };
+
+                // Gọi service để lưu vào database
+                NhomTaiSanMoi = await NhomTaiSanService.ThemNhomTaiSanAsync(NhomTaiSanMoi);
+
+                // Đánh dấu thành công và đóng cửa sổ
+                DialogResult = true;
+                Close();
             }
-
-            // Tạo đối tượng NhomTaiSan mới
-            NhomTaiSanMoi = new NhomTaiSan
+            catch (Exception ex)
             {
-                ma_loai_ts = (int)cboLoaiTaiSan.SelectedValue,
-                TenNhom = txtTenNhom.Text.Trim(),
-                SoLuong = soLuong,
-                MoTa = txtMoTa.Text.Trim()
-            };
-
-            // Đóng window và trả về DialogResult là True
-            DialogResult = true;
-            Close();
+                MessageBox.Show($"Lỗi khi lưu dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                DialogResult = false;
+            }
+            finally
+            {
+                _isProcessing = false;
+                // loadingIndicator.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }

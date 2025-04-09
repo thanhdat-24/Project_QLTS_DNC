@@ -1,5 +1,4 @@
 ﻿using Project_QLTS_DNC.Helpers;
-using Project_QLTS_DNC.Models;
 using Supabase;
 using System;
 using System.Threading.Tasks;
@@ -21,11 +20,5 @@ namespace Project_QLTS_DNC.Services
             await _client.InitializeAsync();
             return _client;
         }
-
-
-
-
-
-
     }
 }
