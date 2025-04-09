@@ -405,7 +405,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         worksheet.Cell(i + 2, 2).Value = phieu.MaTaiSan;
                         worksheet.Cell(i + 2, 3).Value = phieu.TenTaiSan;
                         worksheet.Cell(i + 2, 4).Value = phieu.LoaiBaoTri;
-                        worksheet.Cell(i + 2, 5).Value = phieu.NgayBaoTri.ToString("dd/MM/yyyy");
+                        worksheet.Cell(i + 2, 5).Value = phieu.NgayBaoTri.HasValue
+                            ? phieu.NgayBaoTri.Value.ToString("dd/MM/yyyy")
+                            : string.Empty;
                         worksheet.Cell(i + 2, 6).Value = phieu.NgayHoanThanh?.ToString("dd/MM/yyyy") ?? "";
                         worksheet.Cell(i + 2, 7).Value = phieu.NguoiPhuTrach;
                         worksheet.Cell(i + 2, 8).Value = phieu.TrangThai;

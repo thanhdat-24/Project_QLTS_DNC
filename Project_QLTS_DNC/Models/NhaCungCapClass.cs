@@ -21,5 +21,8 @@ namespace Project_QLTS_DNC.Models
 
         [Column("email")]
         public string Email { get; set; }
+        [Column("mo_ta")]
+        public string MoTa { get; set; }
+    
     }
 }

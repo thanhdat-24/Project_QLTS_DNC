@@ -146,9 +146,9 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-               
-                <DataGridTextColumn Header="Mã NCC" Binding="{Binding MaNCC}" Width="110"/>
-                <DataGridTextColumn Header="Tên nhà cung cấp" Binding="{Binding TenNhaCungCap}" Width="180"/>
+
+                <DataGridTextColumn Header="Mã NCC" Binding="{Binding MaNCC}" IsReadOnly="True" Width="110"/>
+                <DataGridTextColumn Header="Tên nhà cung cấp" Binding="{Binding TenNCC}" Width="180"/>
                 <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="200"/>
                 <DataGridTextColumn Header="Số điện thoại" Binding="{Binding SoDienThoai}" Width="120"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
