@@ -155,8 +155,8 @@
                        Foreground="White" 
                        ToolTip="Tạo phiếu bảo trì từ các mục đã chọn">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="NoteAdd" Margin="0 0 8 0"/>
-                        <TextBlock Text="TẠO PHIẾU BẢO TRÌ"/>
+                        <materialDesign:PackIcon Kind="NoteAdd" Margin="1 0 8 0"/>
+                        <TextBlock Text="TẠO PHIẾU"/>
                     </StackPanel>
                 </Button>
             </Grid>
