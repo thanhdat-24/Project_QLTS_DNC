@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Project_QLTS_DNC.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Project_QLTS_DNC.ViewModels.NhanVien;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Models;
 
 namespace Project_QLTS_DNC.View.NhanVien
 {
@@ -20,9 +24,27 @@ namespace Project_QLTS_DNC.View.NhanVien
     /// </summary>
     public partial class DanhSachNhanVienForm : UserControl
     {
+        private readonly NhanVienService _nhanVienService = new();
+
         public DanhSachNhanVienForm()
         {
             InitializeComponent();
+            _ = LoadDanhSachNhanVienAsync(); // Gọi hàm async trong constructor
+        }
+
+        private async Task LoadDanhSachNhanVienAsync()
+        {
+            List<NhanVienModel> danhSach = await _nhanVienService.LayDanhSachNhanVienAsync();
+            employeeDataGrid.ItemsSource = danhSach;
+        }
+
+        
+
+        private void btnThemNhanVien_Click(object sender, RoutedEventArgs e)
+        {
+            var themNhanVienWindow = new ThemNhanVienForm();
+            themNhanVienWindow.Show();
         }
     }
+
 }

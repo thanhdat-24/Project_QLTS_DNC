@@ -62,7 +62,7 @@ namespace Project_QLTS_DNC.View.DangNhap
                     this.Hide();
 
                     var mainWindow = new MainWindow(user);
-                    Application.Current.MainWindow = mainWindow; 
+                    Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
 
                     this.Close();
@@ -74,6 +74,8 @@ namespace Project_QLTS_DNC.View.DangNhap
                 MessageBox.Show("Lỗi đăng nhập: " + ex.Message);
             }
         }
+
+
 
         private void btnShowPassword_Click(object sender, RoutedEventArgs e)
         {
@@ -100,7 +102,7 @@ namespace Project_QLTS_DNC.View.DangNhap
 
         private void btnForgotPass_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide(); 
+            this.Hide();
             var quenMatKhauForm = new QuenMatKhauForm();
             quenMatKhauForm.ShowDialog();
             this.Show();

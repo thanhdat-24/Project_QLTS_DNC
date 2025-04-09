@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Project_QLTS_DNC.ViewModels.NhanVien;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,7 @@ namespace Project_QLTS_DNC.View.NhanVien
         public ThemNhanVienForm()
         {
             InitializeComponent();
+            DataContext = new ThemNhanVienViewModel();
         }
     }
 }

@@ -7,11 +7,11 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
-        TextElement.FontSize="14"
+        TextElement.FontSize="13"
         FontFamily="{materialDesign:MaterialDesignFont}"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Thêm Nhân Viên" Height="650" Width="800"
+        Title="Thêm Nhân Viên" Height="630" Width="500"
         ResizeMode="NoResize">
 
     <Grid>
@@ -22,18 +22,15 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <materialDesign:ColorZone Grid.Row="0" Mode="SecondaryMid" Padding="16" CornerRadius="0">
+        <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="12" CornerRadius="0" Background="#0078D7">
             <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="AccountPlus" Height="24" Width="24" Foreground="White" Margin="0,0,10,0"/>
-                <TextBlock VerticalAlignment="Center" Text="THÊM NHÂN VIÊN MỚI" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                <materialDesign:PackIcon Kind="AccountPlus" Height="22" Width="22" Foreground="White" Margin="0,0,8,0"/>
+                <TextBlock VerticalAlignment="Center" Text="THÊM NHÂN VIÊN MỚI" FontSize="16" FontWeight="Bold" Foreground="White"/>
             </StackPanel>
         </materialDesign:ColorZone>
 
         <!-- Content -->
-        <Grid Grid.Row="1" Margin="40,20,40,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Margin="20,15,20,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -41,155 +38,124 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
             <!-- Mã Nhân Viên -->
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Mã Nhân Viên:" Margin="0,10,15,0" 
-                           Style="{StaticResource MaterialDesignBody1TextBlock}" 
-                           FontWeight="Medium" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" x:Name="txtMaNV"
-                         materialDesign:HintAssist.Hint="Mã nhân viên tự động"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         IsEnabled="False"
-                         Height="48"
-                         Width="500"
-                         HorizontalAlignment="Left"
-                         Margin="0,10,0,16"/>
-            </Grid>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Mã Nhân Viên:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtMaNV"
+                     materialDesign:HintAssist.Hint="Mã nhân viên tự động" FontSize="8"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     IsEnabled="False"
+                     Height="42"
+                     Margin="0,0,0,12"/>
 
-            <!-- Phòng Ban ComboBox -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Phòng Ban:" Margin="0,0,15,0" 
-                           Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           FontWeight="Medium" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="1" x:Name="cboPhongBan" 
-                          materialDesign:HintAssist.Hint="Chọn phòng ban"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          DisplayMemberPath="TenPhongBan"
-                          SelectedValuePath="MaPhongBan"
-                          Height="48"
-                          Width="500"
-                          HorizontalAlignment="Left"
-                          Margin="0,0,0,16"/>
-            </Grid>
+            <!-- Phòng Ban -->
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Phòng Ban:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cboPhongBan" 
+                      materialDesign:HintAssist.Hint="Chọn phòng ban"  FontSize="8"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      DisplayMemberPath="TenPhongBan"
+                      SelectedValuePath="MaPhongBan"
+                      Height="42"
+                      Margin="0,0,0,12"/>
+
+            <!-- Chức Vụ -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Chức Vụ:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <ComboBox  
+                   Grid.Row="2" Grid.Column="1"
+                   ItemsSource="{Binding DanhSachChucVu}"
+                   DisplayMemberPath="TenChucVu"
+                   SelectedValuePath="MaChucVu"
+                   SelectedValue="{Binding SelectedChucVu, Mode=TwoWay}"
+                   materialDesign:HintAssist.Hint="Chọn chức vụ"
+                   FontSize="8"
+                   Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                   Height="42"
+                   Margin="0,0,0,12"/>
+
+
 
             <!-- Tên Nhân Viên -->
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Tên Nhân Viên:" Margin="0,0,15,0" 
-                           Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           FontWeight="Medium" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" x:Name="txtTenNV"
-                         materialDesign:HintAssist.Hint="Nhập tên nhân viên"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Height="48"
-                         Width="500"
-                         HorizontalAlignment="Left"
-                         Margin="0,0,0,16"/>
-            </Grid>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Tên Nhân Viên:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="3" Grid.Column="1" x:Name="txtTenNV"
+                     materialDesign:HintAssist.Hint="Nhập tên nhân viên" FontSize="8"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Height="42"
+                     Margin="0,0,0,12"/>
+
+            <!-- Giới Tính -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Giới Tính:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,10,0,12">
+                <RadioButton x:Name="rdoNam" Content="Nam" Margin="0,0,24,0" FontSize="13" />
+                <RadioButton x:Name="rdoNu" Content="Nữ" FontSize="13" IsChecked="True" />
+            </StackPanel>
 
             <!-- Địa chỉ -->
-            <Grid Grid.Row="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Địa chỉ:" Margin="0,0,15,0" 
-                           Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           FontWeight="Medium" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" x:Name="txtDiaChi" 
-                         materialDesign:HintAssist.Hint="Nhập địa chỉ" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         Height="48"
-                         Width="500"
-                         HorizontalAlignment="Left"
-                         Margin="0,0,0,16"/>
-            </Grid>
-
-            <!-- SDT -->
-            <Grid Grid.Row="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Số điện thoại:" Margin="0,0,15,0" 
-                           Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           FontWeight="Medium" VerticalAlignment="Center"/>
-                <Grid Grid.Column="1" Width="500" HorizontalAlignment="Left">
-                    <TextBox x:Name="txtSDT"
-                             materialDesign:HintAssist.Hint="Nhập số điện thoại"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Height="48"
-                             Padding="12,12,40,12"
-                             Margin="0,0,0,16"/>
-                    <materialDesign:PackIcon Kind="Phone" 
-                                             VerticalAlignment="Center" 
-                                             HorizontalAlignment="Right"
-                                             Margin="0,0,10,16" 
-                                             Width="24" 
-                                             Height="24"
-                                             Opacity="0.6"/>
-                </Grid>
-            </Grid>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Địa chỉ:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="5" Grid.Column="1" x:Name="txtDiaChi" 
+                     materialDesign:HintAssist.Hint="Nhập địa chỉ"  FontSize="8"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                     Height="42"
+                     Margin="0,0,0,12"/>
 
             <!-- Email -->
-            <Grid Grid.Row="5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Email:" Margin="0,0,15,0" 
-                           Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           FontWeight="Medium" VerticalAlignment="Center"/>
-                <Grid Grid.Column="1" Width="500" HorizontalAlignment="Left">
-                    <TextBox x:Name="txtEmail"
-                             materialDesign:HintAssist.Hint="example@gmail.com"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Height="48"
-                             Padding="12,12,40,12"
-                             Margin="0,0,0,16"/>
-                    <materialDesign:PackIcon Kind="Email" 
-                                             VerticalAlignment="Center" 
-                                             HorizontalAlignment="Right"
-                                             Margin="0,0,10,16" 
-                                             Width="24" 
-                                             Height="24"
-                                             Opacity="0.6"/>
-                </Grid>
-            </Grid>
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Email:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="6" Grid.Column="1" x:Name="txtEmail"
+                     materialDesign:HintAssist.Hint="example@gmail.com" FontSize="8"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Height="42"
+                     Margin="0,0,0,12"/>
+
+            <!-- SDT -->
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Số điện thoại:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="7" Grid.Column="1" x:Name="txtSDT"
+                     materialDesign:HintAssist.Hint="Nhập số điện thoại" FontSize="8"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Height="42"
+                     Margin="0,0,0,12"/>
+
+            <!-- Ngày Vào Làm -->
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Ngày Vào Làm:" Margin="0,10,0,0" 
+                       FontWeight="Medium" VerticalAlignment="Center"/>
+            <DatePicker Grid.Row="8" Grid.Column="1" x:Name="dpNgayVaoLam"
+                      materialDesign:HintAssist.Hint="Chọn ngày vào làm" FontSize="8"
+                      Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                      Height="42"
+                      Margin="0,0,0,12"/>
         </Grid>
 
         <!-- Action Buttons -->
-        <Grid Grid.Row="2" Margin="40,0,40,20">
+        <Grid Grid.Row="2" Margin="20,0,20,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" x:Name="btnHuy" Content="HỦY" Margin="0,0,10,0" Width="150" Height="48"
+            <Button Grid.Column="1" x:Name="btnHuy" Content="HỦY" Margin="0,0,10,0" Width="100" Height="40"
                     Style="{StaticResource MaterialDesignOutlinedButton}"/>
 
-            <Button Grid.Column="2" x:Name="btnLuu" Width="150" Height="48"
+            <Button Grid.Column="2" x:Name="btnLuu" Width="100" Height="40"
                     Style="{StaticResource MaterialDesignRaisedLightButton}"
-                    Background="#007BFF"
+                    Background="#0078D7"
                     Foreground="White">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <materialDesign:PackIcon Kind="ContentSave" Width="20" Height="20" Margin="0,0,8,0"/>
+                    <materialDesign:PackIcon Kind="ContentSave" Width="16" Height="16" Margin="0,0,6,0"/>
                     <TextBlock Text="LƯU" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
