@@ -139,9 +139,10 @@
                     <Style TargetType="DataGridRow" BasedOn="{StaticResource HoverRowStyle}"/>
                 </DataGrid.RowStyle>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã Kho" 
-                                        Binding="{Binding MaSP}" 
-                                        Width="135">
+                    <!-- Cột Mã Kho -->
+                    <DataGridTextColumn Header="Mã Kho"
+                        Binding="{Binding MaKho}"
+                        Width="135">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -149,9 +150,11 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Tên Kho" 
-                                        Binding="{Binding MaPhong}" 
-                                        Width="135">
+
+                    <!-- Cột Tên Kho -->
+                    <DataGridTextColumn Header="Tên Kho"
+                        Binding="{Binding TenKho}"
+                        Width="135">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -159,9 +162,11 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Mô tả" 
-                                        Binding="{Binding MaNhomTS}" 
-                                        Width="135">
+
+                    <!-- Cột Mô Tả -->
+                    <DataGridTextColumn Header="Mô Tả"
+                        Binding="{Binding MoTa}"
+                        Width="135">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -169,9 +174,11 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Tòa nhà" 
-                                        Binding="{Binding TenSanPham}" 
-                                        Width="135">
+
+                    <!-- Cột Tòa Nhà -->
+                    <DataGridTextColumn Header="Tòa Nhà"
+                        Binding="{Binding MaToaNha}"
+                        Width="135">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -179,20 +186,26 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
+
+                    <!-- Cột Tùy Chọn: Chỉnh sửa và Xóa -->
                     <DataGridTemplateColumn Header="Tùy chọn" Width="140">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <!-- Chỉnh sửa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
-                                            ToolTip="Chỉnh sửa"
-                                            Margin="0,0,8,0">
-                                        <materialDesign:PackIcon Kind="Pencil"
-                                                                 Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                            ToolTip="Chỉnh sửa"
+                            Margin="0,0,8,0"
+                                            
+                            >
+                                        <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                                     </Button>
+
+                                    <!-- Xóa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
-                                            ToolTip="Xóa">
-                                        <materialDesign:PackIcon Kind="Delete"
-                                                                 Foreground="#F44336"/>
+                            ToolTip="Xóa"
+                            >
+                                        <materialDesign:PackIcon Kind="Delete" Foreground="#F44336"/>
                                     </Button>
                                 </StackPanel>
                             </DataTemplate>

@@ -87,11 +87,23 @@
                                              Foreground="{StaticResource PrimaryHueMidBrush}"/>
                     <TextBox Grid.Column="1" 
                              x:Name="txtSearch" 
+                             TextChanged="txtSearch_TextChanged" 
                              materialDesign:HintAssist.Hint="Tìm kiếm" 
                              BorderThickness="0" 
                              VerticalAlignment="Center" 
                              Margin="8,0"
                              materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
+                    <Popup x:Name="popupSuggest"
+                           PlacementTarget="{Binding ElementName=txtSearch}"
+                           Placement="Bottom"
+                           StaysOpen="False"
+                           IsOpen="False">
+                        <Border Background="White" BorderBrush="Gray" BorderThickness="1" MinWidth="200">
+                            <ListBox x:Name="lstSuggest"
+                                     MouseLeftButtonUp="lstSuggest_MouseLeftButtonUp"/>
+                        </Border>
+                    </Popup>
+
                     <Button Grid.Column="2" 
                             Style="{StaticResource MaterialDesignIconButton}" 
                             x:Name="btnSearch" 
@@ -104,13 +116,13 @@
             <!-- Filter: Mã kho -->
             <ComboBox Grid.Column="1" 
                       x:Name="cboPhong" 
-                      materialDesign:HintAssist.Hint="Mã kho" 
+                      materialDesign:HintAssist.Hint="Tên kho" 
                       Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                       Width="150" 
                       Margin="0,0,16,0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding MaPhong}"/>
+                        <TextBlock Text="{Binding}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
@@ -124,7 +136,7 @@
                       Margin="0,0,16,0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding MaNhomTS}"/>
+                        <TextBlock Text="{Binding}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
@@ -164,7 +176,7 @@
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã kho" Binding="{Binding MaKho}" Width="90" MinWidth="90">
+                    <DataGridTextColumn Header="Tên Kho" Binding="{Binding TenKho}" Width="90" MinWidth="90">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -252,12 +264,14 @@
                                     <Button Style="{StaticResource MaterialDesignIconButton}" 
                                             ToolTip="Sửa"
                                             Background="{DynamicResource PrimaryHueLightBrush}" 
+                                            
                                             Width="32" Height="32" Padding="2" Margin="0,1">
                                         <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
                                     </Button>
                                     <Button Style="{StaticResource MaterialDesignIconButton}" 
                                             ToolTip="Xóa" Margin="8,1,0,1"
                                             Background="{DynamicResource SecondaryDelete}" 
+                                             
                                             Width="32" Height="32" 
                                             Padding="2">
                                         <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
@@ -274,11 +288,12 @@
         <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" Name="StatusBar">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                   
+
                     <Button Style="{StaticResource MaterialDesignRaisedButton}" 
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileExcel}" 
-                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                            Click="btnXuatExcel_Click"
                             Margin="0 0 8 0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>

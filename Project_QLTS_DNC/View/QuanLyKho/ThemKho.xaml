@@ -30,11 +30,13 @@
 
             <!-- Nút Lưu Kho -->
             <Button Grid.Column="1" Content="+ Lưu Kho " 
-                    Style="{StaticResource MaterialDesignRaisedButton}"
-                    Background="{DynamicResource SecondaryCreate}"
-                    Foreground="White"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                Click="btnLuuKho_Click"
+                Style="{StaticResource MaterialDesignRaisedButton}"
+                Background="{DynamicResource SecondaryCreate}"
+                Foreground="White"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center" />
+
         </Grid>
 
         <!-- Hàng nhập liệu -->
@@ -50,11 +52,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Dòng 1: Mã Kho và Tên Kho -->
-            <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,8"
-                     x:Name="txtMaKho"
-                     materialDesign:HintAssist.Hint="Mã kho"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                     IsEnabled="False"/>
+
             <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"
                      x:Name="txtTenKho"
                      materialDesign:HintAssist.Hint="Tên kho"
@@ -69,8 +67,7 @@
                       x:Name="cboToaNha"
                       materialDesign:HintAssist.Hint="Chọn tòa nhà"
                       Style="{StaticResource MaterialDesignOutlinedComboBox}">
-                <ComboBoxItem Content="Tòa nhà A"/>
-                <ComboBoxItem Content="Tòa nhà B"/>
+                <!-- Không cần thêm ComboBoxItem ở đây, sẽ được thêm động từ Supabase -->
             </ComboBox>
         </Grid>
     </Grid>
