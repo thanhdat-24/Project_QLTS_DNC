@@ -33,7 +33,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
         /// <summary>
         /// Xử lý sự kiện khi nhấn nút Thêm mới Loại Tài Sản
-        /// Giữ lại phương thức để tránh lỗi, nhưng không thực hiện hành động
         /// </summary>
         private void btnThemMoiLoaiTaiSan_Click(object sender, RoutedEventArgs e)
         {
@@ -58,22 +57,125 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
         /// <summary>
         /// Xử lý sự kiện khi nhấn nút Sửa trên DataGrid
-        /// Giữ lại phương thức để tránh lỗi, nhưng không thực hiện hành động
         /// </summary>
-        private void SuaLoaiTaiSan_Click(object sender, RoutedEventArgs e)
+        private async void SuaLoaiTaiSan_Click(object sender, RoutedEventArgs e)
         {
-            // Không thực hiện hành động gì
-            MessageBox.Show("Chức năng chỉnh sửa đã bị vô hiệu hóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Lấy LoaiTaiSan được chọn từ DataGrid
+            var loaiTaiSanDuocChon = dgLoaiTaiSan.SelectedItem as LoaiTaiSan;
+
+            if (loaiTaiSanDuocChon == null)
+            {
+                MessageBox.Show("Vui lòng chọn một loại tài sản để cập nhật.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Kiểm tra xem loại tài sản này có nhóm tài sản nào không
+            if (DsNhomTaiSan != null && DsNhomTaiSan.Any(n => n.MaLoaiTaiSan == loaiTaiSanDuocChon.MaLoaiTaiSan))
+            {
+                MessageBox.Show("Không thể sửa loại tài sản đã có nhóm tài sản liên kết.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // Tạo bản sao của loại tài sản để cập nhật
+                var loaiTaiSanCapNhat = new LoaiTaiSan
+                {
+                    MaLoaiTaiSan = loaiTaiSanDuocChon.MaLoaiTaiSan,
+                    TenLoaiTaiSan = loaiTaiSanDuocChon.TenLoaiTaiSan,
+                    MoTa = loaiTaiSanDuocChon.MoTa
+                };
+
+                // Hiển thị dialog để nhập thông tin mới
+                var capNhatWindow = new CapNhatLoaiTaiSanWindow(loaiTaiSanCapNhat);
+                capNhatWindow.Owner = Window.GetWindow(this);
+
+                bool? result = capNhatWindow.ShowDialog();
+
+                if (result == true && capNhatWindow.LoaiTaiSanCapNhat != null)
+                {
+                    // Cập nhật vào cơ sở dữ liệu
+                    var loaiTaiSanDaCapNhat = await Services.LoaiTaiSanService.CapNhatLoaiTaiSanAsync(capNhatWindow.LoaiTaiSanCapNhat);
+
+                    // Cập nhật lại dữ liệu trong collection
+                    var index = DsLoaiTaiSan.IndexOf(loaiTaiSanDuocChon);
+                    if (index >= 0)
+                    {
+                        DsLoaiTaiSan[index] = loaiTaiSanDaCapNhat;
+                    }
+
+                    // Cập nhật lại hiển thị
+                    HienThiDuLieu();
+
+                    // Thông báo dữ liệu đã thay đổi
+                    OnDataChanged?.Invoke();
+
+                    MessageBox.Show("Cập nhật loại tài sản thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi cập nhật loại tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>
         /// Xử lý sự kiện khi nhấn nút Xóa trên DataGrid
-        /// Giữ lại phương thức để tránh lỗi, nhưng không thực hiện hành động
         /// </summary>
-        private void XoaLoaiTaiSan_Click(object sender, RoutedEventArgs e)
+        private async void XoaLoaiTaiSan_Click(object sender, RoutedEventArgs e)
         {
-            // Không thực hiện hành động gì
-            MessageBox.Show("Chức năng xóa đã bị vô hiệu hóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Lấy LoaiTaiSan được chọn từ DataGrid
+            var loaiTaiSanDuocChon = dgLoaiTaiSan.SelectedItem as LoaiTaiSan;
+
+            if (loaiTaiSanDuocChon == null)
+            {
+                MessageBox.Show("Vui lòng chọn một loại tài sản để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Kiểm tra xem loại tài sản này có nhóm tài sản nào không
+            if (DsNhomTaiSan != null && DsNhomTaiSan.Any(n => n.MaLoaiTaiSan == loaiTaiSanDuocChon.MaLoaiTaiSan))
+            {
+                MessageBox.Show("Không thể xóa loại tài sản đã có nhóm tài sản liên kết.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Xác nhận xóa
+            MessageBoxResult xacNhan = MessageBox.Show($"Bạn có chắc chắn muốn xóa loại tài sản '{loaiTaiSanDuocChon.TenLoaiTaiSan}'?",
+                                                      "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (xacNhan != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                // Thực hiện xóa dữ liệu
+                bool ketQuaXoa = await Services.LoaiTaiSanService.XoaLoaiTaiSanAsync(loaiTaiSanDuocChon.MaLoaiTaiSan);
+
+                if (ketQuaXoa)
+                {
+                    // Xóa khỏi collection
+                    DsLoaiTaiSan.Remove(loaiTaiSanDuocChon);
+
+                    // Cập nhật lại hiển thị
+                    HienThiDuLieu();
+
+                    // Thông báo dữ liệu đã thay đổi
+                    OnDataChanged?.Invoke();
+
+                    MessageBox.Show("Xóa loại tài sản thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Không thể xóa loại tài sản. Vui lòng thử lại sau.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xóa loại tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

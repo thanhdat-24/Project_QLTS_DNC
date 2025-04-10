@@ -67,23 +67,21 @@ namespace Project_QLTS_DNC.Services
         {
             try
             {
-                // Sinh mã mới trước khi lấy client
-                int maMoi = await SinhMaLoaiTSAsync();
-                loaiTaiSan.MaLoaiTaiSan = maMoi;
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (string.IsNullOrWhiteSpace(loaiTaiSan.TenLoaiTaiSan))
+                {
+                    throw new ArgumentException("Tên loại tài sản không được để trống.");
+                }
 
-                System.Diagnostics.Debug.WriteLine($"Thêm loại tài sản với mã: {loaiTaiSan.MaLoaiTaiSan}");
+                // Sinh mã mới nếu chưa có
+                if (loaiTaiSan.MaLoaiTaiSan == 0)
+                {
+                    loaiTaiSan.MaLoaiTaiSan = await SinhMaLoaiTSAsync();
+                }
 
                 var client = await SupabaseService.GetClientAsync();
 
-                // Sử dụng một đối tượng mới để tránh các vấn đề với BaseModel
-                var loaiTaiSanToInsert = new
-                {
-                    ma_loai_ts = loaiTaiSan.MaLoaiTaiSan,
-                    ten_loai_ts = loaiTaiSan.TenLoaiTaiSan,
-                    mo_ta = loaiTaiSan.MoTa
-                };
-
-                // Sử dụng RPC (gọi thủ tục từ xa) hoặc SQL trực tiếp nếu cần
+                // Tạo đối tượng mới để insert vào Supabase
                 var response = await client.From<LoaiTaiSan>().Insert(loaiTaiSan);
 
                 if (response.Models.Count > 0)
@@ -107,7 +105,30 @@ namespace Project_QLTS_DNC.Services
         {
             try
             {
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (loaiTaiSan.MaLoaiTaiSan == 0)
+                {
+                    throw new ArgumentException("Mã loại tài sản không hợp lệ.");
+                }
+
+                if (string.IsNullOrWhiteSpace(loaiTaiSan.TenLoaiTaiSan))
+                {
+                    throw new ArgumentException("Tên loại tài sản không được để trống.");
+                }
+
                 var client = await SupabaseService.GetClientAsync();
+
+                // Kiểm tra xem loại tài sản có tồn tại không
+                var kiemTraTonTai = await client.From<LoaiTaiSan>()
+                    .Where(l => l.MaLoaiTaiSan == loaiTaiSan.MaLoaiTaiSan)
+                    .Get();
+
+                if (kiemTraTonTai.Models.Count == 0)
+                {
+                    throw new ArgumentException("Loại tài sản không tồn tại.");
+                }
+
+                // Update the loại tài sản
                 var response = await client.From<LoaiTaiSan>()
                     .Where(l => l.MaLoaiTaiSan == loaiTaiSan.MaLoaiTaiSan)
                     .Update(loaiTaiSan);
@@ -127,27 +148,49 @@ namespace Project_QLTS_DNC.Services
         }
 
         /// <summary>
-        /// Tìm kiếm Loại Tài Sản theo mã
+        /// Xóa một Loại Tài Sản khỏi Supabase
         /// </summary>
-        public static async Task<LoaiTaiSan> TimLoaiTaiSanTheoMaAsync(int maLoaiTaiSan)
+        public static async Task<bool> XoaLoaiTaiSanAsync(int maLoaiTaiSan)
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-                var response = await client.From<LoaiTaiSan>()
+
+                // Kiểm tra xem loại tài sản có tồn tại không
+                var kiemTraTonTai = await client.From<LoaiTaiSan>()
                     .Where(l => l.MaLoaiTaiSan == maLoaiTaiSan)
                     .Get();
 
-                if (response.Models.Count > 0)
+                if (kiemTraTonTai.Models.Count == 0)
                 {
-                    return response.Models[0];
+                    return false; // Loại tài sản không tồn tại
                 }
 
-                return null;
+                // Kiểm tra xem có nhóm tài sản nào thuộc loại tài sản này không
+                var kiemTraNhomTaiSan = await client.From<NhomTaiSan>()
+                    .Where(n => n.MaLoaiTaiSan == maLoaiTaiSan)
+                    .Get();
+
+                if (kiemTraNhomTaiSan.Models.Count > 0)
+                {
+                    throw new InvalidOperationException("Không thể xóa loại tài sản đã có nhóm tài sản liên kết.");
+                }
+
+                // Xóa loại tài sản
+                await client.From<LoaiTaiSan>()
+                    .Where(l => l.MaLoaiTaiSan == maLoaiTaiSan)
+                    .Delete();
+
+                // Kiểm tra xóa thành công
+                var verifyResponse = await client.From<LoaiTaiSan>()
+                    .Where(l => l.MaLoaiTaiSan == maLoaiTaiSan)
+                    .Get();
+
+                return verifyResponse.Models.Count == 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Lỗi khi tìm Loại Tài Sản theo mã: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi xóa Loại Tài Sản: {ex.Message}");
                 throw;
             }
         }

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Chỉnh Sửa Nhóm Tài Sản" 
-        Height="520" Width="500"
+        Height="450" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -67,7 +67,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Mã Nhóm Tài Sản -->
@@ -92,17 +91,9 @@
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,0,15"/>
 
-                <!-- Số Lượng -->
-                <TextBox x:Name="txtSoLuong" 
-                         Grid.Row="3" 
-                         materialDesign:HintAssist.Hint="Số Lượng" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         PreviewTextInput="txtSoLuong_PreviewTextInput"
-                         Margin="0,0,0,15"/>
-
                 <!-- Mô Tả -->
                 <TextBox x:Name="txtMoTa" 
-                         Grid.Row="4" 
+                         Grid.Row="3" 
                          materialDesign:HintAssist.Hint="Mô Tả" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          AcceptsReturn="True"

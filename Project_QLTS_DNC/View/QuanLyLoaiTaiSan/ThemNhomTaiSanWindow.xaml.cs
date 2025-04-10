@@ -76,18 +76,15 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
                 _isProcessing = true;
 
-                // Hiển thị trạng thái đang xử lý nếu cần
-                // loadingIndicator.Visibility = Visibility.Visible;
-
                 // Lấy loại tài sản đã chọn
                 var loaiTaiSan = cboLoaiTaiSan.SelectedItem as LoaiTaiSan;
 
                 // Tạo đối tượng NhomTaiSan mới
                 NhomTaiSanMoi = new NhomTaiSan
                 {
-                    ma_loai_ts = loaiTaiSan.MaLoaiTaiSan,
+                    MaLoaiTaiSan = loaiTaiSan.MaLoaiTaiSan,
                     TenNhom = txtTenNhom.Text.Trim(),
-                    MoTa = txtMoTa.Text.Trim()
+                    MoTa = txtMoTa.Text?.Trim()
                 };
 
                 // Gọi service để lưu vào database
@@ -105,7 +102,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             finally
             {
                 _isProcessing = false;
-                // loadingIndicator.Visibility = Visibility.Collapsed;
             }
         }
     }

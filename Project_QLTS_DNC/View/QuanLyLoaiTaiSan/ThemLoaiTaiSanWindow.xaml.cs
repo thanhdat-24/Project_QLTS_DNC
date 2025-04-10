@@ -53,14 +53,11 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
                 _isProcessing = true;
 
-                // Hiển thị trạng thái đang xử lý nếu cần
-                // loadingIndicator.Visibility = Visibility.Visible;
-
                 // Tạo đối tượng LoaiTaiSan mới
                 LoaiTaiSanMoi = new LoaiTaiSan
                 {
                     TenLoaiTaiSan = txtTenLoaiTaiSan.Text.Trim(),
-                    MoTa = txtMoTa.Text.Trim()
+                    MoTa = txtMoTa.Text?.Trim()
                 };
 
                 // Gọi service để lưu vào database
@@ -78,7 +75,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             finally
             {
                 _isProcessing = false;
-                // loadingIndicator.Visibility = Visibility.Collapsed;
             }
         }
     }
