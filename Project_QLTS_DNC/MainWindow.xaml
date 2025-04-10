@@ -38,7 +38,13 @@
                         <TreeViewItem Header="📊 Báo cáo kiểm kê" x:Name="btnBaoCaoKiemKe" Selected="btnBaoCaoKiemKe_Selected"/>
 
                         <TreeViewItem Header="📜 Duyệt phiếu"/>
-                        <TreeViewItem Header="⚙️ Cài đặt"/>
+                        <TreeViewItem Header="⚙️ Cài đặt" IsExpanded="True">
+                            <TreeViewItem Header="🏢 Thông tin công ty" />
+                            <TreeViewItem x:Name="btnPhanQuyen" Header="👤 Quản lý người dùng và phân quyền" Selected="btnPhanQuyen_Selected" />
+                            <TreeViewItem Header="📄 Mẫu biểu và báo cáo" />
+                            <TreeViewItem x:Name="btnBaoMat" Header="🔒 Bảo mật" Selected="btnBaoMat_Selected" />
+                        </TreeViewItem>
+
                     </TreeView>
                 </ScrollViewer>
             </StackPanel>

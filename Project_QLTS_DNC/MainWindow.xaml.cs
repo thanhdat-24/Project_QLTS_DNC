@@ -200,6 +200,16 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = tồnKhoForm; // Thay thế nội dung của ContentControl
         }
 
+        private void btnPhanQuyen_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.CaiDat.QuanLyNguoiDungvaPhanQuyenForm();
 
+        }
+
+        private void btnBaoMat_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.CaiDat.BaoMatForm();
+
+        }
     }
 }
