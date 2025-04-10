@@ -140,7 +140,10 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 txtMaTaiSan.Text = taiSan.MaTaiSan;
                 txtTenTaiSan.Text = taiSan.TenTaiSan;
                 txtMaTaiSan.IsReadOnly = true;
-                txtTenTaiSan.IsReadOnly = true;
+
+                // Cho phép chỉnh sửa tên tài sản
+                txtTenTaiSan.IsReadOnly = false;
+                txtTenTaiSan.Background = System.Windows.Media.Brushes.White;
 
                 // Cập nhật thông tin vào đối tượng phiếu
                 _phieuBaoTri.MaTaiSan = taiSan.MaTaiSan;

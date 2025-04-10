@@ -317,7 +317,7 @@
 
                         <!-- Tên tài sản -->
                         <TextBlock Text="Tên tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox x:Name="txtTenTaiSan" IsReadOnly="True" Background="#F8F8F8"/>
+                        <TextBox x:Name="txtTenTaiSan" IsReadOnly="False" Background="White"/>
 
                         <!-- Loại bảo trì -->
                         <TextBlock Text="Loại bảo trì:" Style="{StaticResource LabelStyle}"/>
