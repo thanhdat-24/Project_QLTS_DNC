@@ -7,10 +7,9 @@ using Supabase;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using System.Threading.Tasks;
-using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.QLNhomTS
 {
     [Table("nhomtaisan")]
     public class NhomTaiSan : BaseModel

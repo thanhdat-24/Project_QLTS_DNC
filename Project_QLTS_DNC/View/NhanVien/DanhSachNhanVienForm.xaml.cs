@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Project_QLTS_DNC.ViewModels.NhanVien;
 using Project_QLTS_DNC.Services;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.NhanVien;
 
 namespace Project_QLTS_DNC.View.NhanVien
 {

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.NhaCungCap;
 
 namespace Project_QLTS_DNC.View.NhaCungCap
 {

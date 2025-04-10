@@ -4,8 +4,8 @@ using System.ComponentModel;
 using System.Windows.Input;
 using Project_QLTS_DNC.Helpers;
 using System.Windows;
-using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Repositories;
+using Project_QLTS_DNC.Models.BaoHong;
 
 namespace Project_QLTS_DNC.ViewModel
 {

@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Supabase;
 using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.NhaCungCap;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {

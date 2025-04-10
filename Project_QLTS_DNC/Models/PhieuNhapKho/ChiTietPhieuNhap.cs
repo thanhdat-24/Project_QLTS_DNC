@@ -1,7 +1,7 @@
 ﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.PhieuNhapKho
 {
     [Table("chitietphieunhap")]
     public class ChiTietPhieuNhap : BaseModel

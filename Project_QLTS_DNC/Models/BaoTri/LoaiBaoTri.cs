@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.BaoTri
 {
     [Table("maintenance_types")]
     public class LoaiBaoTri : INotifyPropertyChanged

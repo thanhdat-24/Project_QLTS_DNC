@@ -3,7 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Project_QLTS_DNC.Models;
+using System.Threading.Tasks;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Models.QLLoaiTS;
+using Project_QLTS_DNC.Models.QLNhomTS;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -28,13 +31,54 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             {
                 MessageBox.Show("Không thể tìm thấy cửa sổ chính (MainWindow)", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+
+            // Đăng ký sự kiện Loaded để cập nhật thống kê khi control được tải
+            this.Loaded += (s, e) => {
+                CapNhatThongKe();
+            };
         }
 
         /// <summary>
-        /// Cập nhật thông tin thống kê
+        /// Cập nhật thông tin thống kê từ CSDL Supabase
         /// </summary>
-        public void CapNhatThongKe()
+        public async void CapNhatThongKe()
         {
+            try
+            {
+                // Hiển thị thông báo đang tải
+                txtTongLoaiTaiSan.Text = "...";
+                txtTongNhomTaiSan.Text = "...";
+                txtTongTaiSan.Text = "...";
+
+                // 1. Lấy dữ liệu Loại Tài Sản từ Supabase
+                if (DsLoaiTaiSan == null || DsLoaiTaiSan.Count == 0)
+                {
+                    DsLoaiTaiSan = await LoaiTaiSanService.LayDanhSachLoaiTaiSanAsync();
+                }
+
+                // 2. Lấy dữ liệu Nhóm Tài Sản từ Supabase
+                if (DsNhomTaiSan == null || DsNhomTaiSan.Count == 0)
+                {
+                    DsNhomTaiSan = await NhomTaiSanService.LayDanhSachNhomTaiSanAsync();
+                }
+
+                // 3. Đếm số lượng Tài Sản
+                int soLuongTaiSan = await TaiSanService.DemSoLuongTaiSanAsync();
+
+                // Cập nhật UI với các giá trị thống kê
+                txtTongLoaiTaiSan.Text = DsLoaiTaiSan.Count.ToString();
+                txtTongNhomTaiSan.Text = DsNhomTaiSan.Count.ToString();
+                txtTongTaiSan.Text = soLuongTaiSan.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi cập nhật thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Đặt giá trị mặc định nếu xảy ra lỗi
+                txtTongLoaiTaiSan.Text = "0";
+                txtTongNhomTaiSan.Text = "0";
+                txtTongTaiSan.Text = "0";
+            }
         }
 
         /// <summary>

@@ -2,7 +2,7 @@
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.NhanVien
 {
     [Table("nhanvien")]
     public class NhanVienClass : BaseModel

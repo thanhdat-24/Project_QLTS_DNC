@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.QLLoaiTS
 {
     [Table("loaitaisan")]
     public class LoaiTaiSan : BaseModel

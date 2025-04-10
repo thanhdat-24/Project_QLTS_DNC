@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
-using Project_QLTS_DNC.Models;
 using System.Collections.ObjectModel;
 using Project_QLTS_DNC.Services;
 using System.Linq;
 using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Models.QLLoaiTS;
+using Project_QLTS_DNC.Models.QLNhomTS;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {

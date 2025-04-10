@@ -3,7 +3,7 @@ using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using System;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.NhaCungCap
 {
     [Table("nhacungcap")]
     public class NhaCungCapClass : BaseModel

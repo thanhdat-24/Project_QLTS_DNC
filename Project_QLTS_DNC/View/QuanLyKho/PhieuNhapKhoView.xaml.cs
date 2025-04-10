@@ -13,12 +13,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Project_QLTS_DNC.Models;
 using ClosedXML.Excel;
 using Microsoft.Win32;
 using System.ComponentModel;
 using System.Data;
 using Supabase;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.NhaCungCap;
 
 
 namespace Project_QLTS_DNC.View.QuanLyKho

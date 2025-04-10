@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.ToaNha;
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
 

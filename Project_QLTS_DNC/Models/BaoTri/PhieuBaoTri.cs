@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.BaoTri
 {
     public class PhieuBaoTri : INotifyPropertyChanged
     {

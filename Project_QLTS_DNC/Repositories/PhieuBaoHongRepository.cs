@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using Npgsql;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.BaoHong;
 
 namespace Project_QLTS_DNC.Repositories
 {

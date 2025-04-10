@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Npgsql;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.NhaCungCap;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

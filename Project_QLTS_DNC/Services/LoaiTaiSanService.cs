@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models;
+﻿using Project_QLTS_DNC.Models.QLLoaiTS;
+using Project_QLTS_DNC.Models.QLNhomTS;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

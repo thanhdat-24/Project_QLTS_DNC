@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Npgsql;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.BaoTri;
 
 namespace Project_QLTS_DNC.Repositories
 {

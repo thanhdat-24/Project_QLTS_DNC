@@ -6,7 +6,7 @@ using System.Windows.Input;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Windows.Data;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.BaoTri;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -140,10 +140,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 txtMaTaiSan.Text = taiSan.MaTaiSan;
                 txtTenTaiSan.Text = taiSan.TenTaiSan;
                 txtMaTaiSan.IsReadOnly = true;
-
-                // Cho phép chỉnh sửa tên tài sản
-                txtTenTaiSan.IsReadOnly = false;
-                txtTenTaiSan.Background = System.Windows.Media.Brushes.White;
+                txtTenTaiSan.IsReadOnly = true;
 
                 // Cập nhật thông tin vào đối tượng phiếu
                 _phieuBaoTri.MaTaiSan = taiSan.MaTaiSan;

@@ -1,5 +1,6 @@
 ﻿using System;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.QLLoaiTS;
+using Project_QLTS_DNC.Models.QLNhomTS;
 
 namespace Project_QLTS_DNC.DTOs
 {

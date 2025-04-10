@@ -1,4 +1,4 @@
-﻿using Project_QLTS_DNC.Models;
+﻿using Project_QLTS_DNC.Models.NhanVien;
 using Supabase;
 using Supabase.Postgrest;
 using System;

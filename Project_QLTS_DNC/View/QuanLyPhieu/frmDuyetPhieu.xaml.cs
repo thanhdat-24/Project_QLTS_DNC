@@ -1,4 +1,4 @@
-﻿using Project_QLTS_DNC.Models;
+﻿using Project_QLTS_DNC.Models.DuyetPhieu;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

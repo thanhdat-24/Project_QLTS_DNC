@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.NhanVien;
 
 namespace Project_QLTS_DNC.ViewModels.NhanVien
 {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using Project_QLTS_DNC.Models.BaoTri;
 
 namespace Project_QLTS_DNC.Models
 {

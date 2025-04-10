@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using Supabase;
 using System.Threading.Tasks;
-using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Models.ToaNha;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {

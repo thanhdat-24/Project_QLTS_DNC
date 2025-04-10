@@ -1,7 +1,7 @@
 ﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.ToaNha
 {
     [Table("toanha")] // Tên bảng trong PostgreSQL
     public class ToaNha : BaseModel

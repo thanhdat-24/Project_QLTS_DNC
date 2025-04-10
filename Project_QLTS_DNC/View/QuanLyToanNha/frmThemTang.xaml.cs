@@ -1,4 +1,4 @@
-﻿using Project_QLTS_DNC.Models;
+﻿using Project_QLTS_DNC.Models.ToaNha;
 using System;
 using System.Collections.Generic;
 using System.Linq;

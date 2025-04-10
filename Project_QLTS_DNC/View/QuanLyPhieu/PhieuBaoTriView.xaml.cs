@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.BaoTri;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -148,39 +148,23 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             // Lấy dữ liệu từ hàng được chọn
-            var phieuBaoTri = (PhieuBaoTri)((Button)sender).DataContext;
+            var selectedItem = (dynamic)((Button)sender).DataContext;
 
             // Hiển thị hộp thoại xác nhận
             MessageBoxResult result = MessageBox.Show(
-                $"Bạn có chắc chắn muốn xóa phiếu bảo trì '{phieuBaoTri.MaPhieu}' không?",
+                "Bạn có chắc chắn muốn xóa phiếu bảo trì này không?",
                 "Xác nhận xóa",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
-                try
-                {
-                    // Xóa phiếu bảo trì khỏi danh sách
-                    DanhSachPhieuBaoTri.Remove(phieuBaoTri);
+                // Thực hiện xóa phiếu bảo trì
+                // Gọi đến ViewModel hoặc Service để xóa phiếu
+                // Ví dụ: PhieuBaoTriService.Delete(selectedItem.MaPhieu);
 
-                    // Làm mới DataGrid
-                    ICollectionView view = CollectionViewSource.GetDefaultView(dgPhieuBaoTri.ItemsSource);
-                    view.Refresh();
-
-                    // Thông báo xóa thành công
-                    MessageBox.Show($"Đã xóa phiếu bảo trì {phieuBaoTri.MaPhieu} thành công!",
-                        "Thông báo",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi xóa phiếu bảo trì: {ex.Message}",
-                        "Lỗi",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
+                // Sau khi xóa, làm mới danh sách
+                // LoadData();
             }
         }
 

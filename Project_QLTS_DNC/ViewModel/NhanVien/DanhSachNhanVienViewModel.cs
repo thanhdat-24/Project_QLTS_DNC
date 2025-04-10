@@ -1,4 +1,4 @@
-﻿using Project_QLTS_DNC.Models;
+﻿using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;

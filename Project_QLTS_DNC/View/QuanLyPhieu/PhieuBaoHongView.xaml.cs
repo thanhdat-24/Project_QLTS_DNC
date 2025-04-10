@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.BaoHong;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {

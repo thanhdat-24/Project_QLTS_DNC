@@ -1,9 +1,10 @@
-﻿using Project_QLTS_DNC.Models;
-using Project_QLTS_DNC.DTOs;
+﻿using Project_QLTS_DNC.DTOs;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Project_QLTS_DNC.Models.QLLoaiTS;
+using Project_QLTS_DNC.Models.QLNhomTS;
 
 namespace Project_QLTS_DNC.Services
 {
