@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Chỉnh Sửa Loại Tài Sản" 
-        Height="400" Width="500"
+        Height="350" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -65,28 +65,22 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Mã Loại Tài Sản -->
-                <TextBox x:Name="txtMaLoaiTaiSan" 
-                         Grid.Row="0" 
-                         materialDesign:HintAssist.Hint="Mã Loại Tài Sản" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         IsReadOnly="True"
-                         Margin="0,0,0,15"/>
+                <!-- Đã ẩn ô Mã Loại Tài Sản -->
+                <!-- TextBox x:Name="txtMaLoaiTaiSan" bị ẩn -->
 
                 <!-- Tên Loại Tài Sản -->
                 <TextBox x:Name="txtTenLoaiTaiSan" 
-                         Grid.Row="1" 
+                         Grid.Row="0" 
                          materialDesign:HintAssist.Hint="Tên Loại Tài Sản" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,0,15"/>
 
                 <!-- Mô Tả -->
                 <TextBox x:Name="txtMoTa" 
-                         Grid.Row="2" 
+                         Grid.Row="1" 
                          materialDesign:HintAssist.Hint="Mô Tả" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          AcceptsReturn="True"

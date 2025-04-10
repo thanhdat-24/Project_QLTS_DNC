@@ -5,6 +5,7 @@ using Project_QLTS_DNC.Models;
 using System.Collections.ObjectModel;
 using Project_QLTS_DNC.Services;
 using System.Linq;
+using Project_QLTS_DNC.DTOs;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -50,7 +51,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             DialogResult = false;
             Close();
         }
-
         private async void btnLuu_Click(object sender, RoutedEventArgs e)
         {
             // Tránh người dùng nhấn nút nhiều lần
@@ -89,6 +89,10 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
                 // Gọi service để lưu vào database
                 NhomTaiSanMoi = await NhomTaiSanService.ThemNhomTaiSanAsync(NhomTaiSanMoi);
+
+                // Hiển thị thông báo thành công
+                MessageBox.Show($"Thêm mới nhóm tài sản '{NhomTaiSanMoi.TenNhom}' thành công!",
+                                "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Đánh dấu thành công và đóng cửa sổ
                 DialogResult = true;

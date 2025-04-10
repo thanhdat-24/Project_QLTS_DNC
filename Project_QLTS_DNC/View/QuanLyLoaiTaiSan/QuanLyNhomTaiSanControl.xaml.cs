@@ -4,6 +4,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Services;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -13,31 +15,29 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         public ObservableCollection<LoaiTaiSan> DsLoaiTaiSan { get; set; }
         public ObservableCollection<NhomTaiSan> DsNhomTaiSan { get; set; }
 
+        // Collection dùng cho hiển thị
+        private ObservableCollection<NhomTaiSanDTO> DsNhomTaiSanDTO { get; set; }
+
         // Event để thông báo sự thay đổi dữ liệu
         public event Action OnDataChanged;
 
         public QuanLyNhomTaiSanControl()
         {
             InitializeComponent();
+            DsNhomTaiSanDTO = new ObservableCollection<NhomTaiSanDTO>();
         }
 
         /// <summary>
-        /// Cập nhật hiển thị dữ liệu
+        /// Cập nhật hiển thị dữ liệu sử dụng DTO
         /// </summary>
         public void HienThiDuLieu()
         {
-            // Hiển thị danh sách Nhóm Tài Sản với thông tin Loại Tài Sản tích hợp
-            var nhomTaiSanVm = DsNhomTaiSan.Select(nhom => new
-            {
-                nhom.MaNhomTS,
-                nhom.MaLoaiTaiSan,
-                TenLoaiTaiSan = nhom.LoaiTaiSan?.TenLoaiTaiSan ?? "",
-                nhom.TenNhom,
-                nhom.MoTa
-            }).ToList();
+            // Tạo danh sách DTO từ danh sách nhóm tài sản và loại tài sản
+            DsNhomTaiSanDTO = NhomTaiSanService.TaoDanhSachDTO(DsNhomTaiSan, DsLoaiTaiSan);
 
+            // Hiển thị danh sách DTO
             dgNhomTaiSan.ItemsSource = null;
-            dgNhomTaiSan.ItemsSource = nhomTaiSanVm;
+            dgNhomTaiSan.ItemsSource = DsNhomTaiSanDTO;
         }
 
         /// <summary>
@@ -64,9 +64,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 // Thêm nhóm tài sản mới vào danh sách
                 DsNhomTaiSan.Add(themNhomTaiSanWindow.NhomTaiSanMoi);
 
-                // Cập nhật tham chiếu đến Loại Tài Sản
-                themNhomTaiSanWindow.NhomTaiSanMoi.LoaiTaiSan = DsLoaiTaiSan.FirstOrDefault(l => l.MaLoaiTaiSan == themNhomTaiSanWindow.NhomTaiSanMoi.MaLoaiTaiSan);
-
                 // Hiển thị lại dữ liệu
                 HienThiDuLieu();
 
@@ -80,16 +77,16 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         /// </summary>
         private async void SuaNhomTaiSan_Click(object sender, RoutedEventArgs e)
         {
-            // Xác định nhóm tài sản được chọn
-            dynamic nhomTaiSanVM = dgNhomTaiSan.SelectedItem;
-            if (nhomTaiSanVM == null)
+            // Xác định nhóm tài sản DTO được chọn
+            NhomTaiSanDTO nhomTaiSanDTO = dgNhomTaiSan.SelectedItem as NhomTaiSanDTO;
+            if (nhomTaiSanDTO == null)
             {
                 MessageBox.Show("Vui lòng chọn một nhóm tài sản để sửa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             // Tìm nhóm tài sản tương ứng trong danh sách
-            var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == nhomTaiSanVM.MaNhomTS);
+            var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == nhomTaiSanDTO.MaNhomTS);
             if (nhomTaiSan == null)
             {
                 MessageBox.Show("Không tìm thấy thông tin nhóm tài sản.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -98,8 +95,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
             try
             {
-                // Mở cửa sổ cập nhật nhóm tài sản
-                var capNhatWindow = new CapNhatNhomTaiSanWindow(nhomTaiSan, DsLoaiTaiSan);
+                // Tạo một CapNhatNhomTaiSanWindow với thông tin DTO
+                var capNhatWindow = new CapNhatNhomTaiSanWindow(nhomTaiSanDTO, DsLoaiTaiSan);
                 capNhatWindow.Owner = Window.GetWindow(this);
 
                 bool? result = capNhatWindow.ShowDialog();
@@ -114,9 +111,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     if (index >= 0)
                     {
                         DsNhomTaiSan[index] = nhomTaiSanDaCapNhat;
-
-                        // Cập nhật tham chiếu đến Loại Tài Sản
-                        nhomTaiSanDaCapNhat.LoaiTaiSan = DsLoaiTaiSan.FirstOrDefault(l => l.MaLoaiTaiSan == nhomTaiSanDaCapNhat.MaLoaiTaiSan);
                     }
 
                     // Cập nhật lại hiển thị
@@ -139,16 +133,16 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         /// </summary>
         private async void XoaNhomTaiSan_Click(object sender, RoutedEventArgs e)
         {
-            // Xác định nhóm tài sản được chọn
-            dynamic nhomTaiSanVM = dgNhomTaiSan.SelectedItem;
-            if (nhomTaiSanVM == null)
+            // Xác định nhóm tài sản DTO được chọn
+            NhomTaiSanDTO nhomTaiSanDTO = dgNhomTaiSan.SelectedItem as NhomTaiSanDTO;
+            if (nhomTaiSanDTO == null)
             {
                 MessageBox.Show("Vui lòng chọn một nhóm tài sản để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             // Tìm nhóm tài sản tương ứng trong danh sách
-            var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == nhomTaiSanVM.MaNhomTS);
+            var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == nhomTaiSanDTO.MaNhomTS);
             if (nhomTaiSan == null)
             {
                 MessageBox.Show("Không tìm thấy thông tin nhóm tài sản.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);

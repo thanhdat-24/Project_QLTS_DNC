@@ -27,8 +27,5 @@ namespace Project_QLTS_DNC.Models
 
         [Column("mo_ta")]
         public string MoTa { get; set; }
-
-        // Navigation property
-        public LoaiTaiSan LoaiTaiSan { get; set; }
     }
 }

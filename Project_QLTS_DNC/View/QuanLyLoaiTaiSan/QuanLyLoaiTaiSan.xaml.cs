@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.DTOs;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -16,6 +17,9 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         // Thêm các collection để lưu trữ dữ liệu
         private ObservableCollection<LoaiTaiSan> _dsLoaiTaiSan;
         private ObservableCollection<NhomTaiSan> _dsNhomTaiSan;
+
+        // Thêm collection DTO cho hiển thị
+        private ObservableCollection<NhomTaiSanDTO> _dsNhomTaiSanDTO;
 
         public QuanLyTaiSan()
         {
@@ -48,8 +52,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 _dsLoaiTaiSan = await LoaiTaiSanService.LayDanhSachLoaiTaiSanAsync();
                 _dsNhomTaiSan = await NhomTaiSanService.LayDanhSachNhomTaiSanAsync();
 
-                // Kết hợp dữ liệu Loại Tài Sản và Nhóm Tài Sản
-                NhomTaiSanService.KetHopDuLieu(_dsLoaiTaiSan, _dsNhomTaiSan);
+                // Tạo các DTO cho hiển thị
+                _dsNhomTaiSanDTO = NhomTaiSanService.TaoDanhSachDTO(_dsNhomTaiSan, _dsLoaiTaiSan);
 
                 // Cập nhật dữ liệu cho các control con
                 if (loaiTaiSanControl != null)
@@ -112,14 +116,20 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 )
             );
 
-            // Tìm kiếm trong Nhóm Tài Sản
-            var dsNhomTaiSanLoc = new ObservableCollection<NhomTaiSan>(
-                _dsNhomTaiSan.Where(n =>
-                    n.MaNhomTS.ToString().Contains(tuKhoa) ||
-                    n.TenNhom.ToLower().Contains(tuKhoa) ||
-                    (n.MoTa != null && n.MoTa.ToLower().Contains(tuKhoa)) ||
-                    (n.LoaiTaiSan != null && n.LoaiTaiSan.TenLoaiTaiSan.ToLower().Contains(tuKhoa))
+            // Tìm kiếm trong Nhóm Tài Sản - sử dụng DTO để tìm kiếm
+            var dsNhomTaiSanDTOLoc = new ObservableCollection<NhomTaiSanDTO>(
+                _dsNhomTaiSanDTO.Where(dto =>
+                    dto.MaNhomTS.ToString().Contains(tuKhoa) ||
+                    dto.TenNhom.ToLower().Contains(tuKhoa) ||
+                    (dto.MoTa != null && dto.MoTa.ToLower().Contains(tuKhoa)) ||
+                    (dto.TenLoaiTaiSan != null && dto.TenLoaiTaiSan.ToLower().Contains(tuKhoa))
                 )
+            );
+
+            // Tạo danh sách nhóm tài sản entity (không phải DTO) từ kết quả lọc
+            var dsNhomTaiSanLoc = new ObservableCollection<NhomTaiSan>(
+                dsNhomTaiSanDTOLoc.Select(dto => _dsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == dto.MaNhomTS))
+                .Where(n => n != null) // Loại bỏ các kết quả null
             );
 
             // Cập nhật dữ liệu cho các control con

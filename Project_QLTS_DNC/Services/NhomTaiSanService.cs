@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.DTOs;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -206,14 +207,34 @@ namespace Project_QLTS_DNC.Services
         }
 
         /// <summary>
-        /// Kết hợp dữ liệu Nhóm Tài Sản với Loại Tài Sản
+        /// Tạo danh sách NhomTaiSanDTO từ danh sách NhomTaiSan và LoaiTaiSan
+        /// </summary>
+        public static ObservableCollection<NhomTaiSanDTO> TaoDanhSachDTO(
+            ObservableCollection<NhomTaiSan> dsNhomTaiSan,
+            ObservableCollection<LoaiTaiSan> dsLoaiTaiSan)
+        {
+            ObservableCollection<NhomTaiSanDTO> danhSachDTO = new ObservableCollection<NhomTaiSanDTO>();
+
+            foreach (var nhomTaiSan in dsNhomTaiSan)
+            {
+                // Tìm loại tài sản tương ứng
+                var loaiTaiSan = dsLoaiTaiSan.FirstOrDefault(l => l.MaLoaiTaiSan == nhomTaiSan.MaLoaiTaiSan);
+
+                // Tạo DTO với loại tài sản đã tìm được
+                var nhomTaiSanDTO = new NhomTaiSanDTO(nhomTaiSan, loaiTaiSan);
+                danhSachDTO.Add(nhomTaiSanDTO);
+            }
+
+            return danhSachDTO;
+        }
+
+        /// <summary>
+        /// Phương thức tương thích ngược với code cũ
+        /// Kết hợp dữ liệu Nhóm Tài Sản với Loại Tài Sản bằng cách tạo các DTO
         /// </summary>
         public static void KetHopDuLieu(ObservableCollection<LoaiTaiSan> dsLoaiTaiSan, ObservableCollection<NhomTaiSan> dsNhomTaiSan)
         {
-            foreach (var nhomTaiSan in dsNhomTaiSan)
-            {
-                nhomTaiSan.LoaiTaiSan = dsLoaiTaiSan.FirstOrDefault(l => l.MaLoaiTaiSan == nhomTaiSan.MaLoaiTaiSan);
-            }
+            System.Diagnostics.Debug.WriteLine("Phương thức KetHopDuLieu đã được thay thế bằng TaoDanhSachDTO");
         }
     }
 }

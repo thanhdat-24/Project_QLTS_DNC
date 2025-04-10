@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Chỉnh Sửa Nhóm Tài Sản" 
-        Height="450" Width="500"
+        Height="400" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -66,34 +66,28 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Mã Nhóm Tài Sản -->
-                <TextBox x:Name="txtMaNhomTS" 
-                         Grid.Row="0" 
-                         materialDesign:HintAssist.Hint="Mã Nhóm Tài Sản" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         IsReadOnly="True"
-                         Margin="0,0,0,15"/>
+                <!-- Đã ẩn ô Mã Nhóm Tài Sản -->
+                <!-- TextBox x:Name="txtMaNhomTS" bị ẩn -->
 
                 <!-- Loại Tài Sản -->
                 <ComboBox x:Name="cboLoaiTaiSan" 
-                          Grid.Row="1" 
+                          Grid.Row="0" 
                           materialDesign:HintAssist.Hint="Chọn Loại Tài Sản" 
                           Style="{StaticResource MaterialDesignOutlinedComboBox}"
                           Margin="0,0,0,15"/>
 
                 <!-- Tên Nhóm Tài Sản -->
                 <TextBox x:Name="txtTenNhom" 
-                         Grid.Row="2" 
+                         Grid.Row="1" 
                          materialDesign:HintAssist.Hint="Tên Nhóm Tài Sản" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,0,15"/>
 
                 <!-- Mô Tả -->
                 <TextBox x:Name="txtMoTa" 
-                         Grid.Row="3" 
+                         Grid.Row="2" 
                          materialDesign:HintAssist.Hint="Mô Tả" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          AcceptsReturn="True"
