@@ -185,7 +185,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Ngày nhập" Binding="{Binding NgayNhap}" Width="110" MinWidth="110">
+                    <DataGridTextColumn Header="Ngày nhập" Binding="{Binding NgayNhap, StringFormat='dd/MM/yyyy'}" Width="110" MinWidth="110">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -194,7 +194,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Mã nhà cung cấp" Binding="{Binding MaNhaCungCap}" Width="130" MinWidth="130">
+                    <DataGridTextColumn Header="Mã nhà cung cấp" Binding="{Binding MaNCC}" Width="130" MinWidth="130">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -293,7 +293,7 @@
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileExcel}" 
                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
-                            Click="btnXuatExcel_Click"
+                            
                             Margin="0 0 8 0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>

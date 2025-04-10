@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using Supabase;
 using System.Threading.Tasks;
 using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Services;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -76,8 +77,51 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Lỗi khi tải dữ liệu tòa nhà: " + ex.Message);
             }
         }
+        // Hàm Sinh Mã Kho Mới
+        private static async Task<int> SinhMaKhoAsync()
+        {
+            try
+            {
+                // Lấy danh sách kho hiện có
+                var danhSachKho = await LayDanhSachKhoAsync();
 
+                // Nếu không có dữ liệu, bắt đầu từ 1
+                if (danhSachKho == null || danhSachKho.Count == 0)
+                    return 1;
 
+                // Tìm mã kho lớn nhất trong danh sách
+                int maxMaKho = 0;
+                foreach (var kho in danhSachKho)
+                {
+                    if (kho.MaKho > maxMaKho)
+                        maxMaKho = kho.MaKho;
+                }
+
+                // Trả về mã kho mới = mã kho lớn nhất + 1
+                return maxMaKho + 1;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi sinh mã kho: {ex.Message}");
+                throw;
+            }
+        }
+
+        // Hàm Lấy Danh Sách Kho Từ Supabase
+        private static async Task<List<Kho>> LayDanhSachKhoAsync()
+        {
+            var client = await SupabaseService.GetClientAsync();
+            var response = await client.From<Kho>().Get();
+
+            if (response.Models != null)
+            {
+                return response.Models.ToList();
+            }
+
+            return new List<Kho>();
+        }
+
+        // Hàm Thêm Kho
         private async void btnLuuKho_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTenKho.Text) || cboToaNha.SelectedItem == null)
@@ -86,13 +130,16 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 return;
             }
 
+            // Sinh mã kho mới
+            int maKhoMoi = await SinhMaKhoAsync();
+
             // Lấy mã tòa nhà từ Tag của ComboBoxItem
             if (cboToaNha.SelectedItem is ComboBoxItem selectedItem &&
                 int.TryParse(selectedItem.Tag?.ToString(), out int maToaNha))
             {
                 var newKho = new Kho
                 {
-
+                    MaKho = maKhoMoi, // Sinh mã kho mới
                     TenKho = txtTenKho.Text,
                     MoTa = txtMoTa.Text,
                     MaToaNha = maToaNha // Gán mã tòa nhà vào thuộc tính MaToaNha
@@ -100,10 +147,19 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
                 try
                 {
-                    // Không cần PostgrestOptions, Supabase sẽ tự động xử lý ma_kho
-                    await _client.From<Kho>().Insert(newKho);
-                    MessageBox.Show("Lưu kho thành công!");
-                    this.Close();
+                    // Thêm kho vào Supabase
+                    var client = await SupabaseService.GetClientAsync();
+                    var response = await client.From<Kho>().Insert(newKho);
+
+                    if (response.Models.Count > 0)
+                    {
+                        MessageBox.Show("Lưu kho thành công!");
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể lưu kho!");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -115,6 +171,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Vui lòng chọn tòa nhà hợp lệ.");
             }
         }
+
 
 
 
