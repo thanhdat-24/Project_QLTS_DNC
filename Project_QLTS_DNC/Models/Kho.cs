@@ -24,3 +24,4 @@ public class Kho : BaseModel
     public int MaToaNha { get; set; }  // Gán mã tòa nhà vào đây
 }
 
+

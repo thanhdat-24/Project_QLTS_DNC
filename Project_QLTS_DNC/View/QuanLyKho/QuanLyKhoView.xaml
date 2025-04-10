@@ -196,7 +196,7 @@
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
                             ToolTip="Chỉnh sửa"
                             Margin="0,0,8,0"
-                                            
+                             Click="BtnEdit_Click"               
                             >
                                         <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                                     </Button>
@@ -204,6 +204,7 @@
                                     <!-- Xóa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
                             ToolTip="Xóa"
+                             Click="btnDelete_Click"               
                             >
                                         <materialDesign:PackIcon Kind="Delete" Foreground="#F44336"/>
                                     </Button>

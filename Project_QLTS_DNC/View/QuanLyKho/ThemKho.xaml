@@ -30,6 +30,7 @@
 
             <!-- Nút Lưu Kho -->
             <Button Grid.Column="1" Content="+ Lưu Kho " 
+                    Name="btnLuuKho"
                 Click="btnLuuKho_Click"
                 Style="{StaticResource MaterialDesignRaisedButton}"
                 Background="{DynamicResource SecondaryCreate}"
@@ -53,11 +54,11 @@
 
             <!-- Dòng 1: Mã Kho và Tên Kho -->
 
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"
+            <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
                      x:Name="txtTenKho"
                      materialDesign:HintAssist.Hint="Tên kho"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
-
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     HorizontalAlignment="Stretch"/>
             <!-- Dòng 2: Mô Tả và Tòa Nhà -->
             <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
                      x:Name="txtMoTa"

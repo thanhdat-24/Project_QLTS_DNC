@@ -12,13 +12,13 @@ namespace Project_QLTS_DNC.Models
     public class NhanVienModel : BaseModel
     {
         [PrimaryKey("ma_nv", false)]
-        public long MaNV { get; set; }
+        public int MaNV { get; set; }
 
         [Column("ma_pb")]
-        public long MaPB { get; set; }
+        public int MaPB { get; set; }
 
         [Column("ma_cv")]
-        public long MaCV { get; set; }
+        public int MaCV { get; set; }
 
         [Column("ten_nv")]
         public string TenNV { get; set; }

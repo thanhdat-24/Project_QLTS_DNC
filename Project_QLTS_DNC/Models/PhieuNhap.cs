@@ -8,16 +8,16 @@ namespace Project_QLTS_DNC.Models
     public class PhieuNhap : BaseModel
     {
         [PrimaryKey("ma_pn", false)]
-        public int MaPN { get; set; }  // Chuyển từ long sang int
+        public int MaPN { get; set; }  
 
         [Column("ma_kho")]
-        public int MaKho { get; set; }  // Chuyển từ long sang int
+        public int MaKho { get; set; }  
 
         [Column("ma_nv")]
-        public int MaNV { get; set; }  // Chuyển từ long sang int
+        public int MaNV { get; set; }  
 
         [Column("ma_ncc")]
-        public int MaNCC { get; set; }  // Chuyển từ long sang int
+        public int MaNCC { get; set; }  
 
         [Column("ngay_nhap")]
         public DateTime NgayNhap { get; set; }
@@ -26,10 +26,10 @@ namespace Project_QLTS_DNC.Models
         public decimal TongTien { get; set; }
 
         [Column("trang_thai")]
-        public string? TrangThai { get; set; } // Cho phép null khi insert
+        public string? TrangThai { get; set; } 
 
         [PrimaryKey("ma_phieu_nhap", false)]
         [Column("ma_phieu_nhap")]
-        public int MaPhieuNhap { get; set; }  // Chuyển từ long sang int
+        public int MaPhieuNhap { get; set; } 
     }
 }

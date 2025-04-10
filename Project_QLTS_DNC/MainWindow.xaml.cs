@@ -11,6 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Supabase.Gotrue;
+using Project_QLTS_DNC.View.QuanLyKho;
 
 namespace Project_QLTS_DNC
 {
@@ -72,8 +73,8 @@ namespace Project_QLTS_DNC
 
         }
 
-     
-       
+
+
         private void btnPhieuBaoTri_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
@@ -87,9 +88,11 @@ namespace Project_QLTS_DNC
 
         private void btnQuanLyKho_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.QuanLyKho.QuanLyKhoView();
-
+            // Hiển thị form quản lý kho chính
+            var quanLyKhoForm = new QuanLyKhoView(); // Giả sử bạn đã tạo form QuanLyKhoForm
+            MainContentPanel.Content = quanLyKhoForm; // Gán form vào ContentControl
         }
+
 
         private void btnToaNha_Selected(object sender, RoutedEventArgs e)
         {
@@ -142,7 +145,7 @@ namespace Project_QLTS_DNC
             assetChart.LegendLocation = LegendLocation.Top;
         }
 
-      
+
 
         private void btnPhieuKiemKeTaiSan_Selected(object sender, RoutedEventArgs e)
         {
@@ -153,13 +156,13 @@ namespace Project_QLTS_DNC
         private void btnNhanVien_Selected(object sender, RoutedEventArgs e)
         {
 
-            MainContentPanel.Content = new View.NhanVien.DanhSachNhanVienForm ();
+            MainContentPanel.Content = new View.NhanVien.DanhSachNhanVienForm();
 
 
 
         }
 
-      
+
 
         private void btnBaoTri_Selected(object sender, RoutedEventArgs e)
         {
@@ -173,16 +176,30 @@ namespace Project_QLTS_DNC
 
         }
 
+
+
+
         private void btnNhapKho_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.QuanLyKho.PhieuNhapKhoView();
-
+            // Hiển thị form nhập kho
+            var nhậpKhoForm = new PhieuNhapKhoView(); // Giả sử bạn đã tạo form NhapKhoForm
+            MainContentPanel.Content = nhậpKhoForm; // Thay thế nội dung của ContentControl
         }
 
         private void btnXuatKho_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.QuanLyKho.PhieuXuatKhoView();
-
+            // Hiển thị form xuất kho
+            var xuấtKhoForm = new PhieuXuatKhoView(); // Giả sử bạn đã tạo form XuatKhoForm
+            MainContentPanel.Content = xuấtKhoForm; // Thay thế nội dung của ContentControl
         }
+
+        private void btnTonKho_Selected(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị form tồn kho
+            var tồnKhoForm = new TonKhoView(); // Giả sử bạn đã tạo form TonKhoForm
+            MainContentPanel.Content = tồnKhoForm; // Thay thế nội dung của ContentControl
+        }
+
+
     }
 }

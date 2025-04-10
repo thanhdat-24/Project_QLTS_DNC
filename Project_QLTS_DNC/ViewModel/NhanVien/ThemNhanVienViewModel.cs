@@ -42,7 +42,7 @@ namespace Project_QLTS_DNC.ViewModels.NhanVien
             set
             {
                 _selectedChucVu = value;
-                NhanVien.MaCV = value; // Gán vào model nhân viên
+                NhanVien.MaCV = (int)value; // Gán vào model nhân viên
                 OnPropertyChanged();
             }
         }

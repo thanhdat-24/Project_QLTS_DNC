@@ -51,8 +51,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private async Task InitializeSupabaseAsync()
         {
-            string supabaseUrl = "https://your-project.supabase.co";
-            string supabaseKey = "your-anon-key";
+            var supabaseUrl = "https://hoybfwnugefnpctgghha.supabase.co";
+            var supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhveWJmd251Z2VmbnBjdGdnaGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMDQ4OTEsImV4cCI6MjA1OTY4MDg5MX0.KxNfiOUFXHGgqZf3b3xOk6BR4sllMZG_-W-y_OPUwCI";
 
             var options = new SupabaseOptions
             {
@@ -88,66 +88,33 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             _nvLookup = result.Models.ToDictionary(nv => nv.MaNV, nv => nv.TenNV);
         }
 
-        public class PhieuNhapModel
-        {
-            public int MaKho { get; set; }  // Đổi từ long thành int
-            public string TenKho { get; set; }
-            public DateTime NgayNhap { get; set; }
-            public string MaNhaCungCap { get; set; }
-            public string TenNhaCungCap { get; set; }
-            public string NguoiLapPhieu { get; set; }
-            public string TenNhanVien { get; set; }
-            public string MaSP { get; set; }
-            public string MaNhom { get; set; }
-            public int SoLuong { get; set; }
-            public decimal DonGia { get; set; }
-            public decimal ThanhTien => SoLuong * DonGia;
-        }
+
 
         private async Task LoadPhieuNhapAsync()
         {
-            var list = new List<PhieuNhapModel>();
-
-            var phieunhapResult = await _client.From<PhieuNhap>().Get();
-
-            foreach (var pn in phieunhapResult.Models)
+            try
             {
-                int maPhieu = pn.MaPhieuNhap;
-                int maKho = pn.MaKho;
-                int maNV = pn.MaNV;
-                int maNCC = pn.MaNCC;
+                // Truy vấn dữ liệu kho từ Supabase
+                var result = await _client.From<PhieuNhap>().Get();
 
-                if (_filterMaKho != null && maKho != _filterMaKho) continue;
-
-                var ctResult = await _client
-                    .From<ChiTietPhieuNhap>()
-                    .Filter("ma_phieu_nhap", Supabase.Postgrest.Constants.Operator.Equals, maPhieu)
-                    .Get();
-
-                foreach (var ct in ctResult.Models)
+                // Kiểm tra nếu có dữ liệu trả về
+                if (result.Models.Any())
                 {
-                    if (!string.IsNullOrEmpty(_keyword) && !ct.TenTaiSan.ToLower().Contains(_keyword.ToLower())) continue;
-                    if (_filterMaNhom != null && ct.MaNhomTS != _filterMaNhom) continue;
-
-                    list.Add(new PhieuNhapModel
-                    {
-                        MaKho = maKho,
-                        TenKho = _khoLookup.GetValueOrDefault(maKho, $"Kho {maKho}"),
-                        NgayNhap = pn.NgayNhap,
-                        MaNhaCungCap = maNCC.ToString(),
-                        TenNhaCungCap = _nccLookup.GetValueOrDefault(maNCC, $"NCC {maNCC}"),
-                        NguoiLapPhieu = maNV.ToString(),
-                        TenNhanVien = _nvLookup.GetValueOrDefault(maNV, $"NV {maNV}"),
-                        MaSP = ct.MaChiTietPN.ToString(),
-                        MaNhom = ct.MaNhomTS.ToString(),
-                        SoLuong = ct.SoLuong,
-                        DonGia = ct.DonGia
-                    });
+                    // Gán dữ liệu vào DataGrid
+                    dgSanPham.ItemsSource = result.Models;
+                }
+                else
+                {
+                    MessageBox.Show("Không có dữ liệu kho.");
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu kho: {ex.Message}");
+            }
 
-            dgSanPham.ItemsSource = list;
         }
+
 
         private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -214,72 +181,31 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             _ = LoadPhieuNhapAsync();
         }
 
-        private void btnXuatExcel_Click(object sender, RoutedEventArgs e)
+        // Phương thức để mở form ThemKho và truyền dữ liệu kho cần sửa
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
-            if (!(dgSanPham.ItemsSource is IEnumerable<PhieuNhapModel> data))
+            // Lấy kho được chọn từ DataContext
+            Button button = sender as Button;
+            Kho selectedKho = button.DataContext as Kho;
+
+            if (selectedKho != null)
             {
-                MessageBox.Show("Không có dữ liệu để xuất Excel.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            SaveFileDialog dlg = new SaveFileDialog
-            {
-                FileName = "PhieuNhapKho",
-                DefaultExt = ".xlsx",
-                Filter = "Excel Workbook (.xlsx)|*.xlsx"
-            };
-
-            if (dlg.ShowDialog() == true)
-            {
-                try
-                {
-                    using (var workbook = new XLWorkbook())
-                    {
-                        var ws = workbook.Worksheets.Add("PhieuNhapKho");
-
-                        ws.Cell(1, 1).Value = "PHIẾU NHẬP KHO";
-                        ws.Range(1, 1, 1, 9).Merge();
-                        ws.Row(1).Style.Font.SetBold();
-                        ws.Row(1).Style.Font.FontSize = 16;
-                        ws.Row(1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-
-                        ws.Cell(2, 1).Value = "Tên Kho";
-                        ws.Cell(2, 2).Value = "Ngày Nhập";
-                        ws.Cell(2, 3).Value = "Nhà Cung Cấp";
-                        ws.Cell(2, 4).Value = "Người Lập Phiếu";
-                        ws.Cell(2, 5).Value = "Mã SP";
-                        ws.Cell(2, 6).Value = "Mã Nhóm";
-                        ws.Cell(2, 7).Value = "Số lượng";
-                        ws.Cell(2, 8).Value = "Đơn giá";
-                        ws.Cell(2, 9).Value = "Tổng tiền";
-
-                        int row = 3;
-                        foreach (var item in data)
-                        {
-                            ws.Cell(row, 1).Value = item.TenKho;
-                            ws.Cell(row, 2).Value = item.NgayNhap;
-                            ws.Cell(row, 3).Value = item.TenNhaCungCap;
-                            ws.Cell(row, 4).Value = item.TenNhanVien;
-                            ws.Cell(row, 5).Value = item.MaSP;
-                            ws.Cell(row, 6).Value = item.MaNhom;
-                            ws.Cell(row, 7).Value = item.SoLuong;
-                            ws.Cell(row, 8).Value = item.DonGia;
-                            ws.Cell(row, 9).Value = item.ThanhTien;
-                            row++;
-                        }
-
-                        ws.Columns().AdjustToContents();
-                        workbook.SaveAs(dlg.FileName);
-                    }
-
-                    MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Lỗi khi xuất file Excel: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                // Mở form ThemKho và truyền dữ liệu kho cần sửa
+                ThemKho themKhoForm = new ThemKho(selectedKho);  // Truyền kho hiện tại vào form ThemKho
+                themKhoForm.ShowDialog();  // Hiển thị form ThemKho
             }
         }
+
+
+
+
+
+
+
+
+
+
+
 
 
     }

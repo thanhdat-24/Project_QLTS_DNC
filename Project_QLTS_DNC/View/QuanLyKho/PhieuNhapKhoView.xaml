@@ -185,7 +185,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Ngày nhập" Binding="{Binding NgayNhap}" Width="110" MinWidth="110">
+                    <DataGridTextColumn Header="Ngày nhập" Binding="{Binding NgayNhap, StringFormat='dd/MM/yyyy'}" Width="110" MinWidth="110">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -194,7 +194,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Mã nhà cung cấp" Binding="{Binding MaNhaCungCap}" Width="130" MinWidth="130">
+                    <DataGridTextColumn Header="Mã nhà cung cấp" Binding="{Binding MaNCC}" Width="130" MinWidth="130">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -256,30 +256,6 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-
-                    <DataGridTemplateColumn Header="Tùy chọn" Width="120" MinWidth="120">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Style="{StaticResource MaterialDesignIconButton}" 
-                                            ToolTip="Sửa"
-                                            Background="{DynamicResource PrimaryHueLightBrush}" 
-                                            
-                                            Width="32" Height="32" Padding="2" Margin="0,1">
-                                        <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
-                                    </Button>
-                                    <Button Style="{StaticResource MaterialDesignIconButton}" 
-                                            ToolTip="Xóa" Margin="8,1,0,1"
-                                            Background="{DynamicResource SecondaryDelete}" 
-                                             
-                                            Width="32" Height="32" 
-                                            Padding="2">
-                                        <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </materialDesign:Card>
@@ -293,7 +269,7 @@
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileExcel}" 
                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
-                            Click="btnXuatExcel_Click"
+                            
                             Margin="0 0 8 0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
