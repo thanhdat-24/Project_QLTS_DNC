@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using Project_QLTS_DNC.Models;
 using System;
 using System.Collections.ObjectModel;
@@ -114,24 +115,61 @@ namespace Project_QLTS_DNC.View.NhaCungCap
                 {
                     try
                     {
-                        // Xóa khỏi Supabase
+                        // 1. Kiểm tra xem nhà cung cấp có đang được sử dụng trong phiếu nhập không
+                        var phieuNhapLienQuan = await SupabaseConfig.SupabaseClient
+                            .From<PhieuNhap>()
+                            .Where(p => p.MaNCC == ncc.MaNCC)
+                            .Get();
+
+                        if (phieuNhapLienQuan.Models.Any())
+                        {
+                            MessageBox.Show("Không thể xóa vì nhà cung cấp này đang được sử dụng trong phiếu nhập.");
+                            return;
+                        }
+
+                        // 2. Tiến hành xóa khỏi Supabase
                         var response = await SupabaseConfig.SupabaseClient
                             .From<NhaCungCapClass>()
                             .Delete(ncc);
 
                         if (!response.Models.Any())
+                        {
                             MessageBox.Show("Không thể xoá nhà cung cấp khỏi Supabase.");
+                            return;
+                        }
+
+                        // 3. Xóa khỏi danh sách trong app
+                        DanhSachNCC.Remove(ncc);
+                        DanhSachGoc.Remove(ncc);
+
+                        // 4. Nếu danh sách rỗng thì reset sequence
+                        if (!DanhSachGoc.Any())
+                        {
+                            await ResetSequenceAsync(); // Gọi lại sequence về 1 nếu không còn NCC
+                        }
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Lỗi khi xoá khỏi Supabase: {ex.Message}");
                     }
-
-                    DanhSachNCC.Remove(ncc);
-                    DanhSachGoc.Remove(ncc);
                 }
             }
         }
+
+        public async Task ResetSequenceAsync()
+        {
+            try
+            {
+                await SupabaseConfig.SupabaseClient
+     .Rpc("reset_ma_ncc_sequence", new Dictionary<string, object>());
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi reset sequence: {ex.Message}");
+            }
+        }
+
 
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
