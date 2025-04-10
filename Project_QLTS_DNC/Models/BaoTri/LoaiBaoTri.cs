@@ -1,55 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace Project_QLTS_DNC.Models.BaoTri
 {
-    [Table("maintenance_types")]
-    public class LoaiBaoTri : INotifyPropertyChanged
+    [Table("loaibaotri")]
+    public class LoaiBaoTri : BaseModel
     {
-        private int _maLoaiBaoTri;
-        private string _tenLoai;
-        private string _moTa;
+        [PrimaryKey("ma_loai_bao_tri", false)]
+        public int MaLoaiBaoTri { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        [Column("ten_loai")]
+        public string TenLoai { get; set; }
 
-        public int MaLoaiBaoTri
-        {
-            get => _maLoaiBaoTri;
-            set
-            {
-                _maLoaiBaoTri = value;
-                OnPropertyChanged(nameof(MaLoaiBaoTri));
-            }
-        }
-
-        public string TenLoai
-        {
-            get => _tenLoai;
-            set
-            {
-                _tenLoai = value;
-                OnPropertyChanged(nameof(TenLoai));
-            }
-        }
-
-        public string MoTa
-        {
-            get => _moTa;
-            set
-            {
-                _moTa = value;
-                OnPropertyChanged(nameof(MoTa));
-            }
-        }
-
-        // Navigation property cho EF (nếu sử dụng)
-        public virtual ICollection<PhieuBaoTri> PhieuBaoTris { get; set; } = new List<PhieuBaoTri>();
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        [Column("mo_ta")]
+        public string MoTa { get; set; }
     }
 }
