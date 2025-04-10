@@ -35,15 +35,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         /// </summary>
         public void CapNhatThongKe()
         {
-            // Cập nhật số lượng loại tài sản
-            txtTongLoaiTaiSan.Text = DsLoaiTaiSan.Count.ToString();
-
-            // Cập nhật số lượng nhóm tài sản
-            txtTongNhomTaiSan.Text = DsNhomTaiSan.Count.ToString();
-
-            // Cập nhật tổng số tài sản
-            int tongTaiSan = DsNhomTaiSan.Sum(x => x.SoLuong ?? 0);
-            txtTongTaiSan.Text = tongTaiSan.ToString();
         }
 
         /// <summary>
