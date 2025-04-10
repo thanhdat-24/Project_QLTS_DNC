@@ -181,8 +181,32 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             _ = LoadPhieuNhapAsync();
         }
 
+        // Phương thức để mở form ThemKho và truyền dữ liệu kho cần sửa
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy kho được chọn từ DataContext
+            Button button = sender as Button;
+            Kho selectedKho = button.DataContext as Kho;
 
-       
+            if (selectedKho != null)
+            {
+                // Mở form ThemKho và truyền dữ liệu kho cần sửa
+                ThemKho themKhoForm = new ThemKho(selectedKho);  // Truyền kho hiện tại vào form ThemKho
+                themKhoForm.ShowDialog();  // Hiển thị form ThemKho
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }

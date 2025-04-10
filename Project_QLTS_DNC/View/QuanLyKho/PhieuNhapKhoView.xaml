@@ -256,30 +256,6 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-
-                    <DataGridTemplateColumn Header="Tùy chọn" Width="120" MinWidth="120">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Style="{StaticResource MaterialDesignIconButton}" 
-                                            ToolTip="Sửa"
-                                            Background="{DynamicResource PrimaryHueLightBrush}" 
-                                            
-                                            Width="32" Height="32" Padding="2" Margin="0,1">
-                                        <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
-                                    </Button>
-                                    <Button Style="{StaticResource MaterialDesignIconButton}" 
-                                            ToolTip="Xóa" Margin="8,1,0,1"
-                                            Background="{DynamicResource SecondaryDelete}" 
-                                             
-                                            Width="32" Height="32" 
-                                            Padding="2">
-                                        <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </materialDesign:Card>

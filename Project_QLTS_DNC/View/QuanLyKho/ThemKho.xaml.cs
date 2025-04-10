@@ -13,11 +13,25 @@ namespace Project_QLTS_DNC.View.QuanLyKho
     public partial class ThemKho : Window
     {
         private Supabase.Client _client = null!;
+        private Kho _selectedKho;
 
         public ThemKho()
         {
             InitializeComponent();
             _ = Init();
+
+           
+        }
+
+        public ThemKho(Kho selectedKho) : this()
+        {
+            _selectedKho = selectedKho;  // Lưu kho được chọn vào biến
+
+            // Điền dữ liệu kho vào các trường nhập liệu để chỉnh sửa
+            txtTenKho.Text = selectedKho.TenKho;
+            txtMoTa.Text = selectedKho.MoTa;
+            cboToaNha.SelectedValue = selectedKho.MaToaNha;
+            btnLuuKho.Content = "Cập nhật kho"; // Đổi chữ trên nút Lưu thành "Cập nhật kho"
         }
 
         private async Task Init()
@@ -130,8 +144,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 return;
             }
 
-            // Sinh mã kho mới
-            int maKhoMoi = await SinhMaKhoAsync();
+            // Nếu đang sửa kho, giữ nguyên mã kho cũ
+            int maKhoMoi = _selectedKho != null ? _selectedKho.MaKho : await SinhMaKhoAsync();
 
             // Lấy mã tòa nhà từ Tag của ComboBoxItem
             if (cboToaNha.SelectedItem is ComboBoxItem selectedItem &&
@@ -139,7 +153,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             {
                 var newKho = new Kho
                 {
-                    MaKho = maKhoMoi, // Sinh mã kho mới
+                    MaKho = maKhoMoi, // Giữ mã kho cũ khi sửa
                     TenKho = txtTenKho.Text,
                     MoTa = txtMoTa.Text,
                     MaToaNha = maToaNha // Gán mã tòa nhà vào thuộc tính MaToaNha
@@ -147,18 +161,62 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
                 try
                 {
-                    // Thêm kho vào Supabase
                     var client = await SupabaseService.GetClientAsync();
-                    var response = await client.From<Kho>().Insert(newKho);
 
-                    if (response.Models.Count > 0)
+                    if (_selectedKho == null)
                     {
-                        MessageBox.Show("Lưu kho thành công!");
-                        this.Close();
+                        // Nếu là thêm kho mới, sử dụng Insert
+                        var response = await client.From<Kho>().Insert(newKho);
+
+                        if (response.Models.Count > 0)
+                        {
+                            MessageBox.Show("Lưu kho thành công!");
+                            this.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Không thể lưu kho!");
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("Không thể lưu kho!");
+                        // Nếu là sửa kho cũ, đầu tiên cần lấy toàn bộ danh sách kho
+                        var result = await client.From<Kho>().Get();
+
+                        if (result.Models.Any())
+                        {
+                            // Tìm kho cần sửa trong bộ nhớ
+                            var existingKho = result.Models.FirstOrDefault(k => k.MaKho == _selectedKho.MaKho);
+
+                            if (existingKho != null)
+                            {
+                                // Cập nhật các trường dữ liệu
+                                existingKho.TenKho = newKho.TenKho;
+                                existingKho.MoTa = newKho.MoTa;
+                                existingKho.MaToaNha = newKho.MaToaNha;
+
+                                // Cập nhật kho vào Supabase
+                                var updateResponse = await client.From<Kho>().Update(existingKho);
+
+                                if (updateResponse.Models.Count > 0)
+                                {
+                                    MessageBox.Show("Cập nhật kho thành công!");
+                                    this.Close();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Không thể cập nhật kho!");
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("Kho không tồn tại.");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Không có dữ liệu kho.");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -171,10 +229,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Vui lòng chọn tòa nhà hợp lệ.");
             }
         }
-
-
-
-
 
 
     }
