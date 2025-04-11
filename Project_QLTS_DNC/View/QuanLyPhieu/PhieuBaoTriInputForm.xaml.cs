@@ -91,8 +91,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             if (cboLoaiBaoTri.Items.Count > 0)
                 cboLoaiBaoTri.SelectedIndex = 0;
 
-            if (cboDonViBaoTri.Items.Count > 0)
-                cboDonViBaoTri.SelectedIndex = 0;
 
             if (cboTrangThai.Items.Count > 0)
                 cboTrangThai.SelectedIndex = 0;
@@ -141,7 +139,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Tìm và chọn giá trị tương ứng trong ComboBox
             SelectComboBoxItem(cboLoaiBaoTri, phieu.LoaiBaoTri);
             SelectComboBoxItem(cboTrangThai, phieu.TrangThai);
-            SelectComboBoxItem(cboDonViBaoTri, phieu.DonViBaoTri ?? "Nội bộ");
+            
         }
 
         private void SelectComboBoxItem(ComboBox comboBox, string value)
@@ -257,7 +255,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             _phieuBaoTri.TrangThai = cboTrangThai.SelectedItem != null ? ((ComboBoxItem)cboTrangThai.SelectedItem).Content.ToString() : string.Empty;
             _phieuBaoTri.ChiPhiDuKien = decimal.TryParse(txtChiPhiDuKien.Text.Replace(",", ""), out decimal chiPhi) ? chiPhi : 0;
             _phieuBaoTri.NoiDungBaoTri = txtNoiDungBaoTri.Text;
-            _phieuBaoTri.DonViBaoTri = cboDonViBaoTri.SelectedItem != null ? ((ComboBoxItem)cboDonViBaoTri.SelectedItem).Content.ToString() : string.Empty;
+           
 
             // Nếu là nhiều tài sản, lưu thông tin để xử lý sau
             if (_isMultipleAssets)

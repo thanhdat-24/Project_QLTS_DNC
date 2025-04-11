@@ -340,12 +340,6 @@
 
                         <TextBlock Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox x:Name="cboNguoiPhuTrach" IsEditable="True" StaysOpenOnEdit="True"/>
-                        <!-- Đơn vị bảo trì -->
-                        <TextBlock Text="Đơn vị bảo trì:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox x:Name="cboDonViBaoTri">
-                            <ComboBoxItem Content="Nội bộ"/>
-                            <ComboBoxItem Content="Đối tác bên ngoài"/>
-                        </ComboBox>
 
                         <!-- Trạng thái -->
                         <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>

@@ -43,8 +43,6 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Column("noi_dung_bao_tri")]
         public string NoiDungBaoTri { get; set; }
 
-        [Column("don_vi_bao_tri")]
-        public string DonViBaoTri { get; set; }
     }
    
 }
