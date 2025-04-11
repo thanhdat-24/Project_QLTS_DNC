@@ -19,6 +19,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private bool _isEditMode = false;
         private ObservableCollection<TaiSanCanBaoTri> _danhSachTaiSanDuocChon;
         private bool _isMultipleAssets = false;
+        private ObservableCollection<string> _danhSachNhanVien; // Danh sách nhân viên cho ComboBox
 
         public PhieuBaoTri PhieuBaoTri => _phieuBaoTri;
 
@@ -33,6 +34,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             // Khởi tạo danh sách tài sản được chọn
             _danhSachTaiSanDuocChon = new ObservableCollection<TaiSanCanBaoTri>();
+            
+            // Khởi tạo danh sách nhân viên
+            KhoiTaoDanhSachNhanVien();
 
             if (phieuBaoTri != null)
             {
@@ -56,6 +60,23 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        private void KhoiTaoDanhSachNhanVien()
+        {
+            // Trong thực tế, bạn sẽ lấy danh sách nhân viên từ database
+            // Đây chỉ là danh sách mẫu
+            _danhSachNhanVien = new ObservableCollection<string>
+            {
+                "Nguyễn Văn A",
+                "Trần Thị B",
+                "Lê Văn C",
+                "Phạm Thị D",
+                "Hoàng Văn E"
+            };
+
+            // Thiết lập nguồn dữ liệu cho ComboBox người phụ trách
+            cboNguoiPhuTrach.ItemsSource = _danhSachNhanVien;
+        }
+
         private void KhoiTaoGiaTriMacDinh()
         {
             // Tạo mã phiếu mới
@@ -75,6 +96,10 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             if (cboTrangThai.Items.Count > 0)
                 cboTrangThai.SelectedIndex = 0;
+                
+            // Chọn giá trị mặc định cho người phụ trách nếu có
+            if (_danhSachNhanVien.Count > 0)
+                cboNguoiPhuTrach.SelectedIndex = 0;
         }
 
         private string TaoMaPhieuMoi()
@@ -91,7 +116,22 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             txtMaPhieu.Text = phieu.MaPhieu;
             txtMaTaiSan.Text = phieu.MaTaiSan;
             txtTenTaiSan.Text = phieu.TenTaiSan;
-            txtNguoiPhuTrach.Text = phieu.NguoiPhuTrach;
+            
+            // Thiết lập giá trị cho ComboBox người phụ trách
+            if (!string.IsNullOrEmpty(phieu.NguoiPhuTrach))
+            {
+                if (_danhSachNhanVien.Contains(phieu.NguoiPhuTrach))
+                {
+                    cboNguoiPhuTrach.SelectedItem = phieu.NguoiPhuTrach;
+                }
+                else
+                {
+                    // Trường hợp người phụ trách không có trong danh sách, thêm vào
+                    _danhSachNhanVien.Add(phieu.NguoiPhuTrach);
+                    cboNguoiPhuTrach.SelectedItem = phieu.NguoiPhuTrach;
+                }
+            }
+            
             txtChiPhiDuKien.Text = phieu.ChiPhiDuKien.ToString("N0");
             txtNoiDungBaoTri.Text = phieu.NoiDungBaoTri;
 
@@ -210,7 +250,10 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             _phieuBaoTri.LoaiBaoTri = cboLoaiBaoTri.SelectedItem != null ? ((ComboBoxItem)cboLoaiBaoTri.SelectedItem).Content.ToString() : string.Empty;
             _phieuBaoTri.NgayBaoTri = dtpNgayBaoTri.SelectedDate ?? DateTime.Now;
             _phieuBaoTri.NgayHoanThanh = dtpNgayHoanThanh.SelectedDate;
-            _phieuBaoTri.NguoiPhuTrach = txtNguoiPhuTrach.Text;
+            
+            // Lấy giá trị người phụ trách từ ComboBox thay vì TextBox
+            _phieuBaoTri.NguoiPhuTrach = cboNguoiPhuTrach.Text;
+            
             _phieuBaoTri.TrangThai = cboTrangThai.SelectedItem != null ? ((ComboBoxItem)cboTrangThai.SelectedItem).Content.ToString() : string.Empty;
             _phieuBaoTri.ChiPhiDuKien = decimal.TryParse(txtChiPhiDuKien.Text.Replace(",", ""), out decimal chiPhi) ? chiPhi : 0;
             _phieuBaoTri.NoiDungBaoTri = txtNoiDungBaoTri.Text;
@@ -302,10 +345,10 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(txtNguoiPhuTrach.Text))
+            if (string.IsNullOrWhiteSpace(cboNguoiPhuTrach.Text))
             {
-                MessageBox.Show("Vui lòng nhập Người phụ trách!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                txtNguoiPhuTrach.Focus();
+                MessageBox.Show("Vui lòng chọn hoặc nhập Người phụ trách!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                cboNguoiPhuTrach.Focus();
                 return false;
             }
 

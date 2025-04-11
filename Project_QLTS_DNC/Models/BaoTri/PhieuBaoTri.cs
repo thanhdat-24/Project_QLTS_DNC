@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
@@ -45,4 +46,5 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Column("don_vi_bao_tri")]
         public string DonViBaoTri { get; set; }
     }
+   
 }

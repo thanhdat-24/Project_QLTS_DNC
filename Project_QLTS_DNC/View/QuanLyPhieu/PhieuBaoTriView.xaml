@@ -245,6 +245,7 @@
             </Grid>
 
             <!-- Danh sách phiếu bảo trì -->
+            
             <Border Grid.Row="2" BorderThickness="0" Margin="20,10">
                 <DataGrid x:Name="dgPhieuBaoTri" AutoGenerateColumns="False" 
                           HeadersVisibility="Column"
@@ -281,8 +282,10 @@
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
+                        
                     </DataGrid.Resources>
                     <DataGrid.Columns>
+                        
                         <DataGridTextColumn Header="Mã phiếu" Width="100" Binding="{Binding MaPhieu}"/>
                         <DataGridTextColumn Header="Mã tài sản" Width="100" Binding="{Binding MaTaiSan}"/>
                         <DataGridTextColumn Header="Tên tài sản" Width="*" Binding="{Binding TenTaiSan}"/>

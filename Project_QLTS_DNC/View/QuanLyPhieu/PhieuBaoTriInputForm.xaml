@@ -338,27 +338,8 @@
                         <TextBlock Text="Ngày bảo trì:" Style="{StaticResource LabelStyle}"/>
                         <DatePicker x:Name="dtpNgayBaoTri"/>
 
-                        <!-- Người phụ trách -->
                         <TextBlock Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" x:Name="txtNguoiPhuTrach"/>
-                            <Button Grid.Column="1" Content="..." Width="40" Height="40" Margin="5,5,0,15" 
-                                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" BorderThickness="0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}" 
-                                                CornerRadius="5">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </Grid>
-
+                        <ComboBox x:Name="cboNguoiPhuTrach" IsEditable="True" StaysOpenOnEdit="True"/>
                         <!-- Đơn vị bảo trì -->
                         <TextBlock Text="Đơn vị bảo trì:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox x:Name="cboDonViBaoTri">

@@ -147,24 +147,30 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            // Lấy dữ liệu từ hàng được chọn
-            var selectedItem = (dynamic)((Button)sender).DataContext;
+            var selectedItem = (PhieuBaoTri)((Button)sender).DataContext;
 
-            // Hiển thị hộp thoại xác nhận
             MessageBoxResult result = MessageBox.Show(
-                "Bạn có chắc chắn muốn xóa phiếu bảo trì này không?",
+                $"Bạn có chắc chắn muốn xóa phiếu bảo trì \"{selectedItem.MaPhieu}\" không?",
                 "Xác nhận xóa",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
-                // Thực hiện xóa phiếu bảo trì
-                // Gọi đến ViewModel hoặc Service để xóa phiếu
-                // Ví dụ: PhieuBaoTriService.Delete(selectedItem.MaPhieu);
+                if (DanhSachPhieuBaoTri.Contains(selectedItem))
+                {
+                    DanhSachPhieuBaoTri.Remove(selectedItem);
 
-                // Sau khi xóa, làm mới danh sách
-                // LoadData();
+                    // Làm mới lại view nếu cần
+                    ICollectionView view = CollectionViewSource.GetDefaultView(dgPhieuBaoTri.ItemsSource);
+                    view.Refresh();
+
+                    MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Không tìm thấy phiếu bảo trì cần xóa!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 
