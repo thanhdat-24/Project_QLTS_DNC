@@ -1,133 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
-using Project_QLTS_DNC.Models.BaoTri;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace Project_QLTS_DNC.Models
 {
     [Table("assets")]
-    public class TaiSan : INotifyPropertyChanged
+    public class TaiSan : BaseModel
     {
-        private int _maTaiSan;
-        private int? _maChiTietPn;
-        private string _tenTaiSan;
-        private string _soSeri;
-        private string _maQr;
-        private DateTime? _ngaySuDung;
-        private DateTime? _hanBh;
-        private string _tinhTrangSp;
-        private string _ghiChu;
-        private int? _maPhong;
+        [PrimaryKey("ma_tai_san", false)]
+        public int MaTaiSan { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        [Column("ma_chi_tiet_pn")]
+        public int? MaChiTietPn { get; set; }
 
-        public int MaTaiSan
-        {
-            get => _maTaiSan;
-            set
-            {
-                _maTaiSan = value;
-                OnPropertyChanged(nameof(MaTaiSan));
-            }
-        }
+        [Column("ten_tai_san")]
+        public string TenTaiSan { get; set; }
 
-        public int? MaChiTietPn
-        {
-            get => _maChiTietPn;
-            set
-            {
-                _maChiTietPn = value;
-                OnPropertyChanged(nameof(MaChiTietPn));
-            }
-        }
+        [Column("so_seri")]
+        public string SoSeri { get; set; }
 
-        public string TenTaiSan
-        {
-            get => _tenTaiSan;
-            set
-            {
-                _tenTaiSan = value;
-                OnPropertyChanged(nameof(TenTaiSan));
-            }
-        }
+        [Column("ma_qr")]
+        public string MaQr { get; set; }
 
-        public string SoSeri
-        {
-            get => _soSeri;
-            set
-            {
-                _soSeri = value;
-                OnPropertyChanged(nameof(SoSeri));
-            }
-        }
+        [Column("ngay_su_dung")]
+        public DateTime? NgaySuDung { get; set; }
 
-        public string MaQr
-        {
-            get => _maQr;
-            set
-            {
-                _maQr = value;
-                OnPropertyChanged(nameof(MaQr));
-            }
-        }
+        [Column("han_bh")]
+        public DateTime? HanBh { get; set; }
 
-        public DateTime? NgaySuDung
-        {
-            get => _ngaySuDung;
-            set
-            {
-                _ngaySuDung = value;
-                OnPropertyChanged(nameof(NgaySuDung));
-            }
-        }
+        [Column("tinh_trang_sp")]
+        public string TinhTrangSp { get; set; }
 
-        public DateTime? HanBh
-        {
-            get => _hanBh;
-            set
-            {
-                _hanBh = value;
-                OnPropertyChanged(nameof(HanBh));
-            }
-        }
+        [Column("ghi_chu")]
+        public string GhiChu { get; set; }
 
-        public string TinhTrangSp
-        {
-            get => _tinhTrangSp;
-            set
-            {
-                _tinhTrangSp = value;
-                OnPropertyChanged(nameof(TinhTrangSp));
-            }
-        }
-
-        public string GhiChu
-        {
-            get => _ghiChu;
-            set
-            {
-                _ghiChu = value;
-                OnPropertyChanged(nameof(GhiChu));
-            }
-        }
-
-        public int? MaPhong
-        {
-            get => _maPhong;
-            set
-            {
-                _maPhong = value;
-                OnPropertyChanged(nameof(MaPhong));
-            }
-        }
-
-        // Navigation Property nếu dùng Entity Framework
-        public virtual ICollection<PhieuBaoTri> PhieuBaoTris { get; set; } = new List<PhieuBaoTri>();
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        [Column("ma_phong")]
+        public int? MaPhong { get; set; }
     }
 }
