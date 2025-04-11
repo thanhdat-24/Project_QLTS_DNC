@@ -242,7 +242,7 @@
                           IsReadOnly="True"
                           ColumnHeaderHeight="50" RowHeight="45" 
                           VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto">
+                          HorizontalScrollBarVisibility="Auto" SelectionChanged="dgDanhSachTaiSan_SelectionChanged">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>

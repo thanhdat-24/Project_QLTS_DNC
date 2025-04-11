@@ -282,10 +282,8 @@
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
-                        
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        
                         <DataGridTextColumn Header="Mã phiếu" Width="100" Binding="{Binding MaPhieu}"/>
                         <DataGridTextColumn Header="Mã tài sản" Width="100" Binding="{Binding MaTaiSan}"/>
                         <DataGridTextColumn Header="Tên tài sản" Width="*" Binding="{Binding TenTaiSan}"/>
@@ -396,23 +394,73 @@
                     </Button>
                 </StackPanel>
 
-                <!-- Phân trang (Giữ nguyên) -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="&lt;&lt;" Width="40" Height="40" Background="Transparent" 
-                BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="&lt;" Width="40" Height="40" Background="Transparent" 
-                BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="1" Width="40" Height="40" Background="{StaticResource PrimaryHueMidBrush}" 
-                Foreground="White" BorderThickness="0" Margin="5,0"/>
-                    <Button Content="2" Width="40" Height="40" Background="Transparent" 
-                BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="3" Width="40" Height="40" Background="Transparent" 
-                BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="&gt;" Width="40" Height="40" Background="Transparent" 
-                BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="&gt;&gt;" Width="40" Height="40" Background="Transparent" 
-                BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                </StackPanel>
+                <!-- Phân trang -->
+                <Grid Grid.Column="1" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="btnFirstPage" 
+                Style="{StaticResource MaterialDesignIconButton}" 
+                Width="36" Height="36" 
+                Margin="4,0"
+                ToolTip="Trang đầu">
+                            <materialDesign:PackIcon Kind="PageFirst" Width="20" Height="20"/>
+                        </Button>
+                        <Button x:Name="btnPrevPage" 
+                Style="{StaticResource MaterialDesignIconButton}" 
+                Width="36" Height="36" 
+                Margin="4,0"
+                ToolTip="Trang trước">
+                            <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20"/>
+                        </Button>
+
+                        <Border CornerRadius="2" 
+                BorderThickness="1" 
+                BorderBrush="#CCCCCC" 
+                Margin="8,0">
+                            <StackPanel Orientation="Horizontal" Margin="8,0">
+                                <TextBlock x:Name="txtCurrentPage" 
+                         Text="1" 
+                         VerticalAlignment="Center" 
+                         FontWeight="SemiBold" 
+                         Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="/" 
+                         VerticalAlignment="Center" 
+                         Margin="4,0" 
+                         Foreground="#666666"/>
+                                <TextBlock x:Name="txtTotalPages" 
+                         Text="5" 
+                         VerticalAlignment="Center" 
+                         Foreground="#666666"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button x:Name="btnNextPage" 
+                Style="{StaticResource MaterialDesignIconButton}" 
+                Width="36" Height="36" 
+                Margin="4,0"
+                ToolTip="Trang sau">
+                            <materialDesign:PackIcon Kind="ChevronRight" Width="20" Height="20"/>
+                        </Button>
+                        <Button x:Name="btnLastPage" 
+                Style="{StaticResource MaterialDesignIconButton}" 
+                Width="36" Height="36" 
+                Margin="4,0"
+                ToolTip="Trang cuối">
+                            <materialDesign:PackIcon Kind="PageLast" Width="20" Height="20"/>
+                        </Button>
+
+                        <ComboBox x:Name="cboPageSize" 
+                  Width="80" 
+                  Margin="12,0,0,0"
+                  materialDesign:HintAssist.Hint="Hiển thị" 
+                  FontSize="12">
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="10" IsSelected="True"/>
+                            <ComboBoxItem Content="20"/>
+                            <ComboBoxItem Content="50"/>
+                            <ComboBoxItem Content="100"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
 
                 <!-- Nút bên phải -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">

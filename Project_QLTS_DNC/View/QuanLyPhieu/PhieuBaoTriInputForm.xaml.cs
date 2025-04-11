@@ -20,6 +20,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private ObservableCollection<TaiSanCanBaoTri> _danhSachTaiSanDuocChon;
         private bool _isMultipleAssets = false;
         private ObservableCollection<string> _danhSachNhanVien; // Danh sách nhân viên cho ComboBox
+        private ObservableCollection<TaiSanCanBaoTri> _danhSachTaiSan; // Danh sách tài sản cho ComboBox
 
         public PhieuBaoTri PhieuBaoTri => _phieuBaoTri;
 
@@ -31,12 +32,16 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             btnLuu.Click += BtnLuu_Click;
             btnHuy.Click += BtnHuy_Click;
             txtChiPhiDuKien.PreviewTextInput += TxtChiPhiDuKien_PreviewTextInput;
+            cboMaTaiSan.SelectionChanged += CboMaTaiSan_SelectionChanged;
 
             // Khởi tạo danh sách tài sản được chọn
             _danhSachTaiSanDuocChon = new ObservableCollection<TaiSanCanBaoTri>();
-            
+
             // Khởi tạo danh sách nhân viên
             KhoiTaoDanhSachNhanVien();
+
+            // Khởi tạo danh sách tài sản
+            KhoiTaoDanhSachTaiSan();
 
             if (phieuBaoTri != null)
             {
@@ -77,6 +82,41 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             cboNguoiPhuTrach.ItemsSource = _danhSachNhanVien;
         }
 
+        private void KhoiTaoDanhSachTaiSan()
+        {
+            // Trong thực tế, bạn sẽ lấy danh sách tài sản từ database
+            // Đây chỉ là danh sách mẫu
+            _danhSachTaiSan = new ObservableCollection<TaiSanCanBaoTri>
+            {
+                new TaiSanCanBaoTri { MaTaiSan = "TS001", TenTaiSan = "Máy tính xách tay Dell XPS 13", TinhTrangPhanTram = 80, GhiChu = "Pin yếu" },
+                new TaiSanCanBaoTri { MaTaiSan = "TS002", TenTaiSan = "Máy chiếu Epson EB-X05", TinhTrangPhanTram = 75, GhiChu = "Bóng đèn mờ" },
+                new TaiSanCanBaoTri { MaTaiSan = "TS003", TenTaiSan = "Máy in HP LaserJet Pro M404dn", TinhTrangPhanTram = 90, GhiChu = "Kẹt giấy thường xuyên" },
+                new TaiSanCanBaoTri { MaTaiSan = "TS004", TenTaiSan = "Tủ lạnh Panasonic NR-BL26AVPVN", TinhTrangPhanTram = 85, GhiChu = "Làm lạnh chậm" },
+                new TaiSanCanBaoTri { MaTaiSan = "TS005", TenTaiSan = "Điều hòa Daikin FTKC25UAVMV", TinhTrangPhanTram = 70, GhiChu = "Làm mát kém hiệu quả" }
+            };
+
+            // Thiết lập nguồn dữ liệu cho ComboBox mã tài sản
+            cboMaTaiSan.ItemsSource = _danhSachTaiSan;
+            cboMaTaiSan.DisplayMemberPath = "MaTaiSan";
+            cboMaTaiSan.SelectedValuePath = "MaTaiSan";
+        }
+
+        private void CboMaTaiSan_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cboMaTaiSan.SelectedItem != null && cboMaTaiSan.SelectedItem is TaiSanCanBaoTri taiSan)
+            {
+                // Cập nhật tên tài sản và các thông tin khác
+                txtTenTaiSan.Text = taiSan.TenTaiSan;
+
+                // Tạo nội dung bảo trì mặc định dựa trên ghi chú tình trạng
+                if (!string.IsNullOrEmpty(taiSan.GhiChu))
+                {
+                    string noiDungMacDinh = $"Bảo trì tài sản (hiện trạng: {taiSan.TinhTrangPhanTram}%): {taiSan.GhiChu}";
+                    txtNoiDungBaoTri.Text = noiDungMacDinh;
+                }
+            }
+        }
+
         private void KhoiTaoGiaTriMacDinh()
         {
             // Tạo mã phiếu mới
@@ -91,13 +131,16 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             if (cboLoaiBaoTri.Items.Count > 0)
                 cboLoaiBaoTri.SelectedIndex = 0;
 
-
             if (cboTrangThai.Items.Count > 0)
                 cboTrangThai.SelectedIndex = 0;
-                
+
             // Chọn giá trị mặc định cho người phụ trách nếu có
             if (_danhSachNhanVien.Count > 0)
                 cboNguoiPhuTrach.SelectedIndex = 0;
+
+            // Chọn giá trị mặc định cho mã tài sản nếu có
+            if (_danhSachTaiSan.Count > 0)
+                cboMaTaiSan.SelectedIndex = 0;
         }
 
         private string TaoMaPhieuMoi()
@@ -112,9 +155,31 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             if (phieu == null) return;
 
             txtMaPhieu.Text = phieu.MaPhieu;
-            txtMaTaiSan.Text = phieu.MaTaiSan;
+
+            // Tìm và chọn mã tài sản trong combobox
+            foreach (TaiSanCanBaoTri item in _danhSachTaiSan)
+            {
+                if (item.MaTaiSan == phieu.MaTaiSan)
+                {
+                    cboMaTaiSan.SelectedItem = item;
+                    break;
+                }
+            }
+
+            // Nếu không tìm thấy trong danh sách, thêm vào danh sách và chọn
+            if (cboMaTaiSan.SelectedItem == null && !string.IsNullOrEmpty(phieu.MaTaiSan))
+            {
+                var taiSanMoi = new TaiSanCanBaoTri
+                {
+                    MaTaiSan = phieu.MaTaiSan,
+                    TenTaiSan = phieu.TenTaiSan
+                };
+                _danhSachTaiSan.Add(taiSanMoi);
+                cboMaTaiSan.SelectedItem = taiSanMoi;
+            }
+
             txtTenTaiSan.Text = phieu.TenTaiSan;
-            
+
             // Thiết lập giá trị cho ComboBox người phụ trách
             if (!string.IsNullOrEmpty(phieu.NguoiPhuTrach))
             {
@@ -129,7 +194,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     cboNguoiPhuTrach.SelectedItem = phieu.NguoiPhuTrach;
                 }
             }
-            
+
             txtChiPhiDuKien.Text = phieu.ChiPhiDuKien.ToString("N0");
             txtNoiDungBaoTri.Text = phieu.NoiDungBaoTri;
 
@@ -139,7 +204,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Tìm và chọn giá trị tương ứng trong ComboBox
             SelectComboBoxItem(cboLoaiBaoTri, phieu.LoaiBaoTri);
             SelectComboBoxItem(cboTrangThai, phieu.TrangThai);
-            
         }
 
         private void SelectComboBoxItem(ComboBox comboBox, string value)
@@ -174,10 +238,25 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 var taiSan = _danhSachTaiSanDuocChon[0];
 
+                // Tìm và chọn mã tài sản trong combobox
+                foreach (TaiSanCanBaoTri item in _danhSachTaiSan)
+                {
+                    if (item.MaTaiSan == taiSan.MaTaiSan)
+                    {
+                        cboMaTaiSan.SelectedItem = item;
+                        break;
+                    }
+                }
+
+                // Nếu không tìm thấy trong danh sách, thêm vào danh sách và chọn
+                if (cboMaTaiSan.SelectedItem == null)
+                {
+                    _danhSachTaiSan.Add(taiSan);
+                    cboMaTaiSan.SelectedItem = taiSan;
+                }
+
                 // Thiết lập thông tin tài sản vào form
-                txtMaTaiSan.Text = taiSan.MaTaiSan;
                 txtTenTaiSan.Text = taiSan.TenTaiSan;
-                txtMaTaiSan.IsReadOnly = true;
                 txtTenTaiSan.IsReadOnly = true;
 
                 // Cập nhật thông tin vào đối tượng phiếu
@@ -201,9 +280,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 HienThiDanhSachTaiSanDuocChon();
 
                 // Đặt thông tin phiếu với nhiều tài sản
-                txtMaTaiSan.Text = "Multiple";
+                cboMaTaiSan.Text = "Multiple";
                 txtTenTaiSan.Text = $"{_danhSachTaiSanDuocChon.Count} tài sản được chọn";
-                txtMaTaiSan.IsReadOnly = true;
                 txtTenTaiSan.IsReadOnly = true;
 
                 // Cập nhật thông tin vào đối tượng phiếu
@@ -241,21 +319,29 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Chỉ cập nhật mã tài sản và tên tài sản nếu không phải là nhiều tài sản
             if (!_isMultipleAssets)
             {
-                _phieuBaoTri.MaTaiSan = txtMaTaiSan.Text;
-                _phieuBaoTri.TenTaiSan = txtTenTaiSan.Text;
+                // Lấy mã tài sản từ ComboBox thay vì TextBox
+                if (cboMaTaiSan.SelectedItem is TaiSanCanBaoTri taiSan)
+                {
+                    _phieuBaoTri.MaTaiSan = taiSan.MaTaiSan;
+                    _phieuBaoTri.TenTaiSan = taiSan.TenTaiSan;
+                }
+                else if (!string.IsNullOrEmpty(cboMaTaiSan.Text))
+                {
+                    _phieuBaoTri.MaTaiSan = cboMaTaiSan.Text;
+                    _phieuBaoTri.TenTaiSan = txtTenTaiSan.Text;
+                }
             }
 
             _phieuBaoTri.LoaiBaoTri = cboLoaiBaoTri.SelectedItem != null ? ((ComboBoxItem)cboLoaiBaoTri.SelectedItem).Content.ToString() : string.Empty;
             _phieuBaoTri.NgayBaoTri = dtpNgayBaoTri.SelectedDate ?? DateTime.Now;
             _phieuBaoTri.NgayHoanThanh = dtpNgayHoanThanh.SelectedDate;
-            
-            // Lấy giá trị người phụ trách từ ComboBox thay vì TextBox
+
+            // Lấy giá trị người phụ trách từ ComboBox
             _phieuBaoTri.NguoiPhuTrach = cboNguoiPhuTrach.Text;
-            
+
             _phieuBaoTri.TrangThai = cboTrangThai.SelectedItem != null ? ((ComboBoxItem)cboTrangThai.SelectedItem).Content.ToString() : string.Empty;
             _phieuBaoTri.ChiPhiDuKien = decimal.TryParse(txtChiPhiDuKien.Text.Replace(",", ""), out decimal chiPhi) ? chiPhi : 0;
             _phieuBaoTri.NoiDungBaoTri = txtNoiDungBaoTri.Text;
-           
 
             // Nếu là nhiều tài sản, lưu thông tin để xử lý sau
             if (_isMultipleAssets)
@@ -319,10 +405,10 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Bỏ qua kiểm tra mã tài sản và tên tài sản nếu đang xử lý nhiều tài sản
             if (!_isMultipleAssets)
             {
-                if (string.IsNullOrWhiteSpace(txtMaTaiSan.Text))
+                if (string.IsNullOrWhiteSpace(cboMaTaiSan.Text))
                 {
-                    MessageBox.Show("Vui lòng nhập Mã tài sản!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    txtMaTaiSan.Focus();
+                    MessageBox.Show("Vui lòng chọn hoặc nhập Mã tài sản!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    cboMaTaiSan.Focus();
                     return false;
                 }
 
