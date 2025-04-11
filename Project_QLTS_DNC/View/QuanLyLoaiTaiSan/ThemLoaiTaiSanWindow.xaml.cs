@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using Project_QLTS_DNC.Models.QLLoaiTS;
-using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.QLTaiSanService;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {

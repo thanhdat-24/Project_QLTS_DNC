@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Services.QLTaiSanService;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -96,7 +97,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 if (result == true && capNhatWindow.LoaiTaiSanCapNhat != null)
                 {
                     // Cập nhật vào cơ sở dữ liệu
-                    var loaiTaiSanDaCapNhat = await Services.LoaiTaiSanService.CapNhatLoaiTaiSanAsync(capNhatWindow.LoaiTaiSanCapNhat);
+                    var loaiTaiSanDaCapNhat = await LoaiTaiSanService.CapNhatLoaiTaiSanAsync(capNhatWindow.LoaiTaiSanCapNhat);
 
                     // Cập nhật lại dữ liệu trong collection
                     var index = DsLoaiTaiSan.IndexOf(loaiTaiSanDuocChon);
@@ -153,7 +154,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             try
             {
                 // Thực hiện xóa dữ liệu
-                bool ketQuaXoa = await Services.LoaiTaiSanService.XoaLoaiTaiSanAsync(loaiTaiSanDuocChon.MaLoaiTaiSan);
+                bool ketQuaXoa = await LoaiTaiSanService.XoaLoaiTaiSanAsync(loaiTaiSanDuocChon.MaLoaiTaiSan);
 
                 if (ketQuaXoa)
                 {

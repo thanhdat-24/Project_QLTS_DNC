@@ -171,7 +171,7 @@
                     </DataGrid.RowStyle>
 
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Mã SP" Binding="{Binding MaSP}" Width="60" MinWidth="60">
+                        <DataGridTextColumn Header="Mã Tài Sản" Binding="{Binding MaTaiSan}" Width="80" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -180,25 +180,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Mã phòng" Binding="{Binding MaPhong}" Width="80" MinWidth="80">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="{x:Type TextBlock}">
-                                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Mã nhóm TS" Binding="{Binding MaNhomTS}" Width="90" MinWidth="90">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="{x:Type TextBlock}">
-                                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding TenSanPham}" Width="*" MinWidth="180">
+                        <DataGridTextColumn Header="Tên Tài Sản" Binding="{Binding TenTaiSan}" Width="*" MinWidth="180">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -207,7 +189,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Số seri" Binding="{Binding SoSeri}" Width="120" MinWidth="100">
+                        <DataGridTextColumn Header="Số Seri" Binding="{Binding SoSeri}" Width="120" MinWidth="100">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -216,7 +198,16 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Ngày sử dụng" 
+                        <DataGridTextColumn Header="Mã QR" Binding="{Binding MaQr}" Width="120" MinWidth="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Ngày Sử Dụng" 
                                           Binding="{Binding NgaySuDung, StringFormat={}{0:dd/MM/yyyy}}" 
                                           Width="120" 
                                           MinWidth="110">
@@ -228,20 +219,8 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Giá trị" 
-                                          Binding="{Binding GiaTriSP, StringFormat={}{0:N0} VNĐ}" 
-                                          Width="120" 
-                                          MinWidth="100">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="{x:Type TextBlock}">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-
                         <DataGridTextColumn Header="Hạn BH" 
-                                          Binding="{Binding HanBH, StringFormat={}{0:dd/MM/yyyy}}" 
+                                          Binding="{Binding HanBh, StringFormat={}{0:dd/MM/yyyy}}" 
                                           Width="120" 
                                           MinWidth="110">
                             <DataGridTextColumn.ElementStyle>
@@ -252,7 +231,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Tình trạng" Binding="{Binding TinhTrangSP}" Width="100" MinWidth="80">
+                        <DataGridTextColumn Header="Tình Trạng" Binding="{Binding TinhTrangSp}" Width="100" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -261,9 +240,18 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Ghi chú" Binding="{Binding GhiChu}" Width="100" MinWidth="80">
+                        <DataGridTextColumn Header="Ghi Chú" Binding="{Binding GhiChu}" Width="100" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Mã Phòng" Binding="{Binding MaPhong}" Width="80" MinWidth="80">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
@@ -281,7 +269,7 @@
                                             <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
                                         </Button>
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                              Click="BtnDelete_Click"
+                                             
                                               ToolTip="Xóa" Margin="8,1,0,1"
                                               Background="{DynamicResource SecondaryDelete}" 
                                               Width="32" Height="32" 

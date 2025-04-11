@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.Services.QLTaiSanService
 {
     public partial class NhomTaiSanService
     {

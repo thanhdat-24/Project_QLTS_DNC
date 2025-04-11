@@ -4,9 +4,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.DTOs;
-using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Services.QLTaiSanService;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -105,7 +105,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 if (result == true && capNhatWindow.NhomTaiSanSua != null)
                 {
                     // Cập nhật vào cơ sở dữ liệu
-                    var nhomTaiSanDaCapNhat = await Services.NhomTaiSanService.CapNhatNhomTaiSanAsync(capNhatWindow.NhomTaiSanSua);
+                    var nhomTaiSanDaCapNhat = await NhomTaiSanService.CapNhatNhomTaiSanAsync(capNhatWindow.NhomTaiSanSua);
 
                     // Cập nhật lại đối tượng trong collection
                     var index = DsNhomTaiSan.IndexOf(nhomTaiSan);
@@ -166,7 +166,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 window.Cursor = System.Windows.Input.Cursors.Wait;
 
                 // Thực hiện xóa dữ liệu
-                bool ketQuaXoa = await Services.NhomTaiSanService.XoaNhomTaiSanAsync(nhomTaiSan.MaNhomTS);
+                bool ketQuaXoa = await NhomTaiSanService.XoaNhomTaiSanAsync(nhomTaiSan.MaNhomTS);
 
                 // Khôi phục con trỏ
                 window.Cursor = null;
