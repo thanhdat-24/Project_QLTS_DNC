@@ -1,64 +1,56 @@
 ﻿using Project_QLTS_DNC.Models.ToaNha;
+using Project_QLTS_DNC.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
-    /// <summary>
-    /// Interaction logic for frmTang.xaml
-    /// </summary>
     public partial class frmTang : UserControl
     {
         public ObservableCollection<Tang> DanhSachTang { get; set; } = new ObservableCollection<Tang>();
         private List<Tang> DanhSachGoc { get; set; } = new List<Tang>();
-        private static int _nextMaTang = 1;
 
         public frmTang()
         {
             InitializeComponent();
-            LoadData();
-            dgTang.ItemsSource = DanhSachTang;
-            UpdateStatusBar();
+            Loaded += async (s, e) => await LoadDataAsync();
         }
 
-        private void LoadData()
+        private async Task LoadDataAsync()
         {
-            DanhSachGoc = new List<Tang>
+            try
             {
-                new Tang { MaTang = 1, TenTang = "Tầng 1" },
-                new Tang { MaTang = 2, TenTang = "Tầng 2" }
-            };
+                var tangs = await TangService.LayDanhSachTangAsync();
 
-            DanhSachTang.Clear();
-            foreach (var tang in DanhSachGoc)
+                DanhSachTang.Clear();
+                DanhSachGoc.Clear();
+
+                foreach (var tang in tangs)
+                {
+                    DanhSachTang.Add(tang);
+                    DanhSachGoc.Add(tang);
+                }
+
+                dgTang.ItemsSource = DanhSachTang;
+                UpdateStatusBar();
+            }
+            catch (Exception ex)
             {
-                DanhSachTang.Add(tang);
+                MessageBox.Show($"Lỗi khi tải dữ liệu tầng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        private async void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             var form = new frmThemTang();
-            if (form.ShowDialog() == true && form.TangMoi != null)
+            if (form.ShowDialog() == true)
             {
-                form.TangMoi.MaTang = _nextMaTang++;
-                DanhSachTang.Add(form.TangMoi);
-                DanhSachGoc.Add(form.TangMoi);
-                UpdateStatusBar();
+                await LoadDataAsync(); // 🔁 Gọi lại API để load lại dữ liệu chính xác từ Supabase
             }
         }
 
@@ -83,45 +75,82 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             UpdateStatusBar();
         }
 
-        private void BtnEdit_Click(object sender, RoutedEventArgs e)
+        private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
-            if (btn?.DataContext is Tang tangCanSua)
+            if (btn?.DataContext is Tang tangChon)
             {
-                var form = new frmSuaTang(tangCanSua);
+                var form = new frmSuaTang(tangChon);
                 if (form.ShowDialog() == true && form.TangDaSua != null)
                 {
-                    tangCanSua.TenTang = form.TangDaSua.TenTang;
-                    dgTang.Items.Refresh();
-                    UpdateStatusBar();
+                    try
+                    {
+                        var tangCapNhat = await TangService.CapNhatTangAsync(form.TangDaSua);
+
+                        // Cập nhật lại danh sách
+                        var index = DanhSachTang.IndexOf(tangChon);
+                        if (index >= 0)
+                        {
+                            DanhSachTang[index] = tangCapNhat;
+                            DanhSachGoc[index] = tangCapNhat;
+                        }
+
+                        dgTang.Items.Refresh();
+                        UpdateStatusBar();
+
+                        MessageBox.Show("Cập nhật tầng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi khi cập nhật tầng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
             if (btn?.DataContext is Tang tangCanXoa)
             {
-                var result = MessageBox.Show($"Xóa {tangCanXoa.TenTang}?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Yes)
+                var xacNhan = MessageBox.Show(
+                    $"Bạn có chắc muốn xóa tầng '{tangCanXoa.TenTang}'?",
+                    "Xác nhận xóa",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (xacNhan != MessageBoxResult.Yes)
+                    return;
+
+                try
                 {
-                    DanhSachTang.Remove(tangCanXoa);
-                    DanhSachGoc.Remove(tangCanXoa);
-                    UpdateStatusBar();
+                    bool ketQua = await TangService.XoaTangAsync(tangCanXoa.MaTang ?? 0);
+                    if (ketQua)
+                    {
+                        DanhSachTang.Remove(tangCanXoa);
+                        DanhSachGoc.Remove(tangCanXoa);
+                        UpdateStatusBar();
+
+                        MessageBox.Show("Xóa tầng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể xóa tầng!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi xóa tầng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
-        {
-            txtSearch.Text = string.Empty;
-            DanhSachTang.Clear();
-            foreach (var t in DanhSachGoc)
-                DanhSachTang.Add(t);
 
-            UpdateStatusBar();
+        private async void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadDataAsync();
         }
+
         private void UpdateStatusBar()
         {
             txtStatus.Text = $"Tổng số tầng: {DanhSachTang.Count}";

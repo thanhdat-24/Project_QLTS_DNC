@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using MaterialDesignThemes.Wpf;
 using Project_QLTS_DNC.View;
 using Project_QLTS_DNC.View.DangNhap;
 
@@ -8,10 +9,11 @@ namespace Project_QLTS_DNC
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-            var loginForm = new DangNhapForm();
-            Application.Current.MainWindow = loginForm; // Gán luôn form đăng nhập
-            loginForm.Show();
+             base.OnStartup(e);
+              var loginForm = new DangNhapForm();
+              Application.Current.MainWindow = loginForm; // Gán luôn form đăng nhập
+              loginForm.Show();
+          
         }
 
 

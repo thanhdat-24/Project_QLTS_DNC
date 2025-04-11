@@ -1,25 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace Project_QLTS_DNC.Models.ToaNha
 {
-    public class Phong
+    [Table("phong")]
+    public class Phong : BaseModel
     {
-        // Mã phòng (khóa chính)
-        [Key]
-        public int MaPhong { get; set; }
+        [PrimaryKey("ma_phong", false)] // Supabase sẽ tự sinh mã
+        public int? MaPhong { get; set; }
 
-        // Tên phòng
+        [Column("ma_tang")]
+        public int MaTang { get; set; }
+
+        [Column("ten_phong")]
         public string TenPhong { get; set; }
 
-        // Sức chứa
+        [Column("suc_chua")]
         public int SucChua { get; set; }
 
-        // Mô tả
+        [Column("mo_ta")]
         public string MoTaPhong { get; set; }
     }
 }

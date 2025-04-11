@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyToanNha"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Thêm Tòa nhà" Height="350" Width="450"
+        Title="Thêm Tòa nhà" Height="415" Width="450"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -15,7 +15,7 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
-    <Grid>
+    <Grid Margin="0,0,0,44">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -26,14 +26,23 @@
 
         <!-- Main Content -->
         <materialDesign:Card Grid.Row="0" Margin="16,0,10,10" Padding="5">
-            <StackPanel>
+            <StackPanel Height="279">
                 <!-- Tên phòng ban -->
                 <TextBlock Text="Tên phòng ban:" Margin="0,8,0,0"/>
                 <TextBox x:Name="txtTenPB" 
                          materialDesign:HintAssist.Hint="Nhập tên phòng ban" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                          Margin="0,5,0,5" />
-            
+                <TextBlock Text="Tên tòa nhà:" Margin="0,8,0,0"/>
+
+                <ComboBox x:Name="cboTenToa"
+     Grid.Row="0"
+     Margin="0,8,0,15"
+     materialDesign:HintAssist.Hint="Chọn tòa nhà"
+     Style="{StaticResource MaterialDesignOutlinedComboBox}"
+     DisplayMemberPath="TenToaNha"
+     SelectedValuePath="MaToaNha"
+     SelectedValue="{Binding SelectedMaToaNha, Mode=TwoWay}" />
                 <!-- Mô Tả -->
                 <TextBlock Text="Mô tả:" Margin="0,8,0,0"/>
                 <TextBox x:Name="txtMoTaPB" 
@@ -44,7 +53,7 @@
         </materialDesign:Card>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,50">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,-29" Grid.RowSpan="2">
             <Button x:Name="btnHuy" 
                     Content="HỦY" 
                     Width="100"

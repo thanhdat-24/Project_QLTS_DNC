@@ -48,7 +48,7 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             // Kiểm tra hợp lệ
             if (string.IsNullOrWhiteSpace(txtTenToaNha.Text))
             {
-                MessageBox.Show("Vui lòng nhập tên toà nhà!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Vui lòng nhập tên tòa nhà!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -64,15 +64,17 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
                 return;
             }
 
-            // Cập nhật lại thông tin
+            // Gán dữ liệu đã chỉnh sửa vào đối tượng ToaNhaDaSua
             ToaNhaDaSua.TenToaNha = txtTenToaNha.Text.Trim();
             ToaNhaDaSua.DiaChiTN = txtDiaChiTN.Text.Trim();
             ToaNhaDaSua.SoDienThoaiTN = txtSoDienThoaiTN.Text.Trim();
             ToaNhaDaSua.MoTaTN = txtMoTaTN.Text.Trim();
 
+            // Đóng form và cho biết đã sửa xong
             this.DialogResult = true;
             this.Close();
         }
+
 
         private void btnHuy_Click(object sender, RoutedEventArgs e)
         {

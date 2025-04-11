@@ -1,68 +1,75 @@
 ﻿using Project_QLTS_DNC.Models.ToaNha;
+using Project_QLTS_DNC.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
-    /// <summary>
-    /// Interaction logic for frmSuaPB.xaml
-    /// </summary>
     public partial class frmSuaPB : Window
     {
-        public PhongBan PhongBanDaSua { get; private set; } // ← Dòng này bắt buộc
-
+        public PhongBan PhongBanDaSua { get; private set; }
         private readonly PhongBan _phongBanGoc;
-
-       
+        private List<ToaNha> DanhSachToaNha = new();
 
         public frmSuaPB(PhongBan phongBan)
         {
             InitializeComponent();
-
             _phongBanGoc = phongBan;
 
-            // Gán dữ liệu cũ vào form
-            txtTenPhongBan.Text = phongBan.TenPhongBan;
-            txtMoTaPhongBan.Text = phongBan.MoTaPhongBan;
-        }
-
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
-        {
-            // Kiểm tra dữ liệu
-            if (string.IsNullOrWhiteSpace(txtTenPhongBan.Text))
+            Loaded += async (s, e) =>
             {
-                MessageBox.Show("Vui lòng nhập tên phòng ban!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                try
+                {
+                    DanhSachToaNha = (await ToaNhaService.LayDanhSachToaNhaAsync()).ToList();
+                    cboTenToa.ItemsSource = DanhSachToaNha;
+                    cboTenToa.DisplayMemberPath = "TenToaNha";
+                    cboTenToa.SelectedValuePath = "MaToaNha";
 
-            // Cập nhật dữ liệu
-            PhongBanDaSua = new PhongBan
-            {
-                MaPhongBan = _phongBanGoc.MaPhongBan,
-                TenPhongBan = txtTenPhongBan.Text.Trim(),
-                MoTaPhongBan = txtMoTaPhongBan.Text.Trim()
+                    // Hiển thị dữ liệu cũ
+                    txtTenPB.Text = phongBan.TenPhongBan;
+                    txtMoTaPB.Text = phongBan.MoTaPhongBan;
+                    cboTenToa.SelectedValue = phongBan.MaToa;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi tải toà nhà: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             };
-
-            this.DialogResult = true;
-            this.Close();
         }
-       
 
         private void btnHuy_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
+        }
+
+        private void btnCapNhat_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtTenPB.Text))
+            {
+                MessageBox.Show("Vui lòng nhập tên phòng ban!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (cboTenToa.SelectedValue == null)
+            {
+                MessageBox.Show("Vui lòng chọn tòa nhà!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            PhongBanDaSua = new PhongBan
+            {
+                MaPhongBan = _phongBanGoc.MaPhongBan,
+                TenPhongBan = txtTenPB.Text.Trim(),
+                MoTaPhongBan = txtMoTaPB.Text.Trim(),
+                MaToa = (int)cboTenToa.SelectedValue
+            };
+
+            DialogResult = true;
+            Close();
         }
     }
 }

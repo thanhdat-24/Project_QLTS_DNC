@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyToanNha"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Thêm Tầng" Height="400" Width="450"
+        Title="Thêm Tầng" Height="390" Width="450"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -33,12 +33,28 @@
                          materialDesign:HintAssist.Hint="Nhập tên tầng" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                          Margin="0,5,0,5" />
+                <TextBlock Text="Tên tòa nhà:" Margin="0,8,0,0"/>
+                <ComboBox x:Name="cboTenToa"
+          Grid.Row="0"
+          Margin="0,0,0,15"
+          materialDesign:HintAssist.Hint="Chọn tòa nhà"
+          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+          DisplayMemberPath="TenToaNha"
+          SelectedValuePath="MaToaNha"
+          SelectedValue="{Binding SelectedMaToaNha, Mode=TwoWay}" />
+
+                <!-- mô tả -->
+                <TextBlock Text="Mô tả:" Margin="0,8,0,0"/>
+                <TextBox x:Name="txtMota" 
+           materialDesign:HintAssist.Hint="Nhập mô tả" 
+           Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+           Margin="0,5,0,5" />
 
             </StackPanel>
         </materialDesign:Card>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,180">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,10">
             <Button x:Name="btnHuy" 
                     Content="HỦY" 
                     Width="100"

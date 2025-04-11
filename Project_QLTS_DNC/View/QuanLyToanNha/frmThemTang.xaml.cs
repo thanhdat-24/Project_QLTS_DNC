@@ -1,54 +1,77 @@
 ﻿using Project_QLTS_DNC.Models.ToaNha;
+using Project_QLTS_DNC.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
-    /// <summary>
-    /// Interaction logic for frmThemTang.xaml
-    /// </summary>
     public partial class frmThemTang : Window
     {
         public Tang TangMoi { get; set; }
+        private List<ToaNha> DanhSachToaNha = new();
+
         public frmThemTang()
         {
             InitializeComponent();
+            Loaded += frmThemTang_Loaded;
         }
 
-        private void btnLuu_Click(object sender, RoutedEventArgs e)
+        private async void frmThemTang_Loaded(object sender, RoutedEventArgs e)
         {
-            // Kiểm tra dữ liệu hợp lệ
-            if (string.IsNullOrWhiteSpace(txtTenTang.Text))
+            try
             {
-                MessageBox.Show("Vui lòng nhập tên tầng!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                DanhSachToaNha = (await ToaNhaService.LayDanhSachToaNhaAsync()).ToList();
+                cboTenToa.ItemsSource = DanhSachToaNha;
+                cboTenToa.DisplayMemberPath = "TenToaNha";     // tên hiển thị
+                cboTenToa.SelectedValuePath = "MaToaNha";      // giá trị thực lưu
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách tòa nhà: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void btnLuu_Click(object sender, RoutedEventArgs e)
+        {
+            if (cboTenToa.SelectedValue == null)
+            {
+                MessageBox.Show("Vui lòng chọn tòa nhà!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Gán dữ liệu
+            if (string.IsNullOrWhiteSpace(txtTenTang.Text))
+            {
+                MessageBox.Show("Vui lòng nhập tên tầng!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             TangMoi = new Tang
             {
-                TenTang = txtTenTang.Text.Trim()
+                MaToa = (int)cboTenToa.SelectedValue,
+                TenTang = txtTenTang.Text.Trim(),
+                MoTa = txtMota.Text.Trim()
             };
 
-            DialogResult = true;
-            Close();
+            try
+            {
+                TangMoi = await TangService.ThemTangAsync(TangMoi);
+                MessageBox.Show("Thêm tầng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                this.DialogResult = true;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi thêm tầng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void btnHuy_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }

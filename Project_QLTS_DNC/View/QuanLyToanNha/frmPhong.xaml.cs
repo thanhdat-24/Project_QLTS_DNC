@@ -1,167 +1,160 @@
-﻿using System;
+﻿using Project_QLTS_DNC.Models.ToaNha;
+using Project_QLTS_DNC.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Project_QLTS_DNC.Models.ToaNha;
+
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
-
-    /// <summary>
-    /// Interaction logic for frmPhong.xaml
-    /// </summary>
     public partial class frmPhong : UserControl
     {
-      
-        // Danh sách phòng hiển thị trong DataGrid
         public ObservableCollection<Phong> DanhSachPhong { get; set; } = new ObservableCollection<Phong>();
-
-        // Danh sách gốc để lưu trữ dữ liệu ban đầu
         private List<Phong> DanhSachGoc { get; set; } = new List<Phong>();
 
         public frmPhong()
         {
             InitializeComponent();
-
-            // Khởi tạo danh sách phòng và load dữ liệu mẫu
-            LoadData();
-
-            // Gán danh sách phòng vào DataGrid
-            dgPhong.ItemsSource = DanhSachPhong;
-
-            // Cập nhật trạng thái footer
-            UpdateStatusBar();
+            Loaded += async (s, e) => await LoadData();
         }
-        private static int _nextMaPhong = 1;
-        private void LoadData()
-        {
-            // Dữ liệu mẫu
-            DanhSachGoc = new List<Phong>
-            {
-                new Phong { MaPhong = 1, TenPhong = "Phòng A", SucChua = 50, MoTaPhong = "Phòng họp lớn" },
-                new Phong { MaPhong = 2, TenPhong = "Phòng B", SucChua = 30, MoTaPhong = "Phòng làm việc" }
-            };
 
-            // Gán vào danh sách hiển thị
-            DanhSachPhong.Clear();
-            foreach (var phong in DanhSachGoc)
+        private async Task LoadData()
+        {
+            try
             {
-                DanhSachPhong.Add(phong);
+                var danhSach = await PhongService.LayDanhSachPhongAsync();
+                DanhSachPhong.Clear();
+                DanhSachGoc.Clear();
+
+                foreach (var phong in danhSach)
+                {
+                    DanhSachPhong.Add(phong);
+                    DanhSachGoc.Add(phong);
+                }
+
+                dgPhong.ItemsSource = DanhSachPhong;
+                UpdateStatusBar();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu phòng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        // Sự kiện tìm kiếm phòng
-        private List<Phong> ketQua;
+
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             string tuKhoa = txtSearch.Text.Trim().ToLower();
 
-            if (string.IsNullOrEmpty(tuKhoa))
-            {
-                DanhSachPhong.Clear();
-                foreach (var phong in DanhSachGoc)
-                {
-                    DanhSachPhong.Add(phong);
-                }
-                UpdateStatusBar();
-                return;
-            }
-
-            ketQua = DanhSachGoc.Where(phong =>
-                phong.MaPhong.ToString().ToLower().Contains(tuKhoa) ||
-                (phong.TenPhong != null && phong.TenPhong.ToLower().Contains(tuKhoa)) ||
-                phong.SucChua.ToString().ToLower().Contains(tuKhoa) ||
-                (phong.MoTaPhong != null && phong.MoTaPhong.ToLower().Contains(tuKhoa))
-            ).ToList();
+            var ketQua = string.IsNullOrWhiteSpace(tuKhoa)
+                ? DanhSachGoc
+                : DanhSachGoc.Where(p =>
+                    p.MaPhong.ToString().Contains(tuKhoa) ||
+                    (p.TenPhong != null && p.TenPhong.ToLower().Contains(tuKhoa)) ||
+                    p.SucChua.ToString().Contains(tuKhoa) ||
+                    (p.MoTaPhong != null && p.MoTaPhong.ToLower().Contains(tuKhoa))
+                ).ToList();
 
             DanhSachPhong.Clear();
             foreach (var phong in ketQua)
-            {
                 DanhSachPhong.Add(phong);
-            }
 
             if (ketQua.Count == 0)
+                MessageBox.Show("Không tìm thấy kết quả phù hợp.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            UpdateStatusBar();
+        }
+
+        private async void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            var form = new frmThemPhong();
+            if (form.ShowDialog() == true && form.PhongMoi != null)
             {
-                MessageBox.Show("Không tìm thấy kết quả nào.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                UpdateStatusBar();
+                try
+                {
+                    var phongDaThem = await PhongService.ThemPhongAsync(form.PhongMoi);
+                    DanhSachPhong.Add(phongDaThem);
+                    DanhSachGoc.Add(phongDaThem);
+                    UpdateStatusBar();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi thêm phòng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            var themForm = new frmThemPhong(); // Constructor không tham số
-            if (themForm.ShowDialog() == true && themForm.PhongMoi != null)
+            if ((sender as Button)?.DataContext is Phong phongCanXoa)
             {
-                // Gán mã phòng tự动生成
-                themForm.PhongMoi.MaPhong = _nextMaPhong++;
-                DanhSachPhong.Add(themForm.PhongMoi);
-                DanhSachGoc.Add(themForm.PhongMoi);
-
-                // Cập nhật trạng thái footer
-                UpdateStatusBar();
-            }
-        }
-
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = sender as Button;
-            if (btn?.DataContext is Phong phongCanXoa)
-            {
-                var result = MessageBox.Show($"Bạn có chắc muốn xóa phòng: {phongCanXoa.TenPhong}?",
+                var result = MessageBox.Show($"Bạn có chắc muốn xóa phòng '{phongCanXoa.TenPhong}'?",
                                              "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    DanhSachPhong.Remove(phongCanXoa);
-                    DanhSachGoc.Remove(phongCanXoa);
+                    try
+                    {
+                        bool xoaOk = await PhongService.XoaPhongAsync(phongCanXoa.MaPhong ?? 0);
+                        if (xoaOk)
+                        {
+                            DanhSachPhong.Remove(phongCanXoa);
+                            DanhSachGoc.Remove(phongCanXoa);
+                            UpdateStatusBar();
 
-                    // Cập nhật trạng thái footer
-                    UpdateStatusBar();
+                            // ✅ Thêm dòng thông báo tại đây
+                            MessageBox.Show("Xóa phòng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Không thể xóa phòng. Vui lòng thử lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi khi xóa: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
-        private void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
+
+        private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
-            txtSearch.Text = string.Empty; // Xóa từ khóa tìm kiếm
-
-            // Tải lại toàn bộ danh sách gốc
-            DanhSachPhong.Clear();
-            foreach (var phong in DanhSachGoc)
+            if ((sender as Button)?.DataContext is Phong phongChon)
             {
-                DanhSachPhong.Add(phong);
-            }
-
-            // Cập nhật trạng thái footer
-            UpdateStatusBar();
-        }
-
-        private void BtnEdit_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = sender as Button;
-            if (btn?.DataContext is Phong phongCanSua)
-            {
-                var form = new frmSuaPhong(phongCanSua); // Truyền thông tin phòng cần sửa
+                var form = new frmSuaPhong(phongChon);
                 if (form.ShowDialog() == true && form.PhongDaSua != null)
                 {
-                    // Cập nhật lại dữ liệu
-                    phongCanSua.TenPhong = form.PhongDaSua.TenPhong;
-                    phongCanSua.SucChua = form.PhongDaSua.SucChua;
-                    phongCanSua.MoTaPhong = form.PhongDaSua.MoTaPhong;
+                    try
+                    {
+                        var phongMoi = await PhongService.CapNhatPhongAsync(form.PhongDaSua);
 
-                    // Làm mới DataGrid
-                    dgPhong.Items.Refresh();
+                        int index = DanhSachPhong.IndexOf(phongChon);
+                        if (index >= 0)
+                        {
+                            DanhSachPhong[index] = phongMoi;
+                            DanhSachGoc[index] = phongMoi;
+                        }
 
-                    // Cập nhật trạng thái footer
-                    UpdateStatusBar();
+                        dgPhong.Items.Refresh();
+                        UpdateStatusBar();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
-        // Cập nhật thanh trạng thái (footer)
+        private async void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
+        {
+            txtSearch.Text = "";
+            await LoadData();
+        }
+
         private void UpdateStatusBar()
         {
             txtStatus.Text = $"Tổng số phòng: {DanhSachPhong.Count}";
