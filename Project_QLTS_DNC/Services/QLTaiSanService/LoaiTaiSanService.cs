@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.Services.QLTaiSanService
 {
     public class LoaiTaiSanService
     {

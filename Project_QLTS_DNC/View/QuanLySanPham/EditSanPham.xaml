@@ -51,17 +51,24 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Mã sản phẩm (chỉ hiển thị) -->
+                            <!-- Mã tài sản (chỉ hiển thị) -->
                             <TextBox Grid.Row="0" Grid.Column="0" Margin="0 8 8 8" 
-                                     x:Name="txtMaSP"
-                                     materialDesign:HintAssist.Hint="Mã sản phẩm"
+                                     x:Name="txtMaTaiSan"
+                                     materialDesign:HintAssist.Hint="Mã tài sản"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     IsReadOnly="True"/>
+
+                            <!-- Mã chi tiết phiếu nhập (chỉ hiển thị) -->
+                            <TextBox Grid.Row="0" Grid.Column="1" Margin="8 8 0 8" 
+                                     x:Name="txtMaChiTietPN"
+                                     materialDesign:HintAssist.Hint="Mã chi tiết phiếu nhập"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      IsReadOnly="True"/>
 
                             <!-- Cột 1 -->
                             <TextBox Grid.Row="1" Grid.Column="0" Margin="0 8 8 8" 
-                                    x:Name="txtTenSanPham"
-                                    materialDesign:HintAssist.Hint="Tên sản phẩm"
+                                    x:Name="txtTenTaiSan"
+                                    materialDesign:HintAssist.Hint="Tên tài sản"
                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
                             <TextBox Grid.Row="2" Grid.Column="0" Margin="0 8 8 8" 
@@ -69,7 +76,12 @@
                                     materialDesign:HintAssist.Hint="Số seri"
                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
-                            <ComboBox Grid.Row="3" Grid.Column="0" Margin="0 8 8 8"
+                            <TextBox Grid.Row="3" Grid.Column="0" Margin="0 8 8 8" 
+                                    x:Name="txtMaQR"
+                                    materialDesign:HintAssist.Hint="Mã QR"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+                            <ComboBox Grid.Row="4" Grid.Column="0" Margin="0 8 8 8"
                                     x:Name="cboMaPhong"
                                     materialDesign:HintAssist.Hint="Mã phòng"
                                     Style="{StaticResource MaterialDesignOutlinedComboBox}">
@@ -80,34 +92,18 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
 
-                            <DatePicker Grid.Row="4" Grid.Column="0" Margin="0 8 8 8"
+                            <DatePicker Grid.Row="5" Grid.Column="0" Margin="0 8 8 8"
                                         x:Name="dpNgaySuDung"
                                         materialDesign:HintAssist.Hint="Ngày sử dụng"
                                         Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
 
-                            <TextBox Grid.Row="5" Grid.Column="0" Margin="0 8 8 8" 
-                                    x:Name="txtGiaTri"
-                                    materialDesign:HintAssist.Hint="Giá trị sản phẩm (VNĐ)"
-                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
-
                             <!-- Cột 2 -->
-                            <ComboBox Grid.Row="1" Grid.Column="1" Margin="8 8 0 8"
-                                    x:Name="cboMaNhomTS"
-                                    materialDesign:HintAssist.Hint="Mã nhóm tài sản"
-                                    Style="{StaticResource MaterialDesignOutlinedComboBox}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding MaNhomTS}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <DatePicker Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
+                            <DatePicker Grid.Row="1" Grid.Column="1" Margin="8 8 0 8"
                                         x:Name="dpHanBH"
                                         materialDesign:HintAssist.Hint="Hạn bảo hành"
                                         Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
 
-                            <ComboBox Grid.Row="3" Grid.Column="1" Margin="8 8 0 8"
+                            <ComboBox Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
                                     x:Name="cboTinhTrang"
                                     materialDesign:HintAssist.Hint="Tình trạng sản phẩm"
                                     Style="{StaticResource MaterialDesignOutlinedComboBox}">
@@ -115,6 +111,11 @@
                                 <ComboBoxItem Content="Trung bình"/>
                                 <ComboBoxItem Content="Kém"/>
                             </ComboBox>
+
+                            <TextBox Grid.Row="3" Grid.Column="1" Margin="8 8 0 8" 
+                                    x:Name="txtMaChiTietPNRef"
+                                    materialDesign:HintAssist.Hint="Mã chi tiết phiếu nhập tham chiếu"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
                             <TextBox Grid.Row="4" Grid.Column="1" Grid.RowSpan="2" Margin="8 8 0 8" 
                                     x:Name="txtGhiChu"

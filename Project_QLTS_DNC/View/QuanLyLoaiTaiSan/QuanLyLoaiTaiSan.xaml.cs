@@ -3,10 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Services.QLTaiSanService;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -69,6 +69,10 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     nhomTaiSanControl.DsNhomTaiSan = _dsNhomTaiSan;
                     nhomTaiSanControl.HienThiDuLieu();
                 }
+                if (tongQuanControl != null)
+                {
+                    tongQuanControl.CapNhatThongKe();
+                }
 
                 // Hiển thị thông báo thành công (nếu cần)
                 // MessageBox.Show("Đã tải dữ liệu thành công", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -129,8 +133,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
             // Tạo danh sách nhóm tài sản entity (không phải DTO) từ kết quả lọc
             var dsNhomTaiSanLoc = new ObservableCollection<NhomTaiSan>(
-                dsNhomTaiSanDTOLoc.Select(dto => _dsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == dto.MaNhomTS))
-                .Where(n => n != null) // Loại bỏ các kết quả null
+                dsNhomTaiSanDTOLoc.Select(dto => _dsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == dto.MaNhomTS)).Where(n => n != null) // Loại bỏ các kết quả null
             );
 
             // Cập nhật dữ liệu cho các control con

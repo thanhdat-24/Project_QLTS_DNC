@@ -4,9 +4,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Threading.Tasks;
-using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Services.QLTaiSanService;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
