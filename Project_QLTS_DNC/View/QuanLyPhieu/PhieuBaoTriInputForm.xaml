@@ -294,26 +294,10 @@
                         <TextBlock Text="Mã phiếu:" Style="{StaticResource LabelStyle}"/>
                         <TextBox x:Name="txtMaPhieu" IsReadOnly="True" Background="#F8F8F8"/>
 
-                        <!-- Mã tài sản -->
+                        <!-- Mã tài sản (thay đổi từ TextBox sang ComboBox) -->
                         <TextBlock Text="Mã tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" x:Name="txtMaTaiSan"/>
-                            <Button Grid.Column="1" Content="..." Width="40" Height="40" Margin="5,5,0,15" 
-                                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" BorderThickness="0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}" 
-                                                CornerRadius="5">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </Grid>
+                        <ComboBox x:Name="cboMaTaiSan" IsEditable="False" StaysOpenOnEdit="True" 
+                           SelectionChanged="CboMaTaiSan_SelectionChanged" Margin="0,5,0,15"/>
 
                         <!-- Tên tài sản -->
                         <TextBlock Text="Tên tài sản:" Style="{StaticResource LabelStyle}"/>
@@ -338,33 +322,8 @@
                         <TextBlock Text="Ngày bảo trì:" Style="{StaticResource LabelStyle}"/>
                         <DatePicker x:Name="dtpNgayBaoTri"/>
 
-                        <!-- Người phụ trách -->
                         <TextBlock Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" x:Name="txtNguoiPhuTrach"/>
-                            <Button Grid.Column="1" Content="..." Width="40" Height="40" Margin="5,5,0,15" 
-                                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" BorderThickness="0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="{TemplateBinding Background}" 
-                                                CornerRadius="5">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </Grid>
-
-                        <!-- Đơn vị bảo trì -->
-                        <TextBlock Text="Đơn vị bảo trì:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox x:Name="cboDonViBaoTri">
-                            <ComboBoxItem Content="Nội bộ"/>
-                            <ComboBoxItem Content="Đối tác bên ngoài"/>
-                        </ComboBox>
+                        <ComboBox x:Name="cboNguoiPhuTrach" IsEditable="False" StaysOpenOnEdit="True"/>
 
                         <!-- Trạng thái -->
                         <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>

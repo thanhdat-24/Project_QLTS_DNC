@@ -10,45 +10,69 @@
     <DockPanel>
         <!-- Thanh menu trái -->
         <Border Background="#0066b1" Width="220" DockPanel.Dock="Left">
-            <StackPanel>
-                <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600">
-                    <TreeView Background="Transparent" BorderThickness="0" Foreground="White"
-                              FontSize="14" Padding="10" Height="498">
-                        <TreeViewItem x:Name="btnTrangChu" Header="🏠 Trang chủ" Selected="btnTrangChu_Selected"/>
-                        <TreeViewItem Header="👥 Quản lý tài khoản">
+            <DockPanel>
+                <!-- Logo -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,10,0,10">
+                    <Image Source="/Resources/Logo/dnc.png"
+                   Width="100" Height="100"
+                   Margin="10"
+                   HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Menu -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TreeView Background="Transparent"
+                      BorderThickness="0"
+                      Foreground="White"
+                      FontSize="14"
+                      Padding="10">
+
+                        <!-- Trang chủ -->
+                        <TreeViewItem x:Name="btnTrangChu" Header="🏠 Trang chủ" Selected="btnTrangChu_Selected" />
+
+                        <!-- Quản lý tài khoản -->
+                        <TreeViewItem Header="👥 Quản lý tài khoản" IsExpanded="True">
                             <TreeViewItem x:Name="btnNhanVien" Header="🔎 Nhân viên" Selected="btnNhanVien_Selected" />
                         </TreeViewItem>
-                        <TreeViewItem x:Name="btnQuanLyLoaiTaiSan" Header="📦 Quản lý loại tài sản" Selected="btnQuanLyLoaiTaiSan_Selected"/>
-                        <TreeViewItem Header="🏢 Quản lý tòa nhà">
-                            <TreeViewItem x:Name="btnToaNha" Header="🏢 Tòa nhà" Selected="btnToaNha_Selected"/>
-                            <TreeViewItem x:Name="btnTang" Header="🏬 Tầng" Selected="btnTang_Selected"/>
-                            <TreeViewItem x:Name="btnPhong" Header="🚪 Phòng" Selected="btnPhong_Selected"/>
-                            <TreeViewItem x:Name="btnPhongBan" Header="🏢 Phòng ban" Selected="btnPhongBan_Selected"/>
+
+                        <!-- Quản lý loại tài sản -->
+                        <TreeViewItem x:Name="btnQuanLyLoaiTaiSan" Header="📦 Quản lý loại tài sản" Selected="btnQuanLyLoaiTaiSan_Selected" />
+
+                        <!-- Quản lý tòa nhà -->
+                        <TreeViewItem Header="🏢 Quản lý tòa nhà" IsExpanded="True">
+                            <TreeViewItem x:Name="btnToaNha" Header="🏢 Tòa nhà" Selected="btnToaNha_Selected" />
+                            <TreeViewItem x:Name="btnTang" Header="🏬 Tầng" Selected="btnTang_Selected" />
+                            <TreeViewItem x:Name="btnPhong" Header="🚪 Phòng" Selected="btnPhong_Selected" />
+                            <TreeViewItem x:Name="btnPhongBan" Header="🏢 Phòng ban" Selected="btnPhongBan_Selected" />
                         </TreeViewItem>
-                        <TreeViewItem x:Name="btnQuanLyKho" Header="📦 Quản lý kho" Selected="btnQuanLyKho_Selected"/>
-                        <TreeViewItem Header="📥 Nhập kho" x:Name="btnNhapKho" Selected="btnNhapKho_Selected"/>
-                        <TreeViewItem Header="📤 Xuất kho" x:Name="btnXuatKho" Selected="btnXuatKho_Selected"/>
-                        <TreeViewItem Header="📦 Tồn kho" x:Name="btnTonKho" Selected="btnTonKho_Selected"/>
 
+                        <!-- Kho -->
+                        <TreeViewItem x:Name="btnQuanLyKho" Header="📦 Quản lý kho" Selected="btnQuanLyKho_Selected" />
+                        <TreeViewItem x:Name="btnNhapKho" Header="📥 Nhập kho" Selected="btnNhapKho_Selected" />
+                        <TreeViewItem x:Name="btnXuatKho" Header="📤 Xuất kho" Selected="btnXuatKho_Selected" />
+                        <TreeViewItem x:Name="btnTonKho" Header="📦 Tồn kho" Selected="btnTonKho_Selected" />
 
-                        <TreeViewItem x:Name="btnNhaCungCap" Header="🏭 Quản lý nhà cung cấp" Selected="btnNhaCungCap_Selected"/>
-                        <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected"/>
-                        <TreeViewItem Header="🛠️ Bảo trì" x:Name="btnBaoTri" Selected="btnBaoTri_Selected"/>
-                        <TreeViewItem Header="📊 Báo cáo kiểm kê" x:Name="btnBaoCaoKiemKe" Selected="btnBaoCaoKiemKe_Selected"/>
+                        <!-- Nhà cung cấp -->
+                        <TreeViewItem x:Name="btnNhaCungCap" Header="🏭 Quản lý nhà cung cấp" Selected="btnNhaCungCap_Selected" />
 
-                        <TreeViewItem Header="📜 Duyệt phiếu"/>
+                        <!-- Tra cứu, bảo trì, báo cáo -->
+                        <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected" />
+                        <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Bảo trì" Selected="btnBaoTri_Selected" />
+                        <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected" />
+                        <TreeViewItem Header="📜 Duyệt phiếu" />
+
+                        <!-- Cài đặt -->
                         <TreeViewItem Header="⚙️ Cài đặt" IsExpanded="True">
-                            <TreeViewItem Header="🏢 Thông tin công ty" />
+                            <TreeViewItem x:Name="btnThongTinCongTy" Header="🏢 Thông tin công ty" Selected="btnThongTinCongTy_Selected" />
                             <TreeViewItem x:Name="btnPhanQuyen" Header="👤 Quản lý người dùng và phân quyền" Selected="btnPhanQuyen_Selected" />
                             <TreeViewItem Header="📄 Mẫu biểu và báo cáo" />
                             <TreeViewItem x:Name="btnBaoMat" Header="🔒 Bảo mật" Selected="btnBaoMat_Selected" />
                         </TreeViewItem>
-
                     </TreeView>
                 </ScrollViewer>
-            </StackPanel>
+            </DockPanel>
         </Border>
+
 
         <!-- Thanh tiêu đề -->
         <materialDesign:ColorZone Mode="PrimaryMid" Height="59" DockPanel.Dock="Top"
