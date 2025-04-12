@@ -116,5 +116,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             this.DialogResult = false;
             this.Close();
         }
+
+        private void btnDong_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
+        }
     }
 }

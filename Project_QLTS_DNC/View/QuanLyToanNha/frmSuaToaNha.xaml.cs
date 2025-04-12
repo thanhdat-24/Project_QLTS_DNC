@@ -43,7 +43,16 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         }
 
 
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
+      
+
+
+        private void btnHuy_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
+        }
+
+        private void btnCapNhat_Click(object sender, RoutedEventArgs e)
         {
             // Kiểm tra hợp lệ
             if (string.IsNullOrWhiteSpace(txtTenToaNha.Text))
@@ -72,13 +81,6 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
             // Đóng form và cho biết đã sửa xong
             this.DialogResult = true;
-            this.Close();
-        }
-
-
-        private void btnHuy_Click(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = false;
             this.Close();
         }
     }
