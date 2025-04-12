@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Supabase;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.Services.QLToanNha
 {
     public class PhongBanService
     {

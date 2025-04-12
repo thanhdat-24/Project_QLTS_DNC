@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Supabase;
 using static Supabase.Postgrest.Constants;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.Services.QLToanNha
 {
     public class PhongService
     {

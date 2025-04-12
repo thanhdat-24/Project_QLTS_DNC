@@ -17,6 +17,7 @@
                 <Setter Property="materialDesign:ShadowAssist.ShadowDepth" Value="Depth2"/>
                 <Setter Property="UniformCornerRadius" Value="8"/>
                 <Setter Property="Background" Value="White"/>
+                <Setter Property="Cursor" Value="Hand"/>
                 <Style.Triggers>
                     <EventTrigger RoutedEvent="MouseEnter">
                         <BeginStoryboard>
@@ -57,7 +58,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Card Loại Tài Sản -->
-            <materialDesign:Card Grid.Column="0" Style="{StaticResource OverviewCard}">
+            <materialDesign:Card Grid.Column="0" Style="{StaticResource OverviewCard}" MouseUp="CardLoaiTaiSan_MouseUp">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -76,11 +77,24 @@
                     <TextBlock Grid.Row="1" x:Name="txtTongLoaiTaiSan" 
                              Text="12" FontSize="48" FontWeight="Bold" 
                              HorizontalAlignment="Center" Margin="0,10"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="btnXemChiTietLoaiTaiSan" Click="btnXemChiTietLoaiTaiSan_Click"
+                                Background="Transparent" BorderThickness="0" Padding="0"
+                                Cursor="Hand" Style="{StaticResource MaterialDesignFlatButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Xem chi tiết" Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                           FontWeight="Medium" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <materialDesign:PackIcon Kind="ArrowRight" Foreground="{DynamicResource PrimaryHueMidBrush}" 
+                                                         VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </materialDesign:Card>
 
             <!-- Card Nhóm Tài Sản -->
-            <materialDesign:Card Grid.Column="1" Style="{StaticResource OverviewCard}">
+            <materialDesign:Card Grid.Column="1" Style="{StaticResource OverviewCard}" MouseUp="CardNhomTaiSan_MouseUp">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -99,6 +113,19 @@
                     <TextBlock Grid.Row="1" x:Name="txtTongNhomTaiSan" 
                              Text="28" FontSize="48" FontWeight="Bold" 
                              HorizontalAlignment="Center" Margin="0,10"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="btnXemChiTietNhomTaiSan" Click="btnXemChiTietNhomTaiSan_Click"
+                                Background="Transparent" BorderThickness="0" Padding="0"
+                                Cursor="Hand" Style="{StaticResource MaterialDesignFlatButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Xem chi tiết" Foreground="{DynamicResource PrimaryHueLightBrush}"
+                                           FontWeight="Medium" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <materialDesign:PackIcon Kind="ArrowRight" Foreground="{DynamicResource PrimaryHueLightBrush}" 
+                                                         VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </materialDesign:Card>
 

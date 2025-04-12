@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="Project_QLTS_DNC.View.QuanLyTaiSan.QuanLyNhomTaiSanControl"
+﻿<UserControl x:Class="Project_QLTS_DNC.View.ThongSoKyThuat.ThongSoKyThuatControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyTaiSan"
+             xmlns:local="clr-namespace:Project_QLTS_DNC.View.ThongSoKyThuat"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1280"
@@ -24,17 +24,52 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Tiêu đề và thông tin nhóm tài sản -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Vertical">
+                <TextBlock Text="Thông Số Kỹ Thuật" FontSize="22" FontWeight="Bold" 
+                           Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,8"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Nhóm tài sản: " FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtTenNhom" Text="[Tên nhóm tài sản]" FontWeight="Normal" 
+                               VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Mã nhóm: " FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtMaNhom" Text="[Mã nhóm]" FontWeight="Normal" 
+                               VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <Button Grid.Column="1" x:Name="btnQuayLai" Style="{StaticResource ActionButton}"
+                    Background="{DynamicResource SecondaryBack}" Width="120" 
+                    Click="btnQuayLai_Click" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18" Margin="0,0,8,0"/>
+                    <TextBlock Text="Quay Lại" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
         <!-- Action Buttons -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
-            <Button x:Name="btnThemMoiNhomTaiSan" Style="{StaticResource ActionButton}" 
-                    Background="{DynamicResource SecondaryCreate}" Width="130" 
-                    Click="btnThemMoiNhomTaiSan_Click">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+            <Button x:Name="btnThemMoiThongSo" Style="{StaticResource ActionButton}" 
+                    Background="{DynamicResource SecondaryCreate}" Width="160" 
+                    Click="btnThemMoiThongSo_Click">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0"/>
-                    <TextBlock Text="Thêm Mới" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <TextBlock Text="Thêm Thông Số" VerticalAlignment="Center" FontWeight="SemiBold"/>
                 </StackPanel>
             </Button>
 
@@ -55,8 +90,8 @@
             </Button>
         </StackPanel>
 
-        <!-- DataGrid for Nhóm Tài Sản -->
-        <DataGrid Grid.Row="1" x:Name="dgNhomTaiSan" AutoGenerateColumns="False" 
+        <!-- DataGrid for Thông Số Kỹ Thuật -->
+        <DataGrid Grid.Row="2" x:Name="dgThongSoKyThuat" AutoGenerateColumns="False" 
                   IsReadOnly="True" CanUserAddRows="False" BorderThickness="1" BorderBrush="#DDDDDD"
                   materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
                   materialDesign:DataGridAssist.ColumnHeaderPadding="8"
@@ -105,7 +140,7 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Mã Nhóm TS" Binding="{Binding MaNhomTS}" Width="120">
+                <DataGridTextColumn Header="Mã Thông Số" Binding="{Binding MaThongSo}" Width="120">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -113,48 +148,27 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Loại Tài Sản" Binding="{Binding TenLoaiTaiSan}" Width="180">
+                <DataGridTextColumn Header="Tên Thông Số" Binding="{Binding TenThongSo}" Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="VerticalAlignment" Value="Center"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Tên Nhóm" Binding="{Binding TenNhom}" Width="*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Mô Tả" Binding="{Binding MoTa}" Width="200">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                            <Setter Property="TextWrapping" Value="Wrap"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTemplateColumn Header="Thao Tác" Width="180">
+                <DataGridTemplateColumn Header="Thao Tác" Width="120">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Thông Số KT"
-                    Background="{DynamicResource SecondaryFileExcel}"
-                    Width="32" Height="32" Padding="2" Margin="0,1"
-                    Click="XemThongSoKyThuat_Click">
-                                    <materialDesign:PackIcon Kind="SettingsOutline" Width="18" Height="18" Foreground="White"/>
-                                </Button>
+                        VerticalAlignment="Center">
                                 <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Sửa"
-                    Background="{DynamicResource PrimaryHueLightBrush}"
-                    Width="32" Height="32" Padding="2" Margin="4,1"
-                    Click="SuaNhomTaiSan_Click">
+                        Background="{DynamicResource PrimaryHueLightBrush}"
+                        Width="32" Height="32" Padding="2" Margin="0,1"
+                        Click="SuaThongSo_Click">
                                     <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
                                 </Button>
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Xóa" Margin="0,1"
-                    Background="{DynamicResource SecondaryDelete}" Width="32" Height="32" Padding="2"
-                    Click="XoaNhomTaiSan_Click">
+                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Xóa" Margin="8,1,0,1"
+                        Background="{DynamicResource SecondaryDelete}" Width="32" Height="32" Padding="2"
+                        Click="XoaThongSo_Click">
                                     <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
                                 </Button>
                             </StackPanel>
