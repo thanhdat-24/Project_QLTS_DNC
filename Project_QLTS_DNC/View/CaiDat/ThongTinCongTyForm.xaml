@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="Project_QLTS_DNC.View.CaiDat.ThongTinCongTyForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Project_QLTS_DNC.View.CaiDat"
+             xmlns:packIcon="http://materialdesigninxaml.net/winfx/xaml/controls"
+             Background="White">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề -->
+        <TextBlock Text="🧾 Thông Tin Công Ty" 
+                   FontSize="24" 
+                   FontWeight="Bold" 
+                   Foreground="{DynamicResource PrimaryHueMidBrush}" 
+                   Margin="0,0,0,10"/>
+
+        <!-- Form -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Logo + Button -->
+            <StackPanel>
+                <materialDesign:Card Margin="0,0,0,10">
+                    <Image x:Name="imgLogo"
+                           Width="180" Height="180"
+                           Stretch="UniformToFill"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+                </materialDesign:Card>
+
+                <Button Content="Chọn ảnh" 
+                        Margin="0,10,0,0"
+                        Click="BtnChonAnh_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="{DynamicResource PrimaryHueMidBrush}" 
+                        Foreground="White"/>
+            </StackPanel>
+
+            <!-- Thông tin công ty -->
+            <StackPanel Grid.Column="2">
+                <UniformGrid Columns="2" Rows="5" Margin="0,0,0,10">
+                    <TextBox x:Name="txtTen" 
+                             materialDesign:HintAssist.Hint="Tên công ty"/>
+                    <TextBox x:Name="txtMaSoThue" 
+                             materialDesign:HintAssist.Hint="Mã số thuế"/>
+                    <TextBox x:Name="txtDiaChi" 
+                             materialDesign:HintAssist.Hint="Địa chỉ"/>
+                    <TextBox x:Name="txtSoDienThoai" 
+                             materialDesign:HintAssist.Hint="Số điện thoại"/>
+                    <TextBox x:Name="txtEmail" 
+                             materialDesign:HintAssist.Hint="Email"/>
+                    <TextBox x:Name="txtNguoiDaiDien" 
+                             materialDesign:HintAssist.Hint="Người đại diện"/>
+                </UniformGrid>
+
+                <TextBox x:Name="txtGhiChu"
+                         materialDesign:HintAssist.Hint="Ghi chú"
+                         Height="60"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         Margin="0,0,0,10"/>
+
+                <!-- Button Actions -->
+                <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,20,0,0">
+
+                    <!-- In PDF -->
+                    <Button MinWidth="100" Padding="10,4" Margin="0,0,8,0"
+                        Click="InPDF_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="{DynamicResource PrimaryHueMidBrush}"
+                        Foreground="White">     
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Printer" Width="18" Height="18" Margin="0,0,5,0"/>
+                            <TextBlock Text="In PDF" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Lưu -->
+                    <Button MinWidth="80" Padding="10,4" Margin="0,0,8,0"
+                        Click="BtnLuu_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="{DynamicResource PrimaryHueMidBrush}"
+                        Foreground="White"> 
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18" Margin="0,0,5,0"/>
+                            <TextBlock Text="Lưu" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Mở PDF -->
+                    <Button MinWidth="100" Padding="10,4"
+                        Click="BtnMoPDF_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="{DynamicResource PrimaryHueMidBrush}"
+                        Foreground="White"> 
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="FilePdfBox" Width="18" Height="18" Margin="0,0,5,0"/>
+                            <TextBlock Text="Mở PDF" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+
+                <!-- Đường dẫn PDF -->
+                <TextBlock Text="Đường dẫn PDF:" Margin="0,10,0,5"/>
+                <TextBox x:Name="txtPdfPath" 
+                         IsReadOnly="True" 
+                         Background="#f0f0f0" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
