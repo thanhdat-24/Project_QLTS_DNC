@@ -9,7 +9,9 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.QLTaiSan;
+using System.Windows.Media;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -30,12 +32,23 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             txtSearch.KeyDown += TxtSearch_KeyDown;
             cboPhong.SelectionChanged += Filter_SelectionChanged;
 
+            // Đảm bảo chúng ta thêm sự kiện cho nút xoá không phải trên cấp cao mà trong template
+            // btnDelete.Click += BtnDelete_Click; 
+            // Thay bằng việc để cell template xử lý trong XAML
+
             this.Loaded += DanhSachSanPham_Loaded;
         }
 
         private void DanhSachSanPham_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateStatusBar();
+        }
+
+        // Thêm phương thức này vào lớp DanhSachSanPham
+        public void RefreshData()
+        {
+            // Gọi lại phương thức LoadDataAsync để làm mới dữ liệu
+            LoadDataAsync();
         }
 
         private async void LoadDataAsync()
@@ -100,6 +113,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         {
             ApplyFilters();
         }
+
         private void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
             var selectedTaiSan = dgSanPham.SelectedItem as TaiSanDTO;
@@ -110,14 +124,12 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
 
             // Convert TaiSanDTO to TaiSan model
-            var taiSanModel = selectedTaiSan.ToModel();  // Ensure this method returns a TaiSan object, not TaiSanModel
+            var taiSanModel = selectedTaiSan.ToModel();
 
             // Mở form chỉnh sửa tài sản
-            EditSanPham editWindow = new EditSanPham(this, taiSanModel, _phongList);  // Ensure taiSanModel is of type TaiSan
+            EditSanPham editWindow = new EditSanPham(this, taiSanModel, _phongList);
             editWindow.ShowDialog();
         }
-
-
 
         private void TxtSearch_KeyDown(object sender, KeyEventArgs e)
         {
@@ -167,50 +179,81 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             txtStatus.Text = $"Tổng số tài sản: {_listTaiSan?.Count ?? 0}";
         }
 
-        //private async void BtnDelete_Click(object sender, RoutedEventArgs e)
-        //{
-        //    var selectedTaiSan = dgSanPham.SelectedItem as TaiSanDTO;
-        //    if (selectedTaiSan == null)
-        //    {
-        //        MessageBox.Show("Vui lòng chọn tài sản để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-        //        return;
-        //    }
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy nguồn của sự kiện - là nút Delete trong DataGridTemplateColumn
+            Button deleteButton = sender as Button;
+            if (deleteButton == null) return;
 
-        //    var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa tài sản '{selectedTaiSan.TenTaiSan}'?",
-        //                                 "Xác nhận xóa",
-        //                                 MessageBoxButton.YesNo,
-        //                                 MessageBoxImage.Question);
+            // Lấy context (DataContext) của nút, có thể là TaiSanDTO hoặc DataGridRow
+            var dataContext = deleteButton.DataContext;
+            TaiSanDTO selectedTaiSan = dataContext as TaiSanDTO;
 
-        //    if (result == MessageBoxResult.Yes)
-        //    {
-        //        try
-        //        {
-        //            // Gọi phương thức xóa tài sản từ TaiSanService
-        //            bool success = await TaiSanService.XoaTaiSanAsync(selectedTaiSan.MaTaiSan);
+            // Nếu không thể lấy trực tiếp, thử tìm từ DataGridRow
+            if (selectedTaiSan == null)
+            {
+                var row = FindParent<DataGridRow>(deleteButton);
+                if (row != null)
+                {
+                    selectedTaiSan = row.DataContext as TaiSanDTO;
+                }
+            }
 
-        //            if (success)
-        //            {
-        //                // Xóa khỏi danh sách local
-        //                _listTaiSan.Remove(selectedTaiSan);
+            if (selectedTaiSan == null)
+            {
+                MessageBox.Show("Vui lòng chọn tài sản để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
-        //                // Làm mới view
-        //                _viewSource.View.Refresh();
-        //                UpdateStatusBar();
+            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa tài sản '{selectedTaiSan.TenTaiSan}'?",
+                                         "Xác nhận xóa",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Question);
 
-        //                MessageBox.Show("Xóa tài sản thành công.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-        //            }
-        //            else
-        //            {
-        //                MessageBox.Show("Không thể xóa tài sản.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-        //        }
-        //    }
-        //}
-        // Phương thức hỗ trợ để lấy danh sách phòng
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    // Gọi phương thức xóa tài sản từ TaiSanService
+                    bool success = await TaiSanService.XoaTaiSanAsync(selectedTaiSan.MaTaiSan);
+
+                    if (success)
+                    {
+                        // Xóa khỏi danh sách local
+                        _listTaiSan.Remove(selectedTaiSan);
+
+                        // Làm mới view
+                        _viewSource.View.Refresh();
+                        UpdateStatusBar();
+
+                        MessageBox.Show("Xóa tài sản thành công.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể xóa tài sản.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // Helper method to find parent of a specific type
+        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            if (parentObject == null) return null;
+
+            T parent = parentObject as T;
+            if (parent != null)
+                return parent;
+            else
+                return FindParent<T>(parentObject);
+        }
+
         private async Task<List<PhongFilter>> GetPhongListAsync()
         {
             try

@@ -198,7 +198,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Mã QR" Binding="{Binding MaQr}" Width="120" MinWidth="100">
+                        <DataGridTextColumn Header="Mã QR" Binding="{Binding MaQR}" Width="120" MinWidth="100">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -220,7 +220,7 @@
                         </DataGridTextColumn>
 
                         <DataGridTextColumn Header="Hạn BH" 
-                                          Binding="{Binding HanBh, StringFormat={}{0:dd/MM/yyyy}}" 
+                                          Binding="{Binding HanBH, StringFormat={}{0:dd/MM/yyyy}}" 
                                           Width="120" 
                                           MinWidth="110">
                             <DataGridTextColumn.ElementStyle>
@@ -231,7 +231,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Tình Trạng" Binding="{Binding TinhTrangSp}" Width="100" MinWidth="80">
+                        <DataGridTextColumn Header="Tình Trạng" Binding="{Binding TinhTrangSP}" Width="100" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -269,7 +269,7 @@
                                             <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
                                         </Button>
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                             
+                                                Click="BtnDelete_Click"
                                               ToolTip="Xóa" Margin="8,1,0,1"
                                               Background="{DynamicResource SecondaryDelete}" 
                                               Width="32" Height="32" 
