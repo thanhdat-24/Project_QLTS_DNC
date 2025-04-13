@@ -82,12 +82,12 @@
                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
                             <ComboBox Grid.Row="4" Grid.Column="0" Margin="0 8 8 8"
-                                    x:Name="cboMaPhong"
-                                    materialDesign:HintAssist.Hint="Mã phòng"
+                                    x:Name="cboPhong"
+                                    materialDesign:HintAssist.Hint="Phòng"
                                     Style="{StaticResource MaterialDesignOutlinedComboBox}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding MaPhong}"/>
+                                        <TextBlock Text="{Binding TenPhong}"/>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -103,14 +103,10 @@
                                         materialDesign:HintAssist.Hint="Hạn bảo hành"
                                         Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
 
-                            <ComboBox Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
-                                    x:Name="cboTinhTrang"
+                            <TextBox Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
+                                    x:Name="txtTinhTrang"
                                     materialDesign:HintAssist.Hint="Tình trạng sản phẩm"
-                                    Style="{StaticResource MaterialDesignOutlinedComboBox}">
-                                <ComboBoxItem Content="Tốt"/>
-                                <ComboBoxItem Content="Trung bình"/>
-                                <ComboBoxItem Content="Kém"/>
-                            </ComboBox>
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
                             <TextBox Grid.Row="3" Grid.Column="1" Margin="8 8 0 8" 
                                     x:Name="txtMaChiTietPNRef"

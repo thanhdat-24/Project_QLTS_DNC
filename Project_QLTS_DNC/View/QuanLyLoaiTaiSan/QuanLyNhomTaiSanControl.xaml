@@ -135,20 +135,26 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTemplateColumn Header="Thao Tác" Width="120">
+                <DataGridTemplateColumn Header="Thao Tác" Width="180">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
+                VerticalAlignment="Center">
+                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Thông Số KT"
+                    Background="{DynamicResource SecondaryFileExcel}"
+                    Width="32" Height="32" Padding="2" Margin="0,1"
+                    Click="XemThongSoKyThuat_Click">
+                                    <materialDesign:PackIcon Kind="SettingsOutline" Width="18" Height="18" Foreground="White"/>
+                                </Button>
                                 <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Sửa"
-                        Background="{DynamicResource PrimaryHueLightBrush}"
-                        Width="32" Height="32" Padding="2" Margin="0,1"
-                        Click="SuaNhomTaiSan_Click">
+                    Background="{DynamicResource PrimaryHueLightBrush}"
+                    Width="32" Height="32" Padding="2" Margin="4,1"
+                    Click="SuaNhomTaiSan_Click">
                                     <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
                                 </Button>
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Xóa" Margin="8,1,0,1"
-                        Background="{DynamicResource SecondaryDelete}" Width="32" Height="32" Padding="2"
-                        Click="XoaNhomTaiSan_Click">
+                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Xóa" Margin="0,1"
+                    Background="{DynamicResource SecondaryDelete}" Width="32" Height="32" Padding="2"
+                    Click="XoaNhomTaiSan_Click">
                                     <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
                                 </Button>
                             </StackPanel>

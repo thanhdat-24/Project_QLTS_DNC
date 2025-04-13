@@ -3,73 +3,128 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyToanNha"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Thêm phòng" Height="510" Width="450"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
-        TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="Auto"
-        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Thêm phòng"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="CanResize">
-    <Grid Margin="0,0,0,-6">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        Height="510" Width="500">
 
+    <Border Background="White" CornerRadius="10" BorderThickness="1" BorderBrush="#E0E0E0" Margin="0,0,0,75">
+        <Border.Effect>
+            <DropShadowEffect Color="#404040" ShadowDepth="3" BlurRadius="10" Direction="-45" Opacity="0.3"/>
+        </Border.Effect>
 
+        <Grid Margin="0,0,0,19">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Main Content -->
-        <materialDesign:Card Grid.Row="0" Margin="16,0,10,10" Padding="5">
-            <StackPanel>
-                <!-- Tên phòng ban -->
-                <TextBlock Text="Tên phòng:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtTenP" 
-                         materialDesign:HintAssist.Hint="Nhập tên phòng ban" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,5,0,5" />
-                <TextBlock Text="Tên tầng:" Margin="0,8,0,0"/>
+            <!-- Header -->
+            <Grid Grid.Row="0" Background="{DynamicResource PrimaryHueMidBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <TextBlock Text="THÊM MỚI PHÒNG"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                </Grid>
+
+                <Button x:Name="btnDong"
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="White"
+                        Width="40" Height="40"
+                        Margin="0,0,10,0"
+                        Click="btnHuy_Click">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24"/>
+                </Button>
+            </Grid>
+
+            <!-- Nội dung -->
+            <Grid Grid.Row="1" Margin="20,20,20,18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Tên phòng -->
+                <TextBox x:Name="txtTenP"
+                         materialDesign:HintAssist.Hint="Nhập tên phòng ban"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
+
+                <!-- Tên tầng -->
                 <ComboBox x:Name="cboTenTang"
-                    Grid.Row="0"
-                    Margin="0,8,0,15"
-                    materialDesign:HintAssist.Hint="Chọn tầng"
-                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                    DisplayMemberPath="TenToaNha"
-                    SelectedValuePath="MaToaNha"
-                    SelectedValue="{Binding SelectedMaToaNha, Mode=TwoWay}" />
+                          Grid.Row="1"
+                          materialDesign:HintAssist.Hint="Chọn tầng"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          DisplayMemberPath="TenTang"
+                          SelectedValuePath="MaTang"
+                          SelectedValue="{Binding SelectedMaTang, Mode=TwoWay}"
+                          Margin="0,0,0,15"/>
+
                 <!-- Sức chứa -->
-                <TextBlock Text="Sức chứa:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtSucChuaP" 
-           materialDesign:HintAssist.Hint="Nhập sức chứa" 
-           Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-           Margin="0,8,0,16" VerticalScrollBarVisibility="Auto"/>
+                <TextBox x:Name="txtSucChuaP"
+                         Grid.Row="2"
+                         materialDesign:HintAssist.Hint="Nhập sức chứa"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
 
-                <!-- Mô Tả -->
-                <TextBlock Text="Mô tả:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtMoTaP" 
-                         materialDesign:HintAssist.Hint="Nhập mô tả" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,8,0,16" VerticalScrollBarVisibility="Auto"/>
-            </StackPanel>
-        </materialDesign:Card>
+                <!-- Mô tả -->
+                <TextBox x:Name="txtMoTaP"
+                         Grid.Row="3"
+                         materialDesign:HintAssist.Hint="Nhập mô tả"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Height="100"
+                         VerticalScrollBarVisibility="Auto"/>
+            </Grid>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,10">
-            <Button x:Name="btnHuy" 
-                    Content="HỦY" 
-                    Width="100"
-                    Margin="8,0"
-                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="btnHuy_Click"/>
+            <!-- Nút điều khiển -->
+            <Grid Grid.Row="1" Margin="20,324,20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <Button x:Name="btnLuu" 
-                    Content="LƯU" 
-                    Width="100" 
-                    Style="{StaticResource MaterialDesignRaisedButton}" Click="btnLuu_Click"/>
-        </StackPanel>
-    </Grid>
+                <Button Grid.Column="0"
+                        Margin="0,0,8,0"
+                        x:Name="btnHuy"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="btnHuy_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
+                        <TextBlock Text="HUỶ"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="1"
+                        x:Name="btnLuu"
+                        Background="{StaticResource PrimaryHueMidBrush}"
+                        Foreground="White"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="btnLuu_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ContentSave" Margin="0 0 8 0"/>
+                        <TextBlock Text="LƯU"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

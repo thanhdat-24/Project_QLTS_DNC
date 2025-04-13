@@ -20,5 +20,7 @@ namespace Project_QLTS_DNC.Services
             await _client.InitializeAsync();
             return _client;
         }
+
+
     }
 }

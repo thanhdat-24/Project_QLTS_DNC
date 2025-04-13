@@ -162,27 +162,34 @@
                   BorderBrush="{DynamicResource MaterialDesignDivider}"
                   Background="White"
                   RowBackground="White"
-                  AlternatingRowBackground="#F9F9F9">
+                  AlternatingRowBackground="#F9F9F9"
+                  GridLinesVisibility="All"
+                  
+                  HorizontalAlignment="Stretch" 
+                  VerticalAlignment="Stretch" >
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn 
                     ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
                     EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
                     Header="" Width="60"/>
-                <DataGridTextColumn Header="STT" 
-                                    Binding="{Binding STT}" 
-                                    Width="60"/>
-                <DataGridTextColumn Header="Mã TK" 
-                                    Binding="{Binding MaTaiKhoan}" 
-                                    Width="80"/>
-                <DataGridTextColumn Header="Tài khoản" 
-                                    Binding="{Binding TaiKhoan}" 
-                                    Width="140"/>
-                <DataGridTextColumn Header="Nhân viên" 
-                                    Binding="{Binding TenNhanVien}" 
-                                    Width="*"/>
+                <DataGridTextColumn Header="Mã tài khoản" 
+                                    Binding="{Binding MaTk}" 
+                                    Width="100"/>
                 <DataGridTextColumn Header="Loại tài khoản" 
-                                    Binding="{Binding TenLoai}" 
-                                    Width="140"/>
+                                    Binding="{Binding TenLoaiTk}" 
+                                    Width="100"/>
+                <DataGridTextColumn Header="Nhân viên" 
+                                    Binding="{Binding TenNV}" 
+                                    Width="250"/>
+                <DataGridTextColumn Header="Tên tài khoản" 
+                                    Binding="{Binding TenTaiKhoan}" 
+                                    Width="*"/>
+                <DataGridTextColumn Header="Mật khẩu" 
+                                    Binding="{Binding MatKhau}" 
+                                    Width="*"/>
+                <DataGridTextColumn Header="Uid" 
+                                    Binding="{Binding Uid}" 
+                                    Width="*"/>
 
                 <!-- Cột trạng thái -->
                 <DataGridTemplateColumn Header="Trạng thái" Width="100">
@@ -229,24 +236,7 @@
                                     <materialDesign:PackIcon Kind="Key" Foreground="#FF9800" Height="18" Width="18"/>
                                 </Button>
 
-                                <!-- Nút khóa/mở khóa tài khoản -->
-                                <Button Style="{StaticResource ActionIconButton}"
-                                        Command="{Binding DataContext.ChuyenTrangThaiCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"
-                                        Visibility="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <materialDesign:PackIcon Height="18" Width="18" Foreground="#D32F2F">
-                                        <materialDesign:PackIcon.Style>
-                                            <Style TargetType="materialDesign:PackIcon">
-                                                <Setter Property="Kind" Value="Lock" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="False">
-                                                        <Setter Property="Kind" Value="LockOpen" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </materialDesign:PackIcon.Style>
-                                    </materialDesign:PackIcon>
-                                </Button>
+                                
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

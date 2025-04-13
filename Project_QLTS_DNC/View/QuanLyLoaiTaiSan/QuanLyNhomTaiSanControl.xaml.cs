@@ -7,6 +7,7 @@ using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.View.ThongSoKyThuat;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -192,6 +193,62 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi xóa nhóm tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        /// <summary>
+        /// Xử lý sự kiện khi nhấn nút Xem Thông Số Kỹ Thuật
+        /// </summary>
+        // Trong QuanLyNhomTaiSanControl.xaml.cs
+        private void XemThongSoKyThuat_Click(object sender, RoutedEventArgs e)
+        {
+            // Xác định nhóm tài sản DTO được chọn
+            NhomTaiSanDTO nhomTaiSanDTO = dgNhomTaiSan.SelectedItem as NhomTaiSanDTO;
+            if (nhomTaiSanDTO == null)
+            {
+                MessageBox.Show("Vui lòng chọn một nhóm tài sản để xem thông số kỹ thuật.",
+                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Tìm nhóm tài sản tương ứng trong danh sách
+            var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == nhomTaiSanDTO.MaNhomTS);
+            if (nhomTaiSan == null)
+            {
+                MessageBox.Show("Không tìm thấy thông tin nhóm tài sản.",
+                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                // Tạo instance của UserControl ThongSoKyThuat
+                var thongSoKyThuatControl = new ThongSoKyThuatControl();
+
+                // Đăng ký sự kiện quay lại
+                thongSoKyThuatControl.OnBackRequested += () =>
+                {
+                    // Hiển thị lại màn hình Quản lý nhóm tài sản
+                    var mainContent = this.Parent as ContentControl;
+                    if (mainContent != null)
+                    {
+                        mainContent.Content = this;
+                    }
+                };
+
+                // Khởi tạo dữ liệu cho control
+                thongSoKyThuatControl.KhoiTao(nhomTaiSan);
+
+                // Hiển thị UserControl ThongSoKyThuat
+                var mainContent = this.Parent as ContentControl;
+                if (mainContent != null)
+                {
+                    mainContent.Content = thongSoKyThuatControl;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở giao diện thông số kỹ thuật: {ex.Message}",
+                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

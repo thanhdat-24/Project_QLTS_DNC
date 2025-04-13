@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Models.TaiKhoan;
+using Project_QLTS_DNC.ViewModel.TaiKhoan;
 namespace Project_QLTS_DNC.View.TaiKhoan
 {
     /// <summary>
@@ -23,6 +25,15 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         public DanhSachTaiKhoanForm()
         {
             InitializeComponent();
+            Loaded += DanhSachTaiKhoanForm_Loaded;
+
+        }
+
+        private async void DanhSachTaiKhoanForm_Loaded(object sender, RoutedEventArgs e)
+        {
+            var client = await SupabaseService.GetClientAsync();
+            var taiKhoanService = new TaiKhoanService(client);
+            DataContext = new DanhSachTaiKhoanViewModel(taiKhoanService);
         }
     }
 }

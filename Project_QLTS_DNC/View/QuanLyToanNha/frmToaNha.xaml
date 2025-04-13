@@ -187,7 +187,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChiTN}" Width="120" MinWidth="100">
+                        <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChiTN}" Width="120" MinWidth="300">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
