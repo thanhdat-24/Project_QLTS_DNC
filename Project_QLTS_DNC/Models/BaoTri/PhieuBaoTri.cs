@@ -1,48 +1,41 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Text.Json.Serialization;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using Project_QLTS_DNC.Converters;
 
 namespace Project_QLTS_DNC.Models.BaoTri
 {
-    // Đảm bảo model này có mối quan hệ phù hợp với NhanVienModel
-    [Table("phieubaotri")]
+    [Table("baotri")]
     public class PhieuBaoTri : BaseModel
     {
-        [PrimaryKey("ma_phieu", false)]
-        public string MaPhieu { get; set; }
+        [PrimaryKey("ma_bao_tri", false)]
+        public int MaBaoTri { get; set; }
 
         [Column("ma_tai_san")]
-        public string MaTaiSan { get; set; }
+        public int? MaTaiSan { get; set; }
 
-        [Column("ten_tai_san")]
-        public string TenTaiSan { get; set; }
-
-        [Column("loai_bao_tri")]
-        public string LoaiBaoTri { get; set; }
+        [Column("ma_loai_bao_tri")]
+        public int? MaLoaiBaoTri { get; set; }
 
         [Column("ngay_bao_tri")]
         public DateTime NgayBaoTri { get; set; }
 
-        [Column("ngay_hoan_thanh")]
-        public DateTime? NgayHoanThanh { get; set; }
-
-        [Column("nguoi_phu_trach")]
-        public string NguoiPhuTrach { get; set; }
-
-        // Có thể thêm trường để lưu mã nhân viên nếu cần
         [Column("ma_nv")]
         public int? MaNV { get; set; }
 
-        [Column("trang_thai")]
+        [Column("noi_dung")]
+        public string NoiDung { get; set; }
+
+        [Column("trang_thai_sau_bao_tri")]
         public string TrangThai { get; set; }
 
-        [Column("chi_phi_du_kien")]
-        public decimal ChiPhiDuKien { get; set; }
+        // Sử dụng JsonConverter để xử lý kiểu tiền tệ khi nhận dữ liệu từ Supabase
+        [Column("chi_phi")]
+        [JsonConverter(typeof(CurrencyConverter))]
+        public decimal? ChiPhi { get; set; }
 
-        [Column("noi_dung_bao_tri")]
-        public string NoiDungBaoTri { get; set; }
-
+        [Column("ghi_chu")]
+        public string GhiChu { get; set; }
     }
-   
 }

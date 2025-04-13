@@ -6,12 +6,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyPhieu"
+        xmlns:vm="clr-namespace:Project_QLTS_DNC.ViewModel.Baotri"
         mc:Ignorable="d"
         Title="Danh Sách Tài Sản Cần Bảo Trì" 
         Height="700" 
         Width="1200"
         WindowStartupLocation="CenterScreen"
         Background="#F5F5F5">
+
 
     <Window.Resources>
         <!-- Màu Background chính -->
@@ -114,6 +116,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
     </Window.Resources>
 
     <Border Background="White" Margin="15" CornerRadius="10">
@@ -191,6 +194,7 @@
                         <Button Grid.Column="2" 
                     Style="{StaticResource MaterialDesignIconButton}" 
                     x:Name="btnTimKiem" 
+                   
                     Margin="0,0,8,0"
                     ToolTip="Tìm kiếm">
                             <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource PrimaryHueMidBrush}"/>
@@ -202,6 +206,7 @@
                     <ComboBox x:Name="cboLoaiBaoTri" Width="120" Height="42" Margin="15,0,5,0" 
                         VerticalContentAlignment="Center"
                         Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                 
                         materialDesign:HintAssist.Hint="Loại bảo trì">
                         <ComboBoxItem Content="Tất cả loại" IsSelected="True"/>
                         <ComboBoxItem Content="Định kỳ"/>
@@ -212,6 +217,7 @@
                     <ComboBox x:Name="cboNhomTaiSan" Width="150" Height="42" Margin="10,0,5,0" 
                         VerticalContentAlignment="Center"
                         Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                       
                         materialDesign:HintAssist.Hint="Nhóm tài sản">
                         <ComboBoxItem Content="Tất cả nhóm" IsSelected="True"/>
                         <ComboBoxItem Content="Máy tính"/>
@@ -223,6 +229,7 @@
                     <ComboBox x:Name="cboTinhTrang" Width="150" Height="42" Margin="10,0,5,0" 
                         VerticalContentAlignment="Center"
                         Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                    
                         materialDesign:HintAssist.Hint="Tình trạng">
                         <ComboBoxItem Content="Dưới 50%" IsSelected="True"/>
                         <ComboBoxItem Content="Trên 50%"/>
@@ -232,7 +239,9 @@
 
             <!-- Danh sách tài sản cần bảo trì -->
             <Border Grid.Row="2" BorderThickness="0" Margin="20,10">
-                <DataGrid x:Name="dgDanhSachTaiSan" AutoGenerateColumns="False" 
+                <DataGrid x:Name="dgDanhSachTaiSan" 
+                          ItemsSource="{Binding DsKiemKe}"
+                          AutoGenerateColumns="False" 
                           HeadersVisibility="Column"
                           BorderThickness="1" BorderBrush="#E0E0E0"
                           Background="White" RowBackground="White"
@@ -242,7 +251,7 @@
                           IsReadOnly="True"
                           ColumnHeaderHeight="50" RowHeight="45" 
                           VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto" >
+                          HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
@@ -271,72 +280,39 @@
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="50">
                             <DataGridTemplateColumn.Header>
-                                <CheckBox x:Name="chkSelectAll" Click="ChkSelectAll_Click"/>
+                                <CheckBox x:Name="chkSelectAll" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                                    <CheckBox x:Name="chkSelect" IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="Mã tài sản" Width="100" Binding="{Binding MaTaiSan}"/>
-                        <DataGridTextColumn Header="Tên tài sản" Width="*" Binding="{Binding TenTaiSan}"/>
-                        <DataGridTextColumn Header="Nhóm tài sản" Width="120" Binding="{Binding NhomTaiSan}"/>
-                        <DataGridTextColumn Header="Vị trí" Width="120" Binding="{Binding ViTri}"/>
-                        <DataGridTextColumn Header="Phòng" Width="120" Binding="{Binding TenPhong}"/>
+                        <DataGridTextColumn Header="Mã kiểm kê" Width="130" Binding="{Binding MaKiemKeTs}"/>
+                        <DataGridTextColumn Header="Mã đợt kiểm" Width="130" Binding="{Binding MaDotKiemKe}"/>
+                        <DataGridTextColumn Header="Mã tài sản" Width="130" Binding="{Binding MaTaiSan}"/>
+                        <DataGridTextColumn Header="Mã phòng" Width="130" Binding="{Binding MaPhong}"/>
+                        <DataGridTextColumn Header="Tình trạng" Width="140" Binding="{Binding TinhTrang}"/>
+                        <DataGridTextColumn Header="Vị trí" Width="140" Binding="{Binding ViTriThucTe}"/>
+                        <DataGridTextColumn Header="Ghi chú" Width="150" Binding="{Binding GhiChu}"/>
 
-                        <DataGridTemplateColumn Header="Tình trạng" Width="130">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding TinhTrangPhanTram}" 
-                                                 Height="16" Width="100" 
-                                                 Background="#F5F5F5" BorderBrush="#CCCCCC">
-                                        <ProgressBar.Style>
-                                            <Style TargetType="ProgressBar">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TinhTrangPhanTram}" Value="0">
-                                                        <Setter Property="Foreground" Value="#E53935"/>
-                                                    </DataTrigger>
-                                                    <Trigger Property="Value" Value="10">
-                                                        <Setter Property="Foreground" Value="#E53935"/>
-                                                    </Trigger>
-                                                    <Trigger Property="Value" Value="20">
-                                                        <Setter Property="Foreground" Value="#F44336"/>
-                                                    </Trigger>
-                                                    <Trigger Property="Value" Value="30">
-                                                        <Setter Property="Foreground" Value="#FF5722"/>
-                                                    </Trigger>
-                                                    <Trigger Property="Value" Value="40">
-                                                        <Setter Property="Foreground" Value="#FF9800"/>
-                                                    </Trigger>
-                                                    <Trigger Property="Value" Value="50">
-                                                        <Setter Property="Foreground" Value="#FFC107"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ProgressBar.Style>
-                                    </ProgressBar>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTextColumn Header="Ghi chú" Width="200" Binding="{Binding GhiChu}"/>
-
-                        <DataGridTemplateColumn Width="110" MinWidth="110" Header="Tùy chọn">
+                        <DataGridTemplateColumn Width="120" MinWidth="110" Header="Tùy chọn">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                            Click="BtnEdit_Click"
+                                           
+                                            CommandParameter="{Binding MaKiemKeTs}"
                                             ToolTip="Sửa"
                                             Background="{DynamicResource PrimaryHueLightBrush}" 
                                             Width="26" Height="26" Padding="2" Margin="0,1">
                                             <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                            Click="BtnDelete_Click"
+                                           
+                                            CommandParameter="{Binding MaKiemKeTs}"
                                             ToolTip="Xóa" Margin="8,1,0,1"
                                             Background="{DynamicResource SecondaryDelete}" 
                                             Width="26" Height="26" 
@@ -361,30 +337,30 @@
 
                 <!-- Nút bên trái -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <Button x:Name="btnXuatExcel" Content="Xuất Excel" Style="{StaticResource ExportButton}" Click="BtnXuatExcel_Click"/>
+                    <Button x:Name="btnXuatExcel" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
                 </StackPanel>
 
                 <!-- Phân trang -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="&lt;&lt;" Width="40" Height="40" Background="Transparent" 
                             BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="&lt;" Width="40" Height="40" Background="Transparent" 
+                    <Button Content="&lt;" Width="40" Height="40" Background="Transparent"
                             BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="1" Width="40" Height="40" Background="{StaticResource PrimaryHueMidBrush}" 
-                            Foreground="White" BorderThickness="0" Margin="5,0"/>
-                    <Button Content="2" Width="40" Height="40" Background="Transparent" 
+                    <Button x:Name="btnPage1" Content="1" Width="40" Height="40" Background="{StaticResource PrimaryHueMidBrush}"
+                            Foreground="White" BorderThickness="0" Margin="5,0" Tag="1"/>
+                    <Button x:Name="btnPage2" Content="2" Width="40" Height="40" Background="Transparent"
+                            BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0" Tag="2"/>
+                    <Button x:Name="btnPage3" Content="3" Width="40" Height="40" Background="Transparent"
+                            BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0" Tag="3"/>
+                    <Button Content="&gt;" Width="40" Height="40" Background="Transparent"
                             BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="3" Width="40" Height="40" Background="Transparent" 
-                            BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="&gt;" Width="40" Height="40" Background="Transparent" 
-                            BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
-                    <Button Content="&gt;&gt;" Width="40" Height="40" Background="Transparent" 
+                    <Button Content="&gt;&gt;" Width="40" Height="40" Background="Transparent"
                             BorderBrush="#CCCCCC" BorderThickness="1" Margin="5,0"/>
                 </StackPanel>
 
                 <!-- Nút bên phải -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button x:Name="btnDong" Content="Đóng" Style="{StaticResource SecondaryButton}" Click="BtnDong_Click"/>
+                    <Button x:Name="btnDong" Content="Đóng" Style="{StaticResource SecondaryButton}"/>
                 </StackPanel>
             </Grid>
         </Grid>

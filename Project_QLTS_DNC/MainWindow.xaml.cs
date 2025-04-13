@@ -211,5 +211,15 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.CaiDat.BaoMatForm();
 
         }
+
+        private void btnBaoTri_Selected_1(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
+        }
+
+        private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
     }
 }
