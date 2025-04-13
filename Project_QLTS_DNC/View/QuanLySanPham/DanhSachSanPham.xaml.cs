@@ -32,11 +32,39 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             txtSearch.KeyDown += TxtSearch_KeyDown;
             cboPhong.SelectionChanged += Filter_SelectionChanged;
 
+            // Fix: Reference proper control name from XAML - make sure it matches your XAML declaration
+            btnExportQRCode.Click += BtnExportQRCode_Click;
+
             // Đảm bảo chúng ta thêm sự kiện cho nút xoá không phải trên cấp cao mà trong template
             // btnDelete.Click += BtnDelete_Click; 
             // Thay bằng việc để cell template xử lý trong XAML
 
             this.Loaded += DanhSachSanPham_Loaded;
+        }
+        // Thêm vào class DanhSachSanPham
+        private void BtnExportQRCode_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Kiểm tra nếu không có dữ liệu
+                if (_listTaiSan == null || _listTaiSan.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu tài sản để xuất QR Code.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Tạo một bản sao của danh sách tài sản
+                var dsTaiSan = new ObservableCollection<TaiSanDTO>(_listTaiSan.ToList());
+
+                // Mở form xuất QR Code
+                XuatQRCode xuatQRForm = new XuatQRCode(dsTaiSan);
+                xuatQRForm.Owner = Window.GetWindow(this); // Đặt owner cho cửa sổ popup
+                xuatQRForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở form xuất QR Code: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DanhSachSanPham_Loaded(object sender, RoutedEventArgs e)
@@ -301,4 +329,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             return TenPhong;
         }
     }
+
+
 }

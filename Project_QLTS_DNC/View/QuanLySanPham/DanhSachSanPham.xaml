@@ -304,11 +304,11 @@
                              FontWeight="Medium"/>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                                x:Name="btnExportQRCode"
-                                materialDesign:ButtonAssist.CornerRadius="8" 
-                                Background="{DynamicResource SecondaryAccentForegroundBrush}" 
-                                Foreground="{DynamicResource SecondaryBack}" 
-                                Margin="0 0 8 0">
+        x:Name="btnExportQRCode"
+        materialDesign:ButtonAssist.CornerRadius="8" 
+        Background="{DynamicResource SecondaryAccentForegroundBrush}" 
+        Foreground="{DynamicResource SecondaryBack}" 
+        Margin="0 0 8 0">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="QrcodeScan" Margin="0 0 8 0"/>
                                 <TextBlock Text="XUẤT QRCODE"/>
