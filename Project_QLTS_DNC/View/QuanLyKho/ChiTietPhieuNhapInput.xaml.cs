@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Models;
 using Supabase;
 using System;
@@ -70,9 +71,9 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             try
             {
-                var result = await _client.From<NhomTaiSan2>().Get();
+                var result = await _client.From<NhomTaiSan>().Get();
                 cboNhomTaiSan.ItemsSource = result.Models;
-                cboNhomTaiSan.DisplayMemberPath = "TenNhomTS";
+                cboNhomTaiSan.DisplayMemberPath = "TenNhom";
                 cboNhomTaiSan.SelectedValuePath = "MaNhomTS";
             }
             catch (Exception ex)
@@ -102,7 +103,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void btnThem_Click(object sender, RoutedEventArgs e)
         {
-            if (cboNhomTaiSan.SelectedItem is not NhomTaiSan2 nhom)
+            if (cboNhomTaiSan.SelectedItem is not NhomTaiSan nhom)
             {
                 MessageBox.Show("Vui lòng chọn nhóm tài sản trước khi thêm.");
                 return;
@@ -126,7 +127,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MaChiTietPN = 0, // placeholder, sẽ sinh sau khi nhấn "Lưu"
                 MaPhieuNhap = _maPhieuNhap,
                 MaNhomTS = nhom.MaNhomTS,
-                TenTaiSan = nhom.TenNhomTS,
+                TenTaiSan = nhom.TenNhom,
                 SoLuong = soLuong,
                 DonGia = donGia,
                 CanQuanLyRieng = chkQuanLyRieng.IsChecked == true
