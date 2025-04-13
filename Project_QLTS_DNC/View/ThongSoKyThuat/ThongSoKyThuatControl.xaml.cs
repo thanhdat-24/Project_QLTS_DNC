@@ -277,7 +277,6 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
                     "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         /// <summary>
         /// Xử lý sự kiện khi nhấn nút Thêm mới thông số
         /// </summary>
@@ -290,12 +289,15 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
             // Hiển thị cửa sổ và kiểm tra kết quả
             bool? result = themThongSoWindow.ShowDialog();
 
-            if (result == true && themThongSoWindow.ThongSoMoi != null)
+            if (result == true && themThongSoWindow.DanhSachThongSoMoi.Count > 0)
             {
                 try
                 {
-                    // Thêm thông số mới vào danh sách hiển thị
-                    DsThongSoKyThuat.Add(themThongSoWindow.ThongSoMoi);
+                    // Thêm tất cả thông số mới vào danh sách hiển thị
+                    foreach (var thongSo in themThongSoWindow.DanhSachThongSoMoi)
+                    {
+                        DsThongSoKyThuat.Add(thongSo);
+                    }
 
                     // Cập nhật lại DataGrid
                     dgThongSoKyThuat.Items.Refresh();
@@ -303,7 +305,7 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
                     // Thông báo dữ liệu đã thay đổi
                     OnDataChanged?.Invoke();
 
-                    MessageBox.Show("Thêm thông số kỹ thuật thành công!",
+                    MessageBox.Show($"Đã thêm {themThongSoWindow.DanhSachThongSoMoi.Count} thông số kỹ thuật thành công!",
                         "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)

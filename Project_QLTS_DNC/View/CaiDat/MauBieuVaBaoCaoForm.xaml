@@ -39,9 +39,9 @@
 
         <!-- Nút thao tác -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Xem trước" Width="100" Click="BtnXemTruoc_Click"/>
-            <Button Content="Lưu" Width="100" Click="BtnLuu_Click"/>
-            <Button Content="In thử" Width="100" Click="BtnInThu_Click"/>
+            <!--<Button Content="Xem trước" Width="100" Click="BtnXemTruoc_Click"/>-->
+            <!--<Button Content="Lưu" Width="100" Click="BtnLuu_Click"/>
+            <Button Content="In thử" Width="100" Click="BtnInThu_Click"/>-->
         </StackPanel>
     </Grid>
 </UserControl>

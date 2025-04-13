@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.ThongSoKyThuat"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Thêm Thông Số Kỹ Thuật" Height="500" Width="600"
+        Title="Thêm Thông Số Kỹ Thuật" Height="650" Width="800"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -106,35 +106,97 @@
                     </Grid>
                 </Border>
 
-                <!-- Input form -->
+                <!-- Input form - Thêm thông số đơn lẻ -->
                 <Grid Grid.Row="1" Margin="0,0,0,10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0">
-                        <TextBlock Text="Thêm nhiều thông số kỹ thuật" 
-                                   FontWeight="SemiBold" 
-                                   Margin="0,0,0,5"
-                                   FontSize="14"/>
-                        <TextBlock Text="Mỗi dòng là một thông số kỹ thuật" 
-                                   Foreground="Gray"
-                                   Margin="0,0,0,5"
-                                   FontSize="12"/>
-                        <TextBox x:Name="txtNhieuThongSo" 
-                                 materialDesign:HintAssist.Hint="Nhập các thông số kỹ thuật, mỗi dòng một thông số"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 MinHeight="100"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Margin="0,0,0,5"/>
-                        <TextBlock x:Name="txtErrorThongSo" 
-                                   Foreground="Red" 
-                                   Visibility="Collapsed"
-                                   Text="Vui lòng nhập ít nhất một thông số kỹ thuật"/>
-                    </StackPanel>
+                    <Border Grid.Row="0" 
+                            Background="#F2F7FF" 
+                            CornerRadius="5" 
+                            Padding="12" 
+                            Margin="0,0,0,10"
+                            BorderBrush="#BFDBFE"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Thêm thông số kỹ thuật" 
+                                       FontWeight="Bold" 
+                                       Margin="0,0,0,10"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+                            <TextBlock Text="THÔNG SỐ MỚI" 
+                                       FontWeight="SemiBold" 
+                                       Margin="0,0,0,5"
+                                       FontSize="13"/>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="100"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Tên thông số -->
+                                <TextBox x:Name="txtTenThongSo" 
+                                         Grid.Column="0"
+                                         materialDesign:HintAssist.Hint="Tên thông số"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         Margin="0,0,10,0"/>
+
+                                <!-- Số lượng -->
+                                <TextBox x:Name="txtSoLuong" 
+                                         Grid.Column="1"
+                                         materialDesign:HintAssist.Hint="Số lượng"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         Margin="0,0,10,0"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Text="1"/>
+
+                                <!-- Bảo hành -->
+                                <TextBox x:Name="txtBaoHanh" 
+                                         Grid.Column="2"
+                                         materialDesign:HintAssist.Hint="Bảo hành (tháng)"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         Margin="0,0,10,0"
+                                         PreviewTextInput="NumberValidationTextBox"
+                                         Text="12"/>
+
+                                <!-- Nút thêm -->
+                                <Button x:Name="btnThemThongSo" 
+                                        Grid.Column="3"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Background="{DynamicResource PrimaryHueMidBrush}"
+                                        Foreground="White"
+                                        Click="btnThemThongSo_Click"
+                                        ToolTip="Thêm thông số vào danh sách">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Thêm"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <!-- Chi tiết thông số -->
+                            <TextBox x:Name="txtChiTietThongSo" 
+                                     materialDesign:HintAssist.Hint="Chi tiết thông số (Không bắt buộc)"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     MinHeight="50"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Margin="0,5,0,0"/>
+
+                            <TextBlock x:Name="txtErrorThongSo" 
+                                       Foreground="Red" 
+                                       Visibility="Collapsed"
+                                       Text="Vui lòng nhập tên thông số kỹ thuật"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
 
                 <!-- Danh sách thông số sẽ được thêm -->
@@ -144,36 +206,91 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" 
-                               Text="Xem trước danh sách thông số" 
-                               FontWeight="SemiBold" 
-                               Margin="0,0,0,5"
-                               FontSize="14"/>
+                    <Grid Grid.Row="0" Margin="0,0,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <ListView x:Name="lvThongSoPreview" 
+                        <TextBlock Grid.Column="0"
+                                  Text="DANH SÁCH THÔNG SỐ ĐÃ THÊM" 
+                                  FontWeight="SemiBold" 
+                                  FontSize="14"/>
+
+                        <Button Grid.Column="1" 
+                                x:Name="btnXoaTatCa" 
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Click="btnXoaTatCa_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Delete" Margin="0,0,8,0"/>
+                                <TextBlock Text="Xóa tất cả"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <DataGrid x:Name="dgThongSoPreview" 
                               Grid.Row="1"
                               BorderThickness="1"
                               BorderBrush="#DDDDDD"
-                              Margin="0,5,0,0">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="STT" Width="50">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Index}" HorizontalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="Tên thông số" Width="400">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding TenThongSo}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                              Margin="0,5,0,0"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="False"
+                              materialDesign:DataGridAssist.CellPadding="8 4 8 4"
+                              materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="STT" Width="60" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                                <DataGridTextColumn.Binding>
+                                    <MultiBinding StringFormat="{}{0}">
+                                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}" Path="GetIndex"/>
+                                    </MultiBinding>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Tên thông số" Binding="{Binding TenThongSo}" Width="*" IsReadOnly="False"/>
+                            <DataGridTextColumn Header="Chi tiết" Binding="{Binding ChiTietThongSo}" Width="200" IsReadOnly="False">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}" Width="80" IsReadOnly="False">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Bảo hành" Binding="{Binding BaoHanh}" Width="80" IsReadOnly="False">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="Thao tác" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                ToolTip="Xóa thông số" 
+                                                Background="{DynamicResource SecondaryDelete}" 
+                                                Width="32" Height="32" Padding="2"
+                                                Click="XoaThongSoPreview_Click">
+                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="White"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </Grid>
 
@@ -204,7 +321,7 @@
                         Click="btnLuu_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
-                        <TextBlock Text="LƯU LẠI"/>
+                        <TextBlock Text="LƯU TẤT CẢ"/>
                     </StackPanel>
                 </Button>
             </Grid>

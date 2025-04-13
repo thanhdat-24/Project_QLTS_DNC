@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Input;
 using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Services.QLTaiSanService;
@@ -29,6 +31,18 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
             txtTenNhom.Text = nhomTaiSan.TenNhom;
             txtMaThongSo.Text = thongSo.MaThongSo.ToString();
             txtTenThongSo.Text = thongSo.TenThongSo;
+            txtChiTietThongSo.Text = thongSo.ChiTietThongSo;
+            txtSoLuong.Text = thongSo.SoLuong?.ToString() ?? "";
+            txtBaoHanh.Text = thongSo.BaoHanh?.ToString() ?? "";
+        }
+
+        /// <summary>
+        /// Xác thực nhập liệu chỉ cho phép số
+        /// </summary>
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
 
         /// <summary>
@@ -59,12 +73,30 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
                     window.Cursor = System.Windows.Input.Cursors.Wait;
                 }
 
+                // Lấy thông tin từ các trường nhập liệu
+                string chiTietThongSo = txtChiTietThongSo.Text?.Trim();
+
+                int? soLuong = null;
+                if (!string.IsNullOrWhiteSpace(txtSoLuong.Text) && int.TryParse(txtSoLuong.Text, out int sl))
+                {
+                    soLuong = sl;
+                }
+
+                int? baoHanh = null;
+                if (!string.IsNullOrWhiteSpace(txtBaoHanh.Text) && int.TryParse(txtBaoHanh.Text, out int bh))
+                {
+                    baoHanh = bh;
+                }
+
                 // Tạo đối tượng thông số đã cập nhật
                 var thongSoDTO = new ThongSoKyThuatDTO
                 {
                     MaThongSo = _thongSoGoc.MaThongSo,
                     MaNhomTS = NhomTaiSan.MaNhomTS,
-                    TenThongSo = txtTenThongSo.Text.Trim()
+                    TenThongSo = txtTenThongSo.Text.Trim(),
+                    ChiTietThongSo = chiTietThongSo,
+                    SoLuong = soLuong,
+                    BaoHanh = baoHanh
                 };
 
                 // Cập nhật vào cơ sở dữ liệu qua service
@@ -111,6 +143,42 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
             else
             {
                 txtErrorTenThongSo.Visibility = Visibility.Collapsed;
+            }
+
+            // Kiểm tra số lượng
+            if (!string.IsNullOrWhiteSpace(txtSoLuong.Text))
+            {
+                if (!int.TryParse(txtSoLuong.Text, out int sl) || sl < 0)
+                {
+                    txtErrorSoLuong.Visibility = Visibility.Visible;
+                    isValid = false;
+                }
+                else
+                {
+                    txtErrorSoLuong.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                txtErrorSoLuong.Visibility = Visibility.Collapsed;
+            }
+
+            // Kiểm tra bảo hành
+            if (!string.IsNullOrWhiteSpace(txtBaoHanh.Text))
+            {
+                if (!int.TryParse(txtBaoHanh.Text, out int bh) || bh < 0)
+                {
+                    txtErrorBaoHanh.Visibility = Visibility.Visible;
+                    isValid = false;
+                }
+                else
+                {
+                    txtErrorBaoHanh.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                txtErrorBaoHanh.Visibility = Visibility.Collapsed;
             }
 
             return isValid;
