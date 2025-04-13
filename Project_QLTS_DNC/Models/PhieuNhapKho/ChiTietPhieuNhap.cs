@@ -1,30 +1,29 @@
 ﻿using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace Project_QLTS_DNC.Models.PhieuNhapKho
+[Table("chitietphieunhap")]
+public class ChiTietPhieuNhap : BaseModel
 {
-    [Table("chitietphieunhap")]
-    public class ChiTietPhieuNhap : BaseModel
-    {
-        [PrimaryKey("ma_chi_tiet_pn", false)]
-        public long MaChiTietPN { get; set; }
+    [PrimaryKey("ma_chi_tiet_pn", false)]
+    [Column("ma_chi_tiet_pn")]
+    public int MaChiTietPN { get; set; }
 
-        [Column("ma_phieu_nhap")]
-        public long MaPhieuNhap { get; set; }
+    [Column("ma_phieu_nhap")]
+    public int MaPhieuNhap { get; set; }
 
-        [Column("ma_nhom_ts")]
-        public long MaNhomTS { get; set; }
+    [Column("ma_nhom_ts")]
+    public int MaNhomTS { get; set; }
 
-        [Column("ten_tai_san")]
-        public string TenTaiSan { get; set; }
+    [Column("ten_tai_san")]
+    public string TenTaiSan { get; set; } = string.Empty;
 
-        [Column("so_luong")]
-        public int SoLuong { get; set; }
+    [Column("so_luong")]
+    public int? SoLuong { get; set; }
 
-        [Column("don_gia")]
-        public decimal DonGia { get; set; }
 
-        [Column("thanh_tien")]
-        public decimal ThanhTien { get; set; }
-    }
+    [Column("can_quan_ly_rieng")]
+    public bool CanQuanLyRieng { get; set; } = false;
+
+    [Column("don_gia")]
+    public decimal? DonGia { get; set; }  
 }

@@ -7,17 +7,18 @@ namespace Project_QLTS_DNC.Models.PhieuNhapKho
     [Table("phieunhap")]
     public class PhieuNhap : BaseModel
     {
-        [PrimaryKey("ma_pn", false)]
-        public int MaPN { get; set; }  
+        [PrimaryKey("ma_phieu_nhap", false)]
+        [Column("ma_phieu_nhap")]
+        public int MaPhieuNhap { get; set; }
 
         [Column("ma_kho")]
-        public int MaKho { get; set; }  
+        public int MaKho { get; set; }
 
         [Column("ma_nv")]
-        public int MaNV { get; set; }  
+        public int MaNV { get; set; }
 
         [Column("ma_ncc")]
-        public int MaNCC { get; set; }  
+        public int MaNCC { get; set; }
 
         [Column("ngay_nhap")]
         public DateTime NgayNhap { get; set; }
@@ -26,10 +27,6 @@ namespace Project_QLTS_DNC.Models.PhieuNhapKho
         public decimal TongTien { get; set; }
 
         [Column("trang_thai")]
-        public string? TrangThai { get; set; } 
-
-        [PrimaryKey("ma_phieu_nhap", false)]
-        [Column("ma_phieu_nhap")]
-        public int MaPhieuNhap { get; set; } 
+        public string? TrangThai { get; set; }
     }
 }
