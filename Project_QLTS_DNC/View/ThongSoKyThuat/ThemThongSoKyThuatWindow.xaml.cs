@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Services.QLTaiSanService;
@@ -18,15 +20,8 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
         // Danh sách thông số kỹ thuật mới được tạo
         public ObservableCollection<ThongSoKyThuatDTO> DanhSachThongSoMoi { get; private set; }
 
-        // Class cho preview thông số
-        public class ThongSoPreview
-        {
-            public int Index { get; set; }
-            public string TenThongSo { get; set; }
-        }
-
-        // Danh sách để hiển thị preview
-        private ObservableCollection<ThongSoPreview> _previewList;
+        // Danh sách để hiển thị trên DataGrid
+        private ObservableCollection<ThongSoKyThuatDTO> _danhSachPreview;
 
         // Thông tin thông số mới được tạo (giữ lại để tương thích với code cũ)
         public ThongSoKyThuatDTO ThongSoMoi { get; private set; }
@@ -41,48 +36,109 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
             // Hiển thị tên nhóm tài sản
             txtTenNhom.Text = nhomTaiSan.TenNhom;
 
-            // Khởi tạo danh sách thông số mới
+            // Khởi tạo danh sách
             DanhSachThongSoMoi = new ObservableCollection<ThongSoKyThuatDTO>();
-            _previewList = new ObservableCollection<ThongSoPreview>();
+            _danhSachPreview = new ObservableCollection<ThongSoKyThuatDTO>();
 
-            // Gán danh sách preview vào ListView
-            lvThongSoPreview.ItemsSource = _previewList;
-
-            // Thêm sự kiện TextChanged để cập nhật danh sách preview khi nhập liệu
-            txtNhieuThongSo.TextChanged += TxtNhieuThongSo_TextChanged;
+            // Gán nguồn dữ liệu cho DataGrid
+            dgThongSoPreview.ItemsSource = _danhSachPreview;
         }
 
         /// <summary>
-        /// Cập nhật danh sách preview khi text thay đổi
+        /// Xác thực nhập liệu chỉ cho phép số
         /// </summary>
-        private void TxtNhieuThongSo_TextChanged(object sender, TextChangedEventArgs e)
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-            CapNhatPreview();
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
 
         /// <summary>
-        /// Cập nhật danh sách preview từ text trong TextBox
+        /// Thêm một thông số vào danh sách preview
         /// </summary>
-        private void CapNhatPreview()
+        private void btnThemThongSo_Click(object sender, RoutedEventArgs e)
         {
-            _previewList.Clear();
-            
-            if (string.IsNullOrWhiteSpace(txtNhieuThongSo.Text))
-                return;
-
-            string[] danhSachTen = txtNhieuThongSo.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            
-            int index = 1;
-            foreach (string ten in danhSachTen)
+            // Kiểm tra dữ liệu nhập
+            if (string.IsNullOrWhiteSpace(txtTenThongSo.Text))
             {
-                string tenTrim = ten.Trim();
-                if (!string.IsNullOrWhiteSpace(tenTrim))
+                txtErrorThongSo.Visibility = Visibility.Visible;
+                return;
+            }
+            else
+            {
+                txtErrorThongSo.Visibility = Visibility.Collapsed;
+            }
+
+            // Lấy thông tin từ các trường nhập liệu
+            string tenThongSo = txtTenThongSo.Text.Trim();
+            string chiTietThongSo = txtChiTietThongSo.Text?.Trim();
+
+            int? soLuong = null;
+            if (!string.IsNullOrWhiteSpace(txtSoLuong.Text) && int.TryParse(txtSoLuong.Text, out int sl))
+            {
+                soLuong = sl;
+            }
+
+            int? baoHanh = null;
+            if (!string.IsNullOrWhiteSpace(txtBaoHanh.Text) && int.TryParse(txtBaoHanh.Text, out int bh))
+            {
+                baoHanh = bh;
+            }
+
+            // Tạo đối tượng thông số mới
+            var thongSo = new ThongSoKyThuatDTO
+            {
+                MaNhomTS = NhomTaiSan.MaNhomTS,
+                TenThongSo = tenThongSo,
+                ChiTietThongSo = chiTietThongSo,
+                SoLuong = soLuong,
+                BaoHanh = baoHanh
+            };
+
+            // Thêm vào danh sách preview
+            _danhSachPreview.Add(thongSo);
+
+            // Reset các trường nhập liệu
+            txtTenThongSo.Text = string.Empty;
+            txtSoLuong.Text = "1";
+            txtBaoHanh.Text = "12";
+            // Giữ nguyên trường Chi tiết để dễ nhập các thông số có cùng chi tiết
+
+            // Focus vào trường Tên thông số để tiếp tục nhập
+            txtTenThongSo.Focus();
+        }
+
+        /// <summary>
+        /// Xóa một thông số khỏi danh sách preview
+        /// </summary>
+        private void XoaThongSoPreview_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy thông số được chọn từ button xóa
+            Button btn = sender as Button;
+            ThongSoKyThuatDTO thongSo = btn.DataContext as ThongSoKyThuatDTO;
+
+            if (thongSo != null)
+            {
+                _danhSachPreview.Remove(thongSo);
+            }
+        }
+
+        /// <summary>
+        /// Xóa tất cả thông số khỏi danh sách preview
+        /// </summary>
+        private void btnXoaTatCa_Click(object sender, RoutedEventArgs e)
+        {
+            if (_danhSachPreview.Count > 0)
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    "Bạn có chắc chắn muốn xóa tất cả thông số đã thêm?",
+                    "Xác nhận xóa",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
                 {
-                    _previewList.Add(new ThongSoPreview
-                    {
-                        Index = index++,
-                        TenThongSo = tenTrim
-                    });
+                    _danhSachPreview.Clear();
                 }
             }
         }
@@ -92,19 +148,38 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
         /// </summary>
         private void btnHuy_Click(object sender, RoutedEventArgs e)
         {
+            // Nếu có thông số đã thêm, hiển thị thông báo xác nhận
+            if (_danhSachPreview.Count > 0)
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    "Bạn có các thông số chưa được lưu. Bạn có chắc chắn muốn hủy bỏ?",
+                    "Xác nhận hủy",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
             // Đóng cửa sổ và trả về kết quả false
             DialogResult = false;
             Close();
         }
 
         /// <summary>
-        /// Xử lý sự kiện khi nhấn nút Lưu
+        /// Xử lý sự kiện khi nhấn nút Lưu tất cả
         /// </summary>
         private async void btnLuu_Click(object sender, RoutedEventArgs e)
         {
-            // Kiểm tra dữ liệu nhập
-            if (!KiemTraDuLieu())
+            // Kiểm tra danh sách có thông số nào không
+            if (_danhSachPreview.Count == 0)
+            {
+                MessageBox.Show("Vui lòng thêm ít nhất một thông số kỹ thuật.",
+                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
+            }
 
             try
             {
@@ -115,28 +190,14 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
                     window.Cursor = System.Windows.Input.Cursors.Wait;
                 }
 
-                // Lấy danh sách các thông số từ TextBox
-                string[] danhSachTen = txtNhieuThongSo.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                List<string> danhSachTenHopLe = danhSachTen
-                    .Select(t => t.Trim())
-                    .Where(t => !string.IsNullOrWhiteSpace(t))
-                    .ToList();
-
-                // Tạo danh sách DTO
-                List<ThongSoKyThuatDTO> dsThongSo = danhSachTenHopLe.Select(ten => new ThongSoKyThuatDTO
-                {
-                    MaNhomTS = NhomTaiSan.MaNhomTS,
-                    TenThongSo = ten
-                }).ToList();
-
                 // Thêm từng thông số vào cơ sở dữ liệu
                 DanhSachThongSoMoi.Clear();
-                
-                foreach (var thongSoDTO in dsThongSo)
+
+                foreach (var thongSoDTO in _danhSachPreview)
                 {
                     var thongSoDaThem = await ThongSoKyThuatService.ThemThongSoAsync(thongSoDTO);
                     DanhSachThongSoMoi.Add(thongSoDaThem);
-                    
+
                     // Gán thông số đầu tiên cho ThongSoMoi để tương thích với code cũ
                     if (ThongSoMoi == null)
                     {
@@ -149,6 +210,10 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
                 {
                     window.Cursor = null;
                 }
+
+                // Hiển thị thông báo thành công
+                MessageBox.Show($"Đã thêm thành công {DanhSachThongSoMoi.Count} thông số kỹ thuật.",
+                    "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Đóng cửa sổ và trả về kết quả true
                 DialogResult = true;
@@ -166,28 +231,6 @@ namespace Project_QLTS_DNC.View.ThongSoKyThuat
                 MessageBox.Show($"Lỗi khi thêm thông số kỹ thuật: {ex.Message}",
                     "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        /// <summary>
-        /// Kiểm tra dữ liệu nhập
-        /// </summary>
-        /// <returns>True nếu dữ liệu hợp lệ, False nếu không hợp lệ</returns>
-        private bool KiemTraDuLieu()
-        {
-            bool isValid = true;
-
-            // Kiểm tra danh sách thông số
-            if (string.IsNullOrWhiteSpace(txtNhieuThongSo.Text) || _previewList.Count == 0)
-            {
-                txtErrorThongSo.Visibility = Visibility.Visible;
-                isValid = false;
-            }
-            else
-            {
-                txtErrorThongSo.Visibility = Visibility.Collapsed;
-            }
-
-            return isValid;
         }
     }
 }

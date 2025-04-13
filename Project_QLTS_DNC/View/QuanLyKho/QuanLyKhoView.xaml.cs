@@ -19,7 +19,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Project_QLTS_DNC.Services;
-using Project_QLTS_DNC.Model;
+using Project_QLTS_DNC.Models;
 using System.Collections.ObjectModel;
 
 namespace Project_QLTS_DNC.View.QuanLyKho

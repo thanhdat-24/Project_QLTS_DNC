@@ -20,7 +20,10 @@ namespace Project_QLTS_DNC.Utils
             {
                 MaThongSo = model.MaThongSo,
                 MaNhomTS = model.MaNhomTS,
-                TenThongSo = model.TenThongSo
+                TenThongSo = model.TenThongSo,
+                ChiTietThongSo = model.ChiTietThongSo,
+                SoLuong = model.SoLuong,
+                BaoHanh = model.BaoHanh
             };
         }
 
@@ -35,7 +38,10 @@ namespace Project_QLTS_DNC.Utils
             {
                 MaThongSo = dto.MaThongSo,
                 MaNhomTS = dto.MaNhomTS,
-                TenThongSo = dto.TenThongSo
+                TenThongSo = dto.TenThongSo,
+                ChiTietThongSo = dto.ChiTietThongSo,
+                SoLuong = dto.SoLuong,
+                BaoHanh = dto.BaoHanh
             };
         }
 

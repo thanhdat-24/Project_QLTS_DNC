@@ -16,16 +16,28 @@ namespace Project_QLTS_DNC.Models.ThongSoKT
         [Column("ten_thong_so")]
         public string TenThongSo { get; set; }
 
+        [Column("chi_tiet_thong_so")]
+        public string ChiTietThongSo { get; set; }
+
+        [Column("so_luong")]
+        public int? SoLuong { get; set; }
+
+        [Column("bao_hanh")]
+        public int? BaoHanh { get; set; }
+
         // Constructor
         public ThongSoKyThuat()
         {
         }
 
         // Constructor với tham số
-        public ThongSoKyThuat(int maNhomTS, string tenThongSo)
+        public ThongSoKyThuat(int maNhomTS, string tenThongSo, string chiTietThongSo = null, int? soLuong = null, int? baoHanh = null)
         {
             MaNhomTS = maNhomTS;
             TenThongSo = tenThongSo;
+            ChiTietThongSo = chiTietThongSo;
+            SoLuong = soLuong;
+            BaoHanh = baoHanh;
         }
     }
 }
