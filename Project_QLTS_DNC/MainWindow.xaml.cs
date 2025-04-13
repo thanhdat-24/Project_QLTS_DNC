@@ -12,6 +12,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Supabase.Gotrue;
 using Project_QLTS_DNC.View.QuanLyKho;
+using Project_QLTS_DNC.View.QuanLyTaiSan;
+using Project_QLTS_DNC.View.ThongSoKyThuat;
+using Project_QLTS_DNC.Models.QLNhomTS;
+using System.Windows.Controls;
 
 namespace Project_QLTS_DNC
 {
@@ -216,6 +220,26 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.CaiDat.ThongTinCongTyForm();
 
+        }
+    }
+    public static class MainWindowExtensions
+    {
+        public static T GetContentControl<T>(this MainWindow mainWindow) where T : Control
+        {
+            return mainWindow.MainContentPanel.Content as T;
+        }
+
+        // Phương thức mở rộng để chọn tab Nhóm Tài Sản
+        public static void SelectNhomTaiSanTab(this MainWindow mainWindow)
+        {
+            // Lấy đối tượng QuanLyTaiSan từ MainContentPanel
+            var quanLyTaiSan = mainWindow.GetContentControl<View.QuanLyTaiSan.QuanLyTaiSan>();
+
+            // Nếu tìm thấy, chọn tab Nhóm Tài Sản (tab thứ 3, index = 2)
+            if (quanLyTaiSan != null && quanLyTaiSan.tabMain != null)
+            {
+                quanLyTaiSan.tabMain.SelectedIndex = 2;
+            }
         }
     }
 }

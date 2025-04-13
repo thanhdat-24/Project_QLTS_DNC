@@ -1,0 +1,177 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.ThongSoKyThuat.CapNhatThongSoKyThuatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Project_QLTS_DNC.View.ThongSoKyThuat"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Cập Nhật Thông Số Kỹ Thuật" Height="350" Width="500"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Border Background="White" 
+            CornerRadius="10" 
+            BorderThickness="1"
+            BorderBrush="#E0E0E0">
+        <Border.Effect>
+            <DropShadowEffect Color="#404040" 
+                              ShadowDepth="3" 
+                              BlurRadius="10" 
+                              Direction="-45" 
+                              Opacity="0.3"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Tiêu đề -->
+            <Grid Grid.Row="0" Background="{DynamicResource PrimaryHueMidBrush}" Height="50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="CẬP NHẬT THÔNG SỐ KỸ THUẬT" 
+                           Grid.Column="0" 
+                           Foreground="White" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           VerticalAlignment="Center" 
+                           Margin="15,0,0,0"/>
+
+                <Button x:Name="btnDong" 
+                        Grid.Column="1" 
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="White"
+                        Margin="0,0,10,0"
+                        Width="40" Height="40"
+                        Click="btnHuy_Click">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24"/>
+                </Button>
+            </Grid>
+
+            <!-- Nội dung form -->
+            <Grid Grid.Row="1" Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Thông tin nhóm tài sản và thông số -->
+                <Border Grid.Row="0" 
+                        Background="#F5F5F5" 
+                        CornerRadius="5" 
+                        Padding="12" 
+                        Margin="0,0,0,20"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" 
+                                   Text="THÔNG TIN CHI TIẾT" 
+                                   FontWeight="Bold" 
+                                   FontSize="14"
+                                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                   Margin="0,0,0,10"/>
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="FolderOutline" 
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                    Margin="0,0,8,0"
+                                                    Width="22"
+                                                    Height="22"/>
+                            <TextBlock Text="Tên nhóm: " 
+                                      FontWeight="SemiBold" 
+                                      VerticalAlignment="Center"/>
+                            <TextBlock x:Name="txtTenNhom" 
+                                      Text="[Tên nhóm tài sản]" 
+                                      FontWeight="Medium"
+                                      Margin="4,0,0,0" 
+                                      VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Tag" 
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                    Margin="0,0,8,0"
+                                                    Width="22"
+                                                    Height="22"/>
+                            <TextBlock Text="Mã thông số: " 
+                                      FontWeight="SemiBold" 
+                                      VerticalAlignment="Center"/>
+                            <TextBlock x:Name="txtMaThongSo" 
+                                      Text="[Mã thông số]" 
+                                      FontWeight="Medium"
+                                      Margin="4,0,0,0" 
+                                      VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Input form -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                    <TextBlock Text="Tên thông số kỹ thuật" 
+                               FontWeight="SemiBold" 
+                               Margin="0,0,0,5"
+                               FontSize="14"/>
+                    <TextBox x:Name="txtTenThongSo" 
+                             materialDesign:HintAssist.Hint="Nhập tên thông số kỹ thuật"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Margin="0,0,0,5"/>
+                    <TextBlock x:Name="txtErrorTenThongSo" 
+                               Foreground="Red" 
+                               Visibility="Collapsed"
+                               Text="Tên thông số không được để trống"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Buttons -->
+            <Grid Grid.Row="2" Margin="20,0,20,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" 
+                        Margin="0,0,10,0" 
+                        x:Name="btnHuy" 
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="btnHuy_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
+                        <TextBlock Text="HỦY BỎ"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="btnLuu" 
+                        Grid.Column="1" 
+                        Margin="10,0,0,0"
+                        Background="{StaticResource PrimaryHueMidBrush}"
+                        Foreground="White"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="btnLuu_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
+                        <TextBlock Text="LƯU LẠI"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

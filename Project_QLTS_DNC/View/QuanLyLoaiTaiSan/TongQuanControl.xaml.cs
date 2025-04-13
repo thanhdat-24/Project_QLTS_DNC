@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Threading.Tasks;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
@@ -99,6 +100,150 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             {
                 MessageBox.Show("Không thể tìm thấy cửa sổ chính (MainWindow)", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Xử lý sự kiện khi nhấn vào card Loại Tài Sản hoặc nút Xem chi tiết
+        /// </summary>
+        private void CardLoaiTaiSan_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ChuyenDenTabLoaiTaiSan();
+        }
+
+        private void btnXemChiTietLoaiTaiSan_Click(object sender, RoutedEventArgs e)
+        {
+            ChuyenDenTabLoaiTaiSan();
+        }
+
+        /// <summary>
+        /// Xử lý sự kiện khi nhấn vào card Nhóm Tài Sản hoặc nút Xem chi tiết
+        /// </summary>
+        private void CardNhomTaiSan_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ChuyenDenTabNhomTaiSan();
+        }
+
+        private void btnXemChiTietNhomTaiSan_Click(object sender, RoutedEventArgs e)
+        {
+            ChuyenDenTabNhomTaiSan();
+        }
+
+        /// <summary>
+        /// Tìm phần tử cha có kiểu chỉ định trong cây phần tử trực quan
+        /// </summary>
+        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // Lấy phần tử cha
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            // Kiểm tra nếu không có phần tử cha
+            if (parentObject == null)
+                return null;
+
+            // Kiểm tra nếu phần tử cha là kiểu mong muốn
+            if (parentObject is T parent)
+                return parent;
+
+            // Đệ quy tìm kiếm phần tử cha tiếp theo
+            return FindParent<T>(parentObject);
+        }
+
+        /// <summary>
+        /// Chuyển đến tab Loại Tài Sản
+        /// </summary>
+        private void ChuyenDenTabLoaiTaiSan()
+        {
+            try
+            {
+                // Tìm QuanLyTaiSan control (parent của TongQuanControl)
+                var quanLyTaiSan = FindParent<QuanLyTaiSan>(this);
+                if (quanLyTaiSan != null)
+                {
+                    // Chuyển đến tab Loại Tài Sản (index 1)
+                    if (quanLyTaiSan.tabMain != null)
+                    {
+                        quanLyTaiSan.tabMain.SelectedIndex = 1; // Index của tab Loại Tài Sản
+                    }
+                }
+                else
+                {
+                    // Thử cách khác - tìm kiếm TabControl trong cây phần tử
+                    var tabControl = FindTabControl();
+                    if (tabControl != null)
+                    {
+                        tabControl.SelectedIndex = 1; // Index của tab Loại Tài Sản
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể tìm thấy TabControl để chuyển tab.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi chuyển tab: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Chuyển đến tab Nhóm Tài Sản
+        /// </summary>
+        private void ChuyenDenTabNhomTaiSan()
+        {
+            try
+            {
+                // Tìm QuanLyTaiSan control (parent của TongQuanControl)
+                var quanLyTaiSan = FindParent<QuanLyTaiSan>(this);
+                if (quanLyTaiSan != null)
+                {
+                    // Chuyển đến tab Nhóm Tài Sản (index 2)
+                    if (quanLyTaiSan.tabMain != null)
+                    {
+                        quanLyTaiSan.tabMain.SelectedIndex = 2; // Index của tab Nhóm Tài Sản
+                    }
+                }
+                else
+                {
+                    // Thử cách khác - tìm kiếm TabControl trong cây phần tử
+                    var tabControl = FindTabControl();
+                    if (tabControl != null)
+                    {
+                        tabControl.SelectedIndex = 2; // Index của tab Nhóm Tài Sản
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể tìm thấy TabControl để chuyển tab.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi chuyển tab: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Tìm kiếm TabControl trong cây phần tử
+        /// </summary>
+        private TabControl FindTabControl()
+        {
+            DependencyObject current = this;
+            TabControl tabControl = null;
+
+            // Đi lên cây phần tử để tìm TabItem
+            TabItem tabItem = FindParent<TabItem>(this);
+            if (tabItem != null)
+            {
+                // Nếu tìm thấy TabItem, lấy TabControl chứa nó
+                tabControl = FindParent<TabControl>(tabItem);
+            }
+            else
+            {
+                // Nếu không tìm thấy TabItem, tìm trực tiếp TabControl
+                tabControl = FindParent<TabControl>(this);
+            }
+
+            return tabControl;
         }
     }
 }

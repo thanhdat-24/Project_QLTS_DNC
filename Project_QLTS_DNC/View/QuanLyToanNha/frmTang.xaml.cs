@@ -1,5 +1,5 @@
 ﻿using Project_QLTS_DNC.Models.ToaNha;
-using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.QLToanNha;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

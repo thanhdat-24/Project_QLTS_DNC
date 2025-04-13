@@ -9,9 +9,9 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Services.QLTaiSanService;
-using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using System.Windows.Media;
+using Project_QLTS_DNC.Services.QLToanNha;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
