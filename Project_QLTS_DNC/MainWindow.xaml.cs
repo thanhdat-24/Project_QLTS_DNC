@@ -12,6 +12,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Supabase.Gotrue;
 using Project_QLTS_DNC.View.QuanLyKho;
+using Project_QLTS_DNC.View.QuanLyTaiSan;
+using Project_QLTS_DNC.View.ThongSoKyThuat;
+using Project_QLTS_DNC.Models.QLNhomTS;
+using System.Windows.Controls;
 
 namespace Project_QLTS_DNC
 {
@@ -200,16 +204,36 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = tồnKhoForm; // Thay thế nội dung của ContentControl
         }
 
-        private void btnPhanQuyen_Selected(object sender, RoutedEventArgs e)
+      
+
+       
+
+        private void btnThongTinCongTy_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.CaiDat.QuanLyNguoiDungvaPhanQuyenForm();
+            MainContentPanel.Content = new View.CaiDat.ThongTinCongTyForm();
 
         }
 
-        private void btnBaoMat_Selected(object sender, RoutedEventArgs e)
+       
+    }
+    public static class MainWindowExtensions
+    {
+        public static T GetContentControl<T>(this MainWindow mainWindow) where T : Control
         {
-            MainContentPanel.Content = new View.CaiDat.BaoMatForm();
+            return mainWindow.MainContentPanel.Content as T;
+        }
 
+        // Phương thức mở rộng để chọn tab Nhóm Tài Sản
+        public static void SelectNhomTaiSanTab(this MainWindow mainWindow)
+        {
+            // Lấy đối tượng QuanLyTaiSan từ MainContentPanel
+            var quanLyTaiSan = mainWindow.GetContentControl<View.QuanLyTaiSan.QuanLyTaiSan>();
+
+            // Nếu tìm thấy, chọn tab Nhóm Tài Sản (tab thứ 3, index = 2)
+            if (quanLyTaiSan != null && quanLyTaiSan.tabMain != null)
+            {
+                quanLyTaiSan.tabMain.SelectedIndex = 2;
+            }
         }
 
         private void btnDanhSachTaiKhoan_Selected(object sender, RoutedEventArgs e)

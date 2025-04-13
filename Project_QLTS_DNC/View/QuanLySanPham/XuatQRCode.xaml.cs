@@ -3,29 +3,34 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
-using Project_QLTS_DNC.Model;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
+using ZXing.QrCode.Internal;
 using ZXing.Rendering;
 // Thêm các using cần thiết
 using System.Drawing;
 using System.Drawing.Imaging;
 // Tránh xung đột namespace với iText
 using iTextImage = iText.Layout.Element.Image;
-using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
-using iTextErrorCorrectionLevel = iText.Barcodes.Qrcode.ErrorCorrectionLevel;
-using ZXingErrorCorrectionLevel = ZXing.QrCode.Internal.ErrorCorrectionLevel;
-using static Project_QLTS_DNC.Model.SanPham;
 using iText.IO.Image;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
-
+using iTextErrorCorrectionLevel = iText.Barcodes.Qrcode.ErrorCorrectionLevel;
+using ZXingErrorCorrectionLevel = ZXing.QrCode.Internal.ErrorCorrectionLevel;
+using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Services.QLTaiSanService;
+using System.Windows.Input;
+// Add explicit import for iText TextAlignment to avoid ambiguity
+using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -57,44 +62,99 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
     public partial class XuatQRCode : Window
     {
-        private readonly ObservableCollection<SanPham> _allSanPham;
-        private List<SanPham> _selectedSanPhams = new List<SanPham>();
-        private List<NhomTSFilter> _nhomTSList;
+        private ObservableCollection<TaiSanQRDTO> _listTaiSan;
+        private ObservableCollection<TaiSanQRDTO> _filteredTaiSan;
+        private List<NhomTaiSanFilter> _nhomTSList;
+        private int _totalItems = 0;
+        private int _selectedItems = 0;
 
-        public XuatQRCode(ObservableCollection<SanPham> sanPhams, List<NhomTSFilter> nhomTSList)
+        public XuatQRCode(ObservableCollection<TaiSanDTO> dsTaiSan = null)
         {
             InitializeComponent();
-            _allSanPham = sanPhams;
-            _nhomTSList = nhomTSList;
 
-            // Khởi tạo danh sách tài sản
-            dgSanPham.ItemsSource = _allSanPham;
-
-            // Cài đặt ComboBox nhóm tài sản
-            cboNhomTS.ItemsSource = _nhomTSList;
-            cboNhomTS.SelectedIndex = 0;
-
-            // Đăng ký sự kiện
-            btnApplyFilter.Click += BtnApplyFilter_Click;
+            // Đăng ký events
+            btnCancel.Click += BtnCancel_Click;
+            btnExportQR.Click += BtnExportQR_Click;
             btnSelectAll.Click += BtnSelectAll_Click;
             btnUnselectAll.Click += BtnUnselectAll_Click;
-            btnExportQR.Click += BtnExportQR_Click;
-            btnCancel.Click += BtnCancel_Click;
+            btnApplyFilter.Click += BtnApplyFilter_Click;
             txtSearchSeri.TextChanged += TxtSearchSeri_TextChanged;
             cboNhomTS.SelectionChanged += CboNhomTS_SelectionChanged;
 
-            // Cập nhật trạng thái ban đầu
-            UpdateStatusText();
+            // Tải dữ liệu
+            InitializeDataAsync(dsTaiSan);
+        }
+
+        private async void InitializeDataAsync(ObservableCollection<TaiSanDTO> dsTaiSan)
+        {
+            try
+            {
+                // Tải danh sách nhóm tài sản cho ComboBox filter
+                await LoadNhomTaiSanAsync();
+
+                if (dsTaiSan == null || dsTaiSan.Count == 0)
+                {
+                    // Nếu không có dữ liệu được truyền vào, tải từ service
+                    var taiSanModels = await TaiSanService.LayDanhSachTaiSanAsync();
+                    _listTaiSan = new ObservableCollection<TaiSanQRDTO>(
+                        taiSanModels.Select(model => {
+                            var dto = TaiSanDTO.FromModel(model);
+                            return TaiSanQRDTO.FromTaiSanDTO(dto);
+                        }));
+                }
+                else
+                {
+                    // Sử dụng dữ liệu đã truyền vào
+                    _listTaiSan = new ObservableCollection<TaiSanQRDTO>(
+                        dsTaiSan.Select(dto => TaiSanQRDTO.FromTaiSanDTO(dto)));
+                }
+
+                // Tải thông tin nhóm tài sản cho mỗi tài sản
+                foreach (var taiSan in _listTaiSan)
+                {
+                    await taiSan.LoadNhomTaiSanInfoAsync();
+                }
+
+                // Gán nguồn dữ liệu cho DataGrid
+                _filteredTaiSan = new ObservableCollection<TaiSanQRDTO>(_listTaiSan);
+                dgSanPham.ItemsSource = _filteredTaiSan;
+
+                _totalItems = _filteredTaiSan.Count;
+                UpdateStatusText();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task LoadNhomTaiSanAsync()
+        {
+            try
+            {
+                _nhomTSList = await NhomTaiSanService.GetNhomTaiSanFilterListAsync();
+                cboNhomTS.ItemsSource = _nhomTSList;
+                cboNhomTS.DisplayMemberPath = "TenNhomTS";
+                cboNhomTS.SelectedIndex = 0; // Chọn "Tất cả" mặc định
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách nhóm tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CboNhomTS_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ApplyFilters();
+            // Áp dụng filter khi thay đổi combobox
+            if (IsInitialized && _filteredTaiSan != null)
+            {
+                ApplyFilters();
+            }
         }
 
         private void TxtSearchSeri_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ApplyFilters();
+            // Không cần apply filter ngay khi nhập, chỉ khi nhấn nút "Áp dụng" hoặc enter
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
@@ -110,210 +170,280 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
         private void ApplyFilters()
         {
-            IEnumerable<SanPham> filteredList = _allSanPham;
+            string searchText = txtSearchSeri.Text.ToLower().Trim();
 
-            // Lọc theo Số Seri
-            if (!string.IsNullOrEmpty(txtSearchSeri.Text))
+            // Lọc theo số seri hoặc tên tài sản
+            var filteredItems = _listTaiSan.Where(ts =>
+                string.IsNullOrEmpty(searchText) ||
+                (ts.SoSeri != null && ts.SoSeri.ToLower().Contains(searchText)) ||
+                (ts.TenTaiSan != null && ts.TenTaiSan.ToLower().Contains(searchText))
+            ).ToList();
+
+            // Lọc theo nhóm tài sản (nếu đã chọn)
+            if (cboNhomTS.SelectedItem != null && cboNhomTS.SelectedIndex > 0) // Bỏ qua item "Tất cả"
             {
-                filteredList = filteredList.Where(sp =>
-                    sp.SoSeri.ToLower().Contains(txtSearchSeri.Text.ToLower()));
+                // Lấy mã nhóm tài sản đã chọn
+                var selectedNhomTS = (NhomTaiSanFilter)cboNhomTS.SelectedItem;
+                if (selectedNhomTS.MaNhomTS.HasValue)
+                {
+                    filteredItems = filteredItems.Where(ts => ts.MaNhomTS == selectedNhomTS.MaNhomTS).ToList();
+                }
             }
 
-            // Lọc theo MaNhomTS
-            if (cboNhomTS.SelectedIndex > 0)
+            _filteredTaiSan.Clear();
+            foreach (var item in filteredItems)
             {
-                int selectedMaNhomTS = ((NhomTSFilter)cboNhomTS.SelectedItem).MaNhomTS;
-                filteredList = filteredList.Where(sp => sp.MaNhomTS == selectedMaNhomTS);
+                _filteredTaiSan.Add(item);
             }
 
-            // Cập nhật DataGrid
-            dgSanPham.ItemsSource = filteredList;
-
-            // Cập nhật trạng thái
+            _totalItems = _filteredTaiSan.Count;
+            _selectedItems = _filteredTaiSan.Count(item => item.IsSelected);
             UpdateStatusText();
         }
 
         private void BtnSelectAll_Click(object sender, RoutedEventArgs e)
         {
-            // Chọn tất cả sản phẩm đang hiển thị
-            foreach (SanPham sp in dgSanPham.Items)
+            foreach (var item in _filteredTaiSan)
             {
-                sp.IsSelected = true;
+                item.IsSelected = true;
             }
+            _selectedItems = _filteredTaiSan.Count;
             UpdateStatusText();
         }
 
         private void BtnUnselectAll_Click(object sender, RoutedEventArgs e)
         {
-            // Bỏ chọn tất cả sản phẩm
-            foreach (SanPham sp in dgSanPham.Items)
+            foreach (var item in _filteredTaiSan)
             {
-                sp.IsSelected = false;
+                item.IsSelected = false;
             }
+            _selectedItems = 0;
             UpdateStatusText();
         }
 
         private void UpdateStatusText()
         {
-            int selectedCount = dgSanPham.Items.Cast<SanPham>().Count(sp => sp.IsSelected);
-            txtStatus.Text = $"Đã chọn: {selectedCount} / {dgSanPham.Items.Count} sản phẩm";
+            txtStatus.Text = $"Đã chọn: {_selectedItems} / {_totalItems} sản phẩm";
         }
 
         private void CheckBox_Changed(object sender, RoutedEventArgs e)
         {
+            _selectedItems = _filteredTaiSan.Count(item => item.IsSelected);
             UpdateStatusText();
         }
 
         private void BtnExportQR_Click(object sender, RoutedEventArgs e)
         {
-            // Lấy danh sách sản phẩm đã chọn
-            _selectedSanPhams = dgSanPham.Items.Cast<SanPham>()
-                .Where(sp => sp.IsSelected)
-                .ToList();
+            var selectedItems = _filteredTaiSan.Where(item => item.IsSelected).ToList();
 
-            if (_selectedSanPhams.Count == 0)
+            if (selectedItems.Count == 0)
             {
-                MessageBox.Show("Vui lòng chọn ít nhất một sản phẩm để xuất mã QR!",
-                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng chọn ít nhất một sản phẩm để xuất mã QR.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            // Hiển thị SaveFileDialog để chọn nơi lưu file PDF
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "PDF Files (*.pdf)|*.pdf",
-                DefaultExt = "pdf",
-                FileName = $"QRCode_SanPham_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                FileName = "QRCode_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".pdf"
             };
 
             if (saveFileDialog.ShowDialog() == true)
             {
                 try
                 {
-                    ExportQRCodeToPDF(saveFileDialog.FileName);
-                    MessageBox.Show($"Đã xuất {_selectedSanPhams.Count} mã QR thành công!",
-                        "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    ExportQRCodeToPDF(saveFileDialog.FileName, selectedItems);
+                    Mouse.OverrideCursor = null;
 
-                    // Đóng cửa sổ sau khi xuất thành công
-                    this.DialogResult = true;
-                    this.Close();
+                    MessageBox.Show("Xuất mã QR thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Hỏi người dùng có muốn mở file PDF không
+                    var result = MessageBox.Show("Bạn có muốn mở file PDF vừa tạo không?", "Thông báo", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        OpenPdfFile(saveFileDialog.FileName);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Lỗi khi xuất mã QR: {ex.Message}",
-                        "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Mouse.OverrideCursor = null;
+                    // Ghi log lỗi
+                    LogError(ex);
+                    MessageBox.Show($"Lỗi khi xuất mã QR: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private void ExportQRCodeToPDF(string filePath)
+        // Phương thức mở file PDF với xử lý ngoại lệ chi tiết
+        private void OpenPdfFile(string filePath)
         {
+            try
+            {
+                // Kiểm tra file tồn tại trước
+                if (File.Exists(filePath))
+                {
+                    // Sử dụng phương thức mở file mặc định của hệ điều hành
+                    ProcessStartInfo startInfo = new ProcessStartInfo(filePath)
+                    {
+                        UseShellExecute = true
+                    };
+                    System.Diagnostics.Process.Start(startInfo);
+                }
+                else
+                {
+                    MessageBox.Show("File không tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Win32Exception ex)
+            {
+                MessageBox.Show($"Lỗi hệ thống khi mở file: {ex.Message}\nMã lỗi: {ex.ErrorCode}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                LogError(ex);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi không xác định khi mở file: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                LogError(ex);
+            }
+        }
+
+        // Phương thức ghi log lỗi
+        private void LogError(Exception ex)
+        {
+            try
+            {
+                string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "QRCodeError.log");
+                string errorMessage = $"Thời gian: {DateTime.Now}\n" +
+                                      $"Lỗi: {ex.Message}\n" +
+                                      $"Chi tiết: {ex.ToString()}\n" +
+                                      $"Nguồn: {ex.Source}\n" +
+                                      $"Ngăn xếp: {ex.StackTrace}\n" +
+                                      "---------------------------------------------------\n";
+
+                File.AppendAllText(logPath, errorMessage);
+            }
+            catch
+            {
+                // Nếu không thể ghi log, bỏ qua để tránh gây thêm lỗi
+            }
+        }
+
+        private void ExportQRCodeToPDF(string filePath, List<TaiSanQRDTO> selectedItems)
+        {
+            // Cấu hình PDF writer
             using (PdfWriter writer = new PdfWriter(filePath))
             {
                 using (PdfDocument pdf = new PdfDocument(writer))
                 {
                     Document document = new Document(pdf);
-                    document.SetMargins(36, 36, 36, 36);
 
-                    // Tạo tiêu đề
-                    document.Add(new Paragraph("DANH SÁCH MÃ QR SẢN PHẨM")
-                        .SetTextAlignment(iTextTextAlignment.CENTER)
-                        .SetFontSize(16)
-                        .SetBold());
+                    // Tạo bảng 2x2 để hiển thị 4 mã QR trên mỗi trang
+                    iText.Layout.Element.Table table = new iText.Layout.Element.Table(2);
+                    table.SetWidth(UnitValue.CreatePercentValue(100));
 
-                    document.Add(new Paragraph($"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}")
-                        .SetTextAlignment(iTextTextAlignment.RIGHT)
-                        .SetFontSize(10)
-                        .SetItalic());
+                    int cellCount = 0;
 
-                    document.Add(new Paragraph("\n"));
-
-                    // Số cột hiển thị trên mỗi trang
-                    int cols = 2;
-
-                    // Tạo bảng để hiển thị các mã QR
-                    Table table = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }))
-                        .UseAllAvailableWidth();
-
-                    int count = 0;
-                    foreach (SanPham sp in _selectedSanPhams)
+                    foreach (var item in selectedItems)
                     {
-                        // Tạo mã QR cho sản phẩm
-                        byte[] qrCodeImage = GenerateQRCode(sp);
+                        // Tạo mã QR từ thông tin tài sản
+                        string qrContent = $"https://yourwebsite.com/taisan?id={item.MaTaiSan}&seri={item.SoSeri}";
 
-                        // Tạo ô chứa mã QR và thông tin sản phẩm
-                        Cell cell = new Cell();
-                        cell.SetPadding(10);
-                        cell.SetTextAlignment(iTextTextAlignment.CENTER);
-
-                        // Thêm ảnh mã QR
-                        ImageData imageData = ImageDataFactory.Create(qrCodeImage);
-                        iTextImage image = new iTextImage(imageData).SetWidth(120).SetHeight(120);
-                        cell.Add(image);
-
-                        // Thêm thông tin sản phẩm
-                        cell.Add(new Paragraph($"Mã SP: {sp.MaSP}").SetFontSize(8));
-                        cell.Add(new Paragraph($"Tên: {sp.TenSanPham}").SetFontSize(8));
-                        cell.Add(new Paragraph($"Số Seri: {sp.SoSeri}").SetFontSize(8).SetBold());
-                        cell.Add(new Paragraph($"Ngày SD: {sp.NgaySuDung:dd/MM/yyyy}").SetFontSize(8));
-
-                        table.AddCell(cell);
-
-                        count++;
-
-                        // Nếu đã đủ số cột và không phải là sản phẩm cuối cùng, thêm một dòng mới
-                        if (count % cols == 0 && count < _selectedSanPhams.Count)
+                        // Tạo QR code sử dụng ZXing
+                        BarcodeWriter<Bitmap> barcodeWriter = new BarcodeWriter<Bitmap>();
+                        barcodeWriter.Format = BarcodeFormat.QR_CODE;
+                        barcodeWriter.Options = new QrCodeEncodingOptions
                         {
-                            // Không cần thao tác thêm vì table tự động xuống dòng
+                            Height = 300,
+                            Width = 300,
+                            Margin = 0,
+                            ErrorCorrection = ZXingErrorCorrectionLevel.H
+                        };
+                        barcodeWriter.Renderer = new BitmapRenderer();
+
+                        using (Bitmap qrBitmap = barcodeWriter.Write(qrContent))
+                        {
+                            // Lưu QR code tạm thời vào một MemoryStream
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                qrBitmap.Save(ms, ImageFormat.Png);
+                                byte[] imageBytes = ms.ToArray();
+
+                                // Tạo cell cho mã QR
+                                iText.Layout.Element.Cell cell = new iText.Layout.Element.Cell();
+                                cell.SetPadding(10);
+                                cell.SetBorder(iText.Layout.Borders.Border.NO_BORDER);
+
+                                // Thêm hình ảnh mã QR vào cell
+                                iTextImage qrImage = new iTextImage(ImageDataFactory.Create(imageBytes));
+                                qrImage.SetWidth(UnitValue.CreatePercentValue(70));
+
+                                // Use fully qualified iText TextAlignment to avoid ambiguity
+                                qrImage.SetTextAlignment(iTextTextAlignment.CENTER);
+
+                                // Tạo các dòng thông tin
+                                Paragraph pTitle = new Paragraph("MÃ QR TÀI SẢN")
+                                    .SetFontSize(12)
+                                    .SetBold()
+                                    .SetTextAlignment(iTextTextAlignment.CENTER);
+
+                                Paragraph pTenTS = new Paragraph($"Tên TS: {item.TenTaiSan}")
+                                    .SetFontSize(9);
+
+                                Paragraph pMaTS = new Paragraph($"Mã TS: {item.MaTaiSan}")
+                                    .SetFontSize(9);
+
+                                Paragraph pSoSeri = new Paragraph($"Số Seri: {item.SoSeri}")
+                                    .SetFontSize(9);
+
+                                Paragraph pPhong = new Paragraph($"Phòng: {item.TenPhong ?? "Chưa phân phòng"}")
+                                    .SetFontSize(9);
+
+                                Paragraph pNhomTS = new Paragraph($"Nhóm TS: {item.TenNhomTS ?? "Không xác định"}")
+                                    .SetFontSize(9);
+
+                                // Thêm các thông tin vào cell
+                                cell.Add(pTitle);
+                                cell.Add(qrImage);
+                                cell.Add(pTenTS);
+                                cell.Add(pMaTS);
+                                cell.Add(pSoSeri);
+                                cell.Add(pPhong);
+                                cell.Add(pNhomTS);
+
+                                // Thêm cell vào bảng
+                                table.AddCell(cell);
+
+                                cellCount++;
+
+                                // Mỗi khi đủ 4 cell (2x2), thêm bảng vào document và tạo bảng mới
+                                if (cellCount % 4 == 0)
+                                {
+                                    document.Add(table);
+
+                                    // Fix: Use simplified AreaBreak constructor (creates a page break)
+                                    document.Add(new AreaBreak());
+
+                                    table = new iText.Layout.Element.Table(2);
+                                    table.SetWidth(UnitValue.CreatePercentValue(100));
+                                }
+                            }
                         }
                     }
 
-                    // Nếu số sản phẩm là lẻ, thêm ô trống vào cuối
-                    if (count % cols != 0)
+                    // Nếu còn cell chưa được thêm vào document, thêm bảng cuối cùng
+                    if (cellCount % 4 != 0)
                     {
-                        for (int i = 0; i < cols - (count % cols); i++)
+                        // Thêm ô trống để đảm bảo đủ 4 ô
+                        while (cellCount % 4 != 0)
                         {
-                            table.AddCell(new Cell().SetBorder(iText.Layout.Borders.Border.NO_BORDER));
+                            iText.Layout.Element.Cell emptyCell = new iText.Layout.Element.Cell();
+                            emptyCell.SetBorder(iText.Layout.Borders.Border.NO_BORDER);
+                            table.AddCell(emptyCell);
+                            cellCount++;
                         }
+                        document.Add(table);
                     }
-
-                    document.Add(table);
-                    document.Close();
                 }
-            }
-        }
-
-        private byte[] GenerateQRCode(SanPham sanPham)
-        {
-            // Tạo nội dung cho mã QR (có thể tùy chỉnh theo nhu cầu)
-            string qrContent = $"MaSP:{sanPham.MaSP}|SoSeri:{sanPham.SoSeri}|Ten:{sanPham.TenSanPham}";
-
-            // Thiết lập các tham số cho mã QR
-            QrCodeEncodingOptions options = new QrCodeEncodingOptions
-            {
-                DisableECI = true,
-                CharacterSet = "UTF-8",
-                Width = 300,
-                Height = 300,
-                Margin = 1,
-                ErrorCorrection = ZXingErrorCorrectionLevel.H // Mức độ sửa lỗi cao nhất
-            };
-
-            // Tạo mã QR
-            BarcodeWriter<Bitmap> writer = new BarcodeWriter<Bitmap>
-            {
-                Format = BarcodeFormat.QR_CODE,
-                Options = options,
-                Renderer = new BitmapRenderer()
-            };
-
-            var qrCodeBitmap = writer.Write(qrContent);
-
-            // Chuyển đổi Bitmap thành byte array
-            using (MemoryStream stream = new MemoryStream())
-            {
-                qrCodeBitmap.Save(stream, ImageFormat.Png);
-                return stream.ToArray();
             }
         }
     }

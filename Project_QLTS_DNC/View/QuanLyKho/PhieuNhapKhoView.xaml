@@ -115,7 +115,7 @@
 
             <!-- Filter: Mã kho -->
             <ComboBox Grid.Column="1" 
-                      x:Name="cboPhong" 
+                      x:Name="cboTenKho" 
                       materialDesign:HintAssist.Hint="Tên kho" 
                       Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                       Width="150" 
@@ -129,8 +129,8 @@
 
             <!-- Filter: Mã sản phẩm -->
             <ComboBox Grid.Column="2" 
-                      x:Name="cboNhomTS" 
-                      materialDesign:HintAssist.Hint="Mã sản phẩm" 
+                      x:Name="cboTrangThai" 
+                      materialDesign:HintAssist.Hint="Trạng thái" 
                       Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                       Width="150" 
                       Margin="0,0,16,0">
@@ -176,7 +176,7 @@
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Tên Kho" Binding="{Binding TenKho}" Width="90" MinWidth="90">
+                    <DataGridTextColumn Header="Mã phiếu nhập" Binding="{Binding MaPhieuNhap}" Width="130" MinWidth="130">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -185,7 +185,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Ngày nhập" Binding="{Binding NgayNhap, StringFormat='dd/MM/yyyy'}" Width="110" MinWidth="110">
+                    <DataGridTextColumn Header="Tên kho" Binding="{Binding TenKho}" Width="150" MinWidth="150">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -194,7 +194,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Mã nhà cung cấp" Binding="{Binding MaNCC}" Width="130" MinWidth="130">
+                    <DataGridTextColumn Header="Người lập phiếu" Binding="{Binding TenNhanVien}" Width="170" MinWidth="170">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -203,7 +203,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Người lập phiếu" Binding="{Binding NguoiLapPhieu}" Width="170" MinWidth="170">
+                    <DataGridTextColumn Header="Nhà cung cấp" Binding="{Binding TenNCC}" Width="170" MinWidth="170">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -212,7 +212,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Mã sản phẩm" Binding="{Binding MaSP}" Width="130" MinWidth="130">
+                    <DataGridTextColumn Header="Ngày nhập" Binding="{Binding NgayNhap, StringFormat='dd/MM/yyyy'}" Width="130" MinWidth="130">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -221,25 +221,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Mã nhóm" Binding="{Binding MaNhom}" Width="120" MinWidth="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}" Width="110" MinWidth="110">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <DataGridTextColumn Header="Đơn giá" Binding="{Binding DonGia}" Width="125" MinWidth="125">
+                    <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TongTien}" Width="150" MinWidth="150">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Right"/>
@@ -248,14 +230,39 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Tổng tiền" Binding="{Binding ThanhTien}" Width="120" MinWidth="120">
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding TrangThai}" Width="150" MinWidth="150">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
                                 <Setter Property="VerticalAlignment" Value="Center"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
+
+                    <!-- Cột Tùy Chọn: Chỉnh sửa và Xóa -->
+                    <DataGridTemplateColumn Header="Tùy chọn" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <!-- Chỉnh sửa -->
+                                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Chỉnh sửa"
+                            Margin="0,0,8,0"                                           
+                            >
+                                        <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                    </Button>
+
+                                    <!-- Xóa -->
+                                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                                        ToolTip="Xóa"
+                                        Click="btnDelete_Click"
+                                        Tag="{Binding MaPhieuNhap}">
+                                        <materialDesign:PackIcon Kind="Delete" Foreground="#F44336"/>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </materialDesign:Card>

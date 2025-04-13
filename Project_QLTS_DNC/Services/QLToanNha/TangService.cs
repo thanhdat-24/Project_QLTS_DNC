@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using static Supabase.Postgrest.Constants;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.Services.QLToanNha
 {
     public class TangService
     {

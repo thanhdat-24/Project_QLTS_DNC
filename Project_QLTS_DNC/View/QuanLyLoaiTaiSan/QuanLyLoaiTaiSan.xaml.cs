@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.DTOs;
@@ -89,11 +90,54 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         }
 
         /// <summary>
+        /// Chuyển đổi chuỗi tiếng Việt có dấu thành chuỗi không dấu
+        /// </summary>
+        private string ChuyenChuoiKhongDau(string chuoi)
+        {
+            if (string.IsNullOrEmpty(chuoi))
+                return string.Empty;
+
+            var normalizedString = chuoi.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            string result = stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+
+            // Xử lý thêm các ký tự đặc biệt tiếng Việt
+            result = result.Replace('Đ', 'D').Replace('đ', 'd');
+            return result;
+        }
+
+        /// <summary>
+        /// Kiểm tra xem một chuỗi có chứa chuỗi khác không (không phân biệt dấu)
+        /// </summary>
+        private bool ChuoiChuaChuoiKhac(string chuoiGoc, string tuKhoa)
+        {
+            if (string.IsNullOrEmpty(chuoiGoc))
+                return false;
+
+            // Chuyển đổi cả hai chuỗi sang dạng không dấu và chữ thường
+            string chuoiGocKhongDau = ChuyenChuoiKhongDau(chuoiGoc).ToLower();
+            string tuKhoaKhongDau = ChuyenChuoiKhongDau(tuKhoa).ToLower();
+
+            // Kiểm tra chuỗi gốc có chứa từ khóa không
+            return chuoiGocKhongDau.Contains(tuKhoaKhongDau);
+        }
+
+        /// <summary>
         /// Xử lý sự kiện khi nhấn nút Tìm kiếm
         /// </summary>
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            string tuKhoa = txtSearch.Text.Trim().ToLower();
+            string tuKhoa = txtSearch.Text.Trim();
 
             if (string.IsNullOrEmpty(tuKhoa))
             {
@@ -112,22 +156,22 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 return;
             }
 
-            // Tìm kiếm trong Loại Tài Sản
+            // Tìm kiếm trong Loại Tài Sản sử dụng hàm tìm kiếm không dấu
             var dsLoaiTaiSanLoc = new ObservableCollection<LoaiTaiSan>(
                 _dsLoaiTaiSan.Where(l =>
                     l.MaLoaiTaiSan.ToString().Contains(tuKhoa) ||
-                    l.TenLoaiTaiSan.ToLower().Contains(tuKhoa) ||
-                    (l.MoTa != null && l.MoTa.ToLower().Contains(tuKhoa))
+                    ChuoiChuaChuoiKhac(l.TenLoaiTaiSan, tuKhoa) ||
+                    (l.MoTa != null && ChuoiChuaChuoiKhac(l.MoTa, tuKhoa))
                 )
             );
 
-            // Tìm kiếm trong Nhóm Tài Sản - sử dụng DTO để tìm kiếm
+            // Tìm kiếm trong Nhóm Tài Sản - sử dụng DTO để tìm kiếm với hàm tìm kiếm không dấu
             var dsNhomTaiSanDTOLoc = new ObservableCollection<NhomTaiSanDTO>(
                 _dsNhomTaiSanDTO.Where(dto =>
                     dto.MaNhomTS.ToString().Contains(tuKhoa) ||
-                    dto.TenNhom.ToLower().Contains(tuKhoa) ||
-                    (dto.MoTa != null && dto.MoTa.ToLower().Contains(tuKhoa)) ||
-                    (dto.TenLoaiTaiSan != null && dto.TenLoaiTaiSan.ToLower().Contains(tuKhoa))
+                    ChuoiChuaChuoiKhac(dto.TenNhom, tuKhoa) ||
+                    (dto.MoTa != null && ChuoiChuaChuoiKhac(dto.MoTa, tuKhoa)) ||
+                    (dto.TenLoaiTaiSan != null && ChuoiChuaChuoiKhac(dto.TenLoaiTaiSan, tuKhoa))
                 )
             );
 

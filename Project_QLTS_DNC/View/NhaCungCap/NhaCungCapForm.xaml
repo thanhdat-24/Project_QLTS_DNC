@@ -129,56 +129,141 @@
 
         <!-- DataGrid for Supplier List with Material Design -->
         <DataGrid x:Name="supplierDataGrid" Grid.Row="2" Margin="15,0,15,15" 
-                  Style="{StaticResource MaterialDesignDataGrid}"
-                  materialDesign:DataGridAssist.CellPadding="13 8"
-                  materialDesign:DataGridAssist.ColumnHeaderPadding="8"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" 
-                  Background="White" 
-                  RowBackground="White" AlternatingRowBackground="#F9F9F9">
-            <!-- Style tiêu đề theo MaterialDesign -->
+          AutoGenerateColumns="False"
+          CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True"
+          BorderThickness="1" BorderBrush="#DDDDDD"
+          materialDesign:DataGridAssist.CellPadding="13 8 8 8"
+          materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+          GridLinesVisibility="All" 
+          RowHeight="45" AlternatingRowBackground="#F5F5F5"
+          Background="White">
+
+            <!-- STYLE ROW & CELL -->
+            <DataGrid.Resources>
+                <!-- Style hàng -->
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Setter Property="MinHeight" Value="45"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource PrimaryHueLightBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+
+                <!-- Style ô -->
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Padding" Value="8,4"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Border Padding="{TemplateBinding Padding}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Background="{TemplateBinding Background}" 
+                                SnapsToDevicePixels="True">
+                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.Resources>
+
+            <!-- STYLE HEADER -->
             <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                    <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
-                    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
-                    <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                    <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
                 </Style>
             </DataGrid.ColumnHeaderStyle>
-            <DataGrid.Columns>
 
-                <DataGridTextColumn Header="Mã NCC" Binding="{Binding MaNCC}" IsReadOnly="True" Width="110"/>
-                <DataGridTextColumn Header="Tên nhà cung cấp" Binding="{Binding TenNCC}" Width="180"/>
-                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="200"/>
-                <DataGridTextColumn Header="Số điện thoại" Binding="{Binding SoDienThoai}" Width="120"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
-                <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTa}" Width="180"/>
+            <!-- CÁC CỘT -->
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Mã NCC" Binding="{Binding MaNCC}" Width="110">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Tên nhà cung cấp" Binding="{Binding TenNCC}" Width="180">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="200">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Số điện thoại" Binding="{Binding SoDienThoai}" Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTa}" Width="180">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- CỘT THAO TÁC -->
                 <DataGridTemplateColumn Header="Thao Tác" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Button x:Name="btnEdit" Style="{StaticResource MaterialDesignIconButton}"
-                        ToolTip="Sửa"
-                        Background="{DynamicResource PrimaryHueLightBrush}" 
-                        Width="28" Height="28" Padding="0" Margin="2" Grid.Column="0" Click="btnEdit_Click">
-                                    <materialDesign:PackIcon Kind="Edit" Width="16" Height="16" Foreground="White"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                ToolTip="Sửa"
+                                Background="{DynamicResource PrimaryHueLightBrush}" 
+                                Width="32" Height="32" 
+                                Padding="2" Margin="0,1"
+                                Click="btnEdit_Click">
+                                    <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
                                 </Button>
-                                <Button x:Name="btnDelete" Style="{StaticResource MaterialDesignIconButton}"
-                        ToolTip="Xóa"
-                        Background="{DynamicResource SecondaryDelete}" 
-                        Width="28" Height="28" 
-                        Padding="0" Margin="2" Grid.Column="1" Click="btnDelete_Click">
-                                    <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="White"/>
+                                <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                ToolTip="Xóa"
+                                Background="{DynamicResource SecondaryDelete}" 
+                                Width="32" Height="32" 
+                                Padding="2" Margin="8,1,0,1"
+                                Click="btnDelete_Click">
+                                    <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
                                 </Button>
-                            </Grid>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
     </Grid>
 </UserControl>

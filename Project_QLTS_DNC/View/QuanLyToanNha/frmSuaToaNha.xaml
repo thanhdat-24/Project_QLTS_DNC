@@ -3,74 +3,123 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyToanNha"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Cập nhật tòa nhà" Height="535" Width="450"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
-        TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="Auto"
-        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Cập nhật Tòa nhà"
+        Height="480"
+        Width="500"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="CanResize">
-    <Grid Margin="0,0,0,34">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
 
+    <Border Background="White"
+            CornerRadius="10"
+            BorderThickness="1"
+            BorderBrush="#E0E0E0"
+            Margin="0,0,0,50">
+        <Border.Effect>
+            <DropShadowEffect Color="#404040"
+                              ShadowDepth="3"
+                              BlurRadius="10"
+                              Direction="-45"
+                              Opacity="0.3"/>
+        </Border.Effect>
 
+        <Grid Margin="0,0,0,-21">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Main Content -->
-        <materialDesign:Card Grid.Row="0" Margin="16,0,10,10" Padding="5">
-            <StackPanel>
-                <!-- Tên tòa nhà -->
-                <TextBlock Text="Tên tòa nhà:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtTenToaNha" 
-                         materialDesign:HintAssist.Hint="Nhập tên tòa nhà" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,5,0,5" />
+            <!-- TIÊU ĐỀ -->
+            <Grid Grid.Row="0" Background="{DynamicResource PrimaryHueMidBrush}" Height="50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <!-- Địa Chỉ -->
-                <TextBlock Text="Địa Chỉ:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtDiaChiTN" 
-                         materialDesign:HintAssist.Hint="Nhập địa chỉ tòa nhà" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,8,0,16"/>
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="CẬP NHẬT TÒA NHÀ"
+                               Foreground="White"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                </StackPanel>
 
-                <!-- Số Điện Thoại -->
-                <TextBlock Text="Số Điện Thoại:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtSoDienThoaiTN" 
-                         materialDesign:HintAssist.Hint="Nhập số điện thoại" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,8,0,16"/>
+                <Button x:Name="btnDong"
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="White"
+                        Margin="0,0,10,0"
+                        Width="40" Height="40"
+                        Click="btnHuy_Click">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24"/>
+                </Button>
+            </Grid>
 
+            <!-- NỘI DUNG FORM -->
+            <StackPanel Grid.Row="1" Margin="20" VerticalAlignment="Top">
+                <TextBox x:Name="txtTenToaNha"
+                         materialDesign:HintAssist.Hint="Nhập tên tòa nhà"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
 
+                <TextBox x:Name="txtDiaChiTN"
+                         materialDesign:HintAssist.Hint="Nhập địa chỉ tòa nhà"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
 
-                <!-- Mô Tả -->
-                <TextBlock Text="Mô tả:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtMoTaTN" 
-                         materialDesign:HintAssist.Hint="Nhập mô tả" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,8,0,16" VerticalScrollBarVisibility="Auto"/>
+                <TextBox x:Name="txtSoDienThoaiTN"
+                         materialDesign:HintAssist.Hint="Nhập số điện thoại"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"
+                         MaxLength="11"/>
+
+                <TextBox x:Name="txtMoTaTN"
+                         materialDesign:HintAssist.Hint="Nhập mô tả"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Height="100"
+                         VerticalScrollBarVisibility="Auto"
+                         Margin="0,3,0,0"/>
             </StackPanel>
-        </materialDesign:Card>
 
-        <!-- Buttons -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,359,16,-29" Grid.RowSpan="3">
-            <Button x:Name="btnHuy" 
-                    Content="HỦY" 
-                    Width="100"
-                    Margin="8,0"
-                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="btnHuy_Click"/>
+            <!-- NÚT -->
+            <Grid Grid.Row="1" Margin="20,330,20,35">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <Button x:Name="btnEdit" 
-                    Content="CẬP NHẬT" 
-                    Width="100" 
-                    Style="{StaticResource MaterialDesignRaisedButton}" Click="btnEdit_Click"/>
-        </StackPanel>
-    </Grid>
+                <Button x:Name="btnHuy"
+                        Grid.Column="0"
+                        Margin="0 0 16 0"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="btnHuy_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
+                        <TextBlock Text="HUỶ"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="btnCapNhat"
+                        Grid.Column="1"
+                        Background="{StaticResource PrimaryHueMidBrush}"
+                        Foreground="White"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="btnCapNhat_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ContentSaveEdit" Margin="0 0 8 0"/>
+                        <TextBlock Text="CẬP NHẬT"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

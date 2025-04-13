@@ -21,6 +21,7 @@ using Supabase;
 using Project_QLTS_DNC.Models.PhieuNhapKho;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.NhaCungCap;
+using Project_QLTS_DNC.Services;
 
 
 namespace Project_QLTS_DNC.View.QuanLyKho
@@ -71,7 +72,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             var result = await _client.From<Kho>().Get();
             _khoLookup = result.Models.ToDictionary(k => k.MaKho, k => k.TenKho);
 
-            cboPhong.ItemsSource = _khoLookup.Select(k => new ComboBoxItem
+            cboTenKho.ItemsSource = _khoLookup.Select(k => new ComboBoxItem
             {
                 Content = k.Value,
                 Tag = k.Key
@@ -96,26 +97,42 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             try
             {
-                // Truy vấn dữ liệu kho từ Supabase
                 var result = await _client.From<PhieuNhap>().Get();
-
-                // Kiểm tra nếu có dữ liệu trả về
+                dgSanPham.ItemsSource = result.Models;
                 if (result.Models.Any())
                 {
-                    // Gán dữ liệu vào DataGrid
-                    dgSanPham.ItemsSource = result.Models;
+                    var displayList = result.Models
+                        .Where(p =>
+                            (_filterMaKho == null || p.MaKho == _filterMaKho) &&
+                            (string.IsNullOrEmpty(_keyword) || _keyword == "" ||
+                             (p.TrangThai != null && p.TrangThai.Contains(_keyword, StringComparison.OrdinalIgnoreCase)))
+                        )
+                        .Select(p => new
+                        {
+                            MaPhieuNhap = p.MaPhieuNhap,
+                            TenKho = _khoLookup.ContainsKey(p.MaKho) ? _khoLookup[p.MaKho] : $"#{p.MaKho}",
+                            TenNhanVien = _nvLookup.ContainsKey(p.MaNV) ? _nvLookup[p.MaNV] : $"#{p.MaNV}",
+                            TenNCC = _nccLookup.ContainsKey(p.MaNCC) ? _nccLookup[p.MaNCC] : $"#{p.MaNCC}",
+                            NgayNhap = p.NgayNhap,
+                            TongTien = p.TongTien,
+                            TrangThai = string.IsNullOrEmpty(p.TrangThai) ? "Chờ duyệt" : "Đã duyệt"
+                        })
+                        .ToList();
+
+                    dgSanPham.ItemsSource = displayList;
                 }
                 else
                 {
-                    MessageBox.Show("Không có dữ liệu kho.");
+                    dgSanPham.ItemsSource = null;
+                    MessageBox.Show("Không có dữ liệu phiếu nhập.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi tải dữ liệu kho: {ex.Message}");
+                MessageBox.Show($"Lỗi khi tải dữ liệu phiếu nhập: {ex.Message}");
             }
-
         }
+
 
 
         private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -158,7 +175,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void cboPhong_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cboPhong.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int maKho))
+            if (cboTenKho.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int maKho))
                 _filterMaKho = maKho;
             else
                 _filterMaKho = null;
@@ -168,7 +185,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void cboNhomTS_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cboNhomTS.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int maNhom))
+            if (cboTrangThai.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int maNhom))
                 _filterMaNhom = maNhom;
             else
                 _filterMaNhom = null;
@@ -197,18 +214,52 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 themKhoForm.ShowDialog();  // Hiển thị form ThemKho
             }
         }
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maPhieuNhap))
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    $"Bạn có chắc chắn muốn xóa phiếu nhập có mã '{maPhieuNhap}'?",
+                    "Xác nhận xóa",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
 
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        var client = await SupabaseService.GetClientAsync();
 
+                        // Truy vấn lại đối tượng PhieuNhap từ mã
+                        var getResult = await client
+                            .From<PhieuNhap>()
+                            .Filter("ma_phieu_nhap", Supabase.Postgrest.Constants.Operator.Equals, maPhieuNhap)
+                            .Get();
 
+                        var phieuNhapToDelete = getResult.Models.FirstOrDefault();
+                        if (phieuNhapToDelete != null)
+                        {
+                            await client.From<PhieuNhap>().Delete(phieuNhapToDelete);
 
-
-
-
-
-
-
-
-
+                            MessageBox.Show("Đã xóa phiếu nhập thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                            await LoadPhieuNhapAsync(); // Làm mới danh sách
+                        }
+                        else
+                        {
+                            MessageBox.Show("Không tìm thấy phiếu nhập cần xóa.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi khi xóa phiếu nhập: {ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Không có phiếu nhập được chọn để xóa.");
+            }
+        }
 
     }
 }

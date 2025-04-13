@@ -3,68 +3,130 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyToanNha"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Thêm Tầng" Height="390" Width="450"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
-        TextOptions.TextFormattingMode="Ideal"
-        TextOptions.TextRenderingMode="Auto"
-        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Thêm Tầng"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="CanResize">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        Height="360" Width="500">
 
+    <Border Background="White" CornerRadius="10" BorderThickness="1" BorderBrush="#E0E0E0">
+        <Border.Effect>
+            <DropShadowEffect Color="#404040" ShadowDepth="3" BlurRadius="10" Direction="-45" Opacity="0.3"/>
+        </Border.Effect>
 
+        <Grid Height="364" VerticalAlignment="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Main Content -->
-        <materialDesign:Card Grid.Row="0" Margin="16,0,10,10" Padding="5">
-            <StackPanel>
+            <!-- Header -->
+            <Grid Grid.Row="0" Background="{DynamicResource PrimaryHueMidBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Tiêu đề canh giữa -->
+                <Grid Grid.Column="0">
+                    <TextBlock Text="THÊM MỚI TẦNG"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Nút đóng -->
+                <Button x:Name="btnDong"
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="White"
+                        Width="40" Height="40"
+                        Margin="0,0,10,0"
+                        Click="btnHuy_Click">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24"/>
+                </Button>
+            </Grid>
+
+            <!-- Nội dung -->
+            <Grid Grid.Row="1" Margin="20,20,20,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
                 <!-- Tên tầng -->
-                <TextBlock Text="Tên tầng:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtTenTang" 
-                         materialDesign:HintAssist.Hint="Nhập tên tầng" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,5,0,5" />
-                <TextBlock Text="Tên tòa nhà:" Margin="0,8,0,0"/>
+                <TextBox x:Name="txtTenTang"
+                         materialDesign:HintAssist.Hint="Nhập tên tầng"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
+
+                <!-- Tên tòa nhà -->
                 <ComboBox x:Name="cboTenToa"
-          Grid.Row="0"
-          Margin="0,0,0,15"
-          materialDesign:HintAssist.Hint="Chọn tòa nhà"
-          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-          DisplayMemberPath="TenToaNha"
-          SelectedValuePath="MaToaNha"
-          SelectedValue="{Binding SelectedMaToaNha, Mode=TwoWay}" />
+                          Grid.Row="1"
+                          materialDesign:HintAssist.Hint="Chọn tòa nhà"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          DisplayMemberPath="TenToaNha"
+                          SelectedValuePath="MaToaNha"
+                          SelectedValue="{Binding SelectedMaToaNha, Mode=TwoWay}"
+                          Margin="0,0,0,15"/>
 
-                <!-- mô tả -->
-                <TextBlock Text="Mô tả:" Margin="0,8,0,0"/>
-                <TextBox x:Name="txtMota" 
-           materialDesign:HintAssist.Hint="Nhập mô tả" 
-           Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-           Margin="0,5,0,5" />
+                <!-- Mô tả -->
+                <TextBox x:Name="txtMota"
+                         Grid.Row="2"
+                         materialDesign:HintAssist.Hint="Nhập mô tả"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Height="100"
+                         VerticalScrollBarVisibility="Auto"/>
+            </Grid>
 
-            </StackPanel>
-        </materialDesign:Card>
+            <!-- Nút điều khiển -->
+            <Grid Grid.Row="2" Margin="20,10,20,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,16,10">
-            <Button x:Name="btnHuy" 
-                    Content="HỦY" 
-                    Width="100"
-                    Margin="8,0"
-                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="btnHuy_Click"/>
+                <Button Grid.Column="0"
+                        Margin="0,0,8,0"
+                        x:Name="btnHuy"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="btnHuy_Click" RenderTransformOrigin="0.5,0.5">
+                    <Button.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0.344"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Button.RenderTransform>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
+                        <TextBlock Text="HUỶ"/>
+                    </StackPanel>
+                </Button>
 
-            <Button x:Name="btnLuu" 
-                    Content="LƯU" 
-                    Width="100" 
-                    Style="{StaticResource MaterialDesignRaisedButton}" Click="btnLuu_Click"/>
-        </StackPanel>
-    </Grid>
+                <Button Grid.Column="1"
+                        x:Name="btnLuu"
+                        Background="{StaticResource PrimaryHueMidBrush}"
+                        Foreground="White"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="btnLuu_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ContentSave" Margin="0 0 8 0"/>
+                        <TextBlock Text="LƯU"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

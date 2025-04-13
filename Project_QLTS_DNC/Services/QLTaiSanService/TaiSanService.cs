@@ -3,6 +3,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Supabase.Postgrest;
 
 namespace Project_QLTS_DNC.Services.QLTaiSanService
 {
@@ -70,7 +71,9 @@ namespace Project_QLTS_DNC.Services.QLTaiSanService
                 throw;
             }
         }
-
+        /// <summary>
+        /// Cập nhật thông tin Tài Sản
+        /// </summary>
         /// <summary>
         /// Cập nhật thông tin Tài Sản
         /// </summary>
@@ -79,9 +82,24 @@ namespace Project_QLTS_DNC.Services.QLTaiSanService
             try
             {
                 var client = await SupabaseService.GetClientAsync();
+
+                // Tải dữ liệu hiện tại của tài sản trước để đảm bảo tất cả dữ liệu được giữ nguyên
+                var currentTaiSan = await LayTaiSanTheoMaAsync(taiSan.MaTaiSan);
+
+                // Cập nhật các thuộc tính từ tài sản mới
+                currentTaiSan.TenTaiSan = taiSan.TenTaiSan;
+                currentTaiSan.SoSeri = taiSan.SoSeri;
+                currentTaiSan.MaQR = taiSan.MaQR;
+                currentTaiSan.NgaySuDung = taiSan.NgaySuDung;
+                currentTaiSan.HanBH = taiSan.HanBH;
+                currentTaiSan.TinhTrangSP = taiSan.TinhTrangSP;
+                currentTaiSan.GhiChu = taiSan.GhiChu;
+                currentTaiSan.MaPhong = taiSan.MaPhong;
+
+                // Sử dụng currentTaiSan trong câu lệnh cập nhật
                 var response = await client.From<TaiSanModel>()
-                    .Where(x => x.MaTaiSan == taiSan.MaTaiSan)
-                    .Update(taiSan);
+                    .Filter("ma_tai_san", Supabase.Postgrest.Constants.Operator.Equals, taiSan.MaTaiSan)
+                    .Update(currentTaiSan);
 
                 if (response.Models.Count > 0)
                 {
@@ -124,6 +142,26 @@ namespace Project_QLTS_DNC.Services.QLTaiSanService
             {
                 System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy thông tin Tài Sản: {ex.Message}");
                 throw;
+            }
+        }
+        /// <summary>
+        /// Xóa một Tài Sản khỏi hệ thống
+        /// </summary>
+        public static async Task<bool> XoaTaiSanAsync(int maTaiSan)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                // Thay vì gán kết quả vào biến response
+                await client.From<TaiSanModel>()
+                    .Where(x => x.MaTaiSan == maTaiSan)
+                    .Delete();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi xóa Tài Sản: {ex.Message}");
+                return false;
             }
         }
     }

@@ -50,7 +50,7 @@
             <!-- Lọc theo Số Seri -->
             <TextBox Grid.Column="0" 
                    x:Name="txtSearchSeri" 
-                   materialDesign:HintAssist.Hint="Tìm kiếm theo Số Seri" 
+                   materialDesign:HintAssist.Hint="Tìm kiếm theo Số Seri hoặc Tên" 
                    Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                    Margin="0,0,16,0"/>
 
@@ -61,11 +61,6 @@
                     Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                     Width="200" 
                     Margin="0,0,16,0">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding MaNhomTS}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
             </ComboBox>
 
             <!-- Nút áp dụng bộ lọc -->
@@ -109,7 +104,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTextColumn Header="Mã SP" Binding="{Binding MaSP}" Width="60">
+                    <DataGridTextColumn Header="Mã TS" Binding="{Binding MaTaiSan}" Width="60">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -127,7 +122,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Mã Nhóm" Binding="{Binding MaNhomTS}" Width="80">
+                    <DataGridTextColumn Header="Nhóm TS" Binding="{Binding TenNhomTS}" Width="80">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -136,7 +131,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding TenSanPham}" Width="*">
+                    <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding TenTaiSan}" Width="*">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="TextWrapping" Value="Wrap"/>
@@ -189,7 +184,6 @@
                   materialDesign:ButtonAssist.CornerRadius="8" 
                   Margin="0,0,16,0"/>
             <Button x:Name="btnExportQR" 
-                  Content="Xuất QR" 
                   Style="{StaticResource MaterialDesignRaisedButton}" 
                   materialDesign:ButtonAssist.CornerRadius="8" 
                   Background="{DynamicResource SecondaryAccentForegroundBrush}" 
