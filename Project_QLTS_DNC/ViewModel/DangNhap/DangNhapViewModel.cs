@@ -1,49 +1,63 @@
 ﻿using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Project_QLTS_DNC.Commands;
-using Project_QLTS_DNC.Models.DangNhap;
-
+using Project_QLTS_DNC.Helpers;
 namespace Project_QLTS_DNC.ViewModels
 {
-    public class DangNhapViewModel : INotifyPropertyChanged
+    public class DangNhapViewModel : ViewModelBase
     {
-        private readonly AuthService _authService = new AuthService();
-        public DangNhapModel ThongTinDangNhap { get; set; } = new DangNhapModel();
+        public string Email { get; set; }
+        public string MatKhau { get; set; }
 
-        public ICommand DangNhapCommand { get; }
+        public ObservableCollection<TaiKhoanModel> DanhSachTaiKhoan { get; set; }
+
+        public ICommand DangNhapCommand { get; set; }
+
+        private readonly AuthService _authService;
 
         public DangNhapViewModel()
         {
-            DangNhapCommand = new RelayCommand(async (_) => await DangNhapAsync());
+            _authService = new AuthService();
+            DanhSachTaiKhoan = new ObservableCollection<TaiKhoanModel>();
+            DangNhapCommand = new RelayCommand(async () => await DangNhapAsync());
         }
 
         private async Task DangNhapAsync()
         {
             try
             {
-                var user = await _authService.LoginAsync(ThongTinDangNhap.Email, ThongTinDangNhap.MatKhau);
-                if (user != null)
+                var session = await _authService.DangNhapAsync(Email, MatKhau);
+
+                if (session != null)
                 {
-                    MessageBox.Show($"Đăng nhập thành công! Xin chào {user.Email}");
-                    // TODO: mở giao diện chính hoặc chuyển màn hình
+                    var loaiTk = await _authService.LayLoaiTaiKhoanTheoUid(session.Id);
+
+                    if (loaiTk == "admin")
+                    {
+                        var danhSach = await _authService.LayTatCaTaiKhoanNeuLaAdminAsync();
+                        DanhSachTaiKhoan.Clear();
+                        foreach (var tk in danhSach)
+                            DanhSachTaiKhoan.Add(tk);
+
+                        MessageBox.Show("Đăng nhập thành công với vai trò ADMIN!");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Đăng nhập thành công với vai trò: {loaiTk.ToUpper()}");
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Sai email hoặc mật khẩu.");
+                    MessageBox.Show("Sai email hoặc mật khẩu!");
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                MessageBox.Show($"Lỗi đăng nhập: {ex.Message}");
+                MessageBox.Show("Lỗi đăng nhập: " + ex.Message);
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

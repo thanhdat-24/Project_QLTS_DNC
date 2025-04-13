@@ -37,7 +37,7 @@ namespace Project_QLTS_DNC.View.DangNhap
             try
             {
                 var authService = new AuthService();
-                var user = await authService.LoginAsync(email, password);
+                var user = await authService.DangNhapAsync(email, password);
                 if (user != null)
                 {
                     LoggedInUser = user;

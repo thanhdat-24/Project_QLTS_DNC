@@ -1,24 +1,35 @@
 ﻿using Project_QLTS_DNC.Models.NhanVien;
 using Supabase;
+using Supabase.Interfaces;
 using Supabase.Postgrest;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.Services.NhanVien
 {
     public class NhanVienService
     {
-        public async Task<List<NhanVienModel>> LayDanhSachNhanVienAsync()
+        public async Task<List<NhanVienModel>> GetNhanVienList()
         {
             var client = await SupabaseService.GetClientAsync();
-            var response = await client.From<NhanVienModel>().Get();
 
-            // Kiểm tra dữ liệu trả về
-            Console.WriteLine("Số lượng nhân viên: " + response.Models.Count);
+            // Truy vấn nhân viên và tên phòng ban
+            var response = await client.From<NhanVienModel>()
+                                       .Select("*, phongban(ten_phong_ban)") // Phòng ban join vào nhân viên
+                                       .Get();
 
-            return response.Models;
+            var nhanVienList = response.Models.ToList();
+
+            // Gán tên phòng ban cho từng nhân viên
+            foreach (var nv in nhanVienList)
+            {
+               // nv.TenPhongBan = nv.PhongBan?.TenPhongBan ?? "Không xác định";
+            }
+
+            return nhanVienList;
         }
+
 
         public async Task<bool> ThemNhanVien(NhanVienModel nv)
         {

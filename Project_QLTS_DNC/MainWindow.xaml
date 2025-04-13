@@ -17,8 +17,14 @@
                               FontSize="14" Padding="10" Height="498">
                         <TreeViewItem x:Name="btnTrangChu" Header="🏠 Trang chủ" Selected="btnTrangChu_Selected"/>
                         <TreeViewItem Header="👥 Quản lý tài khoản">
-                            <TreeViewItem x:Name="btnNhanVien" Header="🔎 Nhân viên" Selected="btnNhanVien_Selected" />
+                            <TreeViewItem x:Name="btnDanhSachTaiKhoan" Header="Danh sách tài khoản" Selected="btnDanhSachTaiKhoan_Selected" />
+                            <TreeViewItem x:Name="btnLoaiTaiKhoan" Header="Loại tài khoản" Selected="btnLoaiTaiKhoan_Selected"/>
+                            <TreeViewItem x:Name="btnPhanQuyenTk" Header="Phân quyền"/>
+                            
                         </TreeViewItem>
+
+                        
+                        <TreeViewItem x:Name="btnNhanVien" Header="🔎 Nhân viên" Selected="btnNhanVien_Selected" />
                         <TreeViewItem x:Name="btnQuanLyLoaiTaiSan" Header="📦 Quản lý loại tài sản" Selected="btnQuanLyLoaiTaiSan_Selected"/>
                         <TreeViewItem Header="🏢 Quản lý tòa nhà">
                             <TreeViewItem x:Name="btnToaNha" Header="🏢 Tòa nhà" Selected="btnToaNha_Selected"/>

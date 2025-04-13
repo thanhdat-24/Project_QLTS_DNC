@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Project_QLTS_DNC.View.NhanVien
+namespace Project_QLTS_DNC.View.ChucVu
 {
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// Interaction logic for ChucVuForm.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class ChucVuForm : UserControl
     {
-        public Window1()
+        public ChucVuForm()
         {
             InitializeComponent();
         }

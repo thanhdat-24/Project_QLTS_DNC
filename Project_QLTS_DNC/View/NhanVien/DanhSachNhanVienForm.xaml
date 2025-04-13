@@ -166,26 +166,35 @@
             <DataGrid.Columns>
                 <!-- Your columns remain the same -->
                 <DataGridCheckBoxColumn 
-            ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
-            EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
-            Header="" Width="60"/>
+                        ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                        EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
+                        Header="" Width="60"/>
                 <DataGridTextColumn Header="Mã nhân viên" Binding="{Binding MaNV}" Width="110"/>
                 <DataGridTextColumn Header="Phòng Ban" Binding="{Binding MaPhongBan}" Width="150"/>
+                <DataGridTextColumn Header="Chức vụ" Binding="{Binding MaCV}" Width="150" />
                 <DataGridTextColumn Header="Tên nhân viên" Binding="{Binding TenNV}" Width="180"/>
                 <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="200"/>
                 <DataGridTextColumn Header="Số điện thoại" Binding="{Binding SDT}" Width="120"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
-                <DataGridTemplateColumn Header="Thao Tác" Width="80">
+                <DataGridTextColumn Header="Ngày vào làm" Binding="{Binding NgayVaoLam}" Width="150"/>
+                <DataGridTemplateColumn Header="Thao Tác" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="btnEdit" Style="{StaticResource ActionIconButton}" 
-                                ToolTip="Sửa" Margin="0,0,5,0">
-                                    <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18" Foreground="white"/>
+                                <Button Style="{StaticResource MaterialDesignIconButton}"
+    
+                                        ToolTip="Sửa"
+                                        Background="{DynamicResource PrimaryHueLightBrush}" 
+                                        Width="26" Height="26" Padding="2" Margin="0,1">        
+                                    <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                 </Button>
-                                <Button x:Name="btnDelete" Style="{StaticResource ActionIconButton}" 
-                                ToolTip="Xóa">
-                                    <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
+                                <Button Style="{StaticResource MaterialDesignIconButton}"
+       
+                                        ToolTip="Xóa" Margin="8,1,0,1"
+                                        Background="{DynamicResource SecondaryDelete}" 
+                                        Width="26" Height="26" 
+                                        Padding="2">
+                                    <materialDesign:PackIcon Kind="Delete" Width="15" Height="15" Foreground="White"/>
                                 </Button>
                             </StackPanel>
                         </DataTemplate>

@@ -1,69 +1,85 @@
-﻿using Supabase.Gotrue;
-using System;
+﻿using Supabase;
+using Supabase.Gotrue;
 using System.Threading.Tasks;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.TaiKhoan;
+using System.Collections.Generic;
 
 namespace Project_QLTS_DNC.Services
 {
     public class AuthService
     {
-        // Phương thức đăng nhập
-        public async Task<User> LoginAsync(string email, string password)
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();  // Lấy Supabase client
-                var session = await client.Auth.SignIn(email, password); // Đăng nhập
+        private Supabase.Client _client;
 
-                // Kiểm tra kết quả đăng nhập
-                if (session != null && session.User != null)
-                {
-                    string userId = session.User.Id;  // Lấy UID của người dùng
-                    Console.WriteLine($"UID của người dùng: {userId}");
-                    return session.User;  // Trả về người dùng sau khi đăng nhập thành công
-                }
-                else
-                {
-                    throw new Exception("Đăng nhập không thành công.");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Lỗi đăng nhập: " + ex.Message);
-                throw; // Ném lại exception để lớp gọi phía trên xử lý
-            }
+        public AuthService()
+        {
+            // Chỉ khởi tạo khi cần thiết
+        }
+
+        private async Task<Supabase.Client> GetClientAsync()
+        {
+            if (_client == null)
+                _client = await SupabaseService.GetClientAsync();
+            return _client;
+        }
+
+        // Đăng nhập người dùng và trả về đối tượng User của Supabase
+        public async Task<User> DangNhapAsync(string email, string password)
+        {
+            var client = await GetClientAsync();
+            var session = await client.Auth.SignIn(email, password);  // Sử dụng SignIn thay vì SignInWithPasswordAsync
+
+            if (session?.User == null)
+                throw new System.Exception("Đăng nhập thất bại!");
+
+            return session.User;
         }
 
 
-        // Phương thức đăng xuất
-        public async Task LogoutAsync()
+        // Lấy loại tài khoản từ UID của người dùng
+        public async Task<string> LayLoaiTaiKhoanTheoUid(string uid)
         {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();  // Lấy Supabase client
-                await client.Auth.SignOut();  // Đăng xuất người dùng
-            }
-            catch (Exception ex)
-            {
-                // Xử lý lỗi khi đăng xuất nếu có
-                System.Diagnostics.Debug.WriteLine("Lỗi đăng xuất: " + ex.Message);
-                throw;
-            }
-        }
+            var client = await GetClientAsync();
+            var taiKhoanResult = await client
+                .From<TaiKhoanModel>()
+                .Where(tk => tk.Uid == uid)
+                .Single();
 
-        // Lấy người dùng hiện tại
-        public async Task<User> GetCurrentUserAsync()
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();  // Lấy Supabase client
-                return client.Auth.CurrentUser;  // Trả về người dùng hiện tại
-            }
-            catch (Exception ex)
-            {
-                // Xử lý lỗi nếu không lấy được người dùng
-                System.Diagnostics.Debug.WriteLine("Lỗi lấy thông tin người dùng: " + ex.Message);
+            if (taiKhoanResult == null)
                 return null;
+
+            var loaiTkResult = await client
+                .From<LoaiTaiKhoanModel>()
+                .Where(loai => loai.MaLoaiTk == taiKhoanResult.MaLoaiTk)
+                .Single();
+
+            return loaiTkResult?.TenLoaiTk;
+        }
+
+        // Kiểm tra xem người dùng hiện tại có phải là Admin không và lấy tất cả tài khoản
+        public async Task<List<TaiKhoanModel>> LayTatCaTaiKhoanNeuLaAdminAsync()
+        {
+            var client = await GetClientAsync();
+            var user = client.Auth.CurrentUser;
+
+            if (user == null)
+                return null;
+
+            var taiKhoanHienTai = await client
+                .From<TaiKhoanModel>()
+                .Where(tk => tk.Uid == user.Id)
+                .Single();
+
+            // Kiểm tra quyền admin (MaLoaiTk == 1 là Admin)
+            if (taiKhoanHienTai?.MaLoaiTk == 1)
+            {
+                var danhSach = await client
+                    .From<TaiKhoanModel>()
+                    .Get();
+                return danhSach.Models;
             }
+
+            return null;
         }
     }
 }

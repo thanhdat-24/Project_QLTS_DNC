@@ -14,8 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Project_QLTS_DNC.ViewModels.NhanVien;
-using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Services.NhanVien;
 
 namespace Project_QLTS_DNC.View.NhanVien
 {
@@ -34,7 +34,7 @@ namespace Project_QLTS_DNC.View.NhanVien
 
         private async Task LoadDanhSachNhanVienAsync()
         {
-            List<NhanVienModel> danhSach = await _nhanVienService.LayDanhSachNhanVienAsync();
+            List<NhanVienModel> danhSach = await _nhanVienService.GetNhanVienList();
             employeeDataGrid.ItemsSource = danhSach;
         }
 

@@ -29,8 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Models\PhieuXuatKho\" />
-    <Folder Include="Models\TaiKhoan\" />
-    <Folder Include="ViewModel\TaiKhoan\" />
   </ItemGroup>
 
   <ItemGroup>

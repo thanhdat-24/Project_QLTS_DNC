@@ -86,7 +86,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private async Task LoadNhanVienLookupAsync()
         {
-            var result = await _client.From<NhanVienClass>().Get();
+            var result = await _client.From<NhanVienModel>().Get();
             _nvLookup = result.Models.ToDictionary(nv => nv.MaNV, nv => nv.TenNV);
         }
 

@@ -211,5 +211,15 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.CaiDat.BaoMatForm();
 
         }
+
+        private void btnDanhSachTaiKhoan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.TaiKhoan.DanhSachTaiKhoanForm();
+        }
+
+        private void btnLoaiTaiKhoan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
+        }
     }
 }
