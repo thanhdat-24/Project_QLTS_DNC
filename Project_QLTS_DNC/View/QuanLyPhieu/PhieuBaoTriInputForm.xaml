@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyPhieu"
         mc:Ignorable="d"
-        Title="Thêm Phiếu Bảo Trì" Height="840" Width="750"
+        Title="Thêm Phiếu Bảo Trì" Height="870" Width="800"
         WindowStartupLocation="CenterOwner"
         Background="#F5F5F5">
 
@@ -270,7 +270,6 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Tiêu đề -->
@@ -279,66 +278,106 @@
                            HorizontalAlignment="Center" Foreground="White"/>
             </Border>
 
-            <!-- Form nhập liệu -->
+            <!-- Form nhập liệu - Sắp xếp theo thứ tự mới -->
             <ScrollViewer Grid.Row="1" Margin="0,20,0,0" VerticalScrollBarVisibility="Auto">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <!-- Mã phiếu -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Mã phiếu:" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Grid.Column="1" x:Name="txtMaBaoTri" IsReadOnly="True" Background="#F8F8F8"/>
+                    </Grid>
 
-                    <!-- Cột trái -->
-                    <StackPanel Grid.Column="0">
-                        <!-- Mã phiếu -->
-                        <TextBlock Text="Mã phiếu:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox x:Name="txtMaPhieu" IsReadOnly="True" Background="#F8F8F8"/>
+                    <!-- Mã tài sản -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Mã tài sản:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox Grid.Column="1" x:Name="cboMaTaiSan" IsEditable="False" StaysOpenOnEdit="True"/>
+                    </Grid>
 
-                        <!-- Mã tài sản (thay đổi từ TextBox sang ComboBox) -->
-                        <TextBlock Text="Mã tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox x:Name="cboMaTaiSan" IsEditable="False" StaysOpenOnEdit="True" 
-                           SelectionChanged="CboMaTaiSan_SelectionChanged" Margin="0,5,0,15"/>
+                    <!-- Loại bảo trì -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Loại bảo trì:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox Grid.Column="1" x:Name="cboMaLoaiBaoTri" IsEditable="False" StaysOpenOnEdit="True"/>
+                    </Grid>
 
-                        <!-- Tên tài sản -->
-                        <TextBlock Text="Tên tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox x:Name="txtTenTaiSan" IsReadOnly="False" Background="White"/>
+                    <!-- Ngày bảo trì -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Ngày bảo trì:" Style="{StaticResource LabelStyle}"/>
+                        <DatePicker Grid.Column="1" x:Name="dtpNgayBaoTri"/>
+                    </Grid>
 
-                        <!-- Loại bảo trì -->
-                        <TextBlock Text="Loại bảo trì:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox x:Name="cboLoaiBaoTri">
-                            <ComboBoxItem Content="Định kỳ"/>
-                            <ComboBoxItem Content="Đột xuất"/>
-                            <ComboBoxItem Content="Bảo hành"/>
+                    <!-- Người phụ trách -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox Grid.Column="1" x:Name="cboMaNV" IsEditable="False" StaysOpenOnEdit="True"/>
+                    </Grid>
+
+                    <!-- Nội dung -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Nội dung:" Style="{StaticResource LabelStyle}" VerticalAlignment="Top" Margin="0,15,0,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtNoiDung" Height="100" TextWrapping="Wrap" AcceptsReturn="True" 
+                                 VerticalContentAlignment="Top" Padding="12"/>
+                    </Grid>
+
+                    <!-- Trạng thái -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox Grid.Column="1" x:Name="cboTrangThai">
+                            <ComboBoxItem Content="Tốt"/>
+                            <ComboBoxItem Content="Kém"/>
+                            <ComboBoxItem Content="Cần sửa chữa"/>
+                            <ComboBoxItem Content="Hỏng"/>
                         </ComboBox>
+                    </Grid>
 
-                        <!-- Chi phí dự kiến -->
-                        <TextBlock Text="Chi phí dự kiến (VNĐ):" Style="{StaticResource LabelStyle}"/>
-                        <TextBox x:Name="txtChiPhiDuKien"/>
-                    </StackPanel>
+                    <!-- Chi phí -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Chi phí (VNĐ):" Style="{StaticResource LabelStyle}"/>
+                        <TextBox Grid.Column="1" x:Name="txtChiPhi"/>
+                    </Grid>
 
-                    <!-- Cột phải -->
-                    <StackPanel Grid.Column="2">
-                        <!-- Ngày bảo trì -->
-                        <TextBlock Text="Ngày bảo trì:" Style="{StaticResource LabelStyle}"/>
-                        <DatePicker x:Name="dtpNgayBaoTri"/>
-
-                        <TextBlock Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox x:Name="cboNguoiPhuTrach" IsEditable="False" StaysOpenOnEdit="True"/>
-
-                        <!-- Trạng thái -->
-                        <TextBlock Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox x:Name="cboTrangThai">
-                            <ComboBoxItem Content="Chờ thực hiện"/>
-                            <ComboBoxItem Content="Đang thực hiện"/>
-                            <ComboBoxItem Content="Hoàn thành"/>
-                            <ComboBoxItem Content="Hủy bỏ"/>
-                        </ComboBox>
-
-                        <!-- Ngày hoàn thành -->
-                        <TextBlock Text="Ngày hoàn thành:" Style="{StaticResource LabelStyle}"/>
-                        <DatePicker x:Name="dtpNgayHoanThanh"/>
-                    </StackPanel>
-                </Grid>
+                    <!-- Ghi chú -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Ghi chú:" Style="{StaticResource LabelStyle}" VerticalAlignment="Top" Margin="0,15,0,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtGhiChu" TextWrapping="Wrap" Height="80" 
+                                 VerticalContentAlignment="Top" AcceptsReturn="True" Padding="12"/>
+                    </Grid>
+                </StackPanel>
             </ScrollViewer>
 
             <!-- Danh sách tài sản (mặc định ẩn) -->
@@ -355,15 +394,8 @@
                 </DataGrid>
             </StackPanel>
 
-            <!-- Nội dung bảo trì -->
-            <StackPanel Grid.Row="3" Margin="0,10,0,0">
-                <TextBlock Text="Nội dung bảo trì:" Style="{StaticResource LabelStyle}" Margin="0,10,0,5"/>
-                <TextBox x:Name="txtNoiDungBaoTri" Height="100" TextWrapping="Wrap" AcceptsReturn="True" 
-                         VerticalContentAlignment="Top" Padding="12" Margin="0,5,0,0"/>
-            </StackPanel>
-
             <!-- Các nút điều khiển -->
-            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
                 <Button x:Name="btnLuu" Content="Lưu" Style="{StaticResource PrimaryButton}"/>
                 <Button x:Name="btnHuy" Content="Hủy" Style="{StaticResource SecondaryButton}"/>
             </StackPanel>
