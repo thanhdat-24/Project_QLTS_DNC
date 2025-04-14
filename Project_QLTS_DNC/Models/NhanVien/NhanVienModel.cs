@@ -38,8 +38,7 @@ namespace Project_QLTS_DNC.Models.NhanVien
         [Column("ngay_vao_lam")]
         public DateTime NgayVaoLam { get; set; }
 
-        public string TenPhongBan { get; set; } = string.Empty;
-        public string TenChucVu { get; set; }= string.Empty;
+        
         
     }
 }

@@ -11,9 +11,9 @@ namespace Project_QLTS_DNC.Services
     {
         private Supabase.Client _client;
 
-        public AuthService()
+        public AuthService(Supabase.Client client)
         {
-            // Chỉ khởi tạo khi cần thiết
+            _client = client;
         }
 
         private async Task<Supabase.Client> GetClientAsync()

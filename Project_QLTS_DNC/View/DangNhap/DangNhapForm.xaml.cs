@@ -36,7 +36,8 @@ namespace Project_QLTS_DNC.View.DangNhap
 
             try
             {
-                var authService = new AuthService();
+                var client = SupabaseService.GetClientAsync().Result;
+                var authService = new AuthService(client);
                 var user = await authService.DangNhapAsync(email, password);
                 if (user != null)
                 {

@@ -214,7 +214,15 @@ namespace Project_QLTS_DNC
 
         }
 
-       
+        private void btnDanhSachTaiKhoan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.TaiKhoan.DanhSachTaiKhoanForm();
+        }
+
+        private void btnLoaiTaiKhoan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
+        }
     }
     public static class MainWindowExtensions
     {
@@ -236,14 +244,8 @@ namespace Project_QLTS_DNC
             }
         }
 
-        private void btnDanhSachTaiKhoan_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.TaiKhoan.DanhSachTaiKhoanForm();
-        }
+       
 
-        private void btnLoaiTaiKhoan_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
-        }
+       
     }
 }

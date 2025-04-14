@@ -169,15 +169,16 @@
                         ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
                         EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
                         Header="" Width="60"/>
-                <DataGridTextColumn Header="Mã nhân viên" Binding="{Binding MaNV}" Width="110"/>
-                <DataGridTextColumn Header="Phòng Ban" Binding="{Binding MaPhongBan}" Width="150"/>
-                <DataGridTextColumn Header="Chức vụ" Binding="{Binding MaCV}" Width="150" />
-                <DataGridTextColumn Header="Tên nhân viên" Binding="{Binding TenNV}" Width="180"/>
-                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="200"/>
-                <DataGridTextColumn Header="Số điện thoại" Binding="{Binding SDT}" Width="120"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
-                <DataGridTextColumn Header="Ngày vào làm" Binding="{Binding NgayVaoLam}" Width="150"/>
-                <DataGridTemplateColumn Header="Thao Tác" Width="Auto">
+                <DataGridTextColumn Header="Mã nhân viên" Binding="{Binding MaNv}" Width="*"/>
+                <DataGridTextColumn Header="Phòng Ban" Binding="{Binding TenPb}" Width="*"/>
+                <DataGridTextColumn Header="Chức vụ" Binding="{Binding TenCv}" Width="*" />
+                <DataGridTextColumn Header="Tên nhân viên" Binding="{Binding TenNv}" Width="*"/>
+                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="*"/>
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
+                <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Sdt}" Width="*"/>
+                
+                <DataGridTextColumn Header="Ngày vào làm" Binding="{Binding NgayVaoLam}" Width="*"/>
+                <DataGridTemplateColumn Header="Thao Tác" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

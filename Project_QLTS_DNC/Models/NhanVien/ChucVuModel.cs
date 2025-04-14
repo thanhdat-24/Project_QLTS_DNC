@@ -12,7 +12,7 @@ namespace Project_QLTS_DNC.Models.NhanVien
     public class ChucVuModel : BaseModel
     {
         [PrimaryKey("ma_cv", false)]
-        public long MaChucVu { get; set; }
+        public int MaChucVu { get; set; }
 
         [Column("ten_cv")]
         public string TenChucVu { get; set; }

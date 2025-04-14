@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Project_QLTS_DNC.Helpers;
+
 namespace Project_QLTS_DNC.ViewModels
 {
     public class DangNhapViewModel : ViewModelBase
@@ -20,7 +21,12 @@ namespace Project_QLTS_DNC.ViewModels
 
         public DangNhapViewModel()
         {
-            _authService = new AuthService();
+            // Lấy client từ SupabaseService (đảm bảo Supabase client đã được khởi tạo)
+            var client = SupabaseService.GetClientAsync().Result; // Lấy client đồng bộ
+
+            // Khởi tạo AuthService với client
+            _authService = new AuthService(client);
+
             DanhSachTaiKhoan = new ObservableCollection<TaiKhoanModel>();
             DangNhapCommand = new RelayCommand(async () => await DangNhapAsync());
         }
