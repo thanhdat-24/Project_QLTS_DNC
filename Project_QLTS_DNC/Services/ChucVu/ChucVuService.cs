@@ -9,20 +9,20 @@ using static Supabase.Postgrest.Constants;
 
 namespace Project_QLTS_DNC.Services.ChucVu
 {
-    public class ChucVuService
+    public class ChucVuService: SupabaseService
     {
         
-
-        public ChucVuService()
+        public ChucVuService(): base()
         {
-            
+
         }
+       
 
         public async Task<List<ChucVuModel>> GetAllChucVuAsync()
         {
             var client = await SupabaseService.GetClientAsync();
             var result = await client
-                .From<ChucVuModel>().Order(x => x.MaChucVu, Supabase.Postgrest.Constants.Ordering.Ascending)
+                .From<ChucVuModel>().Order(x => x.MaChucVu,Ordering.Ascending)
                 .Get();
 
             return result.Models.ToList();

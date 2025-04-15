@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.ChucVu;
 using Project_QLTS_DNC.ViewModels.NhanVien;
 using System;
@@ -11,22 +12,33 @@ namespace Project_QLTS_DNC.View.ChucVu
     public partial class ThemChucVuForm : Window
     {
         private ChucVuService _chucVuService;
-        private ChucVuModel _updateCV;  
+        private ChucVuModel _updateCV;
 
-        public ThemChucVuForm()
+        public ThemChucVuForm(Supabase.Client client)
         {
             InitializeComponent();
-            _chucVuService = new ChucVuService(); 
+            _chucVuService = new ChucVuService();
         }
 
-        
-        public ThemChucVuForm(ChucVuModel chucVuUpdate) : this()
+       
+        public ThemChucVuForm(ChucVuModel chucVuUpdate)
         {
-            _updateCV = chucVuUpdate; 
-            LoadChucVuData();  
+            InitializeComponent();
+            _updateCV = chucVuUpdate;
+            _chucVuService = new ChucVuService();  
+            LoadChucVuData();
         }
 
+        private async Task InitializeAsync(ChucVuModel chucVuUpdate)
+        {
+            _updateCV = chucVuUpdate;
 
+            var client = await SupabaseService.GetClientAsync();  
+            _chucVuService = new ChucVuService(); 
+            LoadChucVuData();
+        }
+
+        // Lưu chức vụ
         async void btnLuu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -56,7 +68,7 @@ namespace Project_QLTS_DNC.View.ChucVu
                         var updatedChucVu = await _chucVuService.CapNhatChucVuAsync(chucVu);
                         result = updatedChucVu != null;
 
-                        // Debug log
+                        
                         System.Diagnostics.Debug.WriteLine($"Update result: {result}, Updated object: {(updatedChucVu != null ? "not null" : "null")}");
                     }
                     catch (Exception ex)
@@ -85,7 +97,7 @@ namespace Project_QLTS_DNC.View.ChucVu
                     MessageBox.Show(_updateCV != null ? "Cập nhật chức vụ thành công." : "Thêm chức vụ thành công.",
                                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // Cập nhật lại danh sách chức vụ
+                    
                     try
                     {
                         var parentWindow = System.Windows.Window.GetWindow(this);
@@ -94,7 +106,7 @@ namespace Project_QLTS_DNC.View.ChucVu
                             var danhSachChucVuViewModel = parentWindow.DataContext as DanhSachChucVuViewModel;
                             if (danhSachChucVuViewModel != null)
                             {
-                                await danhSachChucVuViewModel.LoadChucVuAsync();
+                                await danhSachChucVuViewModel.Refresh();
                             }
                         }
                     }
@@ -118,7 +130,7 @@ namespace Project_QLTS_DNC.View.ChucVu
             }
         }
 
-
+        
         private void LoadChucVuData()
         {
             if (_updateCV != null)
@@ -128,12 +140,12 @@ namespace Project_QLTS_DNC.View.ChucVu
                 txtMoTa.Text = _updateCV.MoTa;
 
                 this.txtTieude.Text = "Cập nhật chức vụ";
-                this.Title = "Cập nhật chức vụ";  
-                btnLuu.Content = "Cập nhật";  
+                this.Title = "Cập nhật chức vụ";
+                btnLuu.Content = "Cập nhật";
             }
         }
 
-        // Sự kiện khi bấm nút "Hủy"
+        // Hủy
         private void btnHuy_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

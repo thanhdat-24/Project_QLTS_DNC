@@ -34,14 +34,14 @@ namespace Project_QLTS_DNC.ViewModels.NhanVien
             var client = SupabaseService.GetClientAsync().Result; 
 
            
-            _nhanVienService = new NhanVienService(client);
+            _nhanVienService = new NhanVienService();
             _authService = new AuthService(client); 
 
             _ = LoadNhanVienListAsync(); 
         }
 
         
-        private async Task LoadNhanVienListAsync()
+        public async Task LoadNhanVienListAsync()
         {
            
             var danhSachDto = await _nhanVienService.LayTatCaNhanVienDtoAsync();
@@ -65,7 +65,7 @@ namespace Project_QLTS_DNC.ViewModels.NhanVien
 
 
 
-        // Sự kiện thông báo PropertyChanged để giao diện tự động cập nhật khi danh sách thay đổi
+      
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
