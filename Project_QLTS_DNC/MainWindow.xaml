@@ -43,7 +43,7 @@
                         <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected" />
                         <TreeViewItem Header="🛠️ Bảo trì" >
                              <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì"  />
-                             <TreeViewItem x:Name="btnDSbaotri" Header="Danh sách bảo trì "    />
+                            <TreeViewItem x:Name="btnDSbaotri" Header="📋  Danh sách bảo trì"    />
                         </TreeViewItem>           
                             
                             
@@ -51,6 +51,8 @@
                         <TreeViewItem Header="📜 Duyệt phiếu" />
                         <TreeViewItem Header="⚙️ Cài đặt">
                             <TreeViewItem x:Name="btnThongTinCongTy" Header="🏢 Thông tin công ty" Selected="btnThongTinCongTy_Selected" />
+                            <TreeViewItem x:Name="btnPhieuIn" Header="🧾 Cài đặt phiếu in"  />
+
                         </TreeViewItem>
                     </TreeView>
                 </ScrollViewer>

@@ -228,6 +228,11 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.ChucVu.ChucVuForm();
         }
+
+        private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
     public static class MainWindowExtensions
     {
