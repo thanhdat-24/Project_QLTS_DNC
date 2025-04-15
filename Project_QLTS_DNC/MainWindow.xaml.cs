@@ -233,6 +233,11 @@ namespace Project_QLTS_DNC
         {
 
         }
+
+        private void btnDuyetPhieu_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.DuyetPhieu.frmDuyetPhieu();
+        }
     }
     public static class MainWindowExtensions
     {

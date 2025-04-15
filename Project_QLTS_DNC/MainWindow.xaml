@@ -48,7 +48,7 @@
                             
                             
                         <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected" />
-                        <TreeViewItem Header="📜 Duyệt phiếu" />
+                        <TreeViewItem Header="📜 Duyệt phiếu" x:Name="btnDuyetPhieu" Selected="btnDuyetPhieu_Selected"/>
                         <TreeViewItem Header="⚙️ Cài đặt">
                             <TreeViewItem x:Name="btnThongTinCongTy" Header="🏢 Thông tin công ty" Selected="btnThongTinCongTy_Selected" />
                             <TreeViewItem x:Name="btnPhieuIn" Header="🧾 Cài đặt phiếu in"  />
