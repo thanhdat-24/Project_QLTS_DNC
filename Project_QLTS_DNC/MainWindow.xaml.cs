@@ -223,6 +223,11 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
         }
+
+        private void btnChucVu_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.ChucVu.ChucVuForm();
+        }
     }
     public static class MainWindowExtensions
     {
@@ -247,20 +252,11 @@ namespace Project_QLTS_DNC
        
 
 
-        private void btnLoaiTaiKhoan_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
-        }
+       
 
-        private void btnBaoTri_Selected_1(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
-        }
+       
 
-        private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
-        }
+       
 
     }
 }
