@@ -1,0 +1,248 @@
+﻿<UserControl x:Class="Project_QLTS_DNC.View.DuyetPhieu.frmLoaiPhieu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Project_QLTS_DNC.View.DuyetPhieu"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             TextOptions.TextFormattingMode="Ideal"
+             TextOptions.TextRenderingMode="Auto"
+             mc:Ignorable="d"
+             Height="Auto" 
+             Width="Auto"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignPaper}"
+             TextElement.FontWeight="Regular"
+             TextElement.FontSize="13"
+             FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <UserControl.Resources>
+        <Style x:Key="ActionButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPaper}"/>
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Padding" Value="12,0"/>
+        </Style>
+
+        <Style x:Key="HoverRowStyle" TargetType="{x:Type DataGridRow}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryHueLightBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Bọc toàn bộ nội dung trong DialogHost -->
+    <materialDesign:DialogHost x:Name="MainDialogHost" 
+                              CloseOnClickAway="False"
+                              DialogTheme="Inherit">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Tiêu đề và Nút Thêm -->
+            <Grid Grid.Row="0" Margin="15,15,15,5" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="ListBoxOutline" 
+                                           Foreground="{DynamicResource PrimaryHueMidBrush}" 
+                                           Margin="0,0,10,0"
+                                           Width="28"
+                                           Height="28"
+                                           VerticalAlignment="Center"/>
+                    <TextBlock Text="LOẠI PHIẾU" 
+                             FontSize="24" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource PrimaryHueMidBrush}"
+                             VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" 
+                      x:Name="btnAdd" 
+                      Style="{StaticResource MaterialDesignRaisedButton}" 
+                      materialDesign:ButtonAssist.CornerRadius="8" 
+                      Background="{StaticResource SecondaryCreate}" 
+                      Foreground="{StaticResource SecondaryAccentForegroundBrush}" 
+                      ToolTip="Thêm phòng mới" Click="btnAdd_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Plus" Margin="0 0 8 0"/>
+                        <TextBlock Text="THÊM MỚI"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- Khu vực tìm kiếm và lọc -->
+            <Grid Grid.Row="1" Margin="16" Background="{DynamicResource MaterialDesignBackground}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Bar -->
+                <materialDesign:Card Grid.Row="1" Margin="15,10,15,15" UniformCornerRadius="4" Padding="0">
+                    <Grid Margin="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <!-- Thêm cột cho btnLoadDuLieu -->
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Search Icon -->
+                        <materialDesign:PackIcon Grid.Column="0" Kind="Magnify" Width="20" Height="20" 
+                            Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                        <!-- Search TextBox with Material Design -->
+                        <TextBox x:Name="txtSearch" Grid.Column="1" 
+            materialDesign:HintAssist.Hint="Tìm theo mã, tên loại phiếu..."
+            Style="{StaticResource MaterialDesignTextBox}"
+            VerticalAlignment="Center" Margin="0,0,20,0"/>
+                        <!-- Search Button with Material Design -->
+                        <Button x:Name="btnSearch" Grid.Column="2" Style="{StaticResource MaterialDesignRaisedButton}"
+           Background="{DynamicResource PrimaryHueMidBrush}" Foreground="{DynamicResource MaterialDesignPaper}" 
+           materialDesign:ButtonAssist.CornerRadius="4"
+           Height="36" Width="120" Click="btnSearch_Click" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Margin="0,0,8,0"/>
+                                <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Load Data Button with Material Design -->
+                        <Button x:Name="btnLoadDuLieu" Grid.Column="3" Margin="8,0,0,0" 
+                    Background="#B0BEC5" Height="36" Width="36" 
+                    Style="{StaticResource MaterialDesignIconButton}" 
+                    Click="btnLoadDuLieu_Click" HorizontalAlignment="Left">
+                            <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24" 
+                     VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Button>
+
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+
+            <!-- Danh Sách Tài Sản -->
+            <materialDesign:Card Grid.Row="2" Margin="16" UniformCornerRadius="8">
+                <DataGrid x:Name="dgLoaiPhieu" 
+                        AutoGenerateColumns="False" 
+                        IsReadOnly="True" 
+                        CanUserAddRows="False"
+                        materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
+                        materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+                        BorderThickness="0" 
+                        GridLinesVisibility="All" 
+                        VerticalScrollBarVisibility="Auto"
+                        SelectionMode="Single"
+                        SelectionUnit="FullRow"
+                        CanUserResizeColumns="True"
+                        ColumnWidth="Auto">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="10,8"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource HoverRowStyle}">
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Mã loại phiếu" Binding="{Binding MaLoaiPhieu}" Width="80" MinWidth="150">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Tên loại phiếu" Binding="{Binding TenLoaiPhieu}" Width="*" MinWidth="120">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextWrapping" Value="Wrap"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTaLP}" Width="120" MinWidth="300">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Width="110" MinWidth="110" Header="Thao tác">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                              Click="BtnEdit_Click"
+                                              ToolTip="Sửa"
+                                              Background="{DynamicResource PrimaryHueLightBrush}" 
+                                              Width="32" Height="32" Padding="2" Margin="0,1">
+                                            <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
+                                        </Button>
+                                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                              Click="BtnDelete_Click"
+                                              ToolTip="Xóa" Margin="8,1,0,1"
+                                              Background="{DynamicResource SecondaryDelete}" 
+                                              Width="32" Height="32" 
+                                              Padding="2">
+                                            <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </materialDesign:Card>
+
+            <!-- Grid để chứa form Thêm/Chỉnh sửa -->
+            <Grid Grid.Row="3" Grid.RowSpan="2" x:Name="FormContainer" Visibility="Collapsed">
+                <materialDesign:Card UniformCornerRadius="8" 
+                                   Margin="16" 
+                                   materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                   VerticalAlignment="Top"
+                                   HorizontalAlignment="Stretch">
+                    <ContentControl x:Name="FormContent"/>
+                </materialDesign:Card>
+            </Grid>
+
+            <!-- Footer/Status Bar -->
+            <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" Name="StatusBar">
+                <DockPanel>
+                    <TextBlock x:Name="txtStatus" 
+                             Text="Tổng số tòa nhà: 0" 
+                             VerticalAlignment="Center" 
+                             FontWeight="Medium"/>
+
+                </DockPanel>
+            </materialDesign:ColorZone>
+        </Grid>
+    </materialDesign:DialogHost>
+</UserControl>
