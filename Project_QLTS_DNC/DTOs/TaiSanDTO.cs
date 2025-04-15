@@ -18,6 +18,7 @@ namespace Project_QLTS_DNC.DTOs
         private bool _isSelected;
         private string _tenPhong; // Tên phòng từ bảng phong
         private string _tenNhomTS; // Tên nhóm tài sản (có thể thêm nếu có)
+        private int? _maNhomTS; // mã nhóm tài sản
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -185,6 +186,20 @@ namespace Project_QLTS_DNC.DTOs
                 {
                     _tenPhong = value;
                     OnPropertyChanged(nameof(TenPhong));
+                }
+            }
+        }
+
+        // Mã nhóm tài sản (từ chi tiết phiếu nhập)
+        public int? MaNhomTS
+        {
+            get { return _maNhomTS; }
+            set
+            {
+                if (_maNhomTS != value)
+                {
+                    _maNhomTS = value;
+                    OnPropertyChanged(nameof(MaNhomTS));
                 }
             }
         }

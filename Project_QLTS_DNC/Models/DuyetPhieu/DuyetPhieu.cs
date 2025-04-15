@@ -1,46 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+using System;
 
 namespace Project_QLTS_DNC.Models.DuyetPhieu
 {
-    public class DuyetPhieu
+    [Table("phieuduyet")]
+    public class PhieuDuyet : BaseModel
     {
-        public class PhieuNhapKho
-        {
-            public string MaPhieu { get; set; }
-            public string MaSP { get; set; }
-            public DateTime NgayNhap { get; set; }
-            public string MaNCC { get; set; }
-            public int SoLuong { get; set; }
-            public double DonGia { get; set; }
-            public double TongTien => SoLuong * DonGia;
-        }
-        public class PhieuXuatKho
-        {
-            public string MaPhieu { get; set; }
-            public DateTime NgayXuat { get; set; }
-            public string MaNV { get; set; }
-            public int SoLuong { get; set; }
-            public string MoTa { get; set; }
-        }
-        public class PhieuBaoTri
-        {
-            public string MaPhieu { get; set; }
-            public string MaKiemKe { get; set; }
-            public DateTime NgayKiemKe { get; set; }
-            public string TinhTrangSauKK { get; set; }
-        }
-        public class PhieuBaoHong
-        {
-            public string MaPhieu { get; set; }
-            public string MaBaoCaoHong { get; set; }
-            public string NguoiBaoCao { get; set; }
-            public string HinhThucGhiNhan { get; set; }
-            public string TinhTrang { get; set; }
-        }
+        [PrimaryKey("ma_phieu_duyet", true)] // TRUE => để Supabase tự sinh
+        [Column("ma_phieu_duyet")]
+        public long? MaPhieuDuyet { get; set; }
 
+        [Column("ma_nv")]
+        public long MaNV { get; set; }
+
+        [Column("ma_loai_phieu")]
+        public long MaLoaiPhieu { get; set; }
+
+        [Column("ma_phieu")]
+        public long MaPhieu { get; set; }
+
+        [Column("ngay_duyet")]
+        public DateTime? NgayDuyet { get; set; }
+
+        [Column("ngay_tu_choi")]
+        public DateTime? NgayTuChoi { get; set; }
+
+        [Column("ly_do")]
+        public string LyDo { get; set; }
+
+        [Column("trang_thai")]
+        public string TrangThai { get; set; }
     }
 }

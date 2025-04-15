@@ -20,6 +20,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         private ObservableCollection<TaiSanDTO> _listTaiSan;
         private CollectionViewSource _viewSource;
         private List<PhongFilter> _phongList;
+        private List<NhomTaiSanFilter> _nhomTSList;
 
         public DanhSachSanPham()
         {
@@ -31,17 +32,18 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             btnSearch.Click += BtnSearch_Click;
             txtSearch.KeyDown += TxtSearch_KeyDown;
             cboPhong.SelectionChanged += Filter_SelectionChanged;
-
-            // Fix: Reference proper control name from XAML - make sure it matches your XAML declaration
+            cboNhomTS.SelectionChanged += Filter_SelectionChanged;
+            btnRefresh.Click += BtnRefresh_Click;
             btnExportQRCode.Click += BtnExportQRCode_Click;
-
-            // Đảm bảo chúng ta thêm sự kiện cho nút xoá không phải trên cấp cao mà trong template
-            // btnDelete.Click += BtnDelete_Click; 
-            // Thay bằng việc để cell template xử lý trong XAML
 
             this.Loaded += DanhSachSanPham_Loaded;
         }
-        // Thêm vào class DanhSachSanPham
+
+        private void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshData();
+        }
+
         private void BtnExportQRCode_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -72,7 +74,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             UpdateStatusBar();
         }
 
-        // Thêm phương thức này vào lớp DanhSachSanPham
         public void RefreshData()
         {
             // Gọi lại phương thức LoadDataAsync để làm mới dữ liệu
@@ -83,9 +84,15 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         {
             try
             {
+                // Hiển thị indicator loading (nếu có)
+
                 // Lấy danh sách phòng để điền vào ComboBox lọc
                 _phongList = await GetPhongListAsync();
                 cboPhong.ItemsSource = _phongList;
+
+                // Lấy danh sách nhóm tài sản để điền vào ComboBox lọc
+                _nhomTSList = await GetNhomTSListAsync();
+                cboNhomTS.ItemsSource = _nhomTSList;
 
                 // Lấy danh sách tài sản từ service
                 var taiSanModels = await TaiSanService.LayDanhSachTaiSanAsync();
@@ -97,9 +104,13 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 // Lấy thông tin phòng cho mỗi tài sản
                 var phongCollection = await PhongService.LayDanhSachPhongAsync();
 
-                // Cập nhật tên phòng cho mỗi tài sản
+                // Lấy thông tin nhóm tài sản
+                var nhomTSCollection = await NhomTaiSanService.LayDanhSachNhomTaiSanAsync();
+
+                // Cập nhật tên phòng và nhóm tài sản cho mỗi tài sản
                 foreach (var taiSan in _listTaiSan)
                 {
+                    // Cập nhật tên phòng
                     if (taiSan.MaPhong.HasValue)
                     {
                         var phong = phongCollection.FirstOrDefault(p => p.MaPhong == taiSan.MaPhong.Value);
@@ -112,6 +123,57 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                     {
                         taiSan.TenPhong = "Chưa phân phòng";
                     }
+
+                    // Cập nhật mã và tên nhóm tài sản từ chi tiết phiếu nhập
+                    if (taiSan.MaChiTietPN.HasValue)
+                    {
+                        try
+                        {
+                            // Sử dụng service có sẵn để lấy thông tin chi tiết phiếu nhập
+                            var chiTietPN = await ChiTietPhieuNhapService.LayChiTietPhieuNhapTheoMaAsync(taiSan.MaChiTietPN.Value);
+
+                            if (chiTietPN != null)
+                            {
+                                // Lưu mã nhóm tài sản vào DTO
+                                taiSan.MaNhomTS = chiTietPN.MaNhomTS;
+
+                                // Tìm tên nhóm tài sản
+                                var nhomTS = nhomTSCollection.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
+                                if (nhomTS != null)
+                                {
+                                    taiSan.TenNhomTS = nhomTS.TenNhom;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Xử lý nếu không thể lấy được thông tin chi tiết phiếu nhập
+                            System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy thông tin chi tiết phiếu nhập: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        // Nếu không có MaChiTietPN, có thể truy vấn trực tiếp từ service để lấy nhóm tài sản
+                        try
+                        {
+                            int maNhomTS = await ChiTietPhieuNhapService.TimNhomTaiSanTheoTaiSanAsync(taiSan.MaTaiSan);
+                            if (maNhomTS > 0)  // Nếu tìm thấy nhóm tài sản
+                            {
+                                taiSan.MaNhomTS = maNhomTS;
+
+                                // Tìm tên nhóm tài sản
+                                var nhomTS = nhomTSCollection.FirstOrDefault(n => n.MaNhomTS == maNhomTS);
+                                if (nhomTS != null)
+                                {
+                                    taiSan.TenNhomTS = nhomTS.TenNhom;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Lỗi khi tìm nhóm tài sản: {ex.Message}");
+                        }
+                    }
                 }
 
                 // Thiết lập nguồn dữ liệu cho DataGrid
@@ -119,12 +181,32 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 _viewSource.Source = _listTaiSan;
                 dgSanPham.ItemsSource = _viewSource.View;
 
+                // Thiết lập bộ lọc
+                InitializeFilters();
+
                 // Cập nhật trạng thái
                 UpdateStatusBar();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task<List<NhomTaiSanFilter>> GetNhomTSListAsync()
+        {
+            try
+            {
+                // Sử dụng service để lấy danh sách nhóm tài sản
+                return await NhomTaiSanService.GetNhomTaiSanFilterListAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi lấy danh sách nhóm tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<NhomTaiSanFilter>
+                {
+                    new NhomTaiSanFilter { MaNhomTS = null, TenNhomTS = "Tất cả" }
+                };
             }
         }
 
@@ -196,9 +278,15 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
             // Lọc theo phòng
             bool matchesPhong = cboPhong.SelectedItem == null ||
+                                ((PhongFilter)cboPhong.SelectedItem).MaPhong == null ||
                                 taiSan.MaPhong == ((PhongFilter)cboPhong.SelectedItem).MaPhong;
 
-            e.Accepted = matchesSearch && matchesPhong;
+            // Lọc theo nhóm tài sản
+            bool matchesNhomTS = cboNhomTS.SelectedItem == null ||
+                                ((NhomTaiSanFilter)cboNhomTS.SelectedItem).MaNhomTS == null ||
+                                (taiSan.MaNhomTS.HasValue && taiSan.MaNhomTS.Value == ((NhomTaiSanFilter)cboNhomTS.SelectedItem).MaNhomTS.Value);
+
+            e.Accepted = matchesSearch && matchesPhong && matchesNhomTS;
         }
 
         private void UpdateStatusBar()
@@ -329,6 +417,4 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             return TenPhong;
         }
     }
-
-
 }
