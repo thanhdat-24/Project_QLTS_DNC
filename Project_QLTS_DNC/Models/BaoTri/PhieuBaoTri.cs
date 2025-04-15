@@ -30,12 +30,16 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Column("trang_thai_sau_bao_tri")]
         public string TrangThai { get; set; }
 
-        // Sử dụng JsonConverter để xử lý kiểu tiền tệ khi nhận dữ liệu từ Supabase
         [Column("chi_phi")]
         [JsonConverter(typeof(CurrencyConverter))]
         public decimal? ChiPhi { get; set; }
 
         [Column("ghi_chu")]
         public string GhiChu { get; set; }
+
+        // Thuộc tính trạng thái được chọn - không lưu vào DB
+        [JsonIgnore]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public bool IsSelected { get; set; }
     }
 }

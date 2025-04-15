@@ -174,11 +174,12 @@
                              VerticalAlignment="Center"/>
                 </StackPanel>
                 <Button Grid.Column="1" 
-                       x:Name="btnThem" 
-                       Style="{StaticResource PrimaryButton}" 
-                       Background="{StaticResource SecondaryCreate}" 
-                       Foreground="White" 
-                       ToolTip="Thêm phiếu báo hỏng mới">
+        x:Name="btnThem" 
+        Style="{StaticResource PrimaryButton}" 
+        Background="{StaticResource SecondaryCreate}" 
+        Foreground="White" 
+        Click="btnThem_Click"
+        ToolTip="Thêm phiếu báo hỏng mới">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Margin="0 0 8 0"/>
                         <TextBlock Text="THÊM PHIẾU"/>
@@ -193,7 +194,6 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <materialDesign:Card Grid.Column="0" Padding="0" Margin="0" UniformCornerRadius="5">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -202,10 +202,10 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <materialDesign:PackIcon Kind="Search" 
-                                    Grid.Column="0" 
-                                    VerticalAlignment="Center" 
-                                    Margin="12,0" 
-                                    Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                        Grid.Column="0" 
+                        VerticalAlignment="Center" 
+                        Margin="12,0" 
+                        Foreground="{StaticResource PrimaryHueMidBrush}"/>
                         <TextBox Grid.Column="1" 
                     x:Name="txtTimKiem" 
                     materialDesign:HintAssist.Hint="Tìm kiếm theo mã phiếu, tên tài sản..." 
@@ -213,31 +213,33 @@
                     VerticalAlignment="Center" 
                     Padding="5,12"
                     Background="Transparent"
+                    KeyDown="txtTimKiem_KeyDown"
                     materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
                         <Button Grid.Column="2" 
                     Style="{StaticResource MaterialDesignIconButton}" 
                     x:Name="btnTimKiem" 
                     Margin="0,0,8,0"
+                    Click="btnTimKiem_Click"
                     ToolTip="Tìm kiếm">
                             <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                         </Button>
                     </Grid>
                 </materialDesign:Card>
-
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <ComboBox x:Name="cboTrangThai" Width="120" Height="42" Margin="15,0" 
-            VerticalContentAlignment="Center"
-            Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
+                  VerticalContentAlignment="Center"
+                  SelectionChanged="FilterComboBox_SelectionChanged"
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
                         <ComboBoxItem Content="Tất cả trạng thái" IsSelected="True"/>
-                        <ComboBoxItem Content="Chờ thực hiện"/>
-                        <ComboBoxItem Content="Đang thực hiện"/>
-                        <ComboBoxItem Content="Hoàn thành"/>
-                        <ComboBoxItem Content="Hủy bỏ"/>
+                        <ComboBoxItem Content="Tốt"/>
+                        <ComboBoxItem Content="Kém"/>
+                        <ComboBoxItem Content="Cần sửa chữa"/>
+                        <ComboBoxItem Content="hỏng"/>
                     </ComboBox>
-
                     <ComboBox x:Name="cboLoaiBaoTri" Width="120" Height="42" Margin="5,0" 
-            VerticalContentAlignment="Center"
-            Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
+                  VerticalContentAlignment="Center"
+                  SelectionChanged="FilterComboBox_SelectionChanged"
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
                         <ComboBoxItem Content="Tất cả loại" IsSelected="True"/>
                         <ComboBoxItem Content="Định kỳ"/>
                         <ComboBoxItem Content="Đột xuất"/>
@@ -298,7 +300,18 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Mã phiếu" Width="100" Binding="{Binding MaBaoTri}">
+                        <DataGridTemplateColumn Width="50">
+                            <DataGridTemplateColumn.Header>
+                                <CheckBox x:Name="chkSelectAll"  />
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox x:Name="chkSelect" IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Mã phiếu" Width="90" Binding="{Binding MaBaoTri}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -307,7 +320,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Mã tài sản" Width="110" Binding="{Binding MaTaiSan}">
+                        <DataGridTextColumn Header="Mã tài sản" Width="100" Binding="{Binding MaTaiSan}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -325,7 +338,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Ngày bảo trì" Width="120" Binding="{Binding NgayBaoTri, StringFormat=dd/MM/yyyy}">
+                        <DataGridTextColumn Header="Ngày bảo trì" Width="110" Binding="{Binding NgayBaoTri, StringFormat=dd/MM/yyyy}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -334,7 +347,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Người phụ trách" Width="150" Binding="{Binding MaNV}">
+                        <DataGridTextColumn Header="Người phụ trách" Width="130" Binding="{Binding MaNV}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -359,20 +372,20 @@
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Chờ thực hiện">
-                                                        <Setter Property="Background" Value="#FFF3CD"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Tốt">
+                                                       
                                                         <Setter Property="BorderBrush" Value="#FFE69C"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Đang thực hiện">
-                                                        <Setter Property="Background" Value="#CCE5FF"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Kém">
+                                                    
                                                         <Setter Property="BorderBrush" Value="Black"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Hoàn thành">
-                                                        <Setter Property="Background" Value="#D4EDDA"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Cần sửa chữa">
+                                                      
                                                         <Setter Property="BorderBrush" Value="Black"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Hủy bỏ">
-                                                        <Setter Property="Background" Value="#F8D7DA"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="hỏng">
+                                                      
                                                         <Setter Property="BorderBrush" Value="#F5C6CB"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -382,17 +395,17 @@
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Chờ thực hiện">
-                                                            <Setter Property="Foreground" Value="#856404"/>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Tốt">
+                                                            
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Đang thực hiện">
-                                                            <Setter Property="Foreground" Value="#004085"/>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Kém">
+                                                            
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Hoàn thành">
-                                                            <Setter Property="Foreground" Value="#155724"/>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Cần sửa chữa">
+                                                           
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Hủy bỏ">
-                                                            <Setter Property="Foreground" Value="#721C24"/>
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="hỏng">
+                                                            
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -412,7 +425,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Ghi chú" Width="150" Binding="{Binding GhiChu}">
+                        <DataGridTextColumn Header="Ghi chú" Width="130" Binding="{Binding GhiChu}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -428,14 +441,18 @@
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
                         ToolTip="Sửa"
                         Background="{DynamicResource PrimaryHueLightBrush}" 
-                        Width="26" Height="26" Padding="2" Margin="0,1">
+                        Width="26" Height="26" Padding="2" Margin="0,1"
+                        Click="EditButton_Click"
+                        CommandParameter="{Binding}">
                                             <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
                         ToolTip="Xóa" Margin="8,1,0,1"
                         Background="{DynamicResource SecondaryDelete}" 
                         Width="26" Height="26" 
-                        Padding="2">
+                        Padding="2"
+                        Click="DeleteButton_Click"
+                        CommandParameter="{Binding}">
                                             <materialDesign:PackIcon Kind="Delete" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                     </StackPanel>
@@ -479,6 +496,7 @@
                 Style="{StaticResource MaterialDesignIconButton}" 
                 Width="36" Height="36" 
                 Margin="4,0"
+                Click="btnFirstPage_Click"
                 ToolTip="Trang đầu">
                             <materialDesign:PackIcon Kind="PageFirst" Width="20" Height="20"/>
                         </Button>
@@ -486,35 +504,35 @@
                 Style="{StaticResource MaterialDesignIconButton}" 
                 Width="36" Height="36" 
                 Margin="4,0"
+                Click="btnPrevPage_Click"
                 ToolTip="Trang trước">
                             <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20"/>
                         </Button>
-
                         <Border CornerRadius="2" 
                 BorderThickness="1" 
                 BorderBrush="#CCCCCC" 
                 Margin="8,0">
                             <StackPanel Orientation="Horizontal" Margin="8,0">
                                 <TextBlock x:Name="txtCurrentPage" 
-                         Text="1" 
-                         VerticalAlignment="Center" 
-                         FontWeight="SemiBold" 
-                         Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                           Text="1" 
+                           VerticalAlignment="Center" 
+                           FontWeight="SemiBold" 
+                           Foreground="{StaticResource PrimaryHueMidBrush}"/>
                                 <TextBlock Text="/" 
-                         VerticalAlignment="Center" 
-                         Margin="4,0" 
-                         Foreground="#666666"/>
+                           VerticalAlignment="Center" 
+                           Margin="4,0" 
+                           Foreground="#666666"/>
                                 <TextBlock x:Name="txtTotalPages" 
-                         Text="5" 
-                         VerticalAlignment="Center" 
-                         Foreground="#666666"/>
+                           Text="5" 
+                           VerticalAlignment="Center" 
+                           Foreground="#666666"/>
                             </StackPanel>
                         </Border>
-
                         <Button x:Name="btnNextPage" 
                 Style="{StaticResource MaterialDesignIconButton}" 
                 Width="36" Height="36" 
                 Margin="4,0"
+                Click="btnNextPage_Click"
                 ToolTip="Trang sau">
                             <materialDesign:PackIcon Kind="ChevronRight" Width="20" Height="20"/>
                         </Button>
@@ -522,13 +540,14 @@
                 Style="{StaticResource MaterialDesignIconButton}" 
                 Width="36" Height="36" 
                 Margin="4,0"
+                Click="btnLastPage_Click"
                 ToolTip="Trang cuối">
                             <materialDesign:PackIcon Kind="PageLast" Width="20" Height="20"/>
                         </Button>
-
                         <ComboBox x:Name="cboPageSize" 
                   Width="80" 
                   Margin="12,0,0,0"
+                  SelectionChanged="cboPageSize_SelectionChanged"
                   materialDesign:HintAssist.Hint="Hiển thị" 
                   FontSize="12">
                             <ComboBoxItem Content="5"/>
@@ -542,7 +561,10 @@
 
                 <!-- Nút bên phải -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button x:Name="btnInPhieu" Content="In phiếu" Style="{StaticResource PrimaryButton}"/>
+                    <Button x:Name="btnInPhieu" 
+            Content="In phiếu" 
+            Style="{StaticResource PrimaryButton}"
+            Click="btnInPhieu_Click"/>
                 </StackPanel>
             </Grid>
         </Grid>
