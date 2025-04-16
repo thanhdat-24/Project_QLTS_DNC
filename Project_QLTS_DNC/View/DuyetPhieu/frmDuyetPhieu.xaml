@@ -101,7 +101,7 @@
                 <Button x:Name="btnSearch" Grid.Column="2" Style="{StaticResource MaterialDesignRaisedButton}"
                 Background="{DynamicResource PrimaryHueMidBrush}" Foreground="{DynamicResource MaterialDesignPaper}" 
                 materialDesign:ButtonAssist.CornerRadius="4"
-                Height="36" Width="120">
+                Height="36" Width="120" Click="btnSearch_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Margin="0,0,8,0"/>
                         <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>
@@ -305,13 +305,13 @@
                     Width="150"
                     Margin="0,0,10,0"
                     Style="{StaticResource MaterialDesignOutlinedDatePicker}"
-                    materialDesign:HintAssist.Hint="Từ ngày"/>
+                    materialDesign:HintAssist.Hint="Từ ngày" SelectedDateChanged="dpTuNgay_SelectedDateChanged"/>
 
                                     <DatePicker x:Name="dpDenNgay"
                     Width="150"
                     Margin="0,0,10,0"
                     Style="{StaticResource MaterialDesignOutlinedDatePicker}"
-                    materialDesign:HintAssist.Hint="Đến ngày"/>
+                    materialDesign:HintAssist.Hint="Đến ngày" SelectedDateChanged="dpDenNgay_SelectedDateChanged"/>
                                 </StackPanel>
                                 <!-- Search Button with Material Design -->
                                 <Button x:Name="btnDetail" Grid.Column="1" Style="{StaticResource MaterialDesignRaisedButton}"
@@ -369,7 +369,31 @@
                             <DataGridTextColumn Header="Ngày tạo phiếu" Binding="{Binding NgayTaoPhieu}" Width="200"/>
                             <DataGridTextColumn Header="Trạng thái" Binding="{Binding TrangThai}" Width="200"/>
 
+
+
+                            <DataGridTemplateColumn Header="Thao Tác" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button Style="{StaticResource MaterialDesignIconButton}" 
+                        ToolTip="Xem Chi Tiết"
+                        Background="#80000000" 
+                        Width="32" Height="32" 
+                        Padding="0"
+                        Click="btnXemChiTiet_Click"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                                                <materialDesign:PackIcon Kind="Eye" Width="18" Height="18" Foreground="White"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+
                         </DataGrid.Columns>
+                        
+                        
                     </DataGrid>
                 </Grid>
             </TabItem>

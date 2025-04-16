@@ -28,9 +28,18 @@ namespace Project_QLTS_DNC.Models.DuyetPhieu
         public decimal TongTien { get; set; }
 
         [Column("trang_thai")]
-        public string? TrangThai { get; set; }
+        public bool? TrangThai { get; set; }
 
         [JsonIgnore] // ✅ CHỈ DÙNG CHO UI
         public bool IsSelected { get; set; } = false;
+   
+
+        [JsonIgnore]
+        public string TrangThaiHienThi => TrangThai == true
+            ? "Đã duyệt"
+            : TrangThai == false
+                ? "Từ chối duyệt"
+                : "Chưa duyệt";
+
     }
 }
