@@ -6,7 +6,7 @@ using System;
 namespace Project_QLTS_DNC.Models.DuyetPhieu
 {
     [Table("phieunhap")]
-    public class PhieuNhapKhoInput : BaseModel
+    public class PhieuNhapKho : BaseModel
     {
         [PrimaryKey("ma_phieu_nhap", false)]
         [Column("ma_phieu_nhap")]

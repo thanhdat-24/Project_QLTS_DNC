@@ -62,7 +62,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                var listPhieu = await client.From<PhieuNhapKhoInput>().Get();
+                var listPhieu = await client.From<PhieuNhapKho>().Get();
                 var listChiTiet = await client.From<ChiTietPN>().Get();
                 var listKho = await client.From<Kho>().Get();
                 var listNV = await client.From<NhanVienModel>().Get();

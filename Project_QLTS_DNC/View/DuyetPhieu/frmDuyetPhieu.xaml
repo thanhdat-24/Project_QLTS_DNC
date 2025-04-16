@@ -285,7 +285,7 @@
 
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
 
-                                    <ComboBox x:Name="cboLoaiPhieu"
+                                    <ComboBox x:Name="cboLoaiPhieu" 
           materialDesign:HintAssist.Hint="Chọn loại phiếu"
           Style="{StaticResource MaterialDesignOutlinedComboBox}"
           Width="135"
@@ -296,7 +296,7 @@
                                         <ComboBoxItem Content="Phiếu xuất"/>
                                         <ComboBoxItem Content="Phiếu bảo trì"/>
                                         <ComboBoxItem Content="Phiếu báo hỏng"/>
-                                        <ComboBoxItem Content="Phiếu đề nghị thanh toán"/>
+                                        <ComboBoxItem Content="Phiếu đề nghị mua"/>
                                     </ComboBox>
 
 
