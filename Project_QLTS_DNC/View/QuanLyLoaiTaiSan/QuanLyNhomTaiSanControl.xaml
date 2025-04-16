@@ -127,7 +127,7 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Mô Tả" Binding="{Binding MoTa}" Width="200">
+                <DataGridTextColumn Header="Mô Tả" Binding="{Binding MoTa}" Width="300">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="VerticalAlignment" Value="Center"/>
