@@ -27,6 +27,6 @@ namespace Project_QLTS_DNC.Models.PhieuNhapKho
         public decimal TongTien { get; set; }
 
         [Column("trang_thai")]
-        public string? TrangThai { get; set; }
+        public bool? TrangThai { get; set; }
     }
 }

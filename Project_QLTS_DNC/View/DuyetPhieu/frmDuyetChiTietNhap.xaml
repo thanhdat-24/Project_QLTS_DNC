@@ -6,7 +6,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="DUYỆT PHIẾU CHI TIẾT"
-        Height="600" Width="800"
+        Height="600" Width="1000"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -49,7 +49,7 @@
 
             <!-- Lọc theo Số Seri -->
             <TextBox Grid.Column="0" 
-                   x:Name="txtSearchSeri" 
+                   x:Name="txtSearch" 
                    materialDesign:HintAssist.Hint="Tìm kiếm theo mã phiếu" 
                    Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                    Margin="0,0,16,0"/>
@@ -132,7 +132,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}" Width="*">
+                    <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}" Width="90">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="TextWrapping" Value="Wrap"/>

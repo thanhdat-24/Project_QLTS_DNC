@@ -1,4 +1,9 @@
 ﻿using Project_QLTS_DNC.Models.DuyetPhieu;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.NhaCungCap;
+using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Models.ToaNha;
+
 using Project_QLTS_DNC.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -17,7 +22,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
         public frmChiTietPhieuNhap()
         {
             InitializeComponent();
-            StartAutoRefresh(); // Gọi khi khởi tạo
+            StartAutoRefresh();
         }
 
         private void StartAutoRefresh()
@@ -34,10 +39,14 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
         {
             public long MaPhieu { get; set; }
             public long MaKho { get; set; }
+            public string TenKho { get; set; }
             public long MaNV { get; set; }
+            public string TenNV { get; set; }
             public long MaChiTietPN { get; set; }
             public long MaNhomTS { get; set; }
+            public string TenNhomTS { get; set; }
             public long MaNCC { get; set; }
+            public string TenNCC { get; set; }
             public string TenTS { get; set; }
             public DateTime? NgayNhap { get; set; }
             public int SoLuong { get; set; }
@@ -55,25 +64,38 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 
                 var listPhieu = await client.From<PhieuNhapKhoInput>().Get();
                 var listChiTiet = await client.From<ChiTietPN>().Get();
+                var listKho = await client.From<Kho>().Get();
+                var listNV = await client.From<NhanVienModel>().Get();
+                var listNhomTS = await client.From<NhomTaiSan>().Get();
+                var listNCC = await client.From<NhaCungCapClass>().Get();
 
                 var result = (from pn in listPhieu.Models
-                              join ct in listChiTiet.Models
-                              on pn.MaPhieuNhap equals ct.MaPhieuNhap
+                              join ct in listChiTiet.Models on pn.MaPhieuNhap equals ct.MaPhieuNhap
+                              join kho in listKho.Models on pn.MaKho equals kho.MaKho
+                              join nv in listNV.Models on pn.MaNV equals nv.MaNV
+                              join nhom in listNhomTS.Models on ct.MaNhomTS equals nhom.MaNhomTS
+                              join ncc in listNCC.Models on pn.MaNCC equals ncc.MaNCC
                               select new ChiTietPhieuHienThi
                               {
                                   MaPhieu = pn.MaPhieuNhap,
                                   MaKho = pn.MaKho,
+                                  TenKho = kho.TenKho,
                                   MaNV = pn.MaNV,
+                                  TenNV = nv.TenNV,
                                   MaChiTietPN = ct.MaChiTietPN ?? 0,
                                   MaNhomTS = ct.MaNhomTS,
+                                  TenNhomTS = nhom.TenNhom,
                                   MaNCC = pn.MaNCC,
+                                  TenNCC = ncc.TenNCC,
                                   TenTS = ct.TenTaiSan,
                                   NgayNhap = pn.NgayNhap,
                                   SoLuong = ct.SoLuong,
                                   DonGia = ct.DonGia ?? 0,
                                   CanQLRieng = ct.CanQuanLyRieng ?? false,
                                   TongTien = ct.TongTien ?? ((ct.DonGia ?? 0) * (decimal)ct.SoLuong),
-                                  TrangThai = string.IsNullOrEmpty(pn.TrangThai) ? "Chưa duyệt" : pn.TrangThai
+                                  TrangThai = pn.TrangThai == true ? "Đã duyệt" :
+            pn.TrangThai == false ? "Từ chối duyệt" : "Chưa duyệt"
+
                               }).ToList();
 
                 danhSachChiTiet = new ObservableCollection<ChiTietPhieuHienThi>(result);
@@ -103,5 +125,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             };
             frm.Show();
         }
+
+        private void btnHuyBo_Click(object sender, RoutedEventArgs e) => Window.GetWindow(this)?.Close();
     }
 }
