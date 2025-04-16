@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Thêm loại tài khoản" Height="423" Width="464"
+        Title="Thêm loại tài khoản" Height="550" Width="500"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -13,57 +13,70 @@
         TextOptions.TextRenderingMode="Auto"
         FontFamily="{DynamicResource MaterialDesignFont}"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        ResizeMode="CanResize"
+        Background="{DynamicResource MaterialDesignPaper}">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <materialDesign:DialogHost>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Nội dung -->
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-            <materialDesign:Card Margin="16" Padding="16">
-                <StackPanel>
-                    <!-- Tên loại tài khoản -->
-                    <TextBlock Text="Tên loại tài khoản:" Margin="0,8,0,4"/>
-                    <TextBox x:Name="txtTenLoaiTaiKhoan"
-                             materialDesign:HintAssist.Hint="Nhập tên loại tài khoản"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Margin="0,0,0,10" />
-
-                    <!-- Mô Tả -->
-                    <TextBlock Text="Mô tả:" Margin="0,8,0,4"/>
-                    <TextBox x:Name="txtMoTa"
-                             materialDesign:HintAssist.Hint="Nhập mô tả"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Margin="0,0,0,0"
-                             VerticalScrollBarVisibility="Auto"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             Height="80"/>
+            <!-- Header -->
+            <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16" CornerRadius="3" materialDesign:ShadowAssist.ShadowDepth="Depth2" Margin="10,10,10,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Account" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="txtTieude" Text="THÊM LOẠI TÀI KHOẢN" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
-            </materialDesign:Card>
-        </ScrollViewer>
+            </materialDesign:ColorZone>
 
-        <!-- Nút -->
-        <Grid Grid.Row="1" Background="{DynamicResource MaterialDesignPaper}">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,16,12">
-                <Button x:Name="btnHuy" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0 0 12 0">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
-                        <TextBlock Text="HUỶ"/>
-                    </StackPanel>
-                </Button>
+            <!-- Main Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+                <materialDesign:Card Margin="10" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth1">
+                    <StackPanel Margin="8">
+                        <!-- Tên loại tài khoản -->
+                        <TextBlock Text="Tên loại tài khoản:" FontWeight="Medium" Margin="0,8,0,5"/>
+                        <TextBox x:Name="txtTenLoaiTaiKhoan" 
+                                 materialDesign:HintAssist.Hint="Nhập tên loại tài khoản" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="0,0,0,16"/>
 
-                <Button x:Name="btnLuu" Style="{StaticResource MaterialDesignRaisedButton}"
-                        Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" Click="btnLuu_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ContentSave" Margin="0 0 8 0"/>
-                        <TextBlock Text="LƯU"/>
+                        <!-- Mô Tả -->
+                        <TextBlock Text="Mô tả:" FontWeight="Medium" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtMoTa"
+                                 materialDesign:HintAssist.Hint="Nhập mô tả chi tiết về loại tài khoản"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Margin="0,0,0,16"
+                                 VerticalScrollBarVisibility="Auto"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="120"/>
                     </StackPanel>
-                </Button>
-            </StackPanel>
+                </materialDesign:Card>
+            </ScrollViewer>
+
+            <!-- Buttons -->
+            <Grid Grid.Row="2" Background="{DynamicResource MaterialDesignPaper}">
+                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource MaterialDesignDivider}" Padding="16">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="btnHuy" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,16,0" Click="btnHuy_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
+                                <TextBlock Text="HUỶ BỎ"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="btnLuu" Style="{StaticResource MaterialDesignRaisedButton}"
+                                Background="{DynamicResource PrimaryHueMidBrush}" Foreground="White" Click="btnLuu_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
+                                <TextBlock Text="LƯU"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
-    </Grid>
+    </materialDesign:DialogHost>
 </Window>

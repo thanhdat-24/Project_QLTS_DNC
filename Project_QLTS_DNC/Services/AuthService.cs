@@ -1,9 +1,8 @@
 ﻿using Supabase;
-using Supabase.Gotrue;
 using System.Threading.Tasks;
-using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.TaiKhoan;
-using System.Collections.Generic;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.NhanVien;
 
 namespace Project_QLTS_DNC.Services
 {
@@ -11,10 +10,7 @@ namespace Project_QLTS_DNC.Services
     {
         private Supabase.Client _client;
 
-        public AuthService(Supabase.Client client)
-        {
-            _client = client;
-        }
+        public AuthService() { }
 
         private async Task<Supabase.Client> GetClientAsync()
         {
@@ -23,63 +19,37 @@ namespace Project_QLTS_DNC.Services
             return _client;
         }
 
-        // Đăng nhập người dùng và trả về đối tượng User của Supabase
-        public async Task<User> DangNhapAsync(string email, string password)
+        // Đăng nhập bằng bảng "taikhoan"
+        public async Task<TaiKhoanModel?> DangNhapAsync(string tenTaiKhoan, string matKhau)
         {
-            var client = await GetClientAsync();
-            var session = await client.Auth.SignIn(email, password);  // Sử dụng SignIn thay vì SignInWithPasswordAsync
-
-            if (session?.User == null)
-                throw new System.Exception("Đăng nhập thất bại!");
-
-            return session.User;
-        }
-
-
-        // Lấy loại tài khoản từ UID của người dùng
-        public async Task<string> LayLoaiTaiKhoanTheoUid(string uid)
-        {
-            var client = await GetClientAsync();
-            var taiKhoanResult = await client
-                .From<TaiKhoanModel>()
-                .Where(tk => tk.Uid == uid)
-                .Single();
-
-            if (taiKhoanResult == null)
-                return null;
-
-            var loaiTkResult = await client
-                .From<LoaiTaiKhoanModel>()
-                .Where(loai => loai.MaLoaiTk == taiKhoanResult.MaLoaiTk)
-                .Single();
-
-            return loaiTkResult?.TenLoaiTk;
-        }
-
-        // Kiểm tra xem người dùng hiện tại có phải là Admin không và lấy tất cả tài khoản
-        public async Task<List<TaiKhoanModel>> LayTatCaTaiKhoanNeuLaAdminAsync()
-        {
-            var client = await GetClientAsync();
-            var user = client.Auth.CurrentUser;
-
-            if (user == null)
-                return null;
-
-            var taiKhoanHienTai = await client
-                .From<TaiKhoanModel>()
-                .Where(tk => tk.Uid == user.Id)
-                .Single();
-
-            // Kiểm tra quyền admin (MaLoaiTk == 1 là Admin)
-            if (taiKhoanHienTai?.MaLoaiTk == 1)
+            try
             {
-                var danhSach = await client
-                    .From<TaiKhoanModel>()
-                    .Get();
-                return danhSach.Models;
-            }
+                var client = await GetClientAsync();
 
-            return null;
+                var response = await client
+                    .From<TaiKhoanModel>()
+                    .Select("*")
+                    .Where(x => x.TenTaiKhoan == tenTaiKhoan && x.MatKhau == matKhau)
+                    .Single();
+
+                return response;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Lấy tên loại tài khoản từ mã loại
+        public async Task<string?> LayTenLoaiTaiKhoanTheoMaLoai(int maLoai)
+        {
+            var client = await GetClientAsync();
+            var loaiTaiKhoan = await client
+                .From<LoaiTaiKhoanModel>()
+                .Where(x => x.MaLoaiTk == maLoai)
+                .Single();
+
+            return loaiTaiKhoan?.TenLoaiTk;
         }
     }
 }

@@ -35,7 +35,9 @@ namespace Project_QLTS_DNC.ViewModels.NhanVien
 
            
             _nhanVienService = new NhanVienService();
-            _authService = new AuthService(client); 
+            //_authService = new AuthService(client); 
+
+            _authService = new AuthService();
 
             _ = LoadNhanVienListAsync(); 
         }

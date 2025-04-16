@@ -58,7 +58,7 @@
             <!-- Title with icon -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <materialDesign:PackIcon Kind="AccountMultiple" Width="24" Height="24" Foreground="#3F51B5" Margin="0,0,10,0"/>
-                <TextBlock Text="LOẠI TÀI KHOẢN" FontSize="24" FontWeight="Bold" Foreground="#3F51B5" 
+                <TextBlock x:Name="txtTieude" Text="LOẠI TÀI KHOẢN" FontSize="24" FontWeight="Bold" Foreground="#3F51B5" 
                        VerticalAlignment="Center"/>
             </StackPanel>
 
@@ -139,7 +139,7 @@
                          Command="{Binding RefreshDataCommand}"
                         ToolTip="Làm mới danh sách"
                         Style="{StaticResource ActionIconButton}"
-                        Background="#B0BEC5">
+                        Background="#B0BEC5" Click="btnRefresh_Click">
                     <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Foreground="#3F51B5"/>
                 </Button>
 
@@ -149,7 +149,7 @@
         <!-- Bảng hiển thị danh sách tài khoản -->
         <DataGrid Grid.Row="2"
           x:Name="dgLoaiTaiKhoan"
-          ItemsSource="{Binding listLoaiTaiKhoan}"
+          ItemsSource="{Binding DanhSachLoaiTaiKhoan}"
           AutoGenerateColumns="False"
           CanUserAddRows="False"
           CanUserDeleteRows="False"
@@ -189,14 +189,14 @@
                                 <!-- Nút chỉnh sửa -->
                                 <Button Style="{StaticResource MaterialDesignIconButton}"
                                     
-                                        ToolTip="Sửa"
+                                        ToolTip="Sửa" Click="btnSua_Click"
                                         Background="{DynamicResource PrimaryHueLightBrush}" 
                                         Width="26" Height="26" Padding="2" Margin="0,1">
                                     <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                 </Button>
                                 <Button Style="{StaticResource MaterialDesignIconButton}"
                                        
-                                        ToolTip="Xóa" Margin="8,1,0,1"
+                                        ToolTip="Xóa" Margin="8,1,0,1" Click="btnXoa_Click"
                                         Background="{DynamicResource SecondaryDelete}" 
                                         Width="26" Height="26" 
                                         Padding="2">

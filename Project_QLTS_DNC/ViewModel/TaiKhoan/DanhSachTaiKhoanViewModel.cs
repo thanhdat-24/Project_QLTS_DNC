@@ -46,7 +46,7 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
         {
             try
             {
-                var taiKhoanDTOs = await _taiKhoanService.LayTatCaTaiKhoanNeuLaAdminAsync();
+                var taiKhoanDTOs = await _taiKhoanService.LayDanhSachTaiKhoanAsync();
                 if (taiKhoanDTOs != null)
                 {
                     DanhSachTaiKhoan.Clear();
