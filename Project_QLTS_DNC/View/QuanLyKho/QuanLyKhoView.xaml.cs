@@ -29,6 +29,9 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         private Supabase.Client _client;
         private Kho _selectedKho;
         private ObservableCollection<Kho> _listKho;
+        private ObservableCollection<Kho> _allKho = new();
+
+
 
         public QuanLyKhoView()
         {
@@ -61,17 +64,16 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             try
             {
-                // Truy vấn dữ liệu kho từ Supabase
                 var result = await _client.From<Kho>().Get();
 
-                // Kiểm tra nếu có dữ liệu trả về
                 if (result.Models.Any())
                 {
-                    // Gán dữ liệu vào DataGrid
-                    dgKho.ItemsSource = result.Models;
+                    _allKho = new ObservableCollection<Kho>(result.Models);
+                    dgKho.ItemsSource = _allKho;
                 }
                 else
                 {
+                    dgKho.ItemsSource = null;
                     MessageBox.Show("Không có dữ liệu kho.");
                 }
             }
@@ -79,6 +81,23 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu kho: {ex.Message}");
             }
+        }
+
+        private void btnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            string keyword = txtSearch.Text.Trim().ToLower();
+
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                dgKho.ItemsSource = _allKho;
+                return;
+            }
+
+            var filteredList = _allKho
+                .Where(k => !string.IsNullOrEmpty(k.TenKho) && k.TenKho.ToLower().Contains(keyword))
+                .ToList();
+
+            dgKho.ItemsSource = filteredList;
         }
 
         private void btnViewDetail_Click(object sender, RoutedEventArgs e)

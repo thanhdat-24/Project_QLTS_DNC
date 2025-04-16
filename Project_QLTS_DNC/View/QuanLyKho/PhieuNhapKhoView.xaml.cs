@@ -36,6 +36,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         private string _keyword = "";
         private int? _filterMaKho = null;
         private int? _filterMaNhom = null;
+        private string _filterTrangThai = null;
+
 
         public PhieuNhapKhoView()
         {
@@ -98,14 +100,29 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             try
             {
                 var result = await _client.From<PhieuNhap>().Get();
-                dgSanPham.ItemsSource = result.Models;
+
                 if (result.Models.Any())
                 {
                     var displayList = result.Models
                         .Where(p =>
+                            // Lọc theo kho
                             (_filterMaKho == null || p.MaKho == _filterMaKho) &&
-                            (string.IsNullOrEmpty(_keyword) || _keyword == "" ||
-                             (p.TrangThai != null && p.TrangThai.Contains(_keyword, StringComparison.OrdinalIgnoreCase)))
+
+                            // Lọc theo từ khóa tìm kiếm
+                            (string.IsNullOrEmpty(_keyword) ||
+                                p.MaPhieuNhap.ToString().Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
+                                (_khoLookup.ContainsKey(p.MaKho) && _khoLookup[p.MaKho].Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
+                                (_nccLookup.ContainsKey(p.MaNCC) && _nccLookup[p.MaNCC].Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
+                                (_nvLookup.ContainsKey(p.MaNV) && _nvLookup[p.MaNV].Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
+                                (!string.IsNullOrEmpty(p.TrangThai) && p.TrangThai.Contains(_keyword, StringComparison.OrdinalIgnoreCase))
+                            ) &&
+
+                            // Lọc theo trạng thái
+                            (string.IsNullOrEmpty(_filterTrangThai) ||
+                                 (_filterTrangThai == "Chờ duyệt" && string.IsNullOrEmpty(p.TrangThai)) ||
+                                 (_filterTrangThai == "Đã duyệt" && p.TrangThai == "Đã duyệt") ||
+                                 (_filterTrangThai == "Từ chối duyệt" && p.TrangThai == "Từ chối duyệt"))
+
                         )
                         .Select(p => new
                         {
@@ -115,8 +132,13 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                             TenNCC = _nccLookup.ContainsKey(p.MaNCC) ? _nccLookup[p.MaNCC] : $"#{p.MaNCC}",
                             NgayNhap = p.NgayNhap,
                             TongTien = p.TongTien,
-                            TrangThai = string.IsNullOrEmpty(p.TrangThai) ? "Chờ duyệt" : "Đã duyệt"
+                            TrangThai = string.IsNullOrEmpty(p.TrangThai)
+                                    ? "Chờ duyệt"
+                                    : (p.TrangThai == "DaDuyet" ? "Đã duyệt" :
+                                       (p.TrangThai == "TuChoiDuyet" ? "Từ chối duyệt" : p.TrangThai))
+
                         })
+                        .OrderByDescending(p => p.NgayNhap)
                         .ToList();
 
                     dgSanPham.ItemsSource = displayList;
@@ -132,8 +154,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show($"Lỗi khi tải dữ liệu phiếu nhập: {ex.Message}");
             }
         }
-
-
 
         private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -172,8 +192,22 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 _ = LoadPhieuNhapAsync();
             }
         }
+        private void cboTrangThai_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cboTrangThai.SelectedItem is ComboBoxItem item && item.Content != null)
+            {
+                string selected = item.Content.ToString();
+                _filterTrangThai = selected == "Tất cả" ? null : selected;
+            }
+            else
+            {
+                _filterTrangThai = null;
+            }
 
-        private void cboPhong_SelectionChanged(object sender, SelectionChangedEventArgs e)
+            _ = LoadPhieuNhapAsync();
+        }
+
+        private void cboTenKho_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cboTenKho.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int maKho))
                 _filterMaKho = maKho;
@@ -183,13 +217,9 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             _ = LoadPhieuNhapAsync();
         }
 
-        private void cboNhomTS_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            if (cboTrangThai.SelectedItem is ComboBoxItem item && int.TryParse(item.Tag?.ToString(), out int maNhom))
-                _filterMaNhom = maNhom;
-            else
-                _filterMaNhom = null;
-
+            _keyword = txtSearch.Text.Trim();
             _ = LoadPhieuNhapAsync();
         }
 

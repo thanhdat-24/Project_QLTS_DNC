@@ -5,16 +5,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
-             Background="White"
-             Width="Auto" Height="Auto">
+             Background="White">
+
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Sử dụng giao diện Light của MaterialDesign -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!-- Định nghĩa Style cho hàng DataGrid khi rê chuột -->
             <Style x:Key="HoverRowStyle" TargetType="DataGridRow">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="Black"/>
@@ -28,11 +26,6 @@
     </UserControl.Resources>
 
     <Grid Margin="16">
-        <!-- Định nghĩa 4 hàng: 
-             Row 0: Tiêu đề (header)
-             Row 1: Thanh tìm kiếm và lọc
-             Row 2: DataGrid
-             Row 3: Nút thao tác -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -40,22 +33,18 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Hàng tiêu đề -->
+        <!-- Tiêu đề -->
         <Grid Grid.Row="0" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <!-- Đổi tiêu đề phù hợp với Tồn Kho -->
-            <TextBlock Grid.Column="0" Text="QUẢN LÝ TỒN KHO" 
-                       FontSize="24" FontWeight="Bold" 
-                       Foreground="{DynamicResource PrimaryHueMidBrush}"
-                       VerticalAlignment="Center"/>
-            <!-- Nút thêm (nếu cần) -->
-          
+            <TextBlock Grid.Column="0" Text="QUẢN LÝ TỒN KHO"
+                       FontSize="24" FontWeight="Bold"
+                       Foreground="{DynamicResource PrimaryHueMidBrush}"/>
         </Grid>
 
-        <!-- Thanh tìm kiếm và lọc -->
+        <!-- Tìm kiếm + lọc -->
         <Grid Grid.Row="1" Margin="10,0,10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
@@ -64,65 +53,45 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Ô tìm kiếm -->
+            <!-- Tìm kiếm -->
             <materialDesign:Card Grid.Column="0" Padding="8" Margin="0,0,16,0" UniformCornerRadius="8">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <!-- Icon tìm kiếm ở cột 0 -->
-                    <materialDesign:PackIcon Kind="Search" 
-                                 Margin="0,9,0,0" 
-                                 Foreground="{StaticResource PrimaryHueMidBrush}" 
-                                 HorizontalAlignment="Center" 
-                                 VerticalAlignment="Center"
-                                 Grid.Column="0"/>
-                    <!-- TextBox tìm kiếm ở cột 1 -->
-                    <TextBox Grid.Column="1" 
-                 x:Name="txtSearch" 
-                 materialDesign:HintAssist.Hint="Tìm kiếm theo tên sản phẩm" 
-                 BorderThickness="0" 
-                 VerticalAlignment="Center" 
-                 Margin="8,5,8,5"
-                 materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
-                    <!-- Nút tìm kiếm với icon ArrowRight ở cột 2 -->
-                    <Button Grid.Column="2" 
-                Style="{StaticResource MaterialDesignIconButton}" 
-                x:Name="btnSearch" 
-                ToolTip="Tìm kiếm" 
-                VerticalAlignment="Center"
-                Margin="0">
-                        <materialDesign:PackIcon Kind="ArrowRight" 
-                                     Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    <materialDesign:PackIcon Kind="Search" Grid.Column="0" Margin="0,9,0,0"
+                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    <TextBox Grid.Column="1" x:Name="txtSearch"
+                             materialDesign:HintAssist.Hint="Tìm kiếm theo tên sản phẩm"
+                             BorderThickness="0" VerticalAlignment="Center"
+                             Margin="8,5,8,5"
+                             materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
+                    <Button Grid.Column="2" Style="{StaticResource MaterialDesignIconButton}"
+                            x:Name="btnSearch" ToolTip="Tìm kiếm" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                     </Button>
                 </Grid>
             </materialDesign:Card>
 
-            <!-- Lọc theo MaPhong -->
-            <ComboBox Grid.Column="2" 
-                      x:Name="cboPhong" 
-                      materialDesign:HintAssist.Hint="Mã Tồn Kho" 
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}" 
-                      Width="150" 
-                      Margin="0,0,16,0">
+            <!-- Lọc theo kho -->
+            <ComboBox Grid.Column="1" x:Name="cboMaKho"
+                      materialDesign:HintAssist.Hint="Mã Kho"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Width="150" Margin="0,0,16,0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding MaPhong}"/>
+                        <TextBlock Text="{Binding MaKho}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <!-- Lọc theo MaNhomTS -->
-            <ComboBox Grid.Column="3" 
-                      x:Name="cboNhomTS" 
-                      materialDesign:HintAssist.Hint="Mã SP" 
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}" 
-                      Width="150" 
-                      Margin="0,0,16,0">
+
+            <!-- Lọc theo nhóm tài sản -->
+            <ComboBox Grid.Column="2" x:Name="cboMaNhomTS"
+                      materialDesign:HintAssist.Hint="Mã Nhóm TS"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Width="150" Margin="0,0,16,0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding MaNhomTS}"/>
@@ -131,18 +100,23 @@
             </ComboBox>
         </Grid>
 
-        <!-- DataGrid hiển thị danh sách tồn kho -->
-        <DataGrid Grid.Row="2" ItemsSource="{Binding SelectedKho.TonKhos}"
-                  AutoGenerateColumns="False"
-                  materialDesign:DataGridAssist.CellPadding="8"
-                  materialDesign:DataGridAssist.ColumnHeaderPadding="8"
-                  HeadersVisibility="Column"
-                  Background="White"
-                  RowStyle="{StaticResource HoverRowStyle}"
-                  SelectionMode="Single">
+        <!-- DataGrid -->
+        <DataGrid x:Name="dgTonKho" Grid.Row="2"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    CanUserAddRows="False"
+                    materialDesign:DataGridAssist.CellPadding="13 8 8 8"
+                    materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+                    BorderThickness="0"
+                    GridLinesVisibility="All"
+                    VerticalScrollBarVisibility="Auto"
+                    SelectionMode="Single"
+                    SelectionUnit="FullRow"
+                    CanUserResizeColumns="True"
+                    ColumnWidth="Auto">
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="{x:Type DataGridColumnHeader}"
-                       BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+           BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
                     <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
                     <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
                     <Setter Property="FontWeight" Value="Bold"/>
@@ -153,7 +127,7 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Mã Tồn Kho" Binding="{Binding MaTonKho}" Width="Auto">
+                <DataGridTextColumn Header="Mã Tồn Kho" Binding="{Binding MaTonKho}" Width="211" MinWidth="135">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -161,7 +135,7 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Mã SP" Binding="{Binding ma_sp}" Width="Auto">
+                <DataGridTextColumn Header="Mã Kho" Binding="{Binding MaKho}" Width="211" MinWidth="135">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -169,7 +143,7 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Mã Kho" Binding="{Binding ma_kho}" Width="Auto">
+                <DataGridTextColumn Header="Mã Nhóm TS" Binding="{Binding MaNhomTS}" Width="195" MinWidth="135">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -177,7 +151,9 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Số Lượng Tồn" Binding="{Binding SoLuongTon}" Width="Auto">
+                <DataGridTextColumn Header="Số Lượng Nhập" 
+                                   
+                                    Binding="{Binding SoLuongNhap}" Width="211" MinWidth="135">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -185,7 +161,15 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Ngày Cập Nhật" Binding="{Binding NgayCapNhat}" Width="120">
+                <DataGridTextColumn Header="Số Lượng Xuất" Binding="{Binding SoLuongXuat}" Width="211" MinWidth="135">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Tồn Kho" Binding="{Binding SoLuongTon}" Width="221" MinWidth="135">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -196,25 +180,24 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Dãy nút thao tác -->
+        <!-- Nút xuất -->
         <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" Name="StatusBar">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                    materialDesign:ButtonAssist.CornerRadius="8" 
-                    Background="{DynamicResource SecondaryFileExcel}" 
-                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                    Margin="0 0 8 0">
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            materialDesign:ButtonAssist.CornerRadius="8"
+                            Background="{DynamicResource SecondaryFileExcel}"
+                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                            Margin="0 0 8 0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
                             <TextBlock Text="XUẤT EXCEL"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                    materialDesign:ButtonAssist.CornerRadius="8" 
-                    Background="{DynamicResource SecondaryFileFDP}" 
-                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}">
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            materialDesign:ButtonAssist.CornerRadius="8"
+                            Background="{DynamicResource SecondaryFileFDP}"
+                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FilePdfBox" Margin="0 0 8 0"/>
                             <TextBlock Text="XUẤT PDF"/>

@@ -86,16 +86,18 @@
                                Margin="8 0" 
                                Foreground="{StaticResource PrimaryHueMidBrush}"/>
                     <TextBox Grid.Column="1" 
-               x:Name="txtSearch" 
-               materialDesign:HintAssist.Hint="Tìm kiếm theo tên kho" 
-               BorderThickness="0" 
-               VerticalAlignment="Center" 
-               Margin="8 0"
-               materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
+                       x:Name="txtSearch" 
+                       
+                       materialDesign:HintAssist.Hint="Tìm kiếm theo tên kho" 
+                       BorderThickness="0" 
+                       VerticalAlignment="Center" 
+                       Margin="8 0"
+                       materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
                     <Button Grid.Column="2" 
-              Style="{StaticResource MaterialDesignIconButton}" 
-              x:Name="btnSearch" 
-              ToolTip="Tìm kiếm">
+                      Style="{StaticResource MaterialDesignIconButton}" 
+                      x:Name="btnSearch" 
+                      Click="btnSearch_Click"
+                      ToolTip="Tìm kiếm">
                         <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                     </Button>
                 </Grid>
