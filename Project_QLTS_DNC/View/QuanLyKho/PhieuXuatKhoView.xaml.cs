@@ -89,16 +89,24 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                             // Tìm kiếm theo mã phiếu xuất
                             (string.IsNullOrEmpty(txtSearch.Text) || p.MaPhieuXuat.ToString().Contains(txtSearch.Text))
                         )
-                        .Select(p => new
-                        {
-                            MaPhieuXuat = p.MaPhieuXuat,
-                            TenKhoXuat = _khoLookup.ContainsKey((int)p.MaKhoXuat) ? _khoLookup[(int)p.MaKhoXuat] : $"#{p.MaKhoXuat}",
-                            TenKhoNhan = _khoLookup.ContainsKey((int)p.MaKhoNhan) ? _khoLookup[(int)p.MaKhoNhan] : $"#{p.MaKhoNhan}",
-                            NgayXuat = p.NgayXuat.ToString("dd/MM/yyyy"),
-                            TenNhanVien = _nvLookup.ContainsKey((int)p.MaNV) ? _nvLookup[(int)p.MaNV] : $"#{p.MaNV}",
-                            TrangThai = p.TrangThai ?? "Chờ duyệt",
-                            GhiChu = p.GhiChu
-                        })
+                    .Select(p => new
+                    {
+                        MaPhieuXuat = p.MaPhieuXuat,
+
+                        TenKhoXuat = _khoLookup.TryGetValue((int)p.MaKhoXuat, out var tenKhoXuat) ? tenKhoXuat : $"#{p.MaKhoXuat}",
+                        TenKhoNhan = _khoLookup.TryGetValue((int)p.MaKhoNhan, out var tenKhoNhan) ? tenKhoNhan : $"#{p.MaKhoNhan}",
+
+                        NgayXuat = p.NgayXuat.ToString("dd/MM/yyyy"),
+
+                        TenNhanVien = _nvLookup.TryGetValue((int)p.MaNV, out var tenNV) ? tenNV : $"#{p.MaNV}",
+
+                        TrangThai = p.TrangThai.HasValue
+                            ? (p.TrangThai.Value ? "Đã xử lý" : "Chờ duyệt")
+                            : "Chờ duyệt",
+
+                        GhiChu = p.GhiChu
+                    })
+
                         .ToList();
 
                     dgPhieuXuatKho.ItemsSource = displayList;

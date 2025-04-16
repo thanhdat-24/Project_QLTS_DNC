@@ -21,7 +21,8 @@ public class PhieuXuat : BaseModel
     public long MaNV { get; set; }
 
     [Column("trang_thai")]
-    public string? TrangThai { get; set; }
+    public bool? TrangThai { get; set; }
+
 
     [Column("ghi_chu")]
     public string? GhiChu { get; set; }

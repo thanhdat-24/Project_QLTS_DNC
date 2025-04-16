@@ -249,6 +249,7 @@ namespace Project_QLTS_DNC
 
         private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
         {
+            MainContentPanel.Content = new View.CaiDat.PhieuInForm();
 
         }
 
@@ -256,6 +257,8 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.DuyetPhieu.frmDuyetPhieu();
         }
+
+     
     }
     public static class MainWindowExtensions
     {

@@ -61,14 +61,8 @@
           Style="{StaticResource MaterialDesignOutlinedComboBox}"
           DisplayMemberPath="TenNV"
           SelectedValuePath="MaNV"/>
-
-
-            <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,8"
-                     x:Name="txtTrangThai"
-                     materialDesign:HintAssist.Hint="Trạng Thái"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
             <!-- Tổng tiền -->
-            <TextBox Grid.Row="2" Grid.Column="1"  Margin="0,0,0,8"
+            <TextBox Grid.Row="2"  Grid.ColumnSpan="2"  Margin="0,0,0,8"
                      x:Name="txtGhiChu"
                      materialDesign:HintAssist.Hint="Ghi Chú"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
