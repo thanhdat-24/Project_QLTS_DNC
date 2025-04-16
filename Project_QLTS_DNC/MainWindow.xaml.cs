@@ -242,6 +242,18 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
         }
 
+
+        private void btnLoaiBaoTri_Selected(object sender, RoutedEventArgs e)
+        {
+           MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
+
+        }
+
+        private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
+
         private void btnChucVu_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.ChucVu.ChucVuForm();
@@ -255,6 +267,7 @@ namespace Project_QLTS_DNC
         private void btnDuyetPhieu_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.DuyetPhieu.frmDuyetPhieu();
+
         }
     }
     public static class MainWindowExtensions
@@ -277,14 +290,12 @@ namespace Project_QLTS_DNC
             }
         }
 
-       
-
 
        
 
-       
 
        
 
+       
     }
 }
