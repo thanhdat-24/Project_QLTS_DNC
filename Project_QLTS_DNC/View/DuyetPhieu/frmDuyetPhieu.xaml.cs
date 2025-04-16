@@ -40,13 +40,12 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                     {
                         MaPhieu = $"PN{pn.MaPhieuNhap}",
                         NgayTaoPhieu = pn.NgayNhap,
-                        TrangThai = pn.TrangThai, // giữ kiểu bool?
+                        TrangThai = ConvertTrangThai(pn.TrangThai),
                         LoaiPhieu = "Phiếu nhập"
                     });
                 }
 
                 dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
-
                 if (DanhSachTatCaPhieu.Count > 0)
                     dgPhieuCanDuyet.SelectedIndex = 0;
             }
@@ -61,16 +60,11 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-                var response = await client.From<PhieuNhapKhoInput>().Get();
-                var danhSach = response.Models;
+                var danhSach = (await client.From<PhieuNhapKhoInput>().Get()).Models;
 
-                int daDuyet = danhSach.Count(p => p.TrangThai == true);
-                int tuChoi = danhSach.Count(p => p.TrangThai == false);
-                int canDuyet = danhSach.Count(p => p.TrangThai == null);
-
-                txtTongPhieuCanDuyet.Text = canDuyet.ToString();
-                txtTongPhieuDaDuyet.Text = daDuyet.ToString();
-                txtTongPhieuTuChoi.Text = tuChoi.ToString();
+                txtTongPhieuCanDuyet.Text = danhSach.Count(p => p.TrangThai == null).ToString();
+                txtTongPhieuDaDuyet.Text = danhSach.Count(p => p.TrangThai == true).ToString();
+                txtTongPhieuTuChoi.Text = danhSach.Count(p => p.TrangThai == false).ToString();
             }
             catch (Exception ex)
             {
@@ -133,12 +127,12 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             await LocDuLieuTheoLoaiVaNgay();
         }
 
-        private async void dpDenNgay_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private async void dpTuNgay_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             await LocDuLieuTheoLoaiVaNgay();
         }
 
-        private async void dpTuNgay_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private async void dpDenNgay_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             await LocDuLieuTheoLoaiVaNgay();
         }
@@ -148,8 +142,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-                var response = await client.From<PhieuNhapKhoInput>().Get();
-                var danhSach = response.Models;
+                var danhSach = (await client.From<PhieuNhapKhoInput>().Get()).Models;
 
                 string loaiPhieu = (cboLoaiPhieu.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Tất cả";
                 DateTime? tuNgay = dpTuNgay.SelectedDate;
@@ -158,9 +151,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 var loc = danhSach.AsEnumerable();
 
                 if (loaiPhieu != "Tất cả" && loaiPhieu != "Phiếu nhập")
-                {
                     loc = Enumerable.Empty<PhieuNhapKhoInput>();
-                }
 
                 if (tuNgay.HasValue)
                     loc = loc.Where(p => p.NgayNhap.Date >= tuNgay.Value.Date);
@@ -173,7 +164,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                     {
                         MaPhieu = $"PN{p.MaPhieuNhap}",
                         NgayTaoPhieu = p.NgayNhap,
-                        TrangThai = p.TrangThai, // bool?
+                        TrangThai = ConvertTrangThai(p.TrangThai),
                         LoaiPhieu = "Phiếu nhập"
                     }));
 
@@ -198,7 +189,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             var ketQua = DanhSachTatCaPhieu.Where(p =>
                 p.MaPhieu.ToLower().Contains(tuKhoa) ||
                 p.NgayTaoPhieu.ToString("d/M/yyyy").Contains(tuKhoa) ||
-                (p.TrangThai == true ? "đã duyệt" : p.TrangThai == false ? "từ chối duyệt" : "chưa duyệt").ToLower().Contains(tuKhoa)
+                p.TrangThai.ToLower().Contains(tuKhoa)
             ).ToList();
 
             dgPhieuCanDuyet.ItemsSource = ketQua;
@@ -213,5 +204,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         {
             TimKiemPhieu(txtSearch.Text);
         }
+
+        private string ConvertTrangThai(bool? trangThai)
+        {
+            return trangThai == true ? "Đã duyệt" :
+                   trangThai == false ? "Từ chối duyệt" :
+                   "Chưa duyệt";
+        }
+    }
+
+    public class PhieuCanDuyet
+    {
+        public string MaPhieu { get; set; }
+        public DateTime NgayTaoPhieu { get; set; }
+        public string TrangThai { get; set; }
+        public string LoaiPhieu { get; set; }
     }
 }
