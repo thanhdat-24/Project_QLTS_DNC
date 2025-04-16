@@ -8,12 +8,17 @@ namespace Project_QLTS_DNC
     public partial class App : Application
     {
         protected override void OnStartup(StartupEventArgs e)
-        {
-             base.OnStartup(e);
-              var loginForm = new DangNhapForm();
-              Application.Current.MainWindow = loginForm; // Gán luôn form đăng nhập
-              loginForm.Show();
+        {     base.OnStartup(e);
+             var loginForm = new DangNhapForm();
+           Application.Current.MainWindow = loginForm; // Gán luôn form đăng nhập
+          loginForm.Show();
+
+
+
+
+
           
+
         }
 
 

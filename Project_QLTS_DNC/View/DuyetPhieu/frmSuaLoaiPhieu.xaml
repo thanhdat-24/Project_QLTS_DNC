@@ -1,0 +1,112 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.DuyetPhieu.frmSuaLoaiPhieu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Cập nhật Tòa nhà"
+        Height="320"
+        Width="500"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Border Background="White"
+            CornerRadius="10"
+            BorderThickness="1"
+            BorderBrush="#E0E0E0"
+            Margin="0,0,0,50">
+        <Border.Effect>
+            <DropShadowEffect Color="#404040"
+                              ShadowDepth="3"
+                              BlurRadius="10"
+                              Direction="-45"
+                              Opacity="0.3"/>
+        </Border.Effect>
+
+        <Grid Margin="0,0,0,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- TIÊU ĐỀ -->
+            <Grid Grid.Row="0" Background="{DynamicResource PrimaryHueMidBrush}" Height="50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="CẬP NHẬT LOẠI PHIẾU"
+                               Foreground="White"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                </StackPanel>
+
+                <Button x:Name="btnDong"
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="White"
+                        Margin="0,0,10,0"
+                        Width="40" Height="40"
+                        Click="btnXoa_Click">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24"/>
+                </Button>
+            </Grid>
+
+            <!-- NỘI DUNG FORM -->
+            <StackPanel Grid.Row="1" Margin="20" VerticalAlignment="Top">
+                <TextBox x:Name="txtTenLoaiPhieu"
+                         materialDesign:HintAssist.Hint="Nhập tên loại phiếu"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
+
+                <TextBox x:Name="txtMoTa"
+                         materialDesign:HintAssist.Hint="Nhập mô tả"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,15"/>
+
+               
+            </StackPanel>
+
+            <!-- NÚT -->
+            <Grid Grid.Row="1" Margin="20,155,20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnHuy"
+                        Grid.Column="0"
+                        Margin="0 0 16 0"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="btnHuy_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
+                        <TextBlock Text="HUỶ"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="btnCapNhat"
+                        Grid.Column="1"
+                        Background="{StaticResource PrimaryHueMidBrush}"
+                        Foreground="White"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="btnCapNhat_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ContentSaveEdit" Margin="0 0 8 0"/>
+                        <TextBlock Text="CẬP NHẬT"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

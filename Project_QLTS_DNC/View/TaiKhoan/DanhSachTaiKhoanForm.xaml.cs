@@ -32,7 +32,7 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         private async void DanhSachTaiKhoanForm_Loaded(object sender, RoutedEventArgs e)
         {
             var client = await SupabaseService.GetClientAsync();
-            var taiKhoanService = new TaiKhoanService(client);
+            var taiKhoanService = new TaiKhoanService();
             DataContext = new DanhSachTaiKhoanViewModel(taiKhoanService);
         }
     }

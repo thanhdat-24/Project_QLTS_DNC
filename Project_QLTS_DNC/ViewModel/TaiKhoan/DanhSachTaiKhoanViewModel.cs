@@ -23,26 +23,48 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
             }
         }
 
+        
+        private string _errorMessage;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
         public DanhSachTaiKhoanViewModel(TaiKhoanService taiKhoanService)
         {
             _taiKhoanService = taiKhoanService;
             DanhSachTaiKhoan = new ObservableCollection<TaiKhoanDTO>();
-            _ = LoadDataAsync();
+            _ = LoadDataAsync(); 
         }
 
         private async Task LoadDataAsync()
         {
-            var taiKhoanDTOs = await _taiKhoanService.LayTatCaTaiKhoanNeuLaAdminAsync();
-            if (taiKhoanDTOs != null)
+            try
             {
-                DanhSachTaiKhoan.Clear();
-                foreach (var item in taiKhoanDTOs)
+                var taiKhoanDTOs = await _taiKhoanService.LayDanhSachTaiKhoanAsync();
+                if (taiKhoanDTOs != null)
                 {
-                    DanhSachTaiKhoan.Add(item);
+                    DanhSachTaiKhoan.Clear();
+                    foreach (var item in taiKhoanDTOs)
+                    {
+                        DanhSachTaiKhoan.Add(item);
+                    }
+                }
+                else
+                {
+                    ErrorMessage = "Không thể tải dữ liệu tài khoản.";
                 }
             }
+            catch (System.Exception ex)
+            {
+                ErrorMessage = $"Lỗi khi tải dữ liệu: {ex.Message}";
+            }
         }
-
 
         // ================================
         // INotifyPropertyChanged support

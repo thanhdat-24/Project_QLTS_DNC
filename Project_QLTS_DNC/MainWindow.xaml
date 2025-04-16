@@ -24,7 +24,7 @@
 
                         <TreeViewItem Header="🧑‍💼 Quản lý nhân sự">
                             <TreeViewItem x:Name="btnNhanVien" Header="👥 Danh sách nhân viên" Selected="btnNhanVien_Selected" />
-                            <TreeViewItem x:Name="btnChucVu" Header="🏷️ Chức vụ" />
+                            <TreeViewItem x:Name="btnChucVu" Header="🏷️ Chức vụ" Selected="btnChucVu_Selected" />
                         </TreeViewItem>
 
                         
@@ -42,15 +42,22 @@
                         <TreeViewItem x:Name="btnNhaCungCap" Header="🏭 Quản lý nhà cung cấp" Selected="btnNhaCungCap_Selected" />
                         <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected" />
                         <TreeViewItem Header="🛠️ Bảo trì" >
+
                              <TreeViewItem x:Name="btnLoaiBaoTri" Header="🛠️ Loại bảo trì" Selected="btnLoaiBaoTri_Selected" />
                             <TreeViewItem x:Name="btnDSbaotri" Header="🛠️Danh sách bảo trì " Selected="btnDSbaotri_Selected"  />
+
+                             <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì"  />
+                            <TreeViewItem x:Name="btnDSbaotri" Header="📋  Danh sách bảo trì"    />
+
                         </TreeViewItem>           
                             
                             
                         <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected" />
-                        <TreeViewItem Header="📜 Duyệt phiếu" />
+                        <TreeViewItem Header="📜 Duyệt phiếu" x:Name="btnDuyetPhieu" Selected="btnDuyetPhieu_Selected"/>
                         <TreeViewItem Header="⚙️ Cài đặt">
                             <TreeViewItem x:Name="btnThongTinCongTy" Header="🏢 Thông tin công ty" Selected="btnThongTinCongTy_Selected" />
+                            <TreeViewItem x:Name="btnPhieuIn" Header="🧾 Cài đặt phiếu in"  />
+
                         </TreeViewItem>
                     </TreeView>
                 </ScrollViewer>

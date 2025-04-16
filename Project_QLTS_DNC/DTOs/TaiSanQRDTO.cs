@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.Helpers; // Thêm namespace cho NetworkHelper
 
 namespace Project_QLTS_DNC.DTOs
 {
@@ -74,8 +75,9 @@ namespace Project_QLTS_DNC.DTOs
                 IsSelected = taiSanDTO.IsSelected
             };
 
-            // Tạo URL mặc định cho QR code
-            qrDTO.MaQrUrl = $"https://yourwebsite.com/taisan?id={qrDTO.MaTaiSan}&seri={qrDTO.SoSeri}";
+            // Tạo URL động cho QR code sử dụng NetworkHelper
+            string baseUrl = NetworkHelper.GetLocalIPv4Address(8080);
+            qrDTO.MaQrUrl = $"{baseUrl}/qr?id={qrDTO.MaTaiSan}&seri={qrDTO.SoSeri}";
 
             return qrDTO;
         }

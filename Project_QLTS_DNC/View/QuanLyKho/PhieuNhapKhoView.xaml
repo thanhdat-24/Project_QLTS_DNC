@@ -107,6 +107,7 @@
                     <Button Grid.Column="2" 
                             Style="{StaticResource MaterialDesignIconButton}" 
                             x:Name="btnSearch" 
+                            Click="btnSearch_Click"
                             ToolTip="Tìm kiếm">
                         <materialDesign:PackIcon Kind="ArrowRight" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                     </Button>
@@ -116,6 +117,7 @@
             <!-- Filter: Mã kho -->
             <ComboBox Grid.Column="1" 
                       x:Name="cboTenKho" 
+                      SelectionChanged="cboTenKho_SelectionChanged"
                       materialDesign:HintAssist.Hint="Tên kho" 
                       Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                       Width="150" 
@@ -130,10 +132,15 @@
             <!-- Filter: Mã sản phẩm -->
             <ComboBox Grid.Column="2" 
                       x:Name="cboTrangThai" 
+                      SelectionChanged="cboTrangThai_SelectionChanged"
                       materialDesign:HintAssist.Hint="Trạng thái" 
                       Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                       Width="150" 
                       Margin="0,0,16,0">
+                <ComboBoxItem Content="Tất cả"/>
+                <ComboBoxItem Content="Chờ duyệt"/>
+                <ComboBoxItem Content="Đã duyệt"/>
+                <ComboBoxItem Content="Từ chối duyệt"/>
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding}"/>

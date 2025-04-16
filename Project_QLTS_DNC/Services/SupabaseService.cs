@@ -13,10 +13,10 @@ namespace Project_QLTS_DNC.Services
         {
             if (_client != null) return _client;
 
-            var settings = ConfigHelper.GetSupabaseSettings(); // Lấy cấu hình Supabase
-            _client = new Supabase.Client(settings.Url, settings.ApiKey); // Khởi tạo Supabase.Client
+            var settings = ConfigHelper.GetSupabaseSettings(); 
+            _client = new Supabase.Client(settings.Url, settings.ApiKey); 
 
-            // Khởi tạo Supabase client (PostgrestClient và AuthClient được cấu hình tự động)
+            
             await _client.InitializeAsync();
             return _client;
         }

@@ -16,6 +16,7 @@ using Project_QLTS_DNC.View.QuanLyTaiSan;
 using Project_QLTS_DNC.View.ThongSoKyThuat;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using System.Windows.Controls;
+using Project_QLTS_DNC.Models;
 
 namespace Project_QLTS_DNC
 {
@@ -25,13 +26,30 @@ namespace Project_QLTS_DNC
     public partial class MainWindow : Window
     {
         private User _user; // dùng để truyền thông tin đăng nhập
-        public MainWindow(User user)
+        //public MainWindow(User user)
+        //{
+        //    InitializeComponent();
+        //    LoadBarChart(); // Gọi hàm hiển thị biểu đồ
+        //    _user = user;
+
+        //}
+        private TaiKhoanModel _taiKhoan;
+        private List<TaiKhoanModel> _danhSachTaiKhoan;
+
+        public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
         {
             InitializeComponent();
-            LoadBarChart(); // Gọi hàm hiển thị biểu đồ
-            _user = user;
+            _taiKhoan = taiKhoan;
+            _danhSachTaiKhoan = danhSachTaiKhoan;
 
+            if (_taiKhoan.MaLoaiTk == 1 && _danhSachTaiKhoan != null)
+            {
+                //danhSachTaiKhoan.ItemsSource = _danhSachTaiKhoan; 
+            }
         }
+
+
+
 
         private void btnThoat_Click(object sender, RoutedEventArgs e)
         {
@@ -224,6 +242,7 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.TaiKhoan.LoaiTaiKhoanForm();
         }
 
+
         private void btnLoaiBaoTri_Selected(object sender, RoutedEventArgs e)
         {
            MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
@@ -233,6 +252,21 @@ namespace Project_QLTS_DNC
         private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+
+        private void btnChucVu_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.ChucVu.ChucVuForm();
+        }
+
+        private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnDuyetPhieu_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.DuyetPhieu.frmDuyetPhieu();
+
         }
     }
     public static class MainWindowExtensions
@@ -255,5 +289,12 @@ namespace Project_QLTS_DNC
             }
         }
 
+
+       
+
+
+       
+
+       
     }
 }

@@ -31,6 +31,7 @@ using System.Windows.Input;
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using System.ComponentModel;
 using System.Diagnostics;
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -327,7 +328,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 // Nếu không thể ghi log, bỏ qua để tránh gây thêm lỗi
             }
         }
-
+        // Nội dung phương thức ExportQRCodeToPDF
         private void ExportQRCodeToPDF(string filePath, List<TaiSanQRDTO> selectedItems)
         {
             // Cấu hình PDF writer
@@ -343,10 +344,13 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
                     int cellCount = 0;
 
+                    // Lấy địa chỉ IP động cho URL
+                    string baseUrl = NetworkHelper.GetLocalIPv4Address(8080);
+
                     foreach (var item in selectedItems)
                     {
-                        // Tạo mã QR từ thông tin tài sản
-                        string qrContent = $"https://yourwebsite.com/taisan?id={item.MaTaiSan}&seri={item.SoSeri}";
+                        // Tạo mã QR từ thông tin tài sản với địa chỉ IP động
+                        string qrContent = $"{baseUrl}/qr?id={item.MaTaiSan}&seri={item.SoSeri}";
 
                         // Tạo QR code sử dụng ZXing
                         BarcodeWriter<Bitmap> barcodeWriter = new BarcodeWriter<Bitmap>();

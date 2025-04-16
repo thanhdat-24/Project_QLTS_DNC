@@ -77,6 +77,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Thêm cột cho nút refresh -->
                 </Grid.ColumnDefinitions>
 
                 <!-- Hộp tìm kiếm -->
@@ -108,33 +110,49 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <!-- Lọc theo MaPhong -->
+                <!-- Lọc theo TenPhong -->
                 <ComboBox Grid.Column="1" 
                         x:Name="cboPhong" 
-                        materialDesign:HintAssist.Hint="Mã phòng" 
+                        materialDesign:HintAssist.Hint="Tên phòng" 
                         Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                         Width="150" 
                         Margin="0 0 16 0">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding MaPhong}"/>
+                            <TextBlock Text="{Binding TenPhong}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
                 <!-- Lọc theo MaNhomTS -->
                 <ComboBox Grid.Column="2" 
-                        x:Name="cboNhomTS" 
-                        materialDesign:HintAssist.Hint="Mã nhóm TS" 
-                        Style="{StaticResource MaterialDesignOutlinedComboBox}" 
-                        Width="150" 
-                        Margin="0 0 16 0">
+        x:Name="cboNhomTS" 
+        materialDesign:HintAssist.Hint="Nhóm tài sản" 
+        Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+        Width="150" 
+        Margin="0 0 16 0">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding MaNhomTS}"/>
+                            <TextBlock Text="{Binding TenNhomTS}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+
+                <!-- Nút Refresh -->
+                <Button Grid.Column="3" 
+      x:Name="btnRefresh"
+      Style="{StaticResource MaterialDesignIconButton}" 
+      ToolTip="Làm mới dữ liệu" 
+      Margin="8,0,0,0"
+      Background="#B0BEC5" 
+      Height="36" 
+      Width="36">
+                    <materialDesign:PackIcon Kind="Refresh" 
+                          Width="24" 
+                          Height="24" 
+                          VerticalAlignment="Center" 
+                          HorizontalAlignment="Center"/>
+                </Button>
             </Grid>
 
             <!-- Danh Sách Tài Sản -->
