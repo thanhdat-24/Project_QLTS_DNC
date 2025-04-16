@@ -46,8 +46,7 @@
                              <TreeViewItem x:Name="btnLoaiBaoTri" Header="🛠️ Loại bảo trì" Selected="btnLoaiBaoTri_Selected" />
                             <TreeViewItem x:Name="btnDSbaotri" Header="🛠️Danh sách bảo trì " Selected="btnDSbaotri_Selected"  />
 
-                             <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì"  />
-                            <TreeViewItem x:Name="btnDSbaotri" Header="📋  Danh sách bảo trì"    />
+                            
 
                         </TreeViewItem>           
                             

@@ -252,6 +252,7 @@ namespace Project_QLTS_DNC
         private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
 
         private void btnChucVu_Selected(object sender, RoutedEventArgs e)
         {
