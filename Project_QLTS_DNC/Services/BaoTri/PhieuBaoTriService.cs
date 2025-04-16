@@ -7,6 +7,7 @@ using Supabase.Postgrest.Responses;
 using System.IO;
 using System.IO;
 using ClosedXML.Excel;
+using System.Windows;
 
 
 namespace Project_QLTS_DNC.Services
@@ -102,55 +103,53 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Cập nhật phiếu bảo trì
         public async Task<bool> UpdatePhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
             try
             {
+                Console.WriteLine($"Bắt đầu cập nhật phiếu bảo trì: {phieuBaoTri.MaBaoTri}");
                 var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                {
-                    throw new Exception("Không thể kết nối Supabase Client");
-                }
 
-                // Kiểm tra các giá trị bắt buộc
-                if (phieuBaoTri.MaTaiSan == null)
+                // Tạo phiên bản mới của phiếu bảo trì để cập nhật
+                var updatePhieu = new PhieuBaoTri
                 {
-                    throw new Exception("Mã tài sản không được để trống");
-                }
+                    MaBaoTri = phieuBaoTri.MaBaoTri,
+                    MaTaiSan = phieuBaoTri.MaTaiSan,
+                    MaLoaiBaoTri = phieuBaoTri.MaLoaiBaoTri,
+                    NgayBaoTri = phieuBaoTri.NgayBaoTri,
+                    MaNV = phieuBaoTri.MaNV,
+                    NoiDung = phieuBaoTri.NoiDung,
+                    TrangThai = phieuBaoTri.TrangThai,
+                    ChiPhi = phieuBaoTri.ChiPhi,
+                    GhiChu = phieuBaoTri.GhiChu
+                };
 
-                if (string.IsNullOrEmpty(phieuBaoTri.NoiDung))
-                {
-                    throw new Exception("Nội dung không được để trống");
-                }
+                Console.WriteLine($"Dữ liệu cập nhật: MaTaiSan={updatePhieu.MaTaiSan}, TrangThai={updatePhieu.TrangThai}");
 
-                if (string.IsNullOrEmpty(phieuBaoTri.TrangThai))
-                {
-                    throw new Exception("Trạng thái không được để trống");
-                }
-
-                // Thực hiện cập nhật
+                // Thực hiện cập nhật trực tiếp đối tượng PhieuBaoTri
                 var response = await client.From<PhieuBaoTri>()
-                    .Where(p => p.MaBaoTri == phieuBaoTri.MaBaoTri)
-                    .Update(phieuBaoTri);
+                            .Where(p => p.MaBaoTri == phieuBaoTri.MaBaoTri)
+                            .Update(updatePhieu);
 
-                return response.ResponseMessage.IsSuccessStatusCode;
+                Console.WriteLine($"Kết quả phản hồi: {(response != null ? "Thành công" : "Thất bại")}");
+
+                return response != null;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi cập nhật phiếu bảo trì: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                Console.WriteLine($"Lỗi cập nhật phiếu bảo trì: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Hiển thị thông báo lỗi chi tiết
+                MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Chi tiết lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+
                 return false;
             }
         }
-
-        // Fix for CS0161: Ensure all code paths return a value
-        // Fix for CA1822: Mark the method as static since it does not access instance data
-        // Fix for IDE0060: Retain the parameter as it is part of the public API
-
-    
-
-        // Lấy danh sách tài sản cần bảo trì (tình trạng dưới 50%)
         public async Task<List<PhieuBaoTri>> GetDanhSachCanBaoTriAsync()
         {
             try

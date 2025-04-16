@@ -228,10 +228,23 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 try
                 {
-                    // Sử dụng namespace đầy đủ để tránh ambiguous reference
-                    Project_QLTS_DNC.Views.EditPhieuBaoTriWindow editWindow = new Project_QLTS_DNC.Views.EditPhieuBaoTriWindow(phieu);
+                    // Tạo bản sao của đối tượng phiếu để tránh thay đổi đối tượng gốc
+                    var phieuCopy = new PhieuBaoTri
+                    {
+                        MaBaoTri = phieu.MaBaoTri,
+                        MaTaiSan = phieu.MaTaiSan,
+                        MaLoaiBaoTri = phieu.MaLoaiBaoTri,
+                        NgayBaoTri = phieu.NgayBaoTri,
+                        MaNV = phieu.MaNV,
+                        NoiDung = phieu.NoiDung,
+                        TrangThai = phieu.TrangThai,
+                        ChiPhi = phieu.ChiPhi,
+                        GhiChu = phieu.GhiChu,
+                        IsSelected = phieu.IsSelected
+                    };
 
-                    // Thiết lập owner để cửa sổ hiển thị ở giữa cửa sổ cha
+                    // Sử dụng bản sao để mở cửa sổ chỉnh sửa
+                    Project_QLTS_DNC.Views.EditPhieuBaoTriWindow editWindow = new Project_QLTS_DNC.Views.EditPhieuBaoTriWindow(phieuCopy);
                     editWindow.Owner = Window.GetWindow(this);
 
                     // Hiển thị cửa sổ dưới dạng dialog
@@ -240,6 +253,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     // Nếu người dùng đã lưu thay đổi (nhấn nút Save)
                     if (result == true)
                     {
+                        // Thêm logging để debug
+                        Console.WriteLine($"Cập nhật phiếu: {editWindow.PhieuBaoTri.MaBaoTri}, {editWindow.PhieuBaoTri.TrangThai}");
+
                         // Cập nhật phiếu bảo trì vào cơ sở dữ liệu
                         bool success = await _phieuBaoTriService.UpdatePhieuBaoTriAsync(editWindow.PhieuBaoTri);
 
@@ -247,13 +263,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         {
                             MessageBox.Show("Cập nhật phiếu bảo trì thành công!", "Thông báo",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
-
                             // Tải lại danh sách bảo trì để cập nhật giao diện
                             await LoadDSBaoTriAsync();
                         }
                         else
                         {
-                            MessageBox.Show("Không thể cập nhật phiếu bảo trì!", "Lỗi",
+                            MessageBox.Show("Không thể cập nhật phiếu bảo trì! Kiểm tra log để biết thêm chi tiết.", "Lỗi",
                                 MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
@@ -498,7 +513,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 case 3: loaiBaoTri = "Bảo hành"; break;
             }
             AddTableRow(infoTable, "Loại bảo trì:", loaiBaoTri);
-            AddTableRow(infoTable, "Ngày bảo trì:", phieu.NgayBaoTri.ToString("dd/MM/yyyy"));
+            AddTableRow(infoTable, "Ngày bảo trì:", phieu.NgayBaoTri?.ToString("dd/MM/yyyy") ?? "N/A");
             AddTableRow(infoTable, "Người phụ trách:", phieu.MaNV?.ToString() ?? "N/A");
             AddTableRow(infoTable, "Trạng thái:", phieu.TrangThai);
             AddTableRow(infoTable, "Chi phí:", string.Format("{0:N0} VNĐ", phieu.ChiPhi));

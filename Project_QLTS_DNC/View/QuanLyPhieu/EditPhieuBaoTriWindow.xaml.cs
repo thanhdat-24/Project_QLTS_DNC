@@ -46,6 +46,8 @@ namespace Project_QLTS_DNC.Views
         {
             try
             {
+                await WarmUpSchemaAsync(); // <<-- thêm dòng này
+
                 // Tải dữ liệu cho các combobox
                 await LoadTaiSanAsync();
                 await LoadLoaiBaoTriAsync();
@@ -59,6 +61,7 @@ namespace Project_QLTS_DNC.Views
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private async Task LoadTaiSanAsync()
         {
@@ -76,11 +79,11 @@ namespace Project_QLTS_DNC.Views
 
                 // Hiển thị danh sách lên ComboBox
                 cboMaTaiSan.ItemsSource = response.Models;
-                cboMaTaiSan.DisplayMemberPath = "TenTaiSan"; // Hiển thị tên tài sản
-                cboMaTaiSan.SelectedValuePath = "MaTaiSan"; // Giá trị được chọn là mã tài sản
-
-                // Đặt giá trị mặc định dựa trên dữ liệu phiếu
+                cboMaTaiSan.SelectedValuePath = "MaTaiSan";
                 cboMaTaiSan.SelectedValue = PhieuBaoTri.MaTaiSan;
+
+                // Thiết lập định dạng hiển thị nếu cần
+                // cboMaTaiSan.ItemStringFormat = "{0}"; // Format nếu cần
             }
             catch (Exception ex)
             {
@@ -104,8 +107,10 @@ namespace Project_QLTS_DNC.Views
 
                 // Hiển thị danh sách lên ComboBox
                 cboMaLoaiBaoTri.ItemsSource = response.Models;
-                cboMaLoaiBaoTri.DisplayMemberPath = "TenLoai"; // Tên thuộc tính đúng theo model
-                cboMaLoaiBaoTri.SelectedValuePath = "MaLoaiBaoTri"; // Mã loại bảo trì
+                cboMaLoaiBaoTri.SelectedValuePath = "MaLoaiBaoTri";
+
+                // Thiết lập định dạng hiển thị nếu cần
+                // cboMaLoaiBaoTri.ItemStringFormat = "{0}"; // Format nếu cần
 
                 // Đặt giá trị mặc định
                 cboMaLoaiBaoTri.SelectedValue = PhieuBaoTri.MaLoaiBaoTri;
@@ -132,8 +137,10 @@ namespace Project_QLTS_DNC.Views
 
                 // Hiển thị danh sách lên ComboBox
                 cboMaNV.ItemsSource = response.Models;
-                cboMaNV.DisplayMemberPath = "TenNV"; // Tên nhân viên
-                cboMaNV.SelectedValuePath = "MaNV"; // Mã nhân viên
+                cboMaNV.SelectedValuePath = "MaNV";
+
+                // Thiết lập định dạng hiển thị nếu cần
+                // cboMaNV.ItemStringFormat = "{0}"; // Format nếu cần
 
                 // Đặt giá trị mặc định
                 cboMaNV.SelectedValue = PhieuBaoTri.MaNV;
@@ -222,6 +229,17 @@ namespace Project_QLTS_DNC.Views
             // Hủy thay đổi
             DialogResult = false;
             Close();
+        }
+        private async Task WarmUpSchemaAsync()
+        {
+            var client = await SupabaseService.GetClientAsync();
+
+            // Gọi một truy vấn nhỏ để buộc Supabase cache lại schema
+            await client
+                .From<PhieuBaoTri>()
+                .Select("*")
+                .Limit(1)
+                .Get();
         }
     }
 }

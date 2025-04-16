@@ -256,7 +256,13 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Mã tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Column="1" x:Name="cboMaTaiSan" SelectedValue="{Binding MaTaiSan}" IsEditable="False" StaysOpenOnEdit="True"/>
+                        <ComboBox Grid.Column="1" x:Name="cboMaTaiSan" SelectedValue="{Binding MaTaiSan}" SelectedValuePath="MaTaiSan" IsEditable="False" StaysOpenOnEdit="True">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TenTaiSan}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </Grid>
 
                     <!-- Loại bảo trì -->
@@ -266,7 +272,13 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Loại bảo trì:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Column="1" x:Name="cboMaLoaiBaoTri" SelectedValue="{Binding MaLoaiBaoTri}" IsEditable="False" StaysOpenOnEdit="True"/>
+                        <ComboBox Grid.Column="1" x:Name="cboMaLoaiBaoTri" SelectedValue="{Binding MaLoaiBaoTri}" SelectedValuePath="MaLoaiBaoTri" IsEditable="False" StaysOpenOnEdit="True">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TenLoai}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </Grid>
 
                     <!-- Ngày bảo trì -->
@@ -286,7 +298,13 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Người phụ trách:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Column="1" x:Name="cboMaNV" SelectedValue="{Binding MaNV}" IsEditable="False" StaysOpenOnEdit="True"/>
+                        <ComboBox Grid.Column="1" x:Name="cboMaNV" SelectedValue="{Binding MaNV}" SelectedValuePath="MaNV" IsEditable="False" StaysOpenOnEdit="True">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TenNV}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </Grid>
 
                     <!-- Nội dung -->
