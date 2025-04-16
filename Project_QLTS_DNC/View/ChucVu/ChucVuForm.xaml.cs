@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.ViewModels.NhanVien;
 using System;
 using System.Collections.Generic;
@@ -29,11 +30,13 @@ namespace Project_QLTS_DNC.View.ChucVu
             DataContext = new DanhSachChucVuViewModel();
         }
 
-        private void btnThemChucVu_Click(object sender, RoutedEventArgs e)
+        private async void btnThemChucVu_Click(object sender, RoutedEventArgs e)
         {
-            var themChucVuWindow = new ThemChucVuForm();
+            var client = await SupabaseService.GetClientAsync();  
+            var themChucVuWindow = new ThemChucVuForm(client);  
             themChucVuWindow.ShowDialog();
         }
+
 
         private void btnSua_Click(object sender, RoutedEventArgs e) 
         {

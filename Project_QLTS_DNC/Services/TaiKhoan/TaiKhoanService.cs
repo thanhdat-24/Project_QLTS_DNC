@@ -1,74 +1,47 @@
 ﻿using Project_QLTS_DNC.DTOs;
-using Project_QLTS_DNC.Models;
-using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.TaiKhoan;
-using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Models.NhanVien;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Project_QLTS_DNC.Models;
 
 namespace Project_QLTS_DNC.Services
 {
-    public class TaiKhoanService
+    public class TaiKhoanService : SupabaseService
     {
-        private Supabase.Client _client;
+        public TaiKhoanService() : base() { }
 
-        public TaiKhoanService(Supabase.Client client)
+        public async Task<List<TaiKhoanDTO>> LayDanhSachTaiKhoanAsync()
         {
-            _client = client;
-        }
+            var client = await SupabaseService.GetClientAsync();
 
-        // Đảm bảo Supabase client đã được khởi tạo
-        private async Task EnsureClientAsync()
-        {
-            if (_client == null)
-                _client = await SupabaseService.GetClientAsync();
-        }
+            var danhSachTaiKhoan = await client.From<TaiKhoanModel>().Get();
+            var danhSachLoaiTk = await client.From<LoaiTaiKhoanModel>().Get();
+            var danhSachNhanVien = await client.From<NhanVienModel>().Get();
 
-        // Lấy tất cả tài khoản nếu người dùng hiện tại là admin
-        public async Task<List<TaiKhoanDTO>> LayTatCaTaiKhoanNeuLaAdminAsync()
-        {
-            await EnsureClientAsync();
+            // Tạo dictionary để tra nhanh
+            var loaiTaiKhoanDict = danhSachLoaiTk.Models.ToDictionary(x => x.MaLoaiTk, x => x.TenLoaiTk);
+            var nhanVienDict = danhSachNhanVien.Models.ToDictionary(x => x.MaNV, x => x.TenNV);
 
-            var currentUser = _client.Auth.CurrentUser;
-            if (currentUser == null) return null;  // Trả về null nếu không có người dùng đăng nhập
-
-            // Lấy tài khoản của người dùng hiện tại
-            var taiKhoanHienTai = await _client
-                .From<TaiKhoanModel>()
-                .Where(x => x.Uid == currentUser.Id)
-                .Single();
-
-            // Kiểm tra xem người dùng có phải là admin không (giả sử loại admin là 1)
-            if (taiKhoanHienTai == null || taiKhoanHienTai.MaLoaiTk != 1)
-                return null;
-
-            // Lấy tất cả tài khoản, loại tài khoản và nhân viên
-            var danhSachTaiKhoan = await _client.From<TaiKhoanModel>().Get();
-            var danhSachLoaiTk = await _client.From<LoaiTaiKhoanModel>().Get();
-            var danhSachNhanVien = await _client.From<NhanVienModel>().Get();
-
-            // Danh sách chứa các DTO
+            
             var taiKhoanDTOs = new List<TaiKhoanDTO>();
 
             foreach (var taiKhoan in danhSachTaiKhoan.Models)
             {
-                // Lấy thông tin loại tài khoản và nhân viên tương ứng
-                var loai = danhSachLoaiTk.Models.FirstOrDefault(x => x.MaLoaiTk == taiKhoan.MaLoaiTk);
-                var nv = danhSachNhanVien.Models.FirstOrDefault(x => x.MaNV == taiKhoan.MaNv);
+                var tenLoaiTk = loaiTaiKhoanDict.GetValueOrDefault(taiKhoan.MaLoaiTk, "Không xác định");
+                var tenNhanVien = taiKhoan.MaNv.HasValue
+                    ? nhanVienDict.GetValueOrDefault(taiKhoan.MaNv.Value, "Không xác định")
+                    : "Không có";
 
-                // Tạo DTO cho tài khoản
-                var dto = new TaiKhoanDTO(
-                    taiKhoan,
-                    loai?.TenLoaiTk ?? "Unknown",   
-                    nv?.TenNV ?? "Unknown"          
-                );
-
-                taiKhoanDTOs.Add(dto);  
+                var dto = new TaiKhoanDTO(taiKhoan, tenLoaiTk, tenNhanVien);
+                taiKhoanDTOs.Add(dto);
             }
 
-            
             return taiKhoanDTOs;
         }
+
+
     }
 }
+

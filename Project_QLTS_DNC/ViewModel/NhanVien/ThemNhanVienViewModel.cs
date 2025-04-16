@@ -1,99 +1,127 @@
-﻿
-using Project_QLTS_DNC.Helpers;
-using System;
+﻿using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.ToaNha;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.ChucVu;
+using Project_QLTS_DNC.Services.QLToanNha;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using Project_QLTS_DNC.Models.NhanVien;
+using Supabase;
 
 namespace Project_QLTS_DNC.ViewModels.NhanVien
 {
+
+
     public class ThemNhanVienViewModel : INotifyPropertyChanged
     {
-        private NhanVienModel _nhanVien = new NhanVienModel();
-        public NhanVienModel NhanVien
+
+        private NhanVienService _nhanVienService;
+        private Client _client;
+        private ChucVuService _chucVuService;
+        private ObservableCollection<PhongBan> _danhSachPhongBan;
+        private ObservableCollection<ChucVuModel> _danhSachChucVu;
+        public NhanVienModel NewNhanVien { get; set; } = new NhanVienModel();
+
+
+
+        public ObservableCollection<PhongBan> DanhSachPhongBan
         {
-            get => _nhanVien;
+            get { return _danhSachPhongBan; }
             set
             {
-                _nhanVien = value;
-                OnPropertyChanged();
+                if (_danhSachPhongBan != value)
+                {
+                    _danhSachPhongBan = value;
+                    OnPropertyChanged(nameof(DanhSachPhongBan));  
+                }
             }
         }
 
-        private ObservableCollection<ChucVuModel> _danhSachChucVu;
         public ObservableCollection<ChucVuModel> DanhSachChucVu
         {
-            get => _danhSachChucVu;
+            get { return _danhSachChucVu; }
             set
             {
-                _danhSachChucVu = value;
-                OnPropertyChanged();
+                if (_danhSachChucVu != value)
+                {
+                    _danhSachChucVu = value;
+                    OnPropertyChanged(nameof(DanhSachChucVu));
+                }
             }
         }
-
-        private long _selectedChucVu;
-        public long SelectedChucVu
-        {
-            get => _selectedChucVu;
-            set
-            {
-                _selectedChucVu = value;
-                NhanVien.MaCV = (int)value; // Gán vào model nhân viên
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand ThemNhanVienCommand { get; }
 
         public ThemNhanVienViewModel()
         {
-            ThemNhanVienCommand = new RelayCommand(async () => await ThemNhanVien());
-            _ = LoadChucVu(); // Load danh sách chức vụ khi khởi tạo
+            _client = SupabaseService.GetClientAsync().Result; // Lưu ý khi sử dụng `.Result` cho các call async.
+
+            _nhanVienService = new NhanVienService();
+            _chucVuService = new ChucVuService();
+
+            Task.Run(async () =>
+            {
+                await LoadPhongBan();
+                await LoadChucVu();
+            }).Wait();
         }
 
-        private async Task ThemNhanVien()
+
+
+        public async Task LoadPhongBan()
         {
-            //try
-            //{
-            //    var service = new NhanVienService();
-            //    var result = await service.ThemNhanVien(NhanVien);
-
-            //    if (result)
-            //    {
-            //        MessageBox.Show("Thêm nhân viên thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-            //        NhanVien = new NhanVienModel(); // Reset form
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("Thêm nhân viên thất bại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Lỗi: {ex.Message}", "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
+            try
+            {
+                DanhSachPhongBan = await PhongBanService.LayDanhSachPhongBanAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi load phòng ban: {ex.Message}");
+            }
         }
 
-        private async Task LoadChucVu()
+        public async Task LoadChucVu()
         {
-            //try
-            //{
-            //    var service = new NhanVienService();
-            //    var chucvus = await service.GetChucVusAsync(); // Lấy danh sách chức vụ từ service
-            //    DanhSachChucVu = new ObservableCollection<ChucVuModel>(chucvus);
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Lỗi khi load chức vụ: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
+            try
+            {
+                var chucVuList = await _chucVuService.GetAllChucVuAsync();
+                DanhSachChucVu = new ObservableCollection<ChucVuModel>(chucVuList);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi load chức vụ: {ex.Message}");
+            }
         }
+
+
+        public async Task<bool> ThemNhanVienAsync(NhanVienModel nhanVien)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(nhanVien.TenNV) ||
+                    string.IsNullOrWhiteSpace(nhanVien.Email) ||
+                    string.IsNullOrWhiteSpace(nhanVien.DiaChi))
+                {
+                    return false;
+                }
+
+                if (nhanVien.NgayVaoLam == default)
+                    nhanVien.NgayVaoLam = DateTime.Now;
+
+                var result = await _nhanVienService.ThemNhanVienAsync(nhanVien);
+                return result != null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi thêm nhân viên: " + ex.Message);
+                return false;
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = "") =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

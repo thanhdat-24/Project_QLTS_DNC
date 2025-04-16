@@ -99,7 +99,7 @@
                 <TextBox x:Name="txtSearch" Grid.Column="1" 
                          materialDesign:HintAssist.Hint="Tìm theo mã, tên hoặc email..."
                          Style="{StaticResource MaterialDesignTextBox}"
-                         VerticalAlignment="Center" Margin="0,0,20,0"/>
+                         VerticalAlignment="Center" Margin="0,0,20,0" TextChanged="txtSearch_TextChanged"/>
 
                 <!-- Department Filter Label -->
                 <TextBlock Grid.Column="2" Text="Phòng ban:" VerticalAlignment="Center" Margin="0,0,5,0" 
@@ -109,30 +109,25 @@
                 <ComboBox x:Name="cboPhongBan" Grid.Column="3" Width="180" Margin="0,0,50,0"
                           materialDesign:HintAssist.Hint="Chọn phòng ban"
                           Style="{StaticResource MaterialDesignComboBox}"
-                          BorderThickness="0,0,0,1">
-                    <ComboBoxItem Content="Tất cả phòng ban" IsSelected="True"/>
-                    <ComboBoxItem Content="Phòng Hành chính"/>
-                    <ComboBoxItem Content="Phòng Kế toán"/>
-                    <ComboBoxItem Content="Phòng Kinh doanh"/>
-                    <ComboBoxItem Content="Phòng IT"/>
-                    <ComboBoxItem Content="Phòng Nhân sự"/>
+                          BorderThickness="0,0,0,1" SelectionChanged="cboPhongBan_SelectionChanged">
+                    
                 </ComboBox>
 
                 <!-- Search Button with Material Design -->
                 <Button x:Name="btnSearch" Grid.Column="4" Style="{StaticResource MaterialDesignRaisedButton}"
                         Background="{StaticResource PrimaryHueMidBrush}" Foreground="White" 
                         materialDesign:ButtonAssist.CornerRadius="4"
-                        Height="36" Width="120">
+                        Height="36" Width="120" Click="btnSearch_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
                         <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
 
-                <Button x:Name="btnLoadDuLieu" Grid.Column="5" Margin="8,0,0,0" 
+                <Button x:Name="btnRefresh" Grid.Column="5" Margin="8,0,0,0" 
                          Background="#B0BEC5" Height="36" Width="36" 
                         Style="{StaticResource MaterialDesignIconButton}" 
-                         HorizontalAlignment="Left">
+                         HorizontalAlignment="Left" Click="btnRefresh_Click">
                     <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24" 
                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Button>
@@ -140,7 +135,7 @@
         </materialDesign:Card>
 
         <!-- DataGrid for Employee List with Material Design -->
-        <DataGrid x:Name="employeeDataGrid" Grid.Row="2" Margin="15,0,15,15" 
+        <DataGrid x:Name="dvDanhSachNhanVien" Grid.Row="2" Margin="15,0,15,15" 
           Style="{StaticResource MaterialDesignDataGrid}"
           materialDesign:DataGridAssist.CellPadding="13 8"
           materialDesign:DataGridAssist.ColumnHeaderPadding="8"
@@ -173,6 +168,7 @@
                 <DataGridTextColumn Header="Phòng Ban" Binding="{Binding TenPb}" Width="*"/>
                 <DataGridTextColumn Header="Chức vụ" Binding="{Binding TenCv}" Width="*" />
                 <DataGridTextColumn Header="Tên nhân viên" Binding="{Binding TenNv}" Width="*"/>
+                <DataGridTextColumn Header="Giới tính" Binding="{Binding GioiTinh}" Width="*"/>
                 <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="*"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
                 <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Sdt}" Width="*"/>
@@ -183,14 +179,14 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button Style="{StaticResource MaterialDesignIconButton}"
-    
+                                        Click="btnSua_Click"
                                         ToolTip="Sửa"
                                         Background="{DynamicResource PrimaryHueLightBrush}" 
                                         Width="26" Height="26" Padding="2" Margin="0,1">        
                                     <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                 </Button>
                                 <Button Style="{StaticResource MaterialDesignIconButton}"
-       
+                                        Click="btnXoa_Click"
                                         ToolTip="Xóa" Margin="8,1,0,1"
                                         Background="{DynamicResource SecondaryDelete}" 
                                         Width="26" Height="26" 

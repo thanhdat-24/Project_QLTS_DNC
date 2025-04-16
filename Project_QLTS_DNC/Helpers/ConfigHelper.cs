@@ -10,13 +10,13 @@ namespace Project_QLTS_DNC.Helpers
         {
             try
             {
-                // Xây dựng Configuration từ file appsettings.json
+                
                 var config = new ConfigurationBuilder()
-                    .SetBasePath(AppContext.BaseDirectory)  // Đảm bảo lấy đúng thư mục gốc của ứng dụng
+                    .SetBasePath(AppContext.BaseDirectory)  
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                     .Build();
 
-                // Đọc cấu hình Supabase từ file
+               
                 var settings = new SupabaseSettings();
                 config.GetSection("Supabase").Bind(settings);
 
@@ -29,9 +29,9 @@ namespace Project_QLTS_DNC.Helpers
             }
             catch (Exception ex)
             {
-                // Ghi log lỗi khi không thể tải cấu hình
+                
                 System.Diagnostics.Debug.WriteLine($"Lỗi khi đọc cấu hình Supabase: {ex.Message}");
-                throw; // Ném lại exception để lớp gọi phía trên xử lý
+                throw; 
             }
         }
     }

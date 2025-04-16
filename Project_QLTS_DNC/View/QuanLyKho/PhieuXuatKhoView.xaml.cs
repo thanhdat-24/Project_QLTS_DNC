@@ -1,139 +1,189 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using Supabase.Postgrest.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using ClosedXML.Excel;
-using Microsoft.Win32;
+using Project_QLTS_DNC.Models.PhieuXuatKho;
 using Project_QLTS_DNC.Models;
-using System.IO; // Add this namespace for IOException
+using System.Windows.Controls;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Services;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
-
     public partial class PhieuXuatKhoView : UserControl
     {
-        public ObservableCollection<PhieuXuatKho> PhieuXuatKhoList { get; set; }
+        private Supabase.Client _client;
+        private Dictionary<int, string> _khoLookup = new Dictionary<int, string>();
+        private Dictionary<int, string> _nvLookup = new Dictionary<int, string>();
 
         public PhieuXuatKhoView()
         {
             InitializeComponent();
+            Loaded += async (s, e) => await Init();
 
-            // Sample data
-            PhieuXuatKhoList = new ObservableCollection<PhieuXuatKho>
-            {
-                new PhieuXuatKho { MaKhoXuat = "KX001", MaSanPham = "SP001", MaPhieuXuat = "PX001", MaKhoNhan = "KN001", NgayXuat = DateTime.Now, SoLuong = 10, GhiChu = "Ghi chú 1" },
-                new PhieuXuatKho { MaKhoXuat = "KX002", MaSanPham = "SP002", MaPhieuXuat = "PX002", MaKhoNhan = "KN002", NgayXuat = DateTime.Now.AddDays(-1), SoLuong = 20, GhiChu = "Ghi chú 2" },
-                new PhieuXuatKho { MaKhoXuat = "KX003", MaSanPham = "SP003", MaPhieuXuat = "PX003", MaKhoNhan = "KN003", NgayXuat = DateTime.Now.AddDays(-2), SoLuong = 15, GhiChu = "Ghi chú 3" }
-            };
-
-            // Bind the data to the DataGrid
-            dgPhieuXuatKho.ItemsSource = PhieuXuatKhoList;
+            // Khởi tạo Supabase client
+            _client = new Supabase.Client("https://hoybfwnugefnpctgghha.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhveWJmd251Z2VmbnBjdGdnaGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMDQ4OTEsImV4cCI6MjA1OTY4MDg5MX0.KxNfiOUFXHGgqZf3b3xOk6BR4sllMZG_-W-y_OPUwCI");
         }
 
-        private void EditButton_Click(object sender, RoutedEventArgs e)
+        private async Task Init()
         {
-            // Handle edit button click
-            if (dgPhieuXuatKho.SelectedItem is PhieuXuatKho selectedItem)
-            {
-                // Open edit dialog or perform edit operation
-                MessageBox.Show($"Editing item: {selectedItem.MaPhieuXuat}");
-            }
+            await LoadKhoLookupAsync();
+            await LoadNhanVienLookupAsync();
+            await LoadPhieuXuatAsync();
         }
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Handle delete button click
-            if (dgPhieuXuatKho.SelectedItem is PhieuXuatKho selectedItem)
-            {
-                // Remove the selected item from the collection
-                PhieuXuatKhoList.Remove(selectedItem);
-            }
-        }
-        private void XuatExcelButton_Click(object sender, RoutedEventArgs e)
+
+        private async Task LoadKhoLookupAsync()
         {
             try
             {
-                // Kiểm tra danh sách có dữ liệu không
-                if (PhieuXuatKhoList == null || PhieuXuatKhoList.Count == 0)
+                // Lấy dữ liệu từ bảng "kho"
+                var result = await _client.From<Kho>().Get();
+
+                // Kiểm tra nếu có dữ liệu
+                if (result.Models != null && result.Models.Any())
                 {
-                    MessageBox.Show("Không có dữ liệu để xuất!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    // Tạo từ điển MaKho -> TenKho
+                    _khoLookup = result.Models.ToDictionary(k => (int)k.MaKho, k => k.TenKho);
                 }
-
-                // Mở dialog lưu file
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                else
                 {
-                    Filter = "Excel files (*.xlsx)|*.xlsx",
-                    FileName = $"DanhSachPhieuXuatKho_{DateTime.Now:yyyyMMdd}.xlsx"
-                };
-
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    // Sử dụng using để đảm bảo giải phóng tài nguyên
-                    using (var workbook = new XLWorkbook())
-                    {
-                        var worksheet = workbook.Worksheets.Add("Danh Sách Phiếu Xuất Kho");
-
-                        // Tạo header
-                        var headers = new[]
-                        {
-                    "Mã Kho Xuất", "Mã Sản Phẩm", "Mã Phiếu Xuất", "Mã Kho Nhận",
-                    "Ngày Xuất", "Số Lượng", "Ghi Chú"
-                };
-
-                        for (int col = 0; col < headers.Length; col++)
-                        {
-                            worksheet.Cell(1, col + 1).Value = headers[col];
-                        }
-
-                        // Định dạng header
-                        var headerRange = worksheet.Range(1, 1, 1, headers.Length);
-                        headerRange.Style.Font.Bold = true;
-                        headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
-                        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                        // Điền dữ liệu
-                        for (int i = 0; i < PhieuXuatKhoList.Count; i++)
-                        {
-                            var phieu = PhieuXuatKhoList[i];
-                            worksheet.Cell(i + 2, 1).Value = phieu.MaKhoXuat;
-                            worksheet.Cell(i + 2, 2).Value = phieu.MaSanPham;
-                            worksheet.Cell(i + 2, 3).Value = phieu.MaPhieuXuat;
-                            worksheet.Cell(i + 2, 4).Value = phieu.MaKhoNhan;
-                            worksheet.Cell(i + 2, 5).Value = phieu.NgayXuat.ToString("dd/MM/yyyy");
-                            worksheet.Cell(i + 2, 6).Value = phieu.SoLuong;
-                            worksheet.Cell(i + 2, 7).Value = phieu.GhiChu;
-                        }
-
-                        // Tự động điều chỉnh độ rộng cột
-                        worksheet.Columns().AdjustToContents();
-
-                        // Lưu file
-                        workbook.SaveAs(saveFileDialog.FileName);
-                    }
-
-                    MessageBox.Show("Xuất Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _khoLookup.Clear();
+                    MessageBox.Show("Không có dữ liệu kho.");
                 }
-            }
-            catch (IOException ioEx)
-            {
-                MessageBox.Show($"Lỗi khi lưu file: {ioEx.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi tải danh sách kho: {ex.Message}");
             }
         }
-        public class PhieuXuatKho
+
+        private async Task LoadNhanVienLookupAsync()
         {
-            public string MaKhoXuat { get; set; }
-            public string MaSanPham { get; set; }
-            public string MaPhieuXuat { get; set; }
-            public string MaKhoNhan { get; set; }
-            public DateTime NgayXuat { get; set; }
-            public int SoLuong { get; set; }
-            public string GhiChu { get; set; }
+            try
+            {
+                var result = await _client.From<NhanVienModel>().Get();
+                if (result.Models != null)
+                {
+                    _nvLookup = result.Models.ToDictionary(nv => nv.MaNV, nv => nv.TenNV);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách nhân viên: {ex.Message}");
+            }
+        }
+
+        private async Task LoadPhieuXuatAsync()
+        {
+            try
+            {
+                var result = await _client.From<PhieuXuat>().Get();
+
+                if (result.Models.Any())
+                {
+                    // Lọc các phiếu xuất theo mã phiếu xuất
+                    var displayList = result.Models
+                        .Where(p =>
+                            // Tìm kiếm theo mã phiếu xuất
+                            (string.IsNullOrEmpty(txtSearch.Text) || p.MaPhieuXuat.ToString().Contains(txtSearch.Text))
+                        )
+                        .Select(p => new
+                        {
+                            MaPhieuXuat = p.MaPhieuXuat,
+                            TenKhoXuat = _khoLookup.ContainsKey((int)p.MaKhoXuat) ? _khoLookup[(int)p.MaKhoXuat] : $"#{p.MaKhoXuat}",
+                            TenKhoNhan = _khoLookup.ContainsKey((int)p.MaKhoNhan) ? _khoLookup[(int)p.MaKhoNhan] : $"#{p.MaKhoNhan}",
+                            NgayXuat = p.NgayXuat.ToString("dd/MM/yyyy"),
+                            TenNhanVien = _nvLookup.ContainsKey((int)p.MaNV) ? _nvLookup[(int)p.MaNV] : $"#{p.MaNV}",
+                            TrangThai = p.TrangThai ?? "Chờ duyệt",
+                            GhiChu = p.GhiChu
+                        })
+                        .ToList();
+
+                    dgPhieuXuatKho.ItemsSource = displayList;
+                }
+                else
+                {
+                    dgPhieuXuatKho.ItemsSource = null;
+                    MessageBox.Show("Không có dữ liệu phiếu xuất.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu phiếu xuất: {ex.Message}");
+            }
+        }
+
+
+        private async void btnAdd_Click_1(object sender, RoutedEventArgs e)
+        {
+            // Mở cửa sổ thêm phiếu xuất kho mới
+            var window = new PhieuXuatKho();
+            if (window.ShowDialog() == true)
+            {
+                await LoadPhieuXuatAsync();
+            }
+        }
+
+        private async void btnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadPhieuXuatAsync();
+        }
+
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maPhieuXuat))
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    $"Bạn có chắc chắn muốn xóa phiếu xuất có mã '{maPhieuXuat}'?",
+                    "Xác nhận xóa",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        var client = await SupabaseService.GetClientAsync();
+
+                        // Truy vấn lại đối tượng PhieuXuat từ mã
+                        var getResult = await client
+                            .From<PhieuXuat>()
+                            .Filter("ma_phieu_xuat", Supabase.Postgrest.Constants.Operator.Equals, maPhieuXuat)
+                            .Get();
+
+                        var phieuXuatToDelete = getResult.Models.FirstOrDefault();
+                        if (phieuXuatToDelete != null)
+                        {
+                            await client.From<PhieuXuat>().Delete(phieuXuatToDelete);
+
+                            MessageBox.Show("Đã xóa phiếu xuất thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                            await LoadPhieuXuatAsync(); // Làm mới danh sách
+                        }
+                        else
+                        {
+                            MessageBox.Show("Không tìm thấy phiếu xuất cần xóa.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi khi xóa phiếu xuất: {ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Không có phiếu xuất được chọn để xóa.");
+            }
+        }
+
+        private async void btnEdit_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
     }
-    }
+
+}
+

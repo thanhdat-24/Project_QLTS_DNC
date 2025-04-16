@@ -10,7 +10,7 @@ namespace Project_QLTS_DNC.ViewModels
 {
     public class DangNhapViewModel : ViewModelBase
     {
-        public string Email { get; set; }
+        public string TenTaiKhoan { get; set; }
         public string MatKhau { get; set; }
 
         public ObservableCollection<TaiKhoanModel> DanhSachTaiKhoan { get; set; }
@@ -21,11 +21,7 @@ namespace Project_QLTS_DNC.ViewModels
 
         public DangNhapViewModel()
         {
-            // Lấy client từ SupabaseService (đảm bảo Supabase client đã được khởi tạo)
-            var client = SupabaseService.GetClientAsync().Result; // Lấy client đồng bộ
-
-            // Khởi tạo AuthService với client
-            _authService = new AuthService(client);
+            _authService = new AuthService();
 
             DanhSachTaiKhoan = new ObservableCollection<TaiKhoanModel>();
             DangNhapCommand = new RelayCommand(async () => await DangNhapAsync());
@@ -35,29 +31,17 @@ namespace Project_QLTS_DNC.ViewModels
         {
             try
             {
-                var session = await _authService.DangNhapAsync(Email, MatKhau);
+                var taiKhoan = await _authService.DangNhapAsync(TenTaiKhoan, MatKhau);
 
-                if (session != null)
+                if (taiKhoan != null)
                 {
-                    var loaiTk = await _authService.LayLoaiTaiKhoanTheoUid(session.Id);
+                    var tenLoai = await _authService.LayTenLoaiTaiKhoanTheoMaLoai(taiKhoan.MaLoaiTk);
 
-                    if (loaiTk == "admin")
-                    {
-                        var danhSach = await _authService.LayTatCaTaiKhoanNeuLaAdminAsync();
-                        DanhSachTaiKhoan.Clear();
-                        foreach (var tk in danhSach)
-                            DanhSachTaiKhoan.Add(tk);
-
-                        MessageBox.Show("Đăng nhập thành công với vai trò ADMIN!");
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Đăng nhập thành công với vai trò: {loaiTk.ToUpper()}");
-                    }
+                    MessageBox.Show($"Đăng nhập thành công với vai trò: {tenLoai.ToUpper()}");
                 }
                 else
                 {
-                    MessageBox.Show("Sai email hoặc mật khẩu!");
+                    MessageBox.Show("Sai tên tài khoản hoặc mật khẩu!");
                 }
             }
             catch (System.Exception ex)

@@ -1,13 +1,13 @@
-﻿using Project_QLTS_DNC.Services;
+﻿using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Services;
 using System;
 using System.Windows;
-using Supabase.Gotrue;
 
 namespace Project_QLTS_DNC.View.DangNhap
 {
     public partial class DangNhapForm : Window
     {
-        public User LoggedInUser { get; private set; }
+        public TaiKhoanModel LoggedInTaiKhoan { get; private set; }
         private bool isPasswordVisible = false;
 
         public DangNhapForm()
@@ -31,23 +31,25 @@ namespace Project_QLTS_DNC.View.DangNhap
 
         private async void btnDangNhap_Click(object sender, RoutedEventArgs e)
         {
-            string email = txtUsername.Text;
-            string password = isPasswordVisible ? txtVisiblePassword.Text : passwordBox.Password;
+            string tenTaiKhoan = txtUsername.Text;
+            string matKhau = isPasswordVisible ? txtVisiblePassword.Text : passwordBox.Password;
 
             try
             {
-                var client = SupabaseService.GetClientAsync().Result;
-                var authService = new AuthService(client);
-                var user = await authService.DangNhapAsync(email, password);
-                if (user != null)
-                {
-                    LoggedInUser = user;
+                var authService = new AuthService();
+                var taiKhoan = await authService.DangNhapAsync(tenTaiKhoan, matKhau);
 
-                    // Ghi nhớ tài khoản nếu được chọn
+                if (taiKhoan != null)
+                {
+                    LoggedInTaiKhoan = taiKhoan;
+
+                   
+
+                    // Lưu thông tin nếu người dùng chọn ghi nhớ
                     if (unchkRemember.IsChecked == true)
                     {
-                        Properties.Settings.Default.SavedUsername = email;
-                        Properties.Settings.Default.SavedPassword = password;
+                        Properties.Settings.Default.SavedUsername = tenTaiKhoan;
+                        Properties.Settings.Default.SavedPassword = matKhau;
                         Properties.Settings.Default.RememberMe = true;
                     }
                     else
@@ -59,15 +61,18 @@ namespace Project_QLTS_DNC.View.DangNhap
                     Properties.Settings.Default.Save();
 
                     MessageBox.Show("Đăng nhập thành công!");
-                    // Sau đăng nhập thành công
+
                     this.Hide();
 
-                    var mainWindow = new MainWindow(user);
+                    var mainWindow = new MainWindow(taiKhoan); // Truyền cả danh sách nếu cần
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
 
                     this.Close();
-
+                }
+                else
+                {
+                    MessageBox.Show("Sai tên tài khoản hoặc mật khẩu!");
                 }
             }
             catch (Exception ex)
@@ -75,7 +80,6 @@ namespace Project_QLTS_DNC.View.DangNhap
                 MessageBox.Show("Lỗi đăng nhập: " + ex.Message);
             }
         }
-
 
 
         private void btnShowPassword_Click(object sender, RoutedEventArgs e)
@@ -110,3 +114,4 @@ namespace Project_QLTS_DNC.View.DangNhap
         }
     }
 }
+

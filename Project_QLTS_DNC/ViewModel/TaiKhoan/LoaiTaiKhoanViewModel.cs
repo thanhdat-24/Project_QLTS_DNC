@@ -10,6 +10,7 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
     public class LoaiTaiKhoanViewModel : INotifyPropertyChanged
     {
         private ObservableCollection<LoaiTaiKhoanModel> _loaiTaiKhoans;
+
         public ObservableCollection<LoaiTaiKhoanModel> LoaiTaiKhoans
         {
             get => _loaiTaiKhoans;
@@ -21,13 +22,27 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
             _ = LoadDataAsync();
         }
 
-        private async Task LoadDataAsync()
+        
+
+        public async Task<bool> XoaLoaiTaiKhoanAsync(int maLoaiTk)
+        {
+            var service = new LoaiTaiKhoanService();
+            var ketQua = await service.XoaLoaiTaiKhoan(maLoaiTk);
+            if (ketQua)
+            {
+                await LoadDataAsync();
+                return true;
+            }
+            return false;
+        }
+
+
+        public async Task LoadDataAsync()
         {
             var service = new LoaiTaiKhoanService();
             var list = await service.LayDSLoaiTK();
             LoaiTaiKhoans = new ObservableCollection<LoaiTaiKhoanModel>(list);
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {

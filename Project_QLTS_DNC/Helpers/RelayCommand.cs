@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Project_QLTS_DNC.Helpers
@@ -61,5 +63,8 @@ namespace Project_QLTS_DNC.Helpers
                 _executeAction(typedParam);
             }
         }
+
+      
+
     }
 }
