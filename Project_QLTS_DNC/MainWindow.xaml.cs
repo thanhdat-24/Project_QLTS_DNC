@@ -194,7 +194,7 @@ namespace Project_QLTS_DNC
 
         private void btnBaoCaoKiemKe_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.QuanLyPhieu.PhieuKiemKeView();
+            MainContentPanel.Content = new View.KiemKe.DotKiemKeView();
 
         }
 
