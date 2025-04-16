@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Project_QLTS_DNC.Models.Kho;
-
+using Project_QLTS_DNC.Models.QLNhomTS;
 using Supabase;
 
 
@@ -27,6 +27,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
     public partial class TonKhoView : UserControl
     {
         private Supabase.Client _client;
+        private Dictionary<int, string> _khoLookup = new();
+        private Dictionary<int, string> _nhomLookup = new();
 
 
         public TonKhoView()
@@ -54,26 +56,27 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private async Task LoadTonKhoAsync()
         {
-            try
-            {
-                var result = await _client.From<TonKho>().Get();
+            var tonKhoResult = await _client.From<TonKho>().Get();
+            var list = tonKhoResult.Models;
 
-                if (result.Models != null && result.Models.Count > 0)
-                {
-                    dgTonKho.ItemsSource = result.Models;
-                }
-                else
-                {
-                    dgTonKho.ItemsSource = null;
-                    MessageBox.Show("Không có dữ liệu tồn kho.");
-                }
-            }
-            catch (Exception ex)
+            // Lấy danh sách kho
+            var khoResult = await _client.From<Kho>().Get();
+            _khoLookup = khoResult.Models.ToDictionary(k => k.MaKho, k => k.TenKho);
+
+            // Lấy danh sách nhóm tài sản
+            var nhomResult = await _client.From<NhomTaiSan>().Get();
+            _nhomLookup = nhomResult.Models.ToDictionary(n => n.MaNhomTS, n => n.TenNhom);
+
+            // Gán tên cho mỗi dòng tồn kho
+            foreach (var item in list)
             {
-                MessageBox.Show($"Lỗi khi tải dữ liệu tồn kho: {ex.Message}");
+                item.TenKho = _khoLookup.TryGetValue(item.MaKho, out var tenKho) ? tenKho : "";
+                item.TenNhomTS = _nhomLookup.TryGetValue(item.MaNhomTS, out var tenNhom) ? tenNhom : "";
             }
+
+            dgTonKho.ItemsSource = list;
         }
-                     
+
         private async void TonKhoView_Loaded(object sender, RoutedEventArgs e)
         {
             await InitializeSupabaseAsync();

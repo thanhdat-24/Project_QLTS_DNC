@@ -1,4 +1,5 @@
 ﻿using Supabase.Postgrest.Attributes;
+using System.Text.Json.Serialization;
 using Supabase.Postgrest.Models;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,9 @@ using System.Threading.Tasks;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using System;
+using Project_QLTS_DNC.Models.Kho;
+
+
 
 namespace Project_QLTS_DNC.Models.Kho
 { 
@@ -34,5 +38,17 @@ public class TonKho : BaseModel
 
     [Column("ngay_cap_nhat")]
     public DateTime NgayCapNhat { get; set; }
-}
+
+    [JsonIgnore]
+    public string? TenKho { get; set; }
+
+    [JsonIgnore]
+    public string? TenNhomTS { get; set; }
+
+
+
+    }
+
+
+
 }
