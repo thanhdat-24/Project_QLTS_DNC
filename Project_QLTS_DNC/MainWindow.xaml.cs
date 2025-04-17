@@ -277,6 +277,7 @@ namespace Project_QLTS_DNC
         private void btnPhanQuyenTk_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.TaiKhoan.PhanQuyenForm();
+        }
 
         private void btnBaoTri_Selected_1(object sender, RoutedEventArgs e)
         {
