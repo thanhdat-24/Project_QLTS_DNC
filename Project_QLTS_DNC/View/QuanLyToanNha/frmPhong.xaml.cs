@@ -69,14 +69,9 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             var form = new frmThemPhong();
-            if (form.ShowDialog() == true && form.PhongMoi != null)
-            {
-                // KHÔNG GỌI insert lần nữa, chỉ cập nhật danh sách
-                DanhSachPhong.Add(form.PhongMoi);
-                DanhSachGoc.Add(form.PhongMoi);
-                UpdateStatusBar();
-            }
+            form.ShowDialog(); // 👉 Chỉ mở form lên thôi, không xử lý gì sau đó hết
         }
+
 
 
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)

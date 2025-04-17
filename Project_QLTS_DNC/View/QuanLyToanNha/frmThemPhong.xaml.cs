@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using Supabase;
 using Supabase.Postgrest;
+using Supabase.Postgrest.Models;     
+using Supabase.Postgrest.Attributes;
+
+using static Supabase.Postgrest.Constants;
+using static Supabase.Postgrest.QueryOptions;
+
+
 
 
 
@@ -95,43 +102,52 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
                 await _client.InitializeAsync();
             }
 
-            PhongMoi = new Phong
+            // Tạo đối tượng
+            var phongMoi = new Phong
             {
                 MaTang = (int)cboTenTang.SelectedValue,
                 TenPhong = txtTenP.Text.Trim(),
                 SucChua = sucChua,
                 MoTaPhong = txtMoTaP.Text.Trim()
             };
-           
-                
 
-            var response = await _client
-        .From<Phong>()
-        .Insert(new List<Phong> { PhongMoi }, new Supabase.Postgrest.QueryOptions
-        {
-            Returning = Supabase.Postgrest.QueryOptions.ReturnType.Representation
-        });
-
-            PhongMoi = response.Models.FirstOrDefault();
-
-            if (PhongMoi != null && PhongMoi.MaPhong > 0)
+            try
             {
-                MessageBox.Show("Đã lưu phòng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                var response = await _client
+                    .From<Phong>()
+                    .Insert(phongMoi, new QueryOptions { Returning = ReturnType.Representation });
 
-                // 👉 MỞ FORM NHẬP SỨC CHỨA và TRUYỀN MÃ PHÒNG
-                var formSucChua = new suc_chua_phong_nhom(PhongMoi.MaPhong);
-                formSucChua.ShowDialog();
+                var phongVuaThem = response.Models.FirstOrDefault();
 
-                // 👉 Có thể cập nhật thông tin bổ sung ở đây nếu cần
+                // 🔥 Nếu chưa có MaPhong rõ ràng, thì đọc lại
+                if (phongVuaThem == null || phongVuaThem.MaPhong <= 0)
+                {
+                    // ⚡ Reload phòng mới nhất
+                    var danhSach = await _client.From<Phong>().Get();
+                    phongVuaThem = danhSach.Models.OrderByDescending(p => p.MaPhong).FirstOrDefault();
+                }
 
-                this.Close();
+                if (phongVuaThem != null && phongVuaThem.MaPhong > 0)
+                {
+                    MessageBox.Show("Đã thêm phòng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    var formSucChua = new suc_chua_phong_nhom(phongVuaThem.MaPhong);
+                    formSucChua.ShowDialog();
+
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Không lấy được mã phòng vừa thêm!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Không lấy được mã phòng sau khi lưu!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Lỗi khi thêm phòng: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
+
 
 
         private void btnHuy_Click(object sender, RoutedEventArgs e)
