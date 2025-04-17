@@ -62,7 +62,8 @@
 
                     <TreeViewItem Header="🛠️ Bảo trì">
                         <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì" Selected="btnBaoTri_Selected_1" />
-                        <TreeViewItem x:Name="btnDSbaotri" Header="📋  Danh sách bảo trì" Selected="btnDSbaotri_Selected_1"/>
+                        <TreeViewItem x:Name="btnPhieubaotri" Header="📋  Phiếu bảo trì" Selected="btnPhieubaotri_Selected_1"/>
+                        <TreeViewItem x:Name="btnDSBaotri" Header="📋  Danh sách bảo trì" Selected="btnDSBaotri_Selected_1"/>
                     </TreeViewItem>
 
                     <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected"/>

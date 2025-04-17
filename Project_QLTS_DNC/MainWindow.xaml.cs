@@ -249,7 +249,7 @@ namespace Project_QLTS_DNC
 
         }
 
-        private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
+        private void btnPhieubaotri_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
         }
@@ -275,9 +275,13 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
         }
-        private void btnDSbaotri_Selected_1(object sender, RoutedEventArgs e)
+        private void btnPhieubaotri_Selected_1(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
+        private void btnDSBaotri_Selected_1(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.DanhSachBaoTri();
         }
     }
     public static class MainWindowExtensions

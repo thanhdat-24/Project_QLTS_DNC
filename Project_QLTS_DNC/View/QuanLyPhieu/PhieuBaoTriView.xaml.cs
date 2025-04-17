@@ -37,9 +37,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             btnIn.Click += btnIn_Click;
         }
 
-        private async void PhieuBaoTriView_Loaded(object sender, RoutedEventArgs e)
+        private void PhieuBaoTriView_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadDSBaoTriAsync();
+            Console.WriteLine("View đã được load");
+            DataContext = _viewModel; // Đảm bảo lại DataContext
+            LoadDSBaoTriAsync();
         }
 
         // Phương thức tải danh sách bảo trì

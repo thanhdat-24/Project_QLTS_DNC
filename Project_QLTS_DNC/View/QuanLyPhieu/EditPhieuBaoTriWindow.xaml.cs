@@ -13,7 +13,7 @@ namespace Project_QLTS_DNC.Views
 {
     public partial class EditPhieuBaoTriWindow : Window
     {
-        private readonly PhieuBaoTriService _phieuBaoTriService = new();
+       
 
         public PhieuBaoTri PhieuBaoTri { get; private set; }
 

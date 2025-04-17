@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Project_QLTS_DNC.Models.BaoTri;
 using Project_QLTS_DNC.Services;
-
+using Project_QLTS_DNC.Services.BaoTri;
 namespace Project_QLTS_DNC.ViewModel.Baotri
 {
     public class PhieuBaoTriViewModel : INotifyPropertyChanged
@@ -194,28 +194,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-        // Tải danh sách tài sản cần bảo trì
-        public async Task LoadDanhSachCanBaoTriAsync()
-        {
-            try
-            {
-                IsLoading = true;
-                var danhSachCanBaoTri = await _phieuBaoTriService.GetDanhSachCanBaoTriAsync();
-                DsTaiSanCanBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachCanBaoTri);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tải danh sách tài sản cần bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-        #endregion
-
-        #region CRUD Operations
+       
         // Thêm phiếu bảo trì mới
         public async Task<bool> AddPhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {

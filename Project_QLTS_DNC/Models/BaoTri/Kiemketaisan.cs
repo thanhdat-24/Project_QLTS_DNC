@@ -1,11 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
+using Supabase.Postgrest.Models;  // Cần thêm reference đến package này
 using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
 
 namespace Project_QLTS_DNC.Models
 {
     [Table("kiemketaisan")]
-    public class KiemKeTaiSan : BaseModel
+    public class KiemKeTaiSan : BaseModel, INotifyPropertyChanged
     {
         [PrimaryKey("ma_kiem_ke_ts", false)]
         public int MaKiemKeTs { get; set; }
@@ -27,5 +28,26 @@ namespace Project_QLTS_DNC.Models
 
         [Column("ghi_chu")]
         public string GhiChu { get; set; }
+
+        // Thêm thuộc tính IsSelected để hỗ trợ chọn dòng trong DataGrid
+        private bool _isSelected;
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

@@ -251,7 +251,9 @@
             <!-- Danh sách phiếu bảo trì -->
 
             <Border Grid.Row="2" BorderThickness="0" Margin="20,10">
-                <DataGrid x:Name="dgPhieuBaoTri" AutoGenerateColumns="False" 
+                <DataGrid x:Name="dgPhieuBaoTri"
+                          ItemsSource="{Binding DsBaoTri}"
+                          AutoGenerateColumns="False" 
           HeadersVisibility="Column"
           BorderThickness="1" BorderBrush="#E0E0E0"
           Background="White" RowBackground="White"
@@ -261,7 +263,7 @@
           IsReadOnly="True"
           ColumnHeaderHeight="50" RowHeight="45" 
           VerticalScrollBarVisibility="Auto"
-          HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
+          HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
