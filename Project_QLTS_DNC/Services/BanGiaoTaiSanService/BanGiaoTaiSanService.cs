@@ -213,7 +213,7 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                         TenPhong = phong.TenPhong,
                         MaTang = phong.MaTang,
                         TenTang = tang.TenTang,
-                        MaToaNha = toaNha.MaToaNha.Value,
+                        MaToaNha = toaNha.MaToaNha,
                         TenToaNha = toaNha.TenToaNha
                     });
                 }
@@ -256,7 +256,7 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                     {
                         MaKho = kho.MaKho,
                         TenKho = kho.TenKho,
-                        MaToaNha = toaNha.MaToaNha.Value,
+                        MaToaNha = toaNha.MaToaNha,
                         TenToaNha = toaNha.TenToaNha
                     });
                 }

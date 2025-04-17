@@ -60,27 +60,17 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             try
             {
-                // Lấy dữ liệu từ Supabase
                 var result = await _client.From<ToaNha>().Get();
-
-                if (result.Models != null && result.Models.Any())
-                {
-                    // Gán trực tiếp danh sách ToaNha vào ComboBox
-                    cboToaNha.ItemsSource = result.Models;
-                    cboToaNha.DisplayMemberPath = "TenToaNha";    // Hiển thị tên tòa
-                    cboToaNha.SelectedValuePath = "MaToaNha";     // Lưu mã tòa khi chọn
-                    cboToaNha.SelectedIndex = -1;                 // Không chọn mặc định
-                }
-                else
-                {
-                    MessageBox.Show("Không có dữ liệu tòa nhà.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                cboToaNha.ItemsSource = result.Models; // 👉 Gán thẳng Model
+                cboToaNha.DisplayMemberPath = "TenToaNha"; // 👈 Hiển thị theo tên
+                cboToaNha.SelectedValuePath = "MaToaNha"; // 👈 Lưu mã
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi khi tải dữ liệu tòa nhà: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         // Hàm Sinh Mã Kho Mới
         private static async Task<int> SinhMaKhoAsync()
@@ -131,93 +121,86 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             if (string.IsNullOrWhiteSpace(txtTenKho.Text) || cboToaNha.SelectedItem == null)
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin.");
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Nếu đang sửa kho, giữ nguyên mã kho cũ
             int maKhoMoi = _selectedKho != null ? _selectedKho.MaKho : await SinhMaKhoAsync();
 
-            // Lấy mã tòa nhà từ Tag của ComboBoxItem
-            if (cboToaNha.SelectedItem is ComboBoxItem selectedItem &&
-                int.TryParse(selectedItem.Tag?.ToString(), out int maToaNha))
+            if (cboToaNha.SelectedItem is not ToaNha selectedToaNha)
             {
-                var newKho = new Kho
-                {
-                    MaKho = maKhoMoi, // Giữ mã kho cũ khi sửa
-                    TenKho = txtTenKho.Text,
-                    MoTa = txtMoTa.Text,
-                    MaToaNha = maToaNha // Gán mã tòa nhà vào thuộc tính MaToaNha
-                };
+                MessageBox.Show("Vui lòng chọn tòa nhà hợp lệ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-                try
-                {
-                    var client = await SupabaseService.GetClientAsync();
+            var newKho = new Kho
+            {
+                MaKho = maKhoMoi,
+                TenKho = txtTenKho.Text,
+                MoTa = txtMoTa.Text,
+                MaToaNha = selectedToaNha.MaToaNha
+            };
 
-                    if (_selectedKho == null)
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+
+                if (_selectedKho == null)
+                {
+                    // 👉 Nếu thêm mới
+                    var response = await client.From<Kho>().Insert(newKho);
+
+                    if (response.Models.Count > 0)
                     {
-                        // Nếu là thêm kho mới, sử dụng Insert
-                        var response = await client.From<Kho>().Insert(newKho);
+                        MessageBox.Show("Lưu kho thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể lưu kho!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    // 👉 Nếu đang cập nhật kho cũ
+                    var result = await client.From<Kho>().Get();
 
-                        if (response.Models.Count > 0)
+                    if (result.Models.Any())
+                    {
+                        var existingKho = result.Models.FirstOrDefault(k => k.MaKho == _selectedKho.MaKho);
+
+                        if (existingKho != null)
                         {
-                            MessageBox.Show("Lưu kho thành công!");
-                            this.Close();
+                            existingKho.TenKho = newKho.TenKho;
+                            existingKho.MoTa = newKho.MoTa;
+                            existingKho.MaToaNha = newKho.MaToaNha;
+
+                            var updateResponse = await client.From<Kho>().Update(existingKho);
+
+                            if (updateResponse.Models.Count > 0)
+                            {
+                                MessageBox.Show("Cập nhật kho thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                                this.Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Không thể cập nhật kho!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("Không thể lưu kho!");
+                            MessageBox.Show("Kho không tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                     else
                     {
-                        // Nếu là sửa kho cũ, đầu tiên cần lấy toàn bộ danh sách kho
-                        var result = await client.From<Kho>().Get();
-
-                        if (result.Models.Any())
-                        {
-                            // Tìm kho cần sửa trong bộ nhớ
-                            var existingKho = result.Models.FirstOrDefault(k => k.MaKho == _selectedKho.MaKho);
-
-                            if (existingKho != null)
-                            {
-                                // Cập nhật các trường dữ liệu
-                                existingKho.TenKho = newKho.TenKho;
-                                existingKho.MoTa = newKho.MoTa;
-                                existingKho.MaToaNha = newKho.MaToaNha;
-
-                                // Cập nhật kho vào Supabase
-                                var updateResponse = await client.From<Kho>().Update(existingKho);
-
-                                if (updateResponse.Models.Count > 0)
-                                {
-                                    MessageBox.Show("Cập nhật kho thành công!");
-                                    this.Close();
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Không thể cập nhật kho!");
-                                }
-                            }
-                            else
-                            {
-                                MessageBox.Show("Kho không tồn tại.");
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show("Không có dữ liệu kho.");
-                        }
+                        MessageBox.Show("Không có dữ liệu kho.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi lưu kho: {ex.Message}");
-                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Vui lòng chọn tòa nhà hợp lệ.");
+                MessageBox.Show($"Lỗi khi lưu kho: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

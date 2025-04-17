@@ -66,12 +66,14 @@
                      x:Name="txtMoTa"
                      materialDesign:HintAssist.Hint="Mô tả"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
-            <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,0"
+            <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"
                       x:Name="cboToaNha"
                       materialDesign:HintAssist.Hint="Chọn tòa nhà"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
-                <!-- Không cần thêm ComboBoxItem ở đây, sẽ được thêm động từ Supabase -->
-            </ComboBox>
+                      Foreground="Black"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      DisplayMemberPath="TenToaNha"
+                      SelectedValuePath="MaToaNha"/>    
+
         </Grid>
     </Grid>
 </Window>

@@ -55,11 +55,10 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         private async Task LoadNhaCungCapAsync()
         {
             var result = await _client.From<NhaCungCapClass>().Get();
-            cboNhaCungCap.ItemsSource = result.Models;
-            cboNhaCungCap.DisplayMemberPath = "TenNCC";
+            cboNhaCungCap.ItemsSource = result.Models; // 👉 Không Convert
+            cboNhaCungCap.DisplayMemberPath = "TenNCC"; // 👈 Bind property
             cboNhaCungCap.SelectedValuePath = "MaNCC";
         }
-
 
         private async Task LoadNhanVienAsync()
         {
@@ -111,28 +110,30 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             if (cboMaKho.SelectedItem is not Kho selectedKho)
             {
-                MessageBox.Show("Vui lòng chọn kho.");
+                MessageBox.Show("Vui lòng chọn kho.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (cboNhaCungCap.SelectedItem is not ComboBoxItem nccItem ||
-                cboNguoiLapPhieu.SelectedItem is not ComboBoxItem nvItem)
+            if (cboNhaCungCap.SelectedItem is not NhaCungCapClass selectedNCC ||
+                cboNguoiLapPhieu.SelectedItem is not NhanVienModel selectedNV)
             {
-                MessageBox.Show("Vui lòng chọn nhà cung cấp và người lập phiếu.");
+                MessageBox.Show("Vui lòng chọn nhà cung cấp và người lập phiếu.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (dpNgayNhap.SelectedDate is not DateTime ngayNhap)
             {
-                MessageBox.Show("Vui lòng chọn ngày nhập.");
+                MessageBox.Show("Vui lòng chọn ngày nhập.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             decimal tongTien = decimal.TryParse(txtTongTien.Text.Replace(",", ""), out decimal tt) ? tt : 0;
-            int selectedMaNCC = (int)nccItem.Tag;
-            int selectedMaNV = (int)nvItem.Tag;
 
-            // 👉 Sinh mã mới
+            // 👉 Lấy mã đã chọn
+            int selectedMaNCC = selectedNCC.MaNCC;
+            int selectedMaNV = selectedNV.MaNV;
+
+            // 👉 Sinh mã phiếu nhập mới
             int maPhieuMoi = await SinhMaPhieuNhapAsync(_client);
 
             // 👉 Tạo đối tượng phiếu nhập
@@ -154,18 +155,17 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             {
                 MessageBox.Show("Đã lưu phiếu nhập thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // 👉 MỞ FORM CHI TIẾT và TRUYỀN MÃ PHIẾU NHẬP VÀ MÃ NCC
+                // 👉 Mở form nhập chi tiết
                 var chiTietForm = new ChiTietPhieuNhapInput(maPhieuMoi, selectedMaNCC);
                 chiTietForm.ShowDialog();
-                // 👉 Sau khi đóng form nhập chi tiết, cập nhật tổng tiền từ CTPN
+
+                // 👉 Sau khi nhập chi tiết, tính tổng tiền mới
                 decimal tongTienCapNhat = await TinhTongTienPhieuNhapAsync(maPhieuMoi);
                 txtTongTien.Text = tongTienCapNhat.ToString("N0");
 
-                // Nếu muốn lưu lại tổng tiền mới:
+                // 👉 Cập nhật lại tổng tiền
                 phieuNhap.TongTien = tongTienCapNhat;
                 await _client.From<PhieuNhap>().Update(phieuNhap);
-
-
 
                 this.Close();
             }
@@ -176,6 +176,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         }
 
 
-       
+
+
     }
 }
