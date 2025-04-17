@@ -13,13 +13,13 @@
             <StackPanel>
                 <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600">
-                    <TreeView Background="Transparent" BorderThickness="0" Foreground="White"
-                              FontSize="14" Padding="10" Height="498">
+                    <TreeView  Background="Transparent" BorderThickness="0" Foreground="White"
+                              FontSize="14" Padding="10" Height="498"  >
                         <TreeViewItem x:Name="btnTrangChu" Header="🏠 Trang chủ" Selected="btnTrangChu_Selected"/>
                         <TreeViewItem Header="👥 Quản lý tài khoản">
                             <TreeViewItem x:Name="btnDanhSachTaiKhoan" Header="📋 Danh sách tài khoản" Selected="btnDanhSachTaiKhoan_Selected" />
                             <TreeViewItem x:Name="btnLoaiTaiKhoan" Header="🔑 Loại tài khoản" Selected="btnLoaiTaiKhoan_Selected"/>
-                            <TreeViewItem x:Name="btnPhanQuyenTk" Header="⚙️ Phân quyền"/>
+                            <TreeViewItem x:Name="btnPhanQuyenTk" Header="⚙️ Phân quyền" Selected="btnPhanQuyenTk_Selected"/>
                         </TreeViewItem>
 
                         <TreeViewItem Header="🧑‍💼 Quản lý nhân sự">
@@ -46,8 +46,7 @@
                              <TreeViewItem x:Name="btnLoaiBaoTri" Header="🛠️ Loại bảo trì" Selected="btnLoaiBaoTri_Selected" />
                             <TreeViewItem x:Name="btnDSbaotri" Header="🛠️Danh sách bảo trì " Selected="btnDSbaotri_Selected"  />
 
-                             <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì"  />
-                            <TreeViewItem x:Name="btnDSbaotri" Header="📋  Danh sách bảo trì"    />
+                             
 
                         </TreeViewItem>           
                             

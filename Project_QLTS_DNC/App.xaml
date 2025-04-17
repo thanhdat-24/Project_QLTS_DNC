@@ -12,7 +12,9 @@
                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.LightBlue.xaml" />
            </ResourceDictionary.MergedDictionaries>
 
-           <!-- Định nghĩa màu tùy chỉnh  -->
+
+            
+            <!-- Định nghĩa màu tùy chỉnh  -->
 
            <!--Màu Background chính-->
            <Color x:Key="Primary">#0071f5</Color>

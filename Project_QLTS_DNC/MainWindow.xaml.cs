@@ -25,14 +25,8 @@ namespace Project_QLTS_DNC
     /// </summary>
     public partial class MainWindow : Window
     {
-        private User _user; // dùng để truyền thông tin đăng nhập
-        //public MainWindow(User user)
-        //{
-        //    InitializeComponent();
-        //    LoadBarChart(); // Gọi hàm hiển thị biểu đồ
-        //    _user = user;
+        //public event Action<string> TreeViewItemSelected;
 
-        //}
         private TaiKhoanModel _taiKhoan;
         private List<TaiKhoanModel> _danhSachTaiKhoan;
 
@@ -47,6 +41,15 @@ namespace Project_QLTS_DNC
                 //danhSachTaiKhoan.ItemsSource = _danhSachTaiKhoan; 
             }
         }
+
+        //private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        //{
+        //    if (e.NewValue is TreeViewItem selectedItem)
+        //    {
+        //        string selectedHeader = selectedItem.Header.ToString();
+        //        MessageBox.Show($"Bạn đã chọn: {selectedHeader}");
+        //    }
+        //}
 
 
 
@@ -252,6 +255,7 @@ namespace Project_QLTS_DNC
         private void btnDSbaotri_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
 
         private void btnChucVu_Selected(object sender, RoutedEventArgs e)
         {
@@ -267,6 +271,11 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.DuyetPhieu.frmDuyetPhieu();
 
+        }
+
+        private void btnPhanQuyenTk_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.TaiKhoan.PhanQuyenForm();
         }
     }
     public static class MainWindowExtensions

@@ -35,5 +35,11 @@ namespace Project_QLTS_DNC.View.TaiKhoan
             var taiKhoanService = new TaiKhoanService();
             DataContext = new DanhSachTaiKhoanViewModel(taiKhoanService);
         }
+
+        private void btnTaoTaiKhoan_Click(object sender, RoutedEventArgs e)
+        {
+            var taoTaiKhoanForm = new ThemTaiKhoanForm();
+            taoTaiKhoanForm.ShowDialog();
+        }
     }
 }
