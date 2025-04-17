@@ -82,7 +82,7 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         private async void btnLuu_Click(object sender, RoutedEventArgs e)
 
         {
-            MessageBox.Show($"DEBUG: _maPhong = {_maPhong}");
+            
 
             if (cboNhomTS.SelectedValue == null)
             {
@@ -103,7 +103,7 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
                 SucChua = sucChua
             };
 
-            MessageBox.Show($"MODEL gửi lên: MaPhong = {model.MaPhong}, MaNhomTS = {model.MaNhomTS}, SucChua = {model.SucChua}");
+            
 
             try
             {
