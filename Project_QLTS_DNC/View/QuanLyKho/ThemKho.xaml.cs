@@ -60,37 +60,28 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             try
             {
-                // Làm trống các mục hiện có của ComboBox trước khi gán ItemsSource
-                cboToaNha.Items.Clear();
-
-                // Lấy dữ liệu các tòa nhà từ Supabase
+                // Lấy dữ liệu từ Supabase
                 var result = await _client.From<ToaNha>().Get();
 
-                // Kiểm tra nếu có dữ liệu từ Supabase
-                if (result.Models.Any())
+                if (result.Models != null && result.Models.Any())
                 {
-                    // Tạo danh sách ComboBoxItem từ kết quả
-                    var list = result.Models.Select(x => new ComboBoxItem
-                    {
-                        Content = x.TenToaNha,  // Tên tòa nhà
-                        Tag = x.MaToaNha       // Mã tòa nhà (lưu trong Tag để dễ dàng truy xuất)
-                    }).ToList();
-
-                    // Đưa dữ liệu vào ComboBox
-                    cboToaNha.ItemsSource = list;
-                    cboToaNha.DisplayMemberPath = "Content";  // Để ComboBox hiển thị tên tòa nhà
-                    cboToaNha.SelectedValuePath = "Tag";     // Để ComboBox lưu giá trị mã tòa nhà
+                    // Gán trực tiếp danh sách ToaNha vào ComboBox
+                    cboToaNha.ItemsSource = result.Models;
+                    cboToaNha.DisplayMemberPath = "TenToaNha";    // Hiển thị tên tòa
+                    cboToaNha.SelectedValuePath = "MaToaNha";     // Lưu mã tòa khi chọn
+                    cboToaNha.SelectedIndex = -1;                 // Không chọn mặc định
                 }
                 else
                 {
-                    MessageBox.Show("Không có dữ liệu tòa nhà.");
+                    MessageBox.Show("Không có dữ liệu tòa nhà.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tải dữ liệu tòa nhà: " + ex.Message);
+                MessageBox.Show("Lỗi khi tải dữ liệu tòa nhà: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         // Hàm Sinh Mã Kho Mới
         private static async Task<int> SinhMaKhoAsync()
         {
