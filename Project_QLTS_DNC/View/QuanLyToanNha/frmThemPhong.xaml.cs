@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Supabase;
+using Supabase.Postgrest;
+
+
 
 namespace Project_QLTS_DNC.View.QuanLyToanNha
 {
@@ -58,7 +62,9 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             }
         }
 
-        private void btnLuu_Click(object sender, RoutedEventArgs e)
+        private Supabase.Client _client;
+
+        private async void btnLuu_Click(object sender, RoutedEventArgs e)
         {
             if (cboTenTang.SelectedValue == null)
             {
@@ -78,27 +84,53 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
                 return;
             }
 
+            // Khởi tạo kết nối Supabase nếu cần
+            if (_client == null)
+            {
+                string supabaseUrl = "https://hoybfwnugefnpctgghha.supabase.co";
+                string supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhveWJmd251Z2VmbnBjdGdnaGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMDQ4OTEsImV4cCI6MjA1OTY4MDg5MX0.KxNfiOUFXHGgqZf3b3xOk6BR4sllMZG_-W-y_OPUwCI";
+
+                var options = new SupabaseOptions { AutoConnectRealtime = false };
+                _client = new Supabase.Client(supabaseUrl, supabaseKey, options);
+                await _client.InitializeAsync();
+            }
+
             PhongMoi = new Phong
             {
-                MaPhong = _phongHienTai?.MaPhong, // nếu đang sửa
                 MaTang = (int)cboTenTang.SelectedValue,
                 TenPhong = txtTenP.Text.Trim(),
                 SucChua = sucChua,
                 MoTaPhong = txtMoTaP.Text.Trim()
             };
+           
+                
 
-            // ✅ THÊM THÔNG BÁO
-            if (_phongHienTai == null)
+            var response = await _client
+        .From<Phong>()
+        .Insert(new List<Phong> { PhongMoi }, new Supabase.Postgrest.QueryOptions
+        {
+            Returning = Supabase.Postgrest.QueryOptions.ReturnType.Representation
+        });
+
+            PhongMoi = response.Models.FirstOrDefault();
+
+            if (PhongMoi != null && PhongMoi.MaPhong > 0)
             {
-                MessageBox.Show("Thêm phòng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Đã lưu phòng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // 👉 MỞ FORM NHẬP SỨC CHỨA và TRUYỀN MÃ PHÒNG
+                var formSucChua = new suc_chua_phong_nhom(PhongMoi.MaPhong);
+                formSucChua.ShowDialog();
+
+                // 👉 Có thể cập nhật thông tin bổ sung ở đây nếu cần
+
+                this.Close();
             }
             else
             {
-                MessageBox.Show("Cập nhật phòng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Không lấy được mã phòng sau khi lưu!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            DialogResult = true;
-            Close();
         }
 
 

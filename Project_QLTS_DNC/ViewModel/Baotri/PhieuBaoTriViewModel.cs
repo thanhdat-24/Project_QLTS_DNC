@@ -99,7 +99,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             _phieuBaoTriService = new PhieuBaoTriService();
             DsBaoTri = new ObservableCollection<PhieuBaoTri>();
             DsTaiSanCanBaoTri = new ObservableCollection<PhieuBaoTri>();
-            _ = LoadDSBaoTriAsync();
+            // Không tự động gọi LoadDSBaoTriAsync() trong constructor
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -115,11 +115,24 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
+                Console.WriteLine("Bắt đầu tải danh sách bảo trì...");
                 var danhSachBaoTri = await _phieuBaoTriService.GetPhieuBaoTriAsync();
-                DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
+                Console.WriteLine($"Đã nhận được {danhSachBaoTri?.Count ?? 0} phiếu bảo trì từ service");
+
+                if (danhSachBaoTri == null || danhSachBaoTri.Count == 0)
+                {
+                    Console.WriteLine("Không tìm thấy dữ liệu bảo trì");
+                    DsBaoTri = new ObservableCollection<PhieuBaoTri>();
+                }
+                else
+                {
+                    DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
+                    Console.WriteLine("Đã gán dữ liệu cho DsBaoTri");
+                }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Lỗi chi tiết: {ex.ToString()}");
                 MessageBox.Show($"Lỗi khi tải dữ liệu từ ViewModel: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -155,7 +168,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
-                
+
                 // Chuyển đổi tên loại bảo trì thành mã (nếu chọn loại cụ thể)
                 int? maLoaiBaoTri = null;
                 if (loaiBaoTri != "Tất cả loại")
@@ -165,7 +178,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
 
                 // Gọi service để lấy dữ liệu đã lọc
                 var danhSachBaoTri = await _phieuBaoTriService.GetPhieuBaoTriTheoLoaiTrangThaiAsync(
-                    maLoaiBaoTri, 
+                    maLoaiBaoTri,
                     trangThai == "Tất cả trạng thái" ? null : trangThai);
 
                 DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
@@ -209,31 +222,40 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
-                
-                // Tạo mã mới cho phiếu bảo trì
-                int maxMaBaoTri = await _phieuBaoTriService.GetMaxMaBaoTriAsync();
-                phieuBaoTri.MaBaoTri = maxMaBaoTri + 1;
-                
+
+                // Tạo mã mới cho phiếu bảo trì nếu chưa có
+                if (phieuBaoTri.MaBaoTri <= 0)
+                {
+                    int maxMaBaoTri = await _phieuBaoTriService.GetMaxMaBaoTriAsync();
+                    phieuBaoTri.MaBaoTri = maxMaBaoTri + 1;
+                }
+
                 // Thiết lập ngày bảo trì nếu chưa có
                 if (phieuBaoTri.NgayBaoTri == DateTime.MinValue)
                 {
                     phieuBaoTri.NgayBaoTri = DateTime.Now;
                 }
-                
+
                 // Thêm phiếu bảo trì vào cơ sở dữ liệu
                 bool result = await _phieuBaoTriService.AddPhieuBaoTriAsync(phieuBaoTri);
-                
+
                 if (result)
                 {
                     // Thêm phiếu mới vào danh sách hiển thị nếu thành công
                     DsBaoTri.Add(phieuBaoTri);
                     OnPropertyChanged(nameof(DsBaoTri));
+                    Console.WriteLine($"Đã thêm phiếu bảo trì mới với mã {phieuBaoTri.MaBaoTri} vào danh sách hiển thị");
                 }
-                
+                else
+                {
+                    Console.WriteLine("Thêm phiếu bảo trì thất bại");
+                }
+
                 return result;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Lỗi trong ViewModel khi thêm phiếu bảo trì: {ex.Message}");
                 MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
@@ -244,6 +266,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
+        // Cập nhật phiếu bảo trì
         public async Task<bool> UpdatePhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
             try
@@ -260,7 +283,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                         int index = DsBaoTri.IndexOf(existingItem);
                         DsBaoTri[index] = phieuBaoTri;
                     }
-
                     OnPropertyChanged(nameof(DsBaoTri));
                 }
 
@@ -285,7 +307,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 IsLoading = true;
                 bool result = await _phieuBaoTriService.DeletePhieuBaoTriAsync(maBaoTri);
-                
+
                 if (result)
                 {
                     // Xóa phiếu khỏi danh sách hiển thị nếu thành công
@@ -296,7 +318,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                         OnPropertyChanged(nameof(DsBaoTri));
                     }
                 }
-                
+
                 return result;
             }
             catch (Exception ex)
@@ -329,7 +351,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         public string GetTenLoaiBaoTri(int? maLoai)
         {
             if (!maLoai.HasValue) return "Không xác định";
-            
+
             switch (maLoai.Value)
             {
                 case 1: return "Định kỳ";
@@ -366,6 +388,18 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 ChiPhi = phieu.ChiPhi,
                 GhiChu = phieu.GhiChu
             };
+        }
+
+        // Thêm phương thức để lấy thông tin tài sản
+        public async Task<string> GetTenTaiSanAsync(int maTaiSan)
+        {
+            return await _phieuBaoTriService.GetTenTaiSanAsync(maTaiSan);
+        }
+
+        // Thêm phương thức để lấy thông tin nhân viên
+        public async Task<string> GetTenNhanVienAsync(int maNV)
+        {
+            return await _phieuBaoTriService.GetTenNhanVienAsync(maNV);
         }
         #endregion
     }

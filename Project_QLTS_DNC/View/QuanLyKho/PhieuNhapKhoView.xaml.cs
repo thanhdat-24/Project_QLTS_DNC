@@ -114,15 +114,15 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                                 (_khoLookup.ContainsKey(p.MaKho) && _khoLookup[p.MaKho].Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
                                 (_nccLookup.ContainsKey(p.MaNCC) && _nccLookup[p.MaNCC].Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
                                 (_nvLookup.ContainsKey(p.MaNV) && _nvLookup[p.MaNV].Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
-                                (!string.IsNullOrEmpty(p.TrangThai) && p.TrangThai.Contains(_keyword, StringComparison.OrdinalIgnoreCase))
-                            ) &&
-
+                                (p.TrangThai == null && "Chờ duyệt".Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
+                                (p.TrangThai == true && "Đã duyệt".Contains(_keyword, StringComparison.OrdinalIgnoreCase)) ||
+                                (p.TrangThai == false && "Từ chối duyệt".Contains(_keyword, StringComparison.OrdinalIgnoreCase)))
+                        &&
                             // Lọc theo trạng thái
                             (string.IsNullOrEmpty(_filterTrangThai) ||
-                                 (_filterTrangThai == "Chờ duyệt" && string.IsNullOrEmpty(p.TrangThai)) ||
-                                 (_filterTrangThai == "Đã duyệt" && p.TrangThai == "Đã duyệt") ||
-                                 (_filterTrangThai == "Từ chối duyệt" && p.TrangThai == "Từ chối duyệt"))
-
+                                (_filterTrangThai == "Chờ duyệt" && p.TrangThai == null) ||
+                                (_filterTrangThai == "Đã duyệt" && p.TrangThai == true) ||
+                                (_filterTrangThai == "Từ chối duyệt" && p.TrangThai == false))
                         )
                         .Select(p => new
                         {
@@ -132,11 +132,12 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                             TenNCC = _nccLookup.ContainsKey(p.MaNCC) ? _nccLookup[p.MaNCC] : $"#{p.MaNCC}",
                             NgayNhap = p.NgayNhap,
                             TongTien = p.TongTien,
-                            TrangThai = string.IsNullOrEmpty(p.TrangThai)
-                                    ? "Chờ duyệt"
-                                    : (p.TrangThai == "DaDuyet" ? "Đã duyệt" :
-                                       (p.TrangThai == "TuChoiDuyet" ? "Từ chối duyệt" : p.TrangThai))
-
+                            TrangThai = p.TrangThai switch
+                            {
+                                null => "Chờ duyệt",
+                                true => "Đã duyệt",
+                                false => "Từ chối duyệt"
+                            }
                         })
                         .OrderByDescending(p => p.NgayNhap)
                         .ToList();
@@ -154,6 +155,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show($"Lỗi khi tải dữ liệu phiếu nhập: {ex.Message}");
             }
         }
+
 
         private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {

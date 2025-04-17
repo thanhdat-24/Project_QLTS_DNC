@@ -69,6 +69,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             }
         }
 
+
         private static async Task<long> SinhMaPhieuXuatAsync(Supabase.Client client)
         {
             var danhSach = await client.From<PhieuXuat>().Get();
@@ -117,7 +118,12 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
                 // ✅ Tự sinh mã
                 long maPhieuXuatMoi = await SinhMaPhieuXuatAsync(_client);
+                string ghiChu = null; // Mặc định là null
+                bool trangThai = false; // Mặc định là false (Chờ duyệt)
 
+                // Nếu người dùng đã nhập giá trị cho TrangThai, thay đổi giá trị thành true
+
+                string trangThaiString = trangThai ? "Đã duyệt" : "Chờ duyệt"; // Nếu true thì là "Đã duyệt", nếu false thì là "Chờ duyệt"
                 var phieuXuat = new PhieuXuat
                 {
                     MaPhieuXuat = maPhieuXuatMoi,
@@ -126,7 +132,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                     MaNV = selectedNV.MaNV,
                     NgayXuat = ngayXuat,
                     GhiChu = txtGhiChu.Text,
-                    TrangThai = txtTrangThai.Text
                 };
 
                 var result = await _client.From<PhieuXuat>().Insert(phieuXuat);

@@ -55,26 +55,20 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         private async Task LoadNhaCungCapAsync()
         {
             var result = await _client.From<NhaCungCapClass>().Get();
-            cboNhaCungCap.ItemsSource = result.Models.Select(x => new ComboBoxItem
-            {
-                Content = x.TenNCC,
-                Tag = x.MaNCC
-            }).ToList();
-            cboNhaCungCap.DisplayMemberPath = "Content";
-            cboNhaCungCap.SelectedValuePath = "Tag";
+            cboNhaCungCap.ItemsSource = result.Models;
+            cboNhaCungCap.DisplayMemberPath = "TenNCC";
+            cboNhaCungCap.SelectedValuePath = "MaNCC";
         }
+
 
         private async Task LoadNhanVienAsync()
         {
             var result = await _client.From<NhanVienModel>().Get();
-            cboNguoiLapPhieu.ItemsSource = result.Models.Select(x => new ComboBoxItem
-            {
-                Content = x.TenNV,
-                Tag = x.MaNV
-            }).ToList();
-            cboNguoiLapPhieu.DisplayMemberPath = "Content";
-            cboNguoiLapPhieu.SelectedValuePath = "Tag";
+            cboNguoiLapPhieu.ItemsSource = result.Models;
+            cboNguoiLapPhieu.DisplayMemberPath = "TenNV";
+            cboNguoiLapPhieu.SelectedValuePath = "MaNV";
         }
+
 
         private static async Task<int> SinhMaPhieuNhapAsync(Supabase.Client client)
         {

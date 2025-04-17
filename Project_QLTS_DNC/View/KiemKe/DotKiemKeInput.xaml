@@ -1,0 +1,95 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.KiemKe.DotKiemKeInput"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="THÔNG TIN ĐỢT KIỂM KÊ"
+        Width="430" Height="430"
+        Background="White">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề -->
+        <TextBlock Grid.Row="0" Text="ĐỢT KIỂM KÊ"
+                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                   FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
+
+        <!-- Form nhập liệu -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Tên đợt -->
+            <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
+                     x:Name="txtTenDot"
+                     materialDesign:HintAssist.Hint="Tên đợt kiểm kê"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <!-- Ngày bắt đầu -->
+            <DatePicker Grid.Row="1" Grid.Column="0" Margin="0,0,8,8"
+                        x:Name="dpNgayBatDau"
+                        materialDesign:HintAssist.Hint="Ngày bắt đầu"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+            <!-- Ngày kết thúc -->
+            <DatePicker Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"
+                        x:Name="dpNgayKetThuc"
+                        materialDesign:HintAssist.Hint="Ngày kết thúc"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+            <!-- Nhân viên phụ trách -->
+            <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
+                      x:Name="cboNhanVien"
+                      materialDesign:HintAssist.Hint="Nhân viên phụ trách"
+                      DisplayMemberPath="TenNV"
+                      SelectedValuePath="MaNV"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+
+            <!-- Ghi chú -->
+            <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
+                     x:Name="txtGhiChu"
+                     materialDesign:HintAssist.Hint="Ghi chú"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     Height="80"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+        </Grid>
+
+        <!-- Nút chức năng -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="btnHuy" 
+                    Click="btnHuy_Click"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="0,0,16,0" >
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
+                    <TextBlock Text="HUỶ BỎ"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnLuu"  
+                    Click="btnLuu_Click"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White"
+                   >
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
+                    
+                    <TextBlock Text="LƯU"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

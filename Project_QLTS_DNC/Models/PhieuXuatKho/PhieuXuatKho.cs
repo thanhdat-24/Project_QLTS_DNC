@@ -6,7 +6,7 @@ public class PhieuXuat : BaseModel
 {
     [PrimaryKey("ma_phieu_xuat", false)]
     [Column("ma_phieu_xuat")]
-    public long MaPhieuXuat { get; set; }  // Supabase tự sinh
+    public long MaPhieuXuat { get; set; }  
 
     [Column("ma_kho_xuat")]
     public long MaKhoXuat { get; set; }
@@ -21,7 +21,8 @@ public class PhieuXuat : BaseModel
     public long MaNV { get; set; }
 
     [Column("trang_thai")]
-    public string? TrangThai { get; set; }
+    public bool? TrangThai { get; set; }
+
 
     [Column("ghi_chu")]
     public string? GhiChu { get; set; }

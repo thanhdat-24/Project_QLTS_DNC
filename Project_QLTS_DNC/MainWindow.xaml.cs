@@ -197,7 +197,7 @@ namespace Project_QLTS_DNC
 
         private void btnBaoCaoKiemKe_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.QuanLyPhieu.PhieuKiemKeView();
+            MainContentPanel.Content = new View.KiemKe.DotKiemKeView();
 
         }
 
@@ -264,6 +264,7 @@ namespace Project_QLTS_DNC
 
         private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
         {
+            MainContentPanel.Content = new View.CaiDat.PhieuInForm();
 
         }
 
@@ -276,6 +277,19 @@ namespace Project_QLTS_DNC
         private void btnPhanQuyenTk_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.TaiKhoan.PhanQuyenForm();
+
+        private void btnBaoTri_Selected_1(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
+        }
+        private void btnDSbaotri_Selected_1(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
+        private void btnBanGiaoTaiSan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyTaiSan.DanhSachBanGiaoView();
+
         }
     }
     public static class MainWindowExtensions
