@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_QLTS_DNC.Views"
         mc:Ignorable="d"
-        Title="Chỉnh sửa Phiếu Bảo Trì" Height="870" Width="780"
+        Title="Phiếu Bảo Trì" Height="870" Width="780"
         WindowStartupLocation="CenterOwner"
         Background="#F5F5F5">
 
@@ -232,7 +232,7 @@
 
             <!-- Tiêu đề -->
             <Border Grid.Row="0" Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="5" Padding="15">
-                <TextBlock Text="CHỈNH SỬA PHIẾU BẢO TRÌ" FontSize="20" FontWeight="Bold" 
+                <TextBlock Text="PHIẾU BẢO TRÌ" FontSize="20" FontWeight="Bold" 
                            HorizontalAlignment="Center" Foreground="White"/>
             </Border>
 

@@ -30,7 +30,12 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             public int SoLuong { get; set; }
             public decimal? DonGia { get; set; }
             public decimal? TongTien => DonGia * SoLuong;
-            public string TrangThai { get; set; }
+            public bool? TrangThai { get; set; }
+            public string TrangThaiHienThi => TrangThai == true
+                ? "Đã duyệt"
+                : TrangThai == false
+                    ? "Từ chối duyệt"
+                    : "Chưa duyệt";
             public long MaKho { get; set; }
             public bool IsSelected { get; set; } = false;
         }
@@ -41,11 +46,11 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
                 var dsChiTiet = await client.From<ChiTietPN>().Get();
-                var dsPhieu = await client.From<PhieuNhapKhoInput>().Get();
+                var dsPhieu = await client.From<PhieuNhapKho>().Get();
 
                 var result = (from ct in dsChiTiet.Models
                               join pn in dsPhieu.Models on ct.MaPhieuNhap equals pn.MaPhieuNhap
-                              where string.IsNullOrEmpty(pn.TrangThai) || pn.TrangThai == "Chưa duyệt"
+                              where pn.TrangThai == null
                               select new ChiTietPhieuHienThi
                               {
                                   MaChiTietPN = ct.MaChiTietPN,
@@ -54,7 +59,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                                   TenTaiSan = ct.TenTaiSan,
                                   SoLuong = ct.SoLuong,
                                   DonGia = ct.DonGia,
-                                  TrangThai = string.IsNullOrEmpty(pn.TrangThai) ? "Chưa duyệt" : pn.TrangThai,
+                                  TrangThai = pn.TrangThai,
                                   MaKho = pn.MaKho
                               }).ToList();
 
@@ -86,17 +91,17 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 foreach (var group in nhomPhieu)
                 {
                     var phieu = await client
-                        .From<PhieuNhapKhoInput>()
+                        .From<PhieuNhapKho>()
                         .Filter("ma_phieu_nhap", Operator.Equals, group.Key)
                         .Get();
 
                     if (phieu.Models.Any())
                     {
                         var p = phieu.Models.First();
-                        p.TrangThai = "Từ chối duyệt";
+                        p.TrangThai = false; // Gán từ chối
 
                         await client
-                            .From<PhieuNhapKhoInput>()
+                            .From<PhieuNhapKho>()
                             .Where(x => x.MaPhieuNhap == group.Key)
                             .Update(p);
                     }
@@ -112,8 +117,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             }
         }
 
-
-        private void btnCancel_Click(object sender, RoutedEventArgs e) => this.Close    ();
+        private void btnCancel_Click(object sender, RoutedEventArgs e) => this.Close();
 
         private void CheckBox_Changed(object sender, RoutedEventArgs e) => UpdateStatusText();
 
@@ -144,9 +148,10 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 ? danhSachChiTiet
                 : new ObservableCollection<ChiTietPhieuHienThi>(
                     danhSachChiTiet.Where(p =>
-                        p.MaChiTietPN.ToString().Contains(keyword) ||
+                        (p.MaChiTietPN?.ToString().Contains(keyword) ?? false) ||
                         p.MaPhieuNhap.ToString().Contains(keyword) ||
-                        (p.TenTaiSan?.ToLower().Contains(keyword) ?? false)
+                        (p.TenTaiSan?.ToLower().Contains(keyword) ?? false) ||
+                        p.TrangThaiHienThi.ToLower().Contains(keyword)
                     )
                 );
             UpdateStatusText();

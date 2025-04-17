@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
+using System.Linq;
 using System.Threading.Tasks;
 using Project_QLTS_DNC.Models.BaoTri;
-using Supabase.Postgrest.Responses;
-using System.IO;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Models.NhanVien;
 using System.IO;
 using ClosedXML.Excel;
 using System.Windows;
-
+using Supabase.Gotrue;
+using Supabase;
 
 namespace Project_QLTS_DNC.Services
 {
     public class PhieuBaoTriService
     {
-        // Fix for CS0308: Remove the generic type argument from the Get() method
-        // Fix for CS0246: Replace 'ModeledResponse<>' with the appropriate type or remove it if unnecessary
-
         public async Task<List<PhieuBaoTri>> GetPhieuBaoTriAsync()
         {
             try
@@ -27,16 +25,19 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
-                // Fix for CS0815: Explicitly specify the type of the response
-                var response = await client.From<PhieuBaoTri>().Get(); // Ensure the method returns a ModeledResponse<PhieuBaoTri>
+                // Lấy danh sách phiếu bảo trì
+                var response = await client.From<PhieuBaoTri>().Get();
+                var danhSachPhieu = response.Models;
 
-                // Ensure the response is properly handled
-                return response.Models;
+                // Nếu cần lấy thêm thông tin từ các bảng liên quan có thể thực hiện ở đây
+                // Ví dụ: join với bảng tài sản, nhân viên, loại bảo trì để lấy thêm thông tin
+
+                return danhSachPhieu;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<PhieuBaoTri>();
             }
         }
@@ -51,15 +52,17 @@ namespace Project_QLTS_DNC.Services
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
+
                 var response = await client.From<PhieuBaoTri>()
                     .Where(p => p.MaBaoTri == maBaoTri)
                     .Single();
+
                 return response;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
@@ -75,40 +78,65 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
+                // Đảm bảo người dùng đã đăng nhập và token còn hiệu lực
+                var session = client.Auth.CurrentSession;
+                if (session == null || DateTime.Compare(session.ExpiresAt(), DateTime.UtcNow) < 0)
+                {
+                    // Thử làm mới token nếu hết hạn
+                    try
+                    {
+                        await client.Auth.RefreshSession();
+                    }
+                    catch
+                    {
+                        throw new Exception("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+                    }
+                }
+
                 // Kiểm tra các giá trị bắt buộc
                 if (phieuBaoTri.MaTaiSan == null)
                 {
                     throw new Exception("Mã tài sản không được để trống");
                 }
-
                 if (string.IsNullOrEmpty(phieuBaoTri.NoiDung))
                 {
                     throw new Exception("Nội dung không được để trống");
                 }
-
                 if (string.IsNullOrEmpty(phieuBaoTri.TrangThai))
                 {
                     throw new Exception("Trạng thái không được để trống");
                 }
 
+                Console.WriteLine($"Đang thêm phiếu bảo trì mới: {phieuBaoTri.MaBaoTri}");
+
                 // Thực hiện thêm mới
                 var response = await client.From<PhieuBaoTri>().Insert(phieuBaoTri);
-                return response.ResponseMessage.IsSuccessStatusCode;
+
+                return response != null;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                Console.WriteLine($"Chi tiết lỗi thêm phiếu: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
-
+        // Cập nhật phiếu bảo trì
         public async Task<bool> UpdatePhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
             try
             {
                 Console.WriteLine($"Bắt đầu cập nhật phiếu bảo trì: {phieuBaoTri.MaBaoTri}");
                 var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    throw new Exception("Không thể kết nối Supabase Client");
+                }
 
                 // Tạo phiên bản mới của phiếu bảo trì để cập nhật
                 var updatePhieu = new PhieuBaoTri
@@ -126,13 +154,12 @@ namespace Project_QLTS_DNC.Services
 
                 Console.WriteLine($"Dữ liệu cập nhật: MaTaiSan={updatePhieu.MaTaiSan}, TrangThai={updatePhieu.TrangThai}");
 
-                // Thực hiện cập nhật trực tiếp đối tượng PhieuBaoTri
+                // Thực hiện cập nhật
                 var response = await client.From<PhieuBaoTri>()
-                            .Where(p => p.MaBaoTri == phieuBaoTri.MaBaoTri)
-                            .Update(updatePhieu);
+                    .Where(p => p.MaBaoTri == phieuBaoTri.MaBaoTri)
+                    .Update(updatePhieu);
 
                 Console.WriteLine($"Kết quả phản hồi: {(response != null ? "Thành công" : "Thất bại")}");
-
                 return response != null;
             }
             catch (Exception ex)
@@ -144,12 +171,39 @@ namespace Project_QLTS_DNC.Services
                 }
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
 
-                // Hiển thị thông báo lỗi chi tiết
-                MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Chi tiết lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-
+                MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Chi tiết lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
+
+        // Xóa phiếu bảo trì
+        public async Task<bool> DeletePhieuBaoTriAsync(int maBaoTri)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    throw new Exception("Không thể kết nối Supabase Client");
+                }
+
+                // Thực hiện xóa mà không gán vào biến
+                await client.From<PhieuBaoTri>()
+                    .Where(p => p.MaBaoTri == maBaoTri)
+                    .Delete();
+                return true; // hoặc xác nhận xóa thành công bằng cách khác
+      
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xóa phiếu bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        // Lấy danh sách tài sản cần bảo trì
         public async Task<List<PhieuBaoTri>> GetDanhSachCanBaoTriAsync()
         {
             try
@@ -160,65 +214,33 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
-                // Thực hiện truy vấn SQL tùy chỉnh để lấy danh sách tài sản cần bảo trì
-                // Giả sử có một cột tình trạng tài sản trong cơ sở dữ liệu
-                // Đây là ví dụ, bạn cần điều chỉnh theo cấu trúc cơ sở dữ liệu thực tế của bạn
-                var response = await client.Rpc("get_tai_san_can_bao_tri", new Dictionary<string, object>
-                {
-                    { "tinh_trang_threshold", 50 }
-                });
+                // Lấy danh sách tài sản có tình trạng cần bảo trì
+                var danhSachTaiSan = await client.From<TaiSanModel>()
+                    .Where(t => t.TinhTrangSP.Contains("Cần sửa chữa") || t.TinhTrangSP.Contains("Kém") || t.TinhTrangSP.Contains("hỏng"))
+                    .Get();
 
-                if (response == null)
+                // Chuyển đổi sang các phiếu bảo trì mới
+                var danhSachPhieuDeXuat = new List<PhieuBaoTri>();
+                foreach (var taiSan in danhSachTaiSan.Models)
                 {
-                    throw new Exception("Không có dữ liệu trả về");
+                    danhSachPhieuDeXuat.Add(new PhieuBaoTri
+                    {
+                        MaTaiSan = taiSan.MaTaiSan,
+                        MaLoaiBaoTri = 2, // Đột xuất
+                        NgayBaoTri = DateTime.Now,
+                        TrangThai = taiSan.TinhTrangSP,
+                        NoiDung = $"Bảo trì tài sản {taiSan.TenTaiSan} - Mã {taiSan.MaTaiSan}",
+                        ChiPhi = 0,
+                        GhiChu = $"Tình trạng hiện tại: {taiSan.TinhTrangSP}"
+                    });
                 }
 
-                // Replace the problematic line with the following:
-                var result = JsonSerializer.Deserialize<List<PhieuBaoTri>>(response.Content);
-                return result;
+                return danhSachPhieuDeXuat;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi lấy danh sách tài sản cần bảo trì: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                return new List<PhieuBaoTri>();
-            }
-        }
-
-        // Fix for CS0266: Explicitly cast the query result to the appropriate type
-        public async Task<List<PhieuBaoTri>> GetPhieuBaoTriTheoLoaiTrangThaiAsync(int? maLoaiBaoTri, string trangThai)
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                {
-                    throw new Exception("Không thể kết nối Supabase Client");
-                }
-
-                // Explicitly cast the query to the appropriate type
-                var query = (Supabase.Postgrest.Interfaces.IPostgrestTable<PhieuBaoTri>)client.From<PhieuBaoTri>();
-
-                // Áp dụng bộ lọc theo loại bảo trì
-                if (maLoaiBaoTri.HasValue)
-                {
-                    query = query.Where(p => p.MaLoaiBaoTri == maLoaiBaoTri);
-                }
-
-                // Áp dụng bộ lọc theo trạng thái
-                if (!string.IsNullOrEmpty(trangThai) && trangThai != "Tất cả trạng thái")
-                {
-                    query = query.Where(p => p.TrangThai == trangThai);
-                }
-
-                // Thực hiện truy vấn
-                var response = await query.Get();
-                return response.Models;
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi lấy danh sách tài sản cần bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<PhieuBaoTri>();
             }
         }
@@ -234,32 +256,34 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
-                // Lấy tất cả dữ liệu và thực hiện lọc client-side nếu từ khóa được cung cấp
-                var response = await client.From<PhieuBaoTri>().Get();
-
                 if (string.IsNullOrWhiteSpace(keyword))
                 {
-                    return response.Models;
+                    return await GetPhieuBaoTriAsync();
                 }
 
+                // Tìm kiếm phiếu bảo trì theo một số trường
+                var response = await client.From<PhieuBaoTri>().Get();
+                var danhSachPhieu = response.Models;
+
                 // Lọc dữ liệu theo từ khóa
-                return response.Models.FindAll(p =>
+                return danhSachPhieu.Where(p =>
                     p.MaBaoTri.ToString().Contains(keyword) ||
-                    p.MaTaiSan?.ToString().Contains(keyword) == true ||
-                    p.NoiDung?.Contains(keyword, StringComparison.OrdinalIgnoreCase) == true ||
-                    p.GhiChu?.Contains(keyword, StringComparison.OrdinalIgnoreCase) == true
-                );
+                    (p.MaTaiSan != null && p.MaTaiSan.ToString().Contains(keyword)) ||
+                    (p.NoiDung != null && p.NoiDung.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.GhiChu != null && p.GhiChu.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.TrangThai != null && p.TrangThai.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi tìm kiếm dữ liệu: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi tìm kiếm dữ liệu: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<PhieuBaoTri>();
             }
         }
 
-        // Lấy mã phiếu bảo trì lớn nhất để tạo mã mới
-        public async Task<int> GetMaxMaBaoTriAsync()
+        // Lọc phiếu bảo trì theo loại và trạng thái
+        public async Task<List<PhieuBaoTri>> GetPhieuBaoTriTheoLoaiTrangThaiAsync(int? maLoaiBaoTri, string trangThai)
         {
             try
             {
@@ -271,26 +295,33 @@ namespace Project_QLTS_DNC.Services
 
                 // Lấy tất cả phiếu bảo trì
                 var response = await client.From<PhieuBaoTri>().Get();
+                var danhSachPhieu = response.Models;
 
-                if (response.Models.Count == 0)
+                // Lọc theo loại bảo trì
+                if (maLoaiBaoTri.HasValue)
                 {
-                    return 0; // Trả về 0 nếu không có phiếu bảo trì nào
+                    danhSachPhieu = danhSachPhieu.Where(p => p.MaLoaiBaoTri == maLoaiBaoTri).ToList();
                 }
 
-                // Tìm mã phiếu bảo trì lớn nhất
-                int maxMaBaoTri = response.Models.Max(p => p.MaBaoTri);
-                return maxMaBaoTri;
+                // Lọc theo trạng thái
+                if (!string.IsNullOrEmpty(trangThai) && trangThai != "Tất cả trạng thái")
+                {
+                    danhSachPhieu = danhSachPhieu.Where(p => p.TrangThai == trangThai).ToList();
+                }
+
+                return danhSachPhieu;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi lấy mã phiếu bảo trì lớn nhất: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                return 0;
+                MessageBox.Show($"Lỗi khi lọc dữ liệu: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<PhieuBaoTri>();
             }
         }
 
-        // Xóa phiếu bảo trì
-        public async Task<bool> DeletePhieuBaoTriAsync(int maBaoTri)
+        // Lấy mã phiếu bảo trì lớn nhất để tạo mã mới
+        // Lấy mã phiếu bảo trì lớn nhất để tạo mã mới
+        public async Task<int> GetMaxMaBaoTriAsync()
         {
             try
             {
@@ -299,21 +330,26 @@ namespace Project_QLTS_DNC.Services
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
-
-                // Fix for CS0815: Explicitly specify the type of the response
-                var response = await client.From<PhieuBaoTri>().Get(); // Ensure the method returns a ModeledResponse<PhieuBaoTri>
-
-                return response.ResponseMessage.IsSuccessStatusCode;
+                // Lấy tất cả phiếu bảo trì
+                var response = await client.From<PhieuBaoTri>().Get();
+                if (response.Models.Count == 0)
+                {
+                    return 0; // Trả về 0 nếu không có phiếu bảo trì nào
+                }
+                // Tìm mã phiếu bảo trì lớn nhất
+                int maxMaBaoTri = response.Models.Max(p => p.MaBaoTri);
+                return maxMaBaoTri;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi xóa phiếu bảo trì: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                return false;
+                MessageBox.Show($"Lỗi khi lấy mã phiếu bảo trì lớn nhất: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return 0;
             }
         }
-      
-public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
+
+        // Xuất dữ liệu ra Excel
+        public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
         {
             try
             {
@@ -352,7 +388,6 @@ public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
                     {
                         var phieu = danhSachPhieu[i];
                         int row = i + 4;
-
                         worksheet.Cell(row, 1).Value = i + 1;
                         worksheet.Cell(row, 2).Value = phieu.MaBaoTri;
                         worksheet.Cell(row, 3).Value = phieu.MaTaiSan?.ToString() ?? "N/A";
@@ -369,7 +404,6 @@ public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
 
                         worksheet.Cell(row, 5).Value = phieu.NgayBaoTri;
                         worksheet.Cell(row, 5).Style.DateFormat.Format = "dd/MM/yyyy";
-
                         worksheet.Cell(row, 6).Value = phieu.MaNV?.ToString() ?? "N/A";
                         worksheet.Cell(row, 7).Value = phieu.NoiDung;
                         worksheet.Cell(row, 8).Value = phieu.TrangThai;
@@ -394,8 +428,8 @@ public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
                     // Lưu workbook
                     workbook.SaveAs(filePath);
 
-                    System.Windows.MessageBox.Show("Xuất Excel thành công!", "Thông báo",
-                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                    MessageBox.Show("Xuất Excel thành công!", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
 
                     // Mở file sau khi xuất
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -409,11 +443,56 @@ public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
 
+        // Lấy tên tài sản theo mã
+        public async Task<string> GetTenTaiSanAsync(int maTaiSan)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    throw new Exception("Không thể kết nối Supabase Client");
+                }
+
+                var taiSan = await client.From<TaiSanModel>()
+                    .Where(t => t.MaTaiSan == maTaiSan)
+                    .Single();
+
+                return taiSan?.TenTaiSan ?? "Không xác định";
+            }
+            catch
+            {
+                return "Không xác định";
+            }
+        }
+
+        // Lấy tên nhân viên theo mã
+        public async Task<string> GetTenNhanVienAsync(int maNV)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    throw new Exception("Không thể kết nối Supabase Client");
+                }
+
+                var nhanVien = await client.From<NhanVienModel>()
+                    .Where(nv => nv.MaNV == maNV)
+                    .Single();
+
+                return nhanVien?.TenNV ?? "Không xác định";
+            }
+            catch
+            {
+                return "Không xác định";
+            }
+        }
     }
 }
