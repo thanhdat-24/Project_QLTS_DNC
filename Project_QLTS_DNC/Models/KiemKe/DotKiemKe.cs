@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
 using System.Text.Json.Serialization;
+
 
 namespace Project_QLTS_DNC.Models.KiemKe
 {
@@ -30,8 +31,6 @@ namespace Project_QLTS_DNC.Models.KiemKe
         [Column("ghi_chu")]
         public string? GhiChu { get; set; }
 
-        [JsonIgnore]
-        public string? TenNhanVien { get; set; }
+
     }
 }
-
