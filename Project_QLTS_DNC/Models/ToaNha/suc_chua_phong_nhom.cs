@@ -12,7 +12,7 @@ namespace Project_QLTS_DNC.Models.ToaNha
     [Table("suc_chua_phong_nhom")] 
     public class PhongNhomTS : BaseModel
     {
-        [PrimaryKey("ma_phong", false)]
+        [PrimaryKey("ma_phong", true)]
         public int MaPhong { get; set; }
 
         [Column("ma_nhom_ts")]

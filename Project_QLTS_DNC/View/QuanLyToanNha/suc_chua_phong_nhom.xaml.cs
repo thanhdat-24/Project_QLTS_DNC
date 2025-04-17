@@ -84,6 +84,7 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         {
             
 
+
             if (cboNhomTS.SelectedValue == null)
             {
                 MessageBox.Show("Vui lòng chọn nhóm tài sản!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -102,8 +103,8 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
                 MaNhomTS = (int)cboNhomTS.SelectedValue,
                 SucChua = sucChua
             };
+           
 
-            
 
             try
             {
