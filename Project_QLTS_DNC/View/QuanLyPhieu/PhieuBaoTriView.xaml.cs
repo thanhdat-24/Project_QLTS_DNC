@@ -37,9 +37,19 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             btnIn.Click += btnIn_Click;
         }
 
+        // Trong PhieuBaoTriView.xaml.cs
         private async void PhieuBaoTriView_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadDSBaoTriAsync();
+            try
+            {
+                Console.WriteLine("Đang tải dữ liệu...");
+                await LoadDSBaoTriAsync();
+                Console.WriteLine("Tải dữ liệu hoàn tất");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tải: {ex.Message}");
+            }
         }
 
         // Phương thức tải danh sách bảo trì
