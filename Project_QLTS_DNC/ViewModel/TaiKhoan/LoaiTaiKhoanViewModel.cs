@@ -1,4 +1,6 @@
-﻿using Project_QLTS_DNC.Models.TaiKhoan;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.PhanQuyen;
+using Project_QLTS_DNC.Models.TaiKhoan;
 using Project_QLTS_DNC.Services.TaiKhoan;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,6 +13,13 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
     {
         private ObservableCollection<LoaiTaiKhoanModel> _loaiTaiKhoans;
 
+        private ObservableCollection<PhanQuyen> _danhSachPhanQuyen;
+        public ObservableCollection<PhanQuyen> DanhSachPhanQuyen
+        {
+            get => _danhSachPhanQuyen;
+            set { _danhSachPhanQuyen = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<LoaiTaiKhoanModel> LoaiTaiKhoans
         {
             get => _loaiTaiKhoans;
@@ -22,7 +31,22 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
             _ = LoadDataAsync();
         }
 
-        
+
+        private LoaiTaiKhoanModel _loaiTaiKhoanDuocChon;
+        public LoaiTaiKhoanModel LoaiTaiKhoanDuocChon
+        {
+            get => _loaiTaiKhoanDuocChon;
+            set { _loaiTaiKhoanDuocChon = value; OnPropertyChanged(); }
+        }
+
+        private ObservableCollection<LoaiTaiKhoanModel> _danhSachLoaiTaiKhoan;
+        public ObservableCollection<LoaiTaiKhoanModel> DanhSachLoaiTaiKhoan
+        {
+            get => _danhSachLoaiTaiKhoan;
+            set { _danhSachLoaiTaiKhoan = value; OnPropertyChanged(); }
+        }
+
+
 
         public async Task<bool> XoaLoaiTaiKhoanAsync(int maLoaiTk)
         {
@@ -41,8 +65,11 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
         {
             var service = new LoaiTaiKhoanService();
             var list = await service.LayDSLoaiTK();
-            LoaiTaiKhoans = new ObservableCollection<LoaiTaiKhoanModel>(list);
+            DanhSachLoaiTaiKhoan = new ObservableCollection<LoaiTaiKhoanModel>(list);
+
+            DanhSachPhanQuyen = new ObservableCollection<PhanQuyen>(DanhSachQuyenMacDinh.LayDanhSach());
         }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {

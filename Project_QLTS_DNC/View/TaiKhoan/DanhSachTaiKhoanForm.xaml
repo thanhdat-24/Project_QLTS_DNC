@@ -66,11 +66,11 @@
             <!-- Nút Thêm mới - Chỉ Admin mới thấy -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
                        Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Button Style="{StaticResource ActionButton}" Width="130" Background="#4CAF50"
-                        Command="{Binding ThemMoiCommand}">
+                <Button x:Name="btnTaoTaiKhoan" Style="{StaticResource ActionButton}" Width="130" Background="#4CAF50"
+                        Command="{Binding ThemMoiCommand}" Click="btnTaoTaiKhoan_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
-                        <TextBlock Text="Thêm mới" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="Tạo tài khoản" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

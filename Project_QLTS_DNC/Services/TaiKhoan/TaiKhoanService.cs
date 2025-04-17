@@ -41,6 +41,13 @@ namespace Project_QLTS_DNC.Services
             return taiKhoanDTOs;
         }
 
+        public async Task<TaiKhoanModel> ThemTaiKhoanAsync(TaiKhoanModel taiKhoan)
+        {
+            var client = await SupabaseService.GetClientAsync();
+            var result = await client.From<TaiKhoanModel>().Insert(taiKhoan);
+            return result.Models.FirstOrDefault();
+        }
+
 
     }
 }

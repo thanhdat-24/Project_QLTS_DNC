@@ -19,5 +19,15 @@ namespace Project_QLTS_DNC.Models.TaiKhoan
         [Column("mo_ta")]
         public string MoTa { get; set; }
 
+
+        public string Icon => TenLoaiTk switch
+        {
+            "Admin" => "Account",
+            "Manager" => "AccountSupervisor",
+            "Maintenance" => "Tools",   
+            _ => "AccountQuestion"
+        };
+
+
     }
 }
