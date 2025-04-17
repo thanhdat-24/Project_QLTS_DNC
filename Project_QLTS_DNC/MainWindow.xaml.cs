@@ -271,7 +271,14 @@ namespace Project_QLTS_DNC
 
         }
 
-     
+        private void btnBaoTri_Selected_1(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
+        }
+        private void btnDSbaotri_Selected_1(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.PhieuBaoTriView();
+        }
     }
     public static class MainWindowExtensions
     {

@@ -477,16 +477,7 @@
                     <Button x:Name="btnIn" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
 
                     <!-- Nút Xem danh sách cần bảo trì -->
-                    <Button x:Name="btnXemDanhSach" 
-               Style="{StaticResource PrimaryButton}" 
-               Width="200"
-               Margin="10,0,0,0"
-               ToolTip="Xem danh sách tài sản cần bảo trì (tình trạng dưới 50%)">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ViewList" Margin="0 0 8 0"/>
-                            <TextBlock Text="XEM DANH SÁCH"/>
-                        </StackPanel>
-                    </Button>
+                    
                 </StackPanel>
 
                 <!-- Phân trang -->
