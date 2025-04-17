@@ -46,7 +46,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
                 var dsChiTiet = await client.From<ChiTietPN>().Get();
-                var dsPhieu = await client.From<PhieuNhapKhoInput>().Get();
+                var dsPhieu = await client.From<PhieuNhapKho>().Get();
 
                 var result = (from ct in dsChiTiet.Models
                               join pn in dsPhieu.Models on ct.MaPhieuNhap equals pn.MaPhieuNhap
@@ -91,7 +91,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 foreach (var group in nhomPhieu)
                 {
                     var phieu = await client
-                        .From<PhieuNhapKhoInput>()
+                        .From<PhieuNhapKho>()
                         .Filter("ma_phieu_nhap", Operator.Equals, group.Key)
                         .Get();
 
@@ -101,7 +101,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                         p.TrangThai = false; // Gán từ chối
 
                         await client
-                            .From<PhieuNhapKhoInput>()
+                            .From<PhieuNhapKho>()
                             .Where(x => x.MaPhieuNhap == group.Key)
                             .Update(p);
                     }

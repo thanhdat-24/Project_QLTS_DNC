@@ -51,7 +51,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                var listPhieu = await client.From<PhieuNhapKhoInput>().Get();
+                var listPhieu = await client.From<PhieuNhapKho>().Get();
                 var listChiTiet = await client.From<ChiTietPN>().Get();
                 var listKho = await client.From<Kho>().Get();
                 var listNV = await client.From<NhanVienModel>().Get();
@@ -141,7 +141,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 
                 // ✅ Cập nhật trạng thái phiếu
                 var phieu = await client
-                    .From<PhieuNhapKhoInput>()
+                    .From<PhieuNhapKho>()
                     .Filter("ma_phieu_nhap", Operator.Equals, maPhieuNhapHienTai)
                     .Get();
 
@@ -150,7 +150,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                     var p = phieu.Models.First();
                     p.TrangThai = true;
                     await client
-                        .From<PhieuNhapKhoInput>()
+                        .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)
                         .Update(p);
                 }
@@ -174,7 +174,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 var client = await SupabaseService.GetClientAsync();
 
                 var phieu = await client
-                    .From<PhieuNhapKhoInput>()
+                    .From<PhieuNhapKho>()
                     .Filter("ma_phieu_nhap", Operator.Equals, maPhieuNhapHienTai)
                     .Get();
 
@@ -183,7 +183,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                     var p = phieu.Models.First();
                     p.TrangThai = false; // ❌ cập nhật thành "Từ chối duyệt"
                     await client
-                        .From<PhieuNhapKhoInput>()
+                        .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)
                         .Update(p);
                 }
