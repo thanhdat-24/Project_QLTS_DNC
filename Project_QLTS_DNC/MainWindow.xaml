@@ -42,7 +42,7 @@
                                     <TreeViewItem x:Name="btnPhongBan" Header="🏢 Phòng ban" Selected="btnPhongBan_Selected"/>
                                 </TreeViewItem>
 
-                                <TreeViewItem Header="📦 Quản lý kho" x:Name="btnQuanLyKho" IsExpanded="True">
+                                <TreeViewItem Header="📦 Quản lý kho" x:Name="btnQuanLyKho" >
                                     <TreeViewItem Header="🏢 Danh sách kho" x:Name="btnDanhSachKho" Selected="btnQuanLyKho_Selected"/>
                                     <TreeViewItem Header="📥 Nhập kho" x:Name="btnNhapKho" Selected="btnNhapKho_Selected"/>
                                     <TreeViewItem Header="📤 Xuất kho" x:Name="btnXuatKho" Selected="btnXuatKho_Selected"/>
