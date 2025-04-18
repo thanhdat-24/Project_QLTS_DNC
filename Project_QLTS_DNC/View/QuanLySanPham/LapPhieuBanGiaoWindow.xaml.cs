@@ -195,6 +195,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
         }
 
+        // Thay đổi phương thức btnLapPhieu_Click trong LapPhieuBanGiaoWindow.xaml.cs
         private async void btnLapPhieu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -211,6 +212,27 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 var ngayBanGiao = dateBanGiao.SelectedDate ?? DateTime.Now;
                 var noiDung = txtNoiDung.Text.Trim();
 
+                // Lấy danh sách tài sản đã chọn
+                var dsTaiSanDaChon = _dsTaiSanKho.Where(t => t.IsSelected).ToList();
+
+                if (dsTaiSanDaChon.Count == 0)
+                {
+                    MessageBox.Show("Vui lòng chọn ít nhất một tài sản để bàn giao.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowLoading(false);
+                    return;
+                }
+
+                // THÊM MỚI: Kiểm tra và yêu cầu cấu hình sức chứa cho các nhóm tài sản quản lý riêng
+                bool sucChuaValid = await BanGiaoTaiSanService.KiemTraVaYeuCauCauHinhSucChuaAsync(
+                    selectedPhong.MaPhong,
+                    dsTaiSanDaChon);
+
+                if (!sucChuaValid)
+                {
+                    ShowLoading(false);
+                    return; // Dừng nếu không thỏa mãn điều kiện sức chứa
+                }
+
                 // Tạo phiếu bàn giao
                 var phieuBanGiao = new BanGiaoTaiSanModel
                 {
@@ -223,16 +245,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
                 // Lưu phiếu bàn giao
                 var phieuBanGiaoResult = await BanGiaoTaiSanService.ThemPhieuBanGiaoAsync(phieuBanGiao);
-
-                // Lấy danh sách tài sản đã chọn
-                var dsTaiSanDaChon = _dsTaiSanKho.Where(t => t.IsSelected).ToList();
-
-                if (dsTaiSanDaChon.Count == 0)
-                {
-                    MessageBox.Show("Vui lòng chọn ít nhất một tài sản để bàn giao.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    ShowLoading(false);
-                    return;
-                }
 
                 // Tạo danh sách chi tiết bàn giao
                 var dsChiTietBanGiao = new List<ChiTietBanGiaoModel>();

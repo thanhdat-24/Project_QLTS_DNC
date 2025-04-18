@@ -15,6 +15,9 @@ using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Models.PhieuNhapKho;
 using Project_QLTS_DNC.Services;
 using static Supabase.Postgrest.Constants;
+using Project_QLTS_DNC.Models.QLLoaiTS;
+using Project_QLTS_DNC.View.QuanLyToanNha;
+using System.Windows;
 
 namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
 {
@@ -657,6 +660,121 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
             {
                 System.Diagnostics.Debug.WriteLine($"Lỗi khi xóa phiếu bàn giao: {ex.Message}");
                 throw;
+            }
+        }
+
+        public static async Task<bool> KiemTraVaYeuCauCauHinhSucChuaAsync(int maPhong, List<TaiSanKhoBanGiaoDTO> dsTaiSan)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+
+                // Lấy danh sách nhóm tài sản cần kiểm tra (từ tài sản được chọn)
+                var dsNhomTS = dsTaiSan
+                    .Where(ts => ts.IsSelected && ts.MaNhomTS.HasValue)
+                    .Select(ts => ts.MaNhomTS.Value)
+                    .Distinct()
+                    .ToList();
+
+                // Nếu không có nhóm tài sản nào cần kiểm tra
+                if (!dsNhomTS.Any())
+                {
+                    return true;
+                }
+
+                // Lấy thông tin các nhóm tài sản
+                var nhomTaiSanResponse = await client.From<NhomTaiSan>()
+                    .Filter("ma_nhom_ts", Supabase.Postgrest.Constants.Operator.In, dsNhomTS)
+                    .Get();
+                var dsNhomTaiSan = nhomTaiSanResponse.Models.ToList();
+
+                // Lấy mã loại tài sản từ các nhóm
+                var dsLoaiTS = dsNhomTaiSan.Select(n => n.MaLoaiTaiSan).Distinct().ToList();
+
+                // Lấy thông tin loại tài sản để biết thuộc tính quản lý riêng
+                var loaiTaiSanResponse = await client.From<LoaiTaiSan>()
+                    .Filter("ma_loai_ts", Supabase.Postgrest.Constants.Operator.In, dsLoaiTS)
+                    .Get();
+                var dsLoaiTaiSan = loaiTaiSanResponse.Models.ToList();
+
+                // Lọc ra các nhóm tài sản thuộc loại quản lý riêng (quan_ly_rieng = true)
+                var dsNhomTSQuanLyRieng = new List<int>();
+                foreach (var nhomTS in dsNhomTaiSan)
+                {
+                    var loaiTS = dsLoaiTaiSan.FirstOrDefault(l => l.MaLoaiTaiSan == nhomTS.MaLoaiTaiSan);
+                    if (loaiTS != null && loaiTS.QuanLyRieng)
+                    {
+                        dsNhomTSQuanLyRieng.Add(nhomTS.MaNhomTS);
+                    }
+                }
+
+                // Nếu không có nhóm tài sản nào cần quản lý riêng
+                if (!dsNhomTSQuanLyRieng.Any())
+                {
+                    return true;
+                }
+
+                // Lấy thông tin sức chứa đã cấu hình cho phòng
+                var sucChuaResponse = await client.From<PhongNhomTS>()
+                    .Filter("ma_phong", Supabase.Postgrest.Constants.Operator.Equals, maPhong)
+                    .Get();
+                var dsSucChua = sucChuaResponse.Models.ToList();
+
+                // Kiểm tra từng nhóm tài sản cần quản lý riêng
+                foreach (var maNhomTS in dsNhomTSQuanLyRieng)
+                {
+                    // Kiểm tra xem phòng đã cấu hình sức chứa cho nhóm này chưa
+                    var sucChua = dsSucChua.FirstOrDefault(sc => sc.MaNhomTS == maNhomTS);
+                    if (sucChua == null)
+                    {
+                        // Lấy tên nhóm tài sản để hiển thị
+                        var nhomTS = dsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == maNhomTS);
+                        string tenNhom = nhomTS?.TenNhom ?? $"Mã nhóm: {maNhomTS}";
+
+                        // Hiện hộp thoại hỏi người dùng có muốn cấu hình sức chứa không
+                        MessageBoxResult result = MessageBox.Show(
+                            $"Phòng chưa được cấu hình sức chứa cho nhóm tài sản '{tenNhom}'.\nBạn có muốn cấu hình ngay không?",
+                            "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            // Mở form cấu hình sức chứa
+                            var configWindow = new suc_chua_phong_nhom(maPhong);
+                            configWindow.ShowDialog();
+
+                            // Kiểm tra lại sau khi cấu hình
+                            var checkAgain = await client.From<PhongNhomTS>()
+                                .Filter("ma_phong", Supabase.Postgrest.Constants.Operator.Equals, maPhong)
+                                .Filter("ma_nhom_ts", Supabase.Postgrest.Constants.Operator.Equals, maNhomTS)
+                                .Get();
+
+                            if (checkAgain.Models.Count == 0)
+                            {
+                                // Người dùng đã đóng form nhưng chưa cấu hình
+                                MessageBox.Show(
+                                    $"Phòng vẫn chưa được cấu hình sức chứa cho nhóm tài sản '{tenNhom}'.\nKhông thể tiếp tục bàn giao!",
+                                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            // Người dùng không muốn cấu hình
+                            MessageBox.Show(
+                                $"Không thể bàn giao tài sản thuộc nhóm '{tenNhom}' vì phòng chưa được cấu hình sức chứa.",
+                                "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi kiểm tra sức chứa: {ex.Message}");
+                MessageBox.Show($"Lỗi khi kiểm tra sức chứa: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
         }
     }
