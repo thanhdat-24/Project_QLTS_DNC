@@ -10,6 +10,11 @@ using ClosedXML.Excel;
 using System.Windows;
 using Supabase.Gotrue;
 using Supabase;
+using Newtonsoft.Json;
+using System.Dynamic;
+using System.Net.Http;
+using System.Text;
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC.Services
 {
@@ -67,65 +72,7 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Thêm mới phiếu bảo trì
-        public async Task<bool> AddPhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                {
-                    throw new Exception("Không thể kết nối Supabase Client");
-                }
 
-                // Đảm bảo người dùng đã đăng nhập và token còn hiệu lực
-                var session = client.Auth.CurrentSession;
-                if (session == null || DateTime.Compare(session.ExpiresAt(), DateTime.UtcNow) < 0)
-                {
-                    // Thử làm mới token nếu hết hạn
-                    try
-                    {
-                        await client.Auth.RefreshSession();
-                    }
-                    catch
-                    {
-                        throw new Exception("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
-                    }
-                }
-
-                // Kiểm tra các giá trị bắt buộc
-                if (phieuBaoTri.MaTaiSan == null)
-                {
-                    throw new Exception("Mã tài sản không được để trống");
-                }
-                if (string.IsNullOrEmpty(phieuBaoTri.NoiDung))
-                {
-                    throw new Exception("Nội dung không được để trống");
-                }
-                if (string.IsNullOrEmpty(phieuBaoTri.TrangThai))
-                {
-                    throw new Exception("Trạng thái không được để trống");
-                }
-
-                Console.WriteLine($"Đang thêm phiếu bảo trì mới: {phieuBaoTri.MaBaoTri}");
-
-                // Thực hiện thêm mới
-                var response = await client.From<PhieuBaoTri>().Insert(phieuBaoTri);
-
-                return response != null;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Chi tiết lỗi thêm phiếu: {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-                }
-                MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-        }
         // Cập nhật phiếu bảo trì
         public async Task<bool> UpdatePhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
@@ -138,29 +85,52 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
-                // Tạo phiên bản mới của phiếu bảo trì để cập nhật
-                var updatePhieu = new PhieuBaoTri
+                // Lấy thông tin kết nối từ ConfigHelper hoặc từ một nguồn khác
+                var settings = ConfigHelper.GetSupabaseSettings();
+                string apiUrl = settings.Url;
+                string apiKey = settings.ApiKey;
+
+                // Tạo object chỉ với các trường cần cập nhật
+                var updateData = new
                 {
-                    MaBaoTri = phieuBaoTri.MaBaoTri,
-                    MaTaiSan = phieuBaoTri.MaTaiSan,
-                    MaLoaiBaoTri = phieuBaoTri.MaLoaiBaoTri,
-                    NgayBaoTri = phieuBaoTri.NgayBaoTri,
-                    MaNV = phieuBaoTri.MaNV,
-                    NoiDung = phieuBaoTri.NoiDung,
-                    TrangThai = phieuBaoTri.TrangThai,
-                    ChiPhi = phieuBaoTri.ChiPhi,
-                    GhiChu = phieuBaoTri.GhiChu
+                    ma_tai_san = phieuBaoTri.MaTaiSan,
+                    ma_loai_bao_tri = phieuBaoTri.MaLoaiBaoTri,
+                    ngay_bao_tri = phieuBaoTri.NgayBaoTri,
+                    ma_nv = phieuBaoTri.MaNV,
+                    noi_dung = phieuBaoTri.NoiDung,
+                    trang_thai_sau_bao_tri = phieuBaoTri.TrangThai,
+                    chi_phi = phieuBaoTri.ChiPhi,
+                    ghi_chu = phieuBaoTri.GhiChu
                 };
 
-                Console.WriteLine($"Dữ liệu cập nhật: MaTaiSan={updatePhieu.MaTaiSan}, TrangThai={updatePhieu.TrangThai}");
+                // Chuyển đổi sang JSON
+                string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(updateData);
 
-                // Thực hiện cập nhật
-                var response = await client.From<PhieuBaoTri>()
-                    .Where(p => p.MaBaoTri == phieuBaoTri.MaBaoTri)
-                    .Update(updatePhieu);
+                // Thực hiện HTTP request trực tiếp
+                string url = $"{apiUrl}/rest/v1/baotri?ma_bao_tri=eq.{phieuBaoTri.MaBaoTri}";
 
-                Console.WriteLine($"Kết quả phản hồi: {(response != null ? "Thành công" : "Thất bại")}");
-                return response != null;
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Add("apikey", apiKey);
+                    httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+                    httpClient.DefaultRequestHeaders.Add("Prefer", "return=minimal");
+
+                    StringContent content = new StringContent(jsonData, System.Text.Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PatchAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Cập nhật thành công");
+                        return true;
+                    }
+                    else
+                    {
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Lỗi cập nhật: {errorContent}");
+                        return false;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -170,7 +140,6 @@ namespace Project_QLTS_DNC.Services
                     Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
                 }
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
                 MessageBox.Show($"Lỗi cập nhật: {ex.Message}", "Chi tiết lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
@@ -319,8 +288,7 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Lấy mã phiếu bảo trì lớn nhất để tạo mã mới
-        // Lấy mã phiếu bảo trì lớn nhất để tạo mã mới
+        
         public async Task<int> GetMaxMaBaoTriAsync()
         {
             try
@@ -330,21 +298,31 @@ namespace Project_QLTS_DNC.Services
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
-                // Lấy tất cả phiếu bảo trì
-                var response = await client.From<PhieuBaoTri>().Get();
-                if (response.Models.Count == 0)
+
+                Console.WriteLine("Service: Đang lấy mã bảo trì lớn nhất...");
+
+                // Cách 1: Sử dụng Single() để lấy giá trị lớn nhất
+                var response = await client.From<PhieuBaoTri>()
+                                          .Select("ma_bao_tri")
+                                          .Order("ma_bao_tri", Supabase.Postgrest.Constants.Ordering.Descending)
+                                          .Limit(1)
+                                          .Get();
+
+                if (response?.Models != null && response.Models.Any())
                 {
-                    return 0; // Trả về 0 nếu không có phiếu bảo trì nào
+                    int maxId = response.Models.First().MaBaoTri;
+                    Console.WriteLine($"Service: Mã bảo trì lớn nhất hiện tại: {maxId}");
+                    return maxId;
                 }
-                // Tìm mã phiếu bảo trì lớn nhất
-                int maxMaBaoTri = response.Models.Max(p => p.MaBaoTri);
-                return maxMaBaoTri;
+
+                Console.WriteLine("Service: Chưa có bản ghi nào, trả về mã 0");
+                return 0; // Trường hợp không có phiếu bảo trì nào
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi lấy mã phiếu bảo trì lớn nhất: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return 0;
+                Console.WriteLine($"Service: Lỗi khi lấy mã bảo trì lớn nhất: {ex.Message}");
+                Console.WriteLine($"Service: Stack Trace: {ex.StackTrace}");
+                return 0; // Trả về 0 để không làm gián đoạn quá trình thêm
             }
         }
 

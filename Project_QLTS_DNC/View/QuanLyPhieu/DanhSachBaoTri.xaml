@@ -194,9 +194,8 @@
                         <ComboBoxItem Content="Tất cả loại" IsSelected="True"/>
                         <ComboBoxItem Content="Định kỳ"/>
                         <ComboBoxItem Content="Đột xuất"/>
-                        <ComboBoxItem Content="Bảo hành"/>
                     </ComboBox>
-                    <ComboBox x:Name="cboNhomTaiSan" Width="150" Height="42" Margin="10,0,5,0" 
+                    <ComboBox x:Name="cboNhomTaiSan" Width="150" Height="42" Margin="15,0,5,0" 
                         VerticalContentAlignment="Center"
                         Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
                         materialDesign:HintAssist.Hint="Nhóm tài sản">
@@ -210,8 +209,8 @@
                         VerticalContentAlignment="Center"
                         Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
                         materialDesign:HintAssist.Hint="Tình trạng">
-                        <ComboBoxItem Content="Dưới 50%" IsSelected="True"/>
-                        <ComboBoxItem Content="Trên 50%"/>
+                        <ComboBoxItem Content="Tất cả tình trạng" IsSelected="True"/>
+                        <ComboBoxItem Content="Cần bảo trì"/>
                     </ComboBox>
                 </StackPanel>
             </Grid>
@@ -257,41 +256,41 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="50">
+                        <DataGridTemplateColumn Width="70">
                             <DataGridTemplateColumn.Header>
                                 <CheckBox x:Name="chkSelectAll" />
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox x:Name="chkSelect" IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Mã kiểm kê" Width="130" Binding="{Binding MaKiemKeTs}"/>
-                        <DataGridTextColumn Header="Mã đợt kiểm" Width="130" Binding="{Binding MaDotKiemKe}"/>
-                        <DataGridTextColumn Header="Mã tài sản" Width="130" Binding="{Binding MaTaiSan}"/>
-                        <DataGridTextColumn Header="Mã phòng" Width="130" Binding="{Binding MaPhong}"/>
+                        <DataGridTextColumn Header="Mã kiểm kê" Width="140" Binding="{Binding MaKiemKeTS}"/>
+                        <DataGridTextColumn Header="Mã đợt kiểm" Width="140" Binding="{Binding MaDotKiemKe}"/>
+                        <DataGridTextColumn Header="Mã tài sản" Width="140" Binding="{Binding MaTaiSan}"/>
+                        <DataGridTextColumn Header="Mã phòng" Width="140" Binding="{Binding MaPhong}"/>
                         <DataGridTextColumn Header="Tình trạng" Width="140" Binding="{Binding TinhTrang}"/>
                         <DataGridTextColumn Header="Vị trí" Width="140" Binding="{Binding ViTriThucTe}"/>
                         <DataGridTextColumn Header="Ghi chú" Width="150" Binding="{Binding GhiChu}"/>
-                        <DataGridTemplateColumn Width="120" MinWidth="110" Header="Tùy chọn">
+                        <DataGridTemplateColumn Width="120" MinWidth="120" Header="Tùy chọn">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                           CommandParameter="{Binding MaKiemKeTs}"
-                                           ToolTip="Sửa"
-                                           Background="{DynamicResource PrimaryHueLightBrush}" 
-                                           Width="26" Height="26" Padding="2" Margin="0,1">
+                       CommandParameter="{Binding MaKiemKeTS}"
+                       ToolTip="Sửa"
+                       Background="{DynamicResource PrimaryHueLightBrush}" 
+                       Width="26" Height="26" Padding="2" Margin="0,1">
                                             <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                           CommandParameter="{Binding MaKiemKeTs}"
-                                           ToolTip="Xóa" Margin="8,1,0,1"
-                                           Background="{DynamicResource SecondaryDelete}" 
-                                           Width="26" Height="26" 
-                                           Padding="2">
+                       CommandParameter="{Binding MaKiemKeTS}"
+                       ToolTip="Xóa" Margin="8,1,0,1"
+                       Background="{DynamicResource SecondaryDelete}" 
+                       Width="26" Height="26" 
+                       Padding="2">
                                             <materialDesign:PackIcon Kind="Delete" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                     </StackPanel>

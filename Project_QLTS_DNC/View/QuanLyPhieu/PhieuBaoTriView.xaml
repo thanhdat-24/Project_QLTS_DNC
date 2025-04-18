@@ -178,7 +178,7 @@
         Style="{StaticResource PrimaryButton}" 
         Background="{StaticResource SecondaryCreate}" 
         Foreground="White" 
-        Click="btnThem_Click"
+     
         ToolTip="Thêm phiếu báo hỏng mới">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Margin="0 0 8 0"/>

@@ -9,7 +9,7 @@ namespace Project_QLTS_DNC.Models
     public class KiemKeTaiSan : BaseModel, INotifyPropertyChanged
     {
         [PrimaryKey("ma_kiem_ke_ts", false)]
-        public int MaKiemKeTs { get; set; }
+        public int MaKiemKeTS { get; set; }
 
         [Column("ma_dot_kiem_ke")]
         public int? MaDotKiemKe { get; set; }
@@ -29,9 +29,8 @@ namespace Project_QLTS_DNC.Models
         [Column("ghi_chu")]
         public string GhiChu { get; set; }
 
-        // Thêm thuộc tính IsSelected để hỗ trợ chọn dòng trong DataGrid
+        // Thuộc tính IsSelected để hỗ trợ chọn dòng trong DataGrid
         private bool _isSelected;
-
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
         public bool IsSelected
         {
@@ -43,11 +42,17 @@ namespace Project_QLTS_DNC.Models
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        [Column("loai_bao_tri")]
+        public string LoaiBaoTri { get; set; }
 
-        protected virtual void OnPropertyChanged(string propertyName = null)
+        [Column("nhom_tai_san")]
+        public string NhomTaiSan { get; set; }
+
+        // Sự kiện PropertyChanged để hỗ trợ binding dữ liệu
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string tenThuocTinh = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(tenThuocTinh));
         }
     }
 }

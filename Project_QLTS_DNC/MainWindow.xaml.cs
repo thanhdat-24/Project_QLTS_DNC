@@ -281,7 +281,7 @@ namespace Project_QLTS_DNC
         }
         private void btnDSBaotri_Selected_1(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.QuanLyPhieu.DanhSachBaoTri();
+            MainContentPanel.Content = new View.QuanLyPhieu.DanhSachBaoTriUserControl();
         }
     }
     public static class MainWindowExtensions

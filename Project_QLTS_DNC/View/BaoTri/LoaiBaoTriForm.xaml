@@ -147,16 +147,14 @@
                                                  Margin="12,0"/>
 
                         <TextBox x:Name="txtTimKiem" 
-                                 Grid.Column="1" 
-                                 materialDesign:HintAssist.Hint="Tìm kiếm theo mã, tên loại bảo trì..."
-                                 Style="{StaticResource MaterialDesignTextBox}"
-                                 BorderThickness="0"
-                                 Padding="5,12"
-                                 Background="Transparent"
-                                 VerticalAlignment="Center">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Return" Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}"/>
-                            </TextBox.InputBindings>
+         Grid.Column="1" 
+         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+         materialDesign:HintAssist.Hint="Tìm kiếm theo mã, tên loại bảo trì..."
+         Style="{StaticResource MaterialDesignTextBox}"
+         BorderThickness="0"
+         Padding="5,12"
+         Background="Transparent"
+         VerticalAlignment="Center">
                         </TextBox>
 
                         <Button Grid.Column="2" 
@@ -278,17 +276,19 @@
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <!-- Nút chỉnh sửa -->
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                ToolTip="Sửa"
-                                                Background="{DynamicResource PrimaryHueLightBrush}" 
-                                                Width="26" Height="26" Padding="2" Margin="0,1">
+        ToolTip="Sửa"
+        Background="{DynamicResource PrimaryHueLightBrush}" 
+        Width="26" Height="26" Padding="2" Margin="0,1"
+        Click="EditButton_Click">
                                             <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                         <!-- Nút xóa -->
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                ToolTip="Xóa" Margin="8,1,0,1"
-                                                Background="{DynamicResource SecondaryDelete}" 
-                                                Width="26" Height="26" 
-                                                Padding="2">
+        ToolTip="Xóa" Margin="8,1,0,1"
+        Background="{DynamicResource SecondaryDelete}" 
+        Width="26" Height="26" 
+        Padding="2"
+        Click="DeleteButton_Click">
                                             <materialDesign:PackIcon Kind="Delete" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                     </StackPanel>

@@ -3,7 +3,6 @@ using System.ComponentModel;
 using Newtonsoft.Json;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
-
 namespace Project_QLTS_DNC.Models.BaoTri
 {
     // Đảm bảo tên bảng được chỉ định chính xác
@@ -14,7 +13,7 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [PrimaryKey("ma_bao_tri", true)]  // true = identity
         [Column("ma_bao_tri")]
         [JsonProperty("ma_bao_tri")]
-        public int MaBaoTri { get; set; }
+        public int MaBaoTri { get; set; } = default;
 
         [Column("ma_tai_san")]
         [JsonProperty("ma_tai_san")]
@@ -52,6 +51,16 @@ namespace Project_QLTS_DNC.Models.BaoTri
         // Thuộc tính không lưu trong database
         [JsonIgnore]
         public bool IsSelected { get; set; }
+
+        // Các thuộc tính bổ sung chỉ dùng để hiển thị (không lưu trong cơ sở dữ liệu)
+        [JsonIgnore]
+        public string TenTaiSan { get; set; }
+
+        [JsonIgnore]
+        public string TenLoaiBaoTri { get; set; }
+
+        [JsonIgnore]
+        public string TenNhanVien { get; set; }
 
         // Override ToString để hiển thị thông tin debug
         public override string ToString()

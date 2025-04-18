@@ -115,26 +115,32 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
-                Console.WriteLine("Bắt đầu tải danh sách bảo trì...");
-                var danhSachBaoTri = await _phieuBaoTriService.GetPhieuBaoTriAsync();
-                Console.WriteLine($"Đã nhận được {danhSachBaoTri?.Count ?? 0} phiếu bảo trì từ service");
+                Console.WriteLine("ViewModel: Đang tải lại danh sách bảo trì...");
 
-                if (danhSachBaoTri == null || danhSachBaoTri.Count == 0)
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
                 {
-                    Console.WriteLine("Không tìm thấy dữ liệu bảo trì");
-                    DsBaoTri = new ObservableCollection<PhieuBaoTri>();
+                    throw new Exception("Không thể kết nối Supabase Client");
                 }
-                else
+
+                var response = await client.From<PhieuBaoTri>().Get();
+                if (response?.Models != null)
                 {
-                    DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
-                    Console.WriteLine("Đã gán dữ liệu cho DsBaoTri");
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        DsBaoTri.Clear();
+                        foreach (var item in response.Models)
+                        {
+                            DsBaoTri.Add(item);
+                        }
+                        OnPropertyChanged(nameof(DsBaoTri));
+                    });
+                    Console.WriteLine($"ViewModel: Đã tải {DsBaoTri.Count} phiếu bảo trì");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi chi tiết: {ex.ToString()}");
-                MessageBox.Show($"Lỗi khi tải dữ liệu từ ViewModel: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"ViewModel: Lỗi khi tải danh sách bảo trì: {ex.Message}");
             }
             finally
             {
@@ -193,58 +199,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 IsLoading = false;
             }
         }
-
-       
-        // Thêm phiếu bảo trì mới
-        public async Task<bool> AddPhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
-        {
-            try
-            {
-                IsLoading = true;
-
-                // Tạo mã mới cho phiếu bảo trì nếu chưa có
-                if (phieuBaoTri.MaBaoTri <= 0)
-                {
-                    int maxMaBaoTri = await _phieuBaoTriService.GetMaxMaBaoTriAsync();
-                    phieuBaoTri.MaBaoTri = maxMaBaoTri + 1;
-                }
-
-                // Thiết lập ngày bảo trì nếu chưa có
-                if (phieuBaoTri.NgayBaoTri == DateTime.MinValue)
-                {
-                    phieuBaoTri.NgayBaoTri = DateTime.Now;
-                }
-
-                // Thêm phiếu bảo trì vào cơ sở dữ liệu
-                bool result = await _phieuBaoTriService.AddPhieuBaoTriAsync(phieuBaoTri);
-
-                if (result)
-                {
-                    // Thêm phiếu mới vào danh sách hiển thị nếu thành công
-                    DsBaoTri.Add(phieuBaoTri);
-                    OnPropertyChanged(nameof(DsBaoTri));
-                    Console.WriteLine($"Đã thêm phiếu bảo trì mới với mã {phieuBaoTri.MaBaoTri} vào danh sách hiển thị");
-                }
-                else
-                {
-                    Console.WriteLine("Thêm phiếu bảo trì thất bại");
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi trong ViewModel khi thêm phiếu bảo trì: {ex.Message}");
-                MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
+ 
         // Cập nhật phiếu bảo trì
         public async Task<bool> UpdatePhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
@@ -340,18 +295,22 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-        // Tạo phiếu bảo trì mới với các giá trị mặc định
+
         public PhieuBaoTri CreateNewPhieuBaoTri()
         {
+            // Tạo một phiếu bảo trì mới với các giá trị mặc định
+            // KHÔNG đặt MaBaoTri vì sẽ được tự động tạo
             return new PhieuBaoTri
             {
+                // Không đặt MaBaoTri ở đây
                 NgayBaoTri = DateTime.Now,
-                TrangThai = "Tốt",
-                ChiPhi = 0,
-                GhiChu = ""
+                TrangThai = "Chờ xử lý",
+                MaLoaiBaoTri = 2, // Mặc định là đột xuất
+                ChiPhi = 0, // Chi phí mặc định là 0
+                MaNV = null, // Người phụ trách có thể chưa được gán
+                GhiChu = string.Empty
             };
         }
-
         // Tạo bản sao của phiếu bảo trì để chỉnh sửa
         public PhieuBaoTri ClonePhieuBaoTri(PhieuBaoTri phieu)
         {
