@@ -46,13 +46,26 @@ namespace Project_QLTS_DNC.Views
         {
             try
             {
-                await WarmUpSchemaAsync(); // <<-- thêm dòng này
+                // Kiểm tra xem đây là thêm mới hay chỉnh sửa
+                if (PhieuBaoTri.MaBaoTri == 0)
+                {
+                    // Đây là trường hợp thêm mới
+                    this.Title = "Thêm Phiếu Bảo Trì Mới";
+                    // Không hiển thị và không cho chỉnh sửa MaBaoTri vì sẽ được tạo tự động
+                    txtMaBaoTri.Text = "(Tự động tạo)";
+                    txtMaBaoTri.IsEnabled = false;
+                }
+                else
+                {
+                    // Đây là trường hợp chỉnh sửa
+                    this.Title = $"Chỉnh Sửa Phiếu Bảo Trì - Mã {PhieuBaoTri.MaBaoTri}";
+                }
 
+                await WarmUpSchemaAsync();
                 // Tải dữ liệu cho các combobox
                 await LoadTaiSanAsync();
                 await LoadLoaiBaoTriAsync();
                 await LoadNhanVienAsync();
-
                 // Thiết lập giá trị mặc định cho combobox trạng thái
                 SetDefaultTrangThai();
             }

@@ -201,6 +201,47 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 UpdatePaginationInfo();
             }
         }
+        private async void btnThem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Tạo một phiếu bảo trì mới với giá trị mặc định
+                var phieuMoi = _viewModel.CreateNewPhieuBaoTri();
+
+                // Mở cửa sổ chỉnh sửa với phiếu mới
+                var editWindow = new Project_QLTS_DNC.Views.EditPhieuBaoTriWindow(phieuMoi);
+                editWindow.Title = "Thêm Phiếu Bảo Trì Mới";
+                editWindow.Owner = Window.GetWindow(this);
+
+                // Hiển thị cửa sổ dưới dạng dialog
+                bool? result = editWindow.ShowDialog();
+
+                // Nếu người dùng đã lưu thay đổi (nhấn nút Save)
+                if (result == true)
+                {
+                    // Thêm phiếu bảo trì vào cơ sở dữ liệu
+                    bool success = await _viewModel.ThemPhieuBaoTriAsync(editWindow.PhieuBaoTri);
+                    if (success)
+                    {
+                        MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Tải lại danh sách bảo trì để cập nhật giao diện
+                        await LoadDSBaoTriAsync();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể thêm phiếu bảo trì! Kiểm tra log để biết thêm chi tiết.", "Lỗi",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở cửa sổ thêm mới: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         // Xử lý nút chỉnh sửa
         private async void EditButton_Click(object sender, RoutedEventArgs e)
@@ -423,7 +464,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Phương thức thêm nội dung phiếu vào FlowDocument
+       
         // Phương thức thêm nội dung phiếu vào FlowDocument
         private void ThemNoiDungPhieu(System.Windows.Documents.FlowDocument document, PhieuBaoTri phieu)
         {

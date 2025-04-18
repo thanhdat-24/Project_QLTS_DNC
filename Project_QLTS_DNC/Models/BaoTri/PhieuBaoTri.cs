@@ -59,6 +59,7 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [JsonIgnore]
         public string TenLoaiBaoTri { get; set; }
 
+
         [JsonIgnore]
         public string TenNhanVien { get; set; }
 
@@ -67,5 +68,6 @@ namespace Project_QLTS_DNC.Models.BaoTri
         {
             return $"PhieuBaoTri[MaBaoTri={MaBaoTri}, MaTaiSan={MaTaiSan}, NgayBaoTri={NgayBaoTri}]";
         }
+
     }
 }

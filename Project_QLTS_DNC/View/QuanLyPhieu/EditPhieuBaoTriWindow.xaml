@@ -326,10 +326,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Trạng thái:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox Grid.Column="1" x:Name="cboTrangThai" SelectedValue="{Binding TrangThai}">
-                            <ComboBoxItem Content="Tốt"/>
-                            <ComboBoxItem Content="Kém"/>
+                            <ComboBoxItem Content="Tất cả trạng thái" IsSelected="True"/>
+                            <ComboBoxItem Content="Hỏng nhẹ"/>
                             <ComboBoxItem Content="Cần sửa chữa"/>
-                            <ComboBoxItem Content="Hỏng"/>
+                            <ComboBoxItem Content="Không sử dụng được"/>
+                            <ComboBoxItem Content="Cần thay mới"/>
                         </ComboBox>
                     </Grid>
 

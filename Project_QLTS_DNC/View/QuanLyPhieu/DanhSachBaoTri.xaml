@@ -256,14 +256,56 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="70">
+                        <DataGridTemplateColumn Width="50">
                             <DataGridTemplateColumn.Header>
-                                <CheckBox x:Name="chkSelectAll" />
+                                <CheckBox x:Name="chkSelectAll" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <CheckBox.Style>
+                                        <Style TargetType="CheckBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="CheckBox">
+                                                        <Border BorderBrush="Black" BorderThickness="1" Width="16" Height="16" Background="White">
+                                                            <Path x:Name="CheckMark" Stroke="Green" StrokeThickness="2" 
+                                          Data="M 3,7 L 7,12 L 12,3" Visibility="Collapsed" 
+                                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </CheckBox.Style>
+                                </CheckBox>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox x:Name="chkSelect" IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
-                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="CheckBox">
+                                                            <Border BorderBrush="Black" BorderThickness="1" Width="16" Height="16" Background="White">
+                                                                <Path x:Name="CheckMark" Stroke="Green" StrokeThickness="2" 
+                                              Data="M 3,7 L 7,12 L 12,3" Visibility="Collapsed" 
+                                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsChecked" Value="True">
+                                                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
