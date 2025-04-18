@@ -1,7 +1,16 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.View.QuanLyKho;
+using Project_QLTS_DNC.View.QuanLyTaiSan;
+using Project_QLTS_DNC.View.ThongSoKyThuat;
+using Supabase.Gotrue;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -10,14 +19,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Supabase.Gotrue;
-using Project_QLTS_DNC.View.QuanLyKho;
-using Project_QLTS_DNC.View.QuanLyTaiSan;
-using Project_QLTS_DNC.View.ThongSoKyThuat;
-using Project_QLTS_DNC.Models.QLNhomTS;
-using System.Windows.Controls;
-using Project_QLTS_DNC.Models;
-
+using System.IO;
 namespace Project_QLTS_DNC
 {
     /// <summary>
@@ -41,6 +43,78 @@ namespace Project_QLTS_DNC
                 //danhSachTaiKhoan.ItemsSource = _danhSachTaiKhoan; 
             }
         }
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            await LoadBarChartAsync();
+        }
+
+        private async Task LoadBarChartAsync()
+        {
+            try
+            {
+                // 1. Lấy toàn bộ danh sách tài sản
+                var allAssets = await TaiSanService.LayDanhSachTaiSanAsync();
+
+                // 2. Lấy danh sách phiếu bảo trì để đếm tài sản đã được bảo trì
+                var danhSachPhieu = await new PhieuBaoTriService().GetPhieuBaoTriAsync();
+                int total = allAssets.Count;
+
+                // Đếm tài sản "Đang bảo trì" từ danh sách phiếu bảo trì
+                int daBaoTri = danhSachPhieu
+                    .Where(p => p.MaTaiSan.HasValue)
+                    .Select(p => p.MaTaiSan.Value)
+                    .Distinct()
+                    .Count();
+
+                // Tính số tài sản "Đang dùng" bằng tổng tài sản trừ đi số tài sản "Đang bảo trì"
+                int inUse = total - daBaoTri;
+                //Gán giá trị lên các TextBlock thống kê
+                txtTong.Text = total.ToString();
+                txtDangDung.Text = inUse.ToString();
+                txtBaoTri.Text = daBaoTri.ToString();
+                // 3. Vẽ biểu đồ (loại bỏ cột "Bảo trì")
+                assetChart.Series = new SeriesCollection
+        {
+            new ColumnSeries
+            {
+                Title = "Số lượng",
+                Values = new ChartValues<int> { total, inUse, daBaoTri },
+                Fill = new SolidColorBrush(Color.FromRgb(0x4D, 0x90, 0xFE))
+            }
+        };
+
+                // 4. Cấu hình trục X (loại bỏ "Bảo trì")
+                assetChart.AxisX.Clear();
+                assetChart.AxisX.Add(new Axis
+                {
+                    Labels = new[] { "Tổng TS", "Đang sử dụng", "Bảo trì" },
+                    Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false }
+                });
+
+                // 5. Cấu hình trục Y
+                assetChart.AxisY.Clear();
+                assetChart.AxisY.Add(new Axis
+                {
+                    Title = "Số lượng",
+                    LabelFormatter = value => value.ToString()
+                });
+
+                assetChart.LegendLocation = LegendLocation.Bottom;
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải biểu đồ: " + ex.Message);
+            }
+        }
+
+        public void UpdateLogo(string logoPath)
+        {
+            if (File.Exists(logoPath))
+            {
+                imgMainLogo.Source = new BitmapImage(new Uri(logoPath));
+            }
+        }
+
 
         //private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         //{
@@ -143,33 +217,7 @@ namespace Project_QLTS_DNC
 
         }
         //Load hiện thị biểu đồ cột
-        private void LoadBarChart()
-        {
-            assetChart.Series = new SeriesCollection
-            {
-                new ColumnSeries
-                {
-                    Title = "Số lượng",
-                    Values = new ChartValues<int> { 150, 120, 10, 5 },
-                    Fill = new SolidColorBrush(Color.FromRgb(0x4D, 0x90, 0xFE))
-                }
-            };
-
-            assetChart.AxisX.Add(new Axis
-            {
-                Labels = new[] { "Tổng TS", "Đang dùng", "Bảo trì", "Sửa chữa" },
-                Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false }
-            });
-
-            assetChart.AxisY.Add(new Axis
-            {
-                Title = "Số lượng",
-                LabelFormatter = value => value.ToString()
-            });
-
-            assetChart.LegendLocation = LegendLocation.Top;
-        }
-
+       
 
 
         private void btnPhieuKiemKeTaiSan_Selected(object sender, RoutedEventArgs e)

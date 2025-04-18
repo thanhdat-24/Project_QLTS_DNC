@@ -1,205 +1,40 @@
 ﻿using iText.IO.Image;
 using iText.Kernel.Pdf;
-using iText.StyledXmlParser.Jsoup.Nodes;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Project_QLTS_DNC.Models.ThongTinCongTy;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using iText.IO.Font;
 using iText.Kernel.Font;
+using System.Diagnostics;
+
+// Alias để tránh bị mập mờ
+using PdfImage = iText.Layout.Element.Image;
+using PdfAlignment = iText.Layout.Properties.HorizontalAlignment;
+using PdfTextAlignment = iText.Layout.Properties.TextAlignment;
 
 namespace Project_QLTS_DNC.View.CaiDat
 {
-    /// <summary>
-    /// Interaction logic for ThongTinCongTyForm.xaml
-    /// </summary>
     public partial class ThongTinCongTyForm : UserControl
     {
-        public string PdfPath { get; set; }
+        private string selectedImagePath = string.Empty;
+        private string filePath = "thongtincongty.json";
+        private ThongTinCongTy congTy = new ThongTinCongTy();
 
         public ThongTinCongTyForm()
         {
             InitializeComponent();
-
-            if (File.Exists(filePath))
-            {
-                congTy = JsonConvert.DeserializeObject<ThongTinCongTy>(File.ReadAllText(filePath));
-                if (!string.IsNullOrEmpty(congTy.LogoPath) && File.Exists(congTy.LogoPath))
-                {
-                    imgLogo.Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath(congTy.LogoPath)));
-                }
-
-                // ✅ Load dữ liệu từ JSON lên form
-                txtTen.Text = congTy.Ten;
-                txtMaSoThue.Text = congTy.MaSoThue;
-                txtDiaChi.Text = congTy.DiaChi;
-                txtSoDienThoai.Text = congTy.SoDienThoai;
-                txtEmail.Text = congTy.Email;
-                txtNguoiDaiDien.Text = congTy.NguoiDaiDien;
-                txtGhiChu.Text = congTy.GhiChu;
-                txtPdfPath.Text = congTy.PdfPath;
-            }
-        }
-        private string filePath = "thongtincongty.json";
-        private ThongTinCongTy congTy = new ThongTinCongTy();
-        private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.Filter = "Hình ảnh|*.png;*.jpg;*.jpeg";
-
-            if (dialog.ShowDialog() == true)
-            {
-                string folderPath = "Images";
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-
-                // ✅ Tạo tên file theo thời gian, tránh ghi đè file đang dùng
-                string fileName = $"logo_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-                string destPath = System.IO.Path.Combine(folderPath, fileName);
-
-                try
-                {
-                    // ✅ Đọc ảnh từ file vào memory stream (tránh giữ lock file)
-                    BitmapImage bitmap = new BitmapImage();
-                    using (FileStream stream = new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        bitmap.BeginInit();
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.StreamSource = stream;
-                        bitmap.EndInit();
-                        bitmap.Freeze();
-                    }
-
-                    // ✅ Gán ảnh cho Image
-                    imgLogo.Source = bitmap;
-
-                    // ✅ Copy file về thư mục của ứng dụng
-                    File.Copy(dialog.FileName, destPath);
-
-                    // ✅ Lưu đường dẫn vào đối tượng
-                    congTy.LogoPath = destPath;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Lỗi khi chọn ảnh: " + ex.Message);
-                }
-            }
+            LoadThongTinCongTy();
         }
 
-
-
-
-
-        private void BtnLuu_Click(object sender, RoutedEventArgs e)
-        {
-            congTy.Ten = txtTen.Text;
-            congTy.MaSoThue = txtMaSoThue.Text;
-            congTy.DiaChi = txtDiaChi.Text;
-            congTy.SoDienThoai = txtSoDienThoai.Text;
-            congTy.Email = txtEmail.Text;
-            congTy.NguoiDaiDien = txtNguoiDaiDien.Text;
-            congTy.GhiChu = txtGhiChu.Text;
-
-            File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
-            MessageBox.Show("Đã lưu thông tin!");
-        }
-
-        private void InPDF_Click(object sender, RoutedEventArgs e)
-        {
-            var saveDialog = new Microsoft.Win32.SaveFileDialog
-            {
-                Filter = "PDF files (*.pdf)|*.pdf",
-                FileName = "ThongTinCongTy.pdf",
-                Title = "Lưu thông tin công ty dưới dạng PDF"
-            };
-
-            if (saveDialog.ShowDialog() == true)
-            {
-                string pdfPath = saveDialog.FileName;
-
-                using (var writer = new iText.Kernel.Pdf.PdfWriter(pdfPath))
-                using (var pdf = new iText.Kernel.Pdf.PdfDocument(writer))
-                {
-                    var doc = new iText.Layout.Document(pdf);
-
-                    string fontPath = System.IO.Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf");
-
-                    var fontProgram = iText.IO.Font.FontProgramFactory.CreateFont(fontPath);
-                    var font = iText.Kernel.Font.PdfFontFactory.CreateFont(fontProgram, iText.IO.Font.PdfEncodings.IDENTITY_H);
-                    doc.SetFont(font);
-
-                    if (!string.IsNullOrEmpty(congTy.LogoPath) && File.Exists(congTy.LogoPath))
-                    {
-                        var imageData = iText.IO.Image.ImageDataFactory.Create(congTy.LogoPath);
-                        var logo = new iText.Layout.Element.Image(imageData)
-                            .ScaleToFit(100, 100)
-                            .SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);
-                        doc.Add(logo);
-                    }
-
-                    doc.Add(new iText.Layout.Element.Paragraph("THÔNG TIN CÔNG TY")
-                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                        .SetFontSize(18)
-                        .SetBold()
-                        .SetMarginBottom(20));
-
-                    doc.Add(new iText.Layout.Element.Paragraph($"Tên công ty: {congTy.Ten}"));
-                    doc.Add(new iText.Layout.Element.Paragraph($"Mã số thuế: {congTy.MaSoThue}"));
-                    doc.Add(new iText.Layout.Element.Paragraph($"Địa chỉ: {congTy.DiaChi}"));
-                    doc.Add(new iText.Layout.Element.Paragraph($"Số điện thoại: {congTy.SoDienThoai}"));
-                    doc.Add(new iText.Layout.Element.Paragraph($"Email: {congTy.Email}"));
-                    doc.Add(new iText.Layout.Element.Paragraph($"Người đại diện: {congTy.NguoiDaiDien}"));
-                    doc.Add(new iText.Layout.Element.Paragraph($"Ghi chú: {congTy.GhiChu}"));
-
-                    doc.Close();
-                }
-
-                // ✅ Lưu đường dẫn PDF và hiển thị
-                congTy.PdfPath = pdfPath;
-                txtPdfPath.Text = pdfPath;
-                File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
-
-                MessageBox.Show("PDF đã được lưu thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-
-
-        private void BtnMoPDF_Click(object sender, RoutedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(congTy.PdfPath) && File.Exists(congTy.PdfPath))
-            {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = congTy.PdfPath,
-                    UseShellExecute = true
-                });
-            }
-            else
-            {
-                MessageBox.Show("Không tìm thấy file PDF.");
-            }
-        }
-
-
-        private void ThongTinCongTyForm_Loaded(object sender, RoutedEventArgs e)
+        private void LoadThongTinCongTy()
         {
             if (File.Exists(filePath))
             {
@@ -213,6 +48,7 @@ namespace Project_QLTS_DNC.View.CaiDat
                     txtEmail.Text = congTy.Email;
                     txtNguoiDaiDien.Text = congTy.NguoiDaiDien;
                     txtGhiChu.Text = congTy.GhiChu;
+                    txtPdfPath.Text = congTy.PdfPath;
 
                     if (!string.IsNullOrEmpty(congTy.LogoPath) && File.Exists(congTy.LogoPath))
                     {
@@ -221,8 +57,139 @@ namespace Project_QLTS_DNC.View.CaiDat
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Lỗi khi đọc dữ liệu công ty: " + ex.Message);
+                    MessageBox.Show("Lỗi khi đọc thông tin công ty: " + ex.Message);
                 }
+            }
+        }
+
+        private void BtnChonAnh_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Filter = "Image files (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                selectedImagePath = dlg.FileName;
+                string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string logoDirectory = System.IO.Path.Combine(appDirectory, "Resources", "Logo");
+                Directory.CreateDirectory(logoDirectory);
+
+                string fileName = System.IO.Path.GetFileName(selectedImagePath);
+                string newImagePath = System.IO.Path.Combine(logoDirectory, fileName);
+                File.Copy(selectedImagePath, newImagePath, true);
+
+                congTy.LogoPath = newImagePath;
+                imgLogo.Source = new BitmapImage(new Uri(newImagePath));
+                imgLogo.Source = new BitmapImage(new Uri(selectedImagePath));
+            }
+        }
+
+        private void BtnLuu_Click(object sender, RoutedEventArgs e)
+        {
+            congTy.Ten = txtTen.Text;
+            congTy.MaSoThue = txtMaSoThue.Text;
+            congTy.DiaChi = txtDiaChi.Text;
+            congTy.SoDienThoai = txtSoDienThoai.Text;
+            congTy.Email = txtEmail.Text;
+            congTy.NguoiDaiDien = txtNguoiDaiDien.Text;
+            congTy.GhiChu = txtGhiChu.Text;
+
+            if (!string.IsNullOrEmpty(selectedImagePath))
+            {
+                string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string logoDirectory = Path.Combine(appDirectory, "Resources", "Logo");
+                Directory.CreateDirectory(logoDirectory);
+
+                string fileName = Path.GetFileName(selectedImagePath);
+                string newImagePath = Path.Combine(logoDirectory, fileName);
+
+                congTy.LogoPath = newImagePath;
+
+                imgLogo.Source = new BitmapImage(new Uri(newImagePath));
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                mainWindow?.UpdateLogo(congTy.LogoPath); // congTy.LogoPath là đường dẫn ảnh đã lưu
+
+            }
+
+            File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
+            MessageBox.Show("Thông tin công ty đã được lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void InPDF_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveDialog = new SaveFileDialog
+            {
+                Filter = "PDF files (*.pdf)|*.pdf",
+                FileName = "ThongTinCongTy.pdf",
+                Title = "Lưu thông tin công ty dưới dạng PDF"
+            };
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                string pdfPath = saveDialog.FileName;
+
+                using (var writer = new PdfWriter(pdfPath))
+                using (var pdf = new PdfDocument(writer))
+                {
+                    var doc = new Document(pdf);
+
+                    string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf");
+                    var fontProgram = FontProgramFactory.CreateFont(fontPath);
+                    var font = PdfFontFactory.CreateFont(fontProgram, PdfEncodings.IDENTITY_H);
+                    doc.SetFont(font);
+
+                    // Thêm logo
+                    if (!string.IsNullOrEmpty(congTy.LogoPath) && File.Exists(congTy.LogoPath))
+                    {
+                        var imageData = ImageDataFactory.Create(congTy.LogoPath);
+                        var logo = new PdfImage(imageData)
+                            .ScaleToFit(100, 100)
+                            .SetHorizontalAlignment(PdfAlignment.CENTER);
+                        doc.Add(logo);
+                    }
+
+                    // Tiêu đề
+                    doc.Add(new Paragraph("THÔNG TIN CÔNG TY")
+                        .SetTextAlignment(PdfTextAlignment.CENTER)
+                        .SetFontSize(18)
+                        .SetBold()
+                        .SetMarginBottom(20));
+
+                    // Thông tin chi tiết
+                    doc.Add(new Paragraph($"Tên công ty: {congTy.Ten}"));
+                    doc.Add(new Paragraph($"Mã số thuế: {congTy.MaSoThue}"));
+                    doc.Add(new Paragraph($"Địa chỉ: {congTy.DiaChi}"));
+                    doc.Add(new Paragraph($"Số điện thoại: {congTy.SoDienThoai}"));
+                    doc.Add(new Paragraph($"Email: {congTy.Email}"));
+                    doc.Add(new Paragraph($"Người đại diện: {congTy.NguoiDaiDien}"));
+                    doc.Add(new Paragraph($"Ghi chú: {congTy.GhiChu}"));
+
+                    doc.Close();
+                }
+
+                congTy.PdfPath = pdfPath;
+                txtPdfPath.Text = pdfPath;
+                File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
+
+                MessageBox.Show("PDF đã được lưu thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnMoPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(congTy.PdfPath) && File.Exists(congTy.PdfPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = congTy.PdfPath,
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                MessageBox.Show("Không tìm thấy file PDF.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -238,10 +205,5 @@ namespace Project_QLTS_DNC.View.CaiDat
 
             File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
         }
-
-
-
-
-
     }
 }
