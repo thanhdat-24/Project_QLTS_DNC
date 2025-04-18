@@ -292,6 +292,18 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.QuanLyTaiSan.DanhSachBanGiaoView();
 
         }
+
+        private void btnPhieuMuaMoi_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.PhieuMuaMoiTSView();
+
+        }
+
+        private void btnChiTietPhieuMuaMoi_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.ChiTietMuaMoiView();
+
+        }
     }
     public static class MainWindowExtensions
     {
