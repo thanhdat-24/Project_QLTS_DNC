@@ -17,6 +17,9 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
             // Gán sự kiện cho nút đóng
             btnDong.Click += btnDong_Click;
+
+            // Mặc định ẩn cảnh báo
+            borderCanhBao.Visibility = Visibility.Collapsed;
         }
 
         // Cho phép di chuyển cửa sổ
@@ -33,6 +36,13 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         {
             DialogResult = false;
             Close();
+        }
+
+        // Xử lý sự kiện khi thay đổi trạng thái checkbox Quản Lý Riêng
+        private void chkQuanLyRieng_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị hoặc ẩn cảnh báo dựa trên trạng thái của checkbox
+            borderCanhBao.Visibility = chkQuanLyRieng.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private async void btnLuu_Click(object sender, RoutedEventArgs e)
@@ -57,7 +67,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 LoaiTaiSanMoi = new LoaiTaiSan
                 {
                     TenLoaiTaiSan = txtTenLoaiTaiSan.Text.Trim(),
-                    MoTa = txtMoTa.Text?.Trim()
+                    MoTa = txtMoTa.Text?.Trim(),
+                    QuanLyRieng = chkQuanLyRieng.IsChecked ?? false
                 };
 
                 // Gọi service để lưu vào database

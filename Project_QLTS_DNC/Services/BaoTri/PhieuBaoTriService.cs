@@ -20,27 +20,38 @@ namespace Project_QLTS_DNC.Services
 {
     public class PhieuBaoTriService
     {
+        // Trong PhieuBaoTriService.cs
         public async Task<List<PhieuBaoTri>> GetPhieuBaoTriAsync()
         {
             try
             {
+                Console.WriteLine("Bắt đầu kết nối Supabase...");
                 var client = await SupabaseService.GetClientAsync();
                 if (client == null)
                 {
+                    Console.WriteLine("Lỗi: client là null");
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
+                Console.WriteLine("Kết nối Supabase thành công, bắt đầu truy vấn...");
 
                 // Lấy danh sách phiếu bảo trì
                 var response = await client.From<PhieuBaoTri>().Get();
+                Console.WriteLine($"Nhận được phản hồi: {response != null}");
                 var danhSachPhieu = response.Models;
-
-                // Nếu cần lấy thêm thông tin từ các bảng liên quan có thể thực hiện ở đây
-                // Ví dụ: join với bảng tài sản, nhân viên, loại bảo trì để lấy thêm thông tin
+                Console.WriteLine($"Số lượng phiếu: {danhSachPhieu?.Count ?? 0}");
 
                 return danhSachPhieu;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Lỗi chi tiết: {ex.Message}");
+                Console.WriteLine($"Loại lỗi: {ex.GetType().Name}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+
                 MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<PhieuBaoTri>();
@@ -162,7 +173,7 @@ namespace Project_QLTS_DNC.Services
                     .Where(p => p.MaBaoTri == maBaoTri)
                     .Delete();
                 return true; // hoặc xác nhận xóa thành công bằng cách khác
-      
+
             }
             catch (Exception ex)
             {

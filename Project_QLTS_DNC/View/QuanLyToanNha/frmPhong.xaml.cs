@@ -66,24 +66,13 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             UpdateStatusBar();
         }
 
-        private async void btnAdd_Click(object sender, RoutedEventArgs e)
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             var form = new frmThemPhong();
-            if (form.ShowDialog() == true && form.PhongMoi != null)
-            {
-                try
-                {
-                    var phongDaThem = await PhongService.ThemPhongAsync(form.PhongMoi);
-                    DanhSachPhong.Add(phongDaThem);
-                    DanhSachGoc.Add(phongDaThem);
-                    UpdateStatusBar();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi thêm phòng: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+            form.ShowDialog(); // 👉 Chỉ mở form lên thôi, không xử lý gì sau đó hết
         }
+
+
 
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
@@ -96,7 +85,8 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
                 {
                     try
                     {
-                        bool xoaOk = await PhongService.XoaPhongAsync(phongCanXoa.MaPhong ?? 0);
+                        bool xoaOk = await PhongService.XoaPhongAsync(phongCanXoa.MaPhong);
+
                         if (xoaOk)
                         {
                             DanhSachPhong.Remove(phongCanXoa);

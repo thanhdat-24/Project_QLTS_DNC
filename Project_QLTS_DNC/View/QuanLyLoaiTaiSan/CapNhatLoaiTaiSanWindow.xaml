@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Chỉnh Sửa Loại Tài Sản" 
-        Height="350" Width="500"
+        Height="400" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -65,6 +65,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -88,6 +90,37 @@
                          VerticalScrollBarVisibility="Auto"
                          Height="100"
                          Margin="0,0,0,15"/>
+
+                <!-- Quản Lý Riêng Checkbox -->
+                <CheckBox x:Name="chkQuanLyRieng" 
+                          Grid.Row="2" 
+                          Content="Quản Lý Riêng" 
+                          Margin="0,0,0,10"
+                          Checked="chkQuanLyRieng_CheckedChanged"
+                          Unchecked="chkQuanLyRieng_CheckedChanged"/>
+
+                <!-- Cảnh báo khi chọn Quản Lý Riêng -->
+                <Border x:Name="borderCanhBao" 
+                        Grid.Row="3" 
+                        Background="#FFF9E6" 
+                        BorderBrush="#FFEAC4" 
+                        BorderThickness="1" 
+                        CornerRadius="4" 
+                        Padding="10" 
+                        Margin="0,0,0,15" 
+                        Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Alert" 
+                                                 Foreground="#FF9800" 
+                                                 Width="20" 
+                                                 Height="20" 
+                                                 VerticalAlignment="Top" 
+                                                 Margin="0,0,10,0"/>
+                        <TextBlock Text="Nếu Loại tài sản này bạn muốn quản lý riêng thì phải cấu hình sức chứa nếu muốn bàn giao và đưa vào sử dụng về sau." 
+                                   TextWrapping="Wrap" 
+                                   Foreground="#FF6000"/>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <!-- Nút điều khiển -->
@@ -119,7 +152,6 @@
                         <TextBlock Text="LƯU LẠI"/>
                     </StackPanel>
                 </Button>
-
             </Grid>
         </Grid>
     </Border>

@@ -144,7 +144,7 @@
                     <!-- Cột Mã Kho -->
                     <DataGridTextColumn Header="Mã Kho"
                         Binding="{Binding MaKho}"
-                        Width="135">
+                        Width="295">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -156,7 +156,7 @@
                     <!-- Cột Tên Kho -->
                     <DataGridTextColumn Header="Tên Kho"
                         Binding="{Binding TenKho}"
-                        Width="135">
+                        Width="259">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -168,7 +168,7 @@
                     <!-- Cột Mô Tả -->
                     <DataGridTextColumn Header="Mô Tả"
                         Binding="{Binding MoTa}"
-                        Width="135">
+                        Width="259">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -180,7 +180,7 @@
                     <!-- Cột Tòa Nhà -->
                     <DataGridTextColumn Header="Tòa Nhà"
                         Binding="{Binding MaToaNha}"
-                        Width="135">
+                        Width="259">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -190,7 +190,7 @@
                     </DataGridTextColumn>
 
                     <!-- Cột Tùy Chọn: Chỉnh sửa và Xóa -->
-                    <DataGridTemplateColumn Header="Tùy chọn" Width="140">
+                    <DataGridTemplateColumn Header="Tùy chọn" Width="160">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

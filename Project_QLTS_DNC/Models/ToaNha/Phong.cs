@@ -8,7 +8,7 @@ namespace Project_QLTS_DNC.Models.ToaNha
     public class Phong : BaseModel
     {
         [PrimaryKey("ma_phong", false)] // Supabase sẽ tự sinh mã
-        public int? MaPhong { get; set; }
+        public int MaPhong { get; set; }
 
         [Column("ma_tang")]
         public int MaTang { get; set; }

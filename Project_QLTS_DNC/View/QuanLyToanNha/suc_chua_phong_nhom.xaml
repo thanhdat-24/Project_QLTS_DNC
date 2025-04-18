@@ -1,0 +1,81 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyToanNha.suc_chua_phong_nhom"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="THÊM SỨC CHỨA PHÒNG - NHÓM TÀI SẢN"
+        Width="430" Height="360"
+        Background="White"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề -->
+        <TextBlock Grid.Row="0" Text="THÊM SỨC CHỨA"
+                   FontSize="22" FontWeight="Bold"
+                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                   Margin="0,0,0,16"/>
+
+        <!-- Form nhập -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Chọn phòng -->
+            <TextBox Grid.Row="0" x:Name="txtMaPhong"
+                         materialDesign:HintAssist.Hint="Mã phòng"
+                         IsReadOnly="True"
+                         IsTabStop="False"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,12"/>    
+
+
+            <!-- Chọn nhóm tài sản -->
+            <ComboBox Grid.Row="1" x:Name="cboNhomTS" Margin="0 0 0 12"
+                      materialDesign:HintAssist.Hint="Nhóm tài sản"
+                      DisplayMemberPath="TenNhom"
+                      SelectedValuePath="MaNhomTS"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+
+            <!-- Nhập sức chứa -->
+            <TextBox Grid.Row="2" x:Name="txtSucChua" Margin="0"
+                     materialDesign:HintAssist.Hint="Sức chứa"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+        </Grid>
+
+        <!-- Nút chức năng -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="btnHuy"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Click="btnHuy_Click"
+                    Margin="0,0,16,0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
+                    <TextBlock Text="HỦY"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnLuu"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{StaticResource PrimaryHueMidBrush}"
+                    Foreground="White"
+                    Click="btnLuu_Click">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
+                    <TextBlock Text="LƯU"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

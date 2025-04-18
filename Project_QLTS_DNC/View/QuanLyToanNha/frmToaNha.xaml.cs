@@ -100,7 +100,7 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
             try
             {
-                bool ketQua = await ToaNhaService.XoaTNAsync(toaNhaChon.MaToaNha.Value);
+                bool ketQua = await ToaNhaService.XoaTNAsync(toaNhaChon.MaToaNha);
                 if (ketQua)
                 {
                     DanhSachToaNha.Remove(toaNhaChon);

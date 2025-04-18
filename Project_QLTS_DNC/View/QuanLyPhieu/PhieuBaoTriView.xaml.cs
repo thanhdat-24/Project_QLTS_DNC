@@ -66,8 +66,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-       
-       
+
+
         // Xử lý sự kiện khi ấn nút tìm kiếm
         private async void btnTimKiem_Click(object sender, RoutedEventArgs e)
         {
@@ -249,9 +249,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 }
             }
         }
-       
-        
-      
+
+
+
         // Xử lý khi nhấn nút xóa
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {

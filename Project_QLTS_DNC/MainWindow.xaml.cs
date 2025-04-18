@@ -222,9 +222,9 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = tồnKhoForm; // Thay thế nội dung của ContentControl
         }
 
-      
 
-       
+
+
 
         private void btnThongTinCongTy_Selected(object sender, RoutedEventArgs e)
         {
@@ -245,7 +245,7 @@ namespace Project_QLTS_DNC
 
         private void btnLoaiBaoTri_Selected(object sender, RoutedEventArgs e)
         {
-           MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
+            MainContentPanel.Content = new View.BaoTri.LoaiBaoTriForm();
 
         }
 
@@ -305,11 +305,11 @@ namespace Project_QLTS_DNC
         }
 
 
-       
 
 
-       
 
-       
+
+
+
     }
 }
