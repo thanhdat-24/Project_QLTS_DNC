@@ -9,7 +9,7 @@ namespace Project_QLTS_DNC.Models.ToaNha
     {
         // PHẢI là int? và false
         [PrimaryKey("ma_toa", false)]
-        public int? MaToaNha { get; set; }
+        public int MaToaNha { get; set; }
 
         [Column("ten_toa")]
         public string TenToaNha { get; set; }

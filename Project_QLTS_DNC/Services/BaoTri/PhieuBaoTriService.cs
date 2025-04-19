@@ -505,5 +505,34 @@ namespace Project_QLTS_DNC.Services
                 return "Không xác định";
             }
         }
+        // Thống kê tổng tài sản đã bảo trì
+        public async Task<int> ThongKeTongTaiSanBaoTriAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                var response = await client.From<PhieuBaoTri>().Get();
+                var danhSachPhieu = response.Models;
+
+                // Lấy danh sách mã tài sản duy nhất đã từng được bảo trì
+                var soLuongTaiSanBaoTri = danhSachPhieu
+                    .Where(p => p.MaTaiSan.HasValue)
+                    .Select(p => p.MaTaiSan.Value)
+                    .Distinct()
+                    .Count();
+
+                return soLuongTaiSanBaoTri;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi thống kê tài sản bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return 0;
+            }
+        }
+
     }
 }

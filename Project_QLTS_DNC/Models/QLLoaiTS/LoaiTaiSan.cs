@@ -17,5 +17,8 @@ namespace Project_QLTS_DNC.Models.QLLoaiTS
 
         [Column("mo_ta")]
         public string MoTa { get; set; }
+
+        [Column("quan_ly_rieng")]
+        public bool QuanLyRieng { get; set; }
     }
 }

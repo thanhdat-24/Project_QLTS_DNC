@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Chỉnh Sửa Nhóm Tài Sản" 
-        Height="400" Width="500"
+        Height="450" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -66,6 +66,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <!-- Đã ẩn ô Mã Nhóm Tài Sản -->
@@ -76,18 +78,49 @@
                           Grid.Row="0" 
                           materialDesign:HintAssist.Hint="Chọn Loại Tài Sản" 
                           Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Margin="0,0,0,15"/>
+                          Margin="0,0,0,15"
+                          SelectionChanged="cboLoaiTaiSan_SelectionChanged"/>
+
+                <!-- Cảnh báo khi chọn Loại Tài Sản có QuanLyRieng = true -->
+                <Border x:Name="borderCanhBao" 
+                        Grid.Row="1" 
+                        Background="#FFF9E6" 
+                        BorderBrush="#FFEAC4" 
+                        BorderThickness="1" 
+                        CornerRadius="4" 
+                        Padding="10" 
+                        Margin="0,0,0,15" 
+                        Visibility="Collapsed"
+                        MinHeight="60">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="Alert" 
+                                               Grid.Column="0"
+                                               Foreground="#FF9800" 
+                                               Width="20" 
+                                               Height="20" 
+                                               VerticalAlignment="Top" 
+                                               Margin="0,0,10,0"/>
+                        <TextBlock Grid.Column="1"
+                                 Text="Bạn muốn thêm mới với loại tài sản này thì phải cấu hình sức chứa nếu muốn bàn giao và đưa vào sử dụng về sau." 
+                                 TextWrapping="Wrap" 
+                                 Foreground="#FF6000"/>
+                    </Grid>
+                </Border>
 
                 <!-- Tên Nhóm Tài Sản -->
                 <TextBox x:Name="txtTenNhom" 
-                         Grid.Row="1" 
+                         Grid.Row="2" 
                          materialDesign:HintAssist.Hint="Tên Nhóm Tài Sản" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,0,15"/>
 
                 <!-- Mô Tả -->
                 <TextBox x:Name="txtMoTa" 
-                         Grid.Row="2" 
+                         Grid.Row="3" 
                          materialDesign:HintAssist.Hint="Mô Tả" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          AcceptsReturn="True"
@@ -126,7 +159,6 @@
                         <TextBlock Text="LƯU LẠI"/>
                     </StackPanel>
                 </Button>
-
             </Grid>
         </Grid>
     </Border>

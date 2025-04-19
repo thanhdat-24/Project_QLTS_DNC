@@ -73,14 +73,15 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             {
 
                 // Tạo object mới
-                ToaNhaMoi = new ToaNha
+                ToaNha ToaNhaMoi = new ToaNha
                 {
-                    MaToaNha = null,
                     TenToaNha = txtTenToaNha.Text.Trim(),
                     DiaChiTN = txtDiaChiTN.Text.Trim(),
                     SoDienThoaiTN = txtSoDienThoaiTN.Text.Trim(),
                     MoTaTN = txtMoTaTN.Text.Trim()
+                    // Không gán MaToaNha
                 };
+
 
 
 

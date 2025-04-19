@@ -1,5 +1,5 @@
-﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyPhieu.PhieuMuaMoiTS"
-  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyPhieu.CTMuaBoSung"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Phiếu Mua Mới Tài Sản"
@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
 
         <!-- Tiêu đề -->
-        <TextBlock Grid.Row="0" Text=" PHIẾU MUA MỚI TÀI SẢN" 
+        <TextBlock Grid.Row="0" Text=" PHIẾU CHI TIẾT MUA MỚI TÀI SẢN" 
                    Foreground="{DynamicResource PrimaryHueMidBrush}"
                    FontSize="17" FontWeight="Bold" Margin="0,0,0,8"
                    HorizontalAlignment="Center" TextAlignment="Center"/>
@@ -37,25 +37,33 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ComboBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,8"
-                      x:Name="cboMaNhanVien"
-                      materialDesign:HintAssist.Hint="Mã Nhân Viên"
+            <ComboBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,8"
+                      x:Name="cboMaPhieuDeNghi"
+                      materialDesign:HintAssist.Hint="Mã phiếu đề nghị"
                       Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
-            <DatePicker Grid.Row="1" Grid.Column="1" Margin="0,0,8,8"
-                        x:Name="dpNgayDeNghi"
-                        materialDesign:HintAssist.Hint="Ngày Đề Nghị"
-                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
-            <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,8"
-                     x:Name="txtGhiChu"
-                     materialDesign:HintAssist.Hint="Ghi chú"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+            <ComboBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8"
+          x:Name="cboMaKho"
+          materialDesign:HintAssist.Hint="Mã kho"
+          Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+            <ComboBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,8"
+                x:Name="cboTenSp"
+                materialDesign:HintAssist.Hint="Tên sản phẩm"
+                Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8"
+          x:Name="txtSoLuong"
+          materialDesign:HintAssist.Hint="Số lượng"
+          Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
             <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8"
-                     x:Name="txtDonVi"
-                     materialDesign:HintAssist.Hint="Đơn vị đề nghị"
+                     x:Name="txtDonViTinh"
+                     materialDesign:HintAssist.Hint="Đơn vị tính"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+            <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,8"
+             x:Name="txtGia"
+             materialDesign:HintAssist.Hint="Dự kiến giá"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
             <TextBox Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,8,8"
-                     x:Name="txtLyDo"
-                     materialDesign:HintAssist.Hint="Lý Do"
+                     x:Name="txtMoTa"
+                     materialDesign:HintAssist.Hint="Mô tả"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
         </Grid>
 
@@ -66,8 +74,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Margin="0 0 16 0" x:Name="btnHuy"
-                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="btnHuy_Click">
+            <Button Grid.Column="1" Margin="0,0,16,0" x:Name="btnHuy"
+                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="btnHuy_Click" HorizontalAlignment="Right" Width="107">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
                     <TextBlock Text="HUỶ BỎ"/>
