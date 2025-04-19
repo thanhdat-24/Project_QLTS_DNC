@@ -371,6 +371,7 @@ namespace Project_QLTS_DNC
         private void btnUserProfile_Click(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new UserProfileForm();
+        }
 
         private void btnPhieuMuaMoi_Selected(object sender, RoutedEventArgs e)
         {

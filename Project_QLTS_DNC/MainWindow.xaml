@@ -14,8 +14,8 @@
 
             <StackPanel>
 
-                <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600" >
+                <!-- <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600" >-->
 
                 <Image x:Name="imgMainLogo" Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600">
