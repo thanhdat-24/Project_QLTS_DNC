@@ -326,7 +326,7 @@
                                    Margin="0,0,0,8"/>
                                     <ComboBox materialDesign:HintAssist.Hint="Chọn giới tính" 
                                   Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                  SelectedItem="{Binding UserProfile.gioi_tinh}">
+                                  SelectedValue="{Binding UserProfile.gioi_tinh}" SelectedValuePath="Content">
                                         <ComboBoxItem Content="Nam"/>
                                         <ComboBoxItem Content="Nữ"/>
                                         <ComboBoxItem Content="Khác"/>
