@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.TaiKhoan;
 using Project_QLTS_DNC.ViewModel.TaiKhoan;
 using System;
@@ -25,17 +26,21 @@ namespace Project_QLTS_DNC.View.TaiKhoan
     {
         private UserProfileService _profileService;
         private UserProfileViewModel _viewModel;
-
+        private readonly TaiKhoanService _taiKhoanService;
         public UserProfileForm()
         {
             InitializeComponent();
             _profileService = new UserProfileService();
-            _viewModel = new UserProfileViewModel(_profileService);
+            _taiKhoanService = new TaiKhoanService();
+
+            _viewModel = new UserProfileViewModel(
+                _profileService,  
+                null,             
+                _taiKhoanService  
+            );
+
             this.DataContext = _viewModel;
-
-            
             this.Loaded += UserProfileForm_Loaded;
-
             SetupEventHandlers();
         }
 
@@ -52,12 +57,12 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                 if (_viewModel.UserProfile != null)
                 {
                     Console.WriteLine($"Đã tải thông tin: {_viewModel.UserProfile.ten_nv}");
-                    UpdateUI(); // Gọi UpdateUI ngay lập tức
+                    UpdateUI();
                 }
                 else
                 {
                     Console.WriteLine("ERROR: UserProfile là null sau khi load");
-                    //LoadTestData();
+                    
                     MessageBox.Show("Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -68,34 +73,7 @@ namespace Project_QLTS_DNC.View.TaiKhoan
             }
         }
 
-        //private void LoadTestData()
-        //{
-        //    Console.WriteLine("Đang tải dữ liệu thử nghiệm...");
-
-        //    var testProfile = new UserProfileDTO
-        //    {
-        //        ma_nv = 1,
-        //        ten_nv = "Nguyễn Văn A",
-        //        gioi_tinh = "Nam",
-        //        email = "nguyenvana@example.com",
-        //        sdt = "0987654321",
-        //        ngay_vao_lam = DateTime.Now.AddYears(-2),
-        //        dia_chi = "123 Đường ABC, Quận XYZ, TP. HCM",
-        //        ten_tai_khoan = _viewModel.GetCurrentUsername(), // Sử dụng username hiện tại
-        //        ten_loai_tk = "Quản trị viên",
-        //        trang_thai = true,
-        //        ten_pb = "Phòng Kỹ thuật",
-        //        ten_cv = "Trưởng phòng"
-        //    };
-
-        //    // Cập nhật trong ViewModel
-        //    _viewModel.UserProfile = testProfile;
-
-        //    // Cập nhật UI
-        //    UpdateUI();
-
-        //    Console.WriteLine("Đã tải dữ liệu thử nghiệm thành công");
-        //}
+        
         private void UpdateUI()
         {
             if (_viewModel.UserProfile != null)
@@ -319,53 +297,77 @@ namespace Project_QLTS_DNC.View.TaiKhoan
             EditProfileOverlay.Visibility = Visibility.Collapsed;
         }
 
-        private void btnXacNhanDoiMatKhau_Click(object sender, RoutedEventArgs e)
+        private async void btnUpdatePassword_Click(object sender, RoutedEventArgs e)
         {
-            string matKhauCu = pwdCurrent.Password;
-            string matKhauMoi = pwdNew.Password;
-            string xacNhanMatKhau = pwdConfirm.Password;
-
-            
-            if (string.IsNullOrEmpty(matKhauCu) ||
-                string.IsNullOrEmpty(matKhauMoi) ||
-                string.IsNullOrEmpty(xacNhanMatKhau))
+            try
             {
-                MessageBox.Show("Vui lòng điền đầy đủ thông tin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                string matKhauCu = pwdCurrent.Password;
+                string matKhauMoi = pwdNew.Password;
+                string xacNhanMatKhau = pwdConfirm.Password;
+
+                if (string.IsNullOrEmpty(matKhauCu) ||
+                    string.IsNullOrEmpty(matKhauMoi) ||
+                    string.IsNullOrEmpty(xacNhanMatKhau))
+                {
+                    MessageBox.Show("Vui lòng điền đầy đủ thông tin!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (matKhauMoi != xacNhanMatKhau)
+                {
+                    MessageBox.Show("Mật khẩu mới và xác nhận mật khẩu không khớp!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (!IsStrongPassword(matKhauMoi))
+                {
+                    MessageBox.Show("Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+                        "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Thêm các kiểm tra chi tiết
+                if (_viewModel == null)
+                {
+                    MessageBox.Show("Lỗi: ViewModel không tồn tại", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (_viewModel.UserProfile == null)
+                {
+                    MessageBox.Show("Lỗi: Không có thông tin người dùng", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Log thông tin để debug
+                Console.WriteLine($"Tên tài khoản: {_viewModel.UserProfile.ten_tai_khoan}");
+                Console.WriteLine($"Mật khẩu cũ: {matKhauCu}");
+                Console.WriteLine($"Mật khẩu mới: {matKhauMoi}");
+
+                bool ketQua = await _viewModel.DoiMatKhauAsync(matKhauCu, matKhauMoi);
+
+                if (ketQua)
+                {
+                    MessageBox.Show("Đổi mật khẩu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ChangePasswordOverlay.Visibility = Visibility.Collapsed;
+
+                    pwdCurrent.Clear();
+                    pwdNew.Clear();
+                    pwdConfirm.Clear();
+                }
+                else
+                {
+                    MessageBox.Show("Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-
-            if (matKhauMoi != xacNhanMatKhau)
+            catch (Exception ex)
             {
-                MessageBox.Show("Mật khẩu mới và xác nhận mật khẩu không khớp!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                // Ghi log lỗi chi tiết
+                Console.WriteLine($"Lỗi khi đổi mật khẩu: {ex.Message}");
+                Console.WriteLine($"Chi tiết: {ex.StackTrace}");
 
-            
-            if (!IsStrongPassword(matKhauMoi))
-            {
-                MessageBox.Show("Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
-                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            bool ketQua = _viewModel.DoiMatKhau(matKhauCu, matKhauMoi);
-
-            if (ketQua)
-            {
-                MessageBox.Show("Đổi mật khẩu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                ChangePasswordOverlay.Visibility = Visibility.Collapsed;
-
-                
-                pwdCurrent.Clear();
-                pwdNew.Clear();
-                pwdConfirm.Clear();
-            }
-            else
-            {
-                MessageBox.Show("Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Đã xảy ra lỗi: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         private bool IsStrongPassword(string password)
         {
@@ -374,6 +376,13 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                 @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$");
         }
 
+        private void btnHuy_Click(object sender, RoutedEventArgs e)
+        {
+            ChangePasswordOverlay.Visibility = Visibility.Collapsed;
+            pwdCurrent.Clear();
+            pwdNew.Clear();
+            pwdConfirm.Clear();
+        }
         private async void btnLuuThayDoi_Click(object sender, RoutedEventArgs e)
         {
             try

@@ -76,7 +76,7 @@ namespace Project_QLTS_DNC.Services
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                // Tìm tài khoản theo mã
+                
                 var taiKhoanResponse = await client
                     .From<TaiKhoanModel>().Order(x => x.MaTk, Ordering.Ascending)
                     .Where(t => t.MaTk == maTk)
@@ -86,17 +86,17 @@ namespace Project_QLTS_DNC.Services
                 if (taiKhoan == null)
                     return false;
 
-                // Cập nhật thông tin
+                
                 taiKhoan.MatKhau = matKhau;
                 taiKhoan.MaLoaiTk = maLoaiTk;
                 taiKhoan.MaNv = maNv;
 
-                // Lưu thay đổi vào cơ sở dữ liệu
+               
                 var response = await client
                     .From<TaiKhoanModel>()
                     .Update(taiKhoan);
 
-                return response.Models.Any(); // Trả về true nếu cập nhật thành công
+                return response.Models.Any(); 
             }
             catch (Exception ex)
             {
@@ -228,6 +228,73 @@ namespace Project_QLTS_DNC.Services
             {
                 Console.WriteLine($"Lỗi khi tìm kiếm tài khoản: {ex.Message}");
                 return new List<TaiKhoanDTO>();
+            }
+        }
+
+        public async Task<bool> DoiMatKhauAsync(string tenTaiKhoan, string matKhauCu, string matKhauMoi)
+        {
+            try
+            {
+                Console.WriteLine($"Bắt đầu đổi mật khẩu cho tài khoản: {tenTaiKhoan}");
+
+                var client = await SupabaseService.GetClientAsync();
+
+                // Kiểm tra kết nối client
+                if (client == null)
+                {
+                    Console.WriteLine("Lỗi: Không thể kết nối Supabase");
+                    return false;
+                }
+
+                // Tìm tài khoản
+                var taiKhoanResponse = await client.From<TaiKhoanModel>()
+                    .Where(tk => tk.TenTaiKhoan == tenTaiKhoan)
+                    .Get();
+
+                // Kiểm tra tồn tại tài khoản
+                if (!taiKhoanResponse.Models.Any())
+                {
+                    Console.WriteLine($"Không tìm thấy tài khoản: {tenTaiKhoan}");
+                    return false;
+                }
+
+                var taiKhoan = taiKhoanResponse.Models.First();
+
+                // Kiểm tra mật khẩu cũ
+                if (taiKhoan.MatKhau != matKhauCu)
+                {
+                    Console.WriteLine("Mật khẩu cũ không chính xác");
+                    return false;
+                }
+
+                // Cập nhật mật khẩu
+                var updateResult = await client.From<TaiKhoanModel>()
+                    .Where(x => x.TenTaiKhoan == tenTaiKhoan)
+                    .Update(new TaiKhoanModel
+                    {
+                        MatKhau = matKhauMoi,
+                        // Giữ nguyên các thông tin khác
+                        MaTk = taiKhoan.MaTk,
+                        TenTaiKhoan = tenTaiKhoan,
+                        MaLoaiTk = taiKhoan.MaLoaiTk,
+                        MaNv = taiKhoan.MaNv,
+                        Uid = taiKhoan.Uid,
+                        TrangThai = taiKhoan.TrangThai
+                    });
+
+                // Kiểm tra kết quả cập nhật
+                bool ketQua = updateResult.Models.Any();
+                Console.WriteLine(ketQua
+                    ? "Đổi mật khẩu thành công"
+                    : "Đổi mật khẩu thất bại");
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi đổi mật khẩu: {ex.Message}");
+                Console.WriteLine($"Chi tiết: {ex.StackTrace}");
+                return false;
             }
         }
     }
