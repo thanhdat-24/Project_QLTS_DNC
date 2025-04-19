@@ -46,6 +46,16 @@ namespace Project_QLTS_DNC
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await LoadBarChartAsync();
+            // Đọc đường dẫn logo từ file và hiển thị
+            string logoPathFile = "logo_path.txt";
+            if (File.Exists(logoPathFile))
+            {
+                string savedPath = File.ReadAllText(logoPathFile);
+                if (File.Exists(savedPath))
+                {
+                    imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
+                }
+            }
         }
 
         private async Task LoadBarChartAsync()

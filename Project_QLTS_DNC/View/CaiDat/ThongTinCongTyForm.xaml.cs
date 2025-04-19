@@ -113,7 +113,7 @@ namespace Project_QLTS_DNC.View.CaiDat
 
             }
 
-            File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
+            File.WriteAllText("logo_path.txt", congTy.LogoPath);
             MessageBox.Show("Thông tin công ty đã được lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
