@@ -9,6 +9,11 @@ using Microsoft.Win32;
 using System.IO;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.ViewModel.Baotri;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using ClosedXML.Excel;
+using Project_QLTS_DNC.Services;
+
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -20,87 +25,99 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         public DanhSachBaoTriUserControl()
         {
             InitializeComponent();
-
             // Khởi tạo ViewModel và gán làm DataContext
             _viewModel = new DanhSachBaoTriViewModel(false); // Không tự động tải dữ liệu
             this.DataContext = _viewModel;
 
-          
+            // Đăng ký sự kiện cho nút xuất Excel
+            btnXuatExcel.Click += BtnXuatExcel_Click;
+
+            // Đăng ký sự kiện cho checkbox chọn tất cả
+            chkSelectAll.Checked += ChkSelectAll_CheckedChanged;
+            chkSelectAll.Unchecked += ChkSelectAll_CheckedChanged;
+
+            // Đăng ký sự kiện cho nút tạo phiếu bảo trì
+            btnTaoPhieuBaoTri.Click += BtnTaoPhieuBaoTri_Click;
 
             // Tải dữ liệu khi control được khởi tạo
             this.Loaded += DanhSachBaoTriUserControl_Loaded;
         }
-
-        private void DanhSachBaoTriUserControl_Loaded(object sender, RoutedEventArgs e)
+        private async void DanhSachBaoTriUserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Tải dữ liệu khi control được tải
-            _ = _viewModel.LoadDSKiemKeAsync();
+            try
+            {
+                // Tải dữ liệu khi control được tải
+                await _viewModel.LoadDSKiemKeAsync(); // Không gán vào biến var
+                                                      // Cập nhật UI phân trang
+                UpdatePaginationUI();
+                // Đăng ký sự kiện PropertyChanged - đã sửa lỗi cú pháp
+                _viewModel.PropertyChanged += ViewModel_PropertyChanged; // Sửa dấu * thành _
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        
+        private void UpdatePaginationUI()
+        {
+            // Cập nhật thông tin trang hiện tại và tổng số trang
+            txtCurrentPage.Text = _viewModel.TrangHienTai.ToString();
+            txtTotalPages.Text = _viewModel.TongSoTrang.ToString();
+            // Cập nhật trạng thái của các nút điều hướng
+            btnFirstPage.IsEnabled = _viewModel.TrangHienTai > 1;
+            btnPrevPage.IsEnabled = _viewModel.TrangHienTai > 1;
+            btnNextPage.IsEnabled = _viewModel.TrangHienTai < _viewModel.TongSoTrang; // Sửa * thành _
+            btnLastPage.IsEnabled = _viewModel.TrangHienTai < _viewModel.TongSoTrang; // Sửa * thành _
+
+            // Đảm bảo các nút luôn hiển thị
+            btnFirstPage.Visibility = Visibility.Visible;
+            btnPrevPage.Visibility = Visibility.Visible;
+            btnNextPage.Visibility = Visibility.Visible;
+            btnLastPage.Visibility = Visibility.Visible;
+        }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(_viewModel.TrangHienTai) || e.PropertyName == nameof(_viewModel.TongSoTrang))
             {
-                UpdatePaginationButtons();
+                UpdatePaginationUI();
             }
         }
 
-        private void UpdatePaginationButtons()
+        private void btnFirstPage_Click(object sender, RoutedEventArgs e)
         {
-            // Cập nhật hiển thị của các nút phân trang
-            int currentPage = _viewModel.TrangHienTai;
-            int totalPages = _viewModel.TongSoTrang;
-
-            // Xác định các trang cần hiển thị
-            int startPage = Math.Max(1, currentPage - 1);
-            int endPage = Math.Min(startPage + 2, totalPages);
-
-            // Đảm bảo luôn hiển thị 3 nút nếu có đủ trang
-            if (endPage - startPage < 2 && totalPages >= 3)
-            {
-                if (startPage == 1)
-                    endPage = Math.Min(3, totalPages);
-                else
-                    startPage = Math.Max(1, endPage - 2);
-            }
-
-            // Cập nhật nội dung và trạng thái của các nút
-            for (int i = 0; i < _pageButtons.Count; i++)
-            {
-                int pageNumber = startPage + i;
-                Button button = _pageButtons[i];
-
-                if (pageNumber <= totalPages)
-                {
-                    button.Content = pageNumber.ToString();
-                    button.Tag = pageNumber;
-                    button.Visibility = Visibility.Visible;
-
-                    // Đánh dấu nút của trang hiện tại
-                    if (pageNumber == currentPage)
-                    {
-                        button.Background = FindResource("PrimaryHueMidBrush") as SolidColorBrush;
-                        button.Foreground = Brushes.White;
-                    }
-                    else
-                    {
-                        button.Background = Brushes.Transparent;
-                        button.Foreground = Brushes.Black;
-                        button.BorderBrush = new SolidColorBrush(Color.FromRgb(204, 204, 204));
-                    }
-                }
-                else
-                {
-                    // Ẩn các nút thừa
-                    button.Visibility = Visibility.Collapsed;
-                }
-            }
-
-       
+            _viewModel.ChuyenDenTrangDau();
         }
 
+        private void btnPrevPage_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.ChuyenTrangTruoc();
+        }
+
+        private void btnNextPage_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.ChuyenTrangSau();
+        }
+
+        private void btnLastPage_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.ChuyenDenTrangCuoi();
+        }
+
+        private void cboPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cboPageSize.SelectedItem is ComboBoxItem item && _viewModel != null)
+            {
+                if (int.TryParse(item.Content.ToString(), out int pageSize))
+                {
+                    _viewModel.SoDongMoiTrang = pageSize;
+                    _viewModel.ChuyenDenTrangDau(); // Reset về trang đầu tiên khi đổi số dòng mỗi trang
+                }
+            }
+        }
+        
         private void BtnTimKiem_Click(object sender, RoutedEventArgs e)
         {
             // Cập nhật từ khóa tìm kiếm
@@ -144,8 +161,21 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
         private void ChkSelectAll_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            // Cập nhật trạng thái chọn tất cả
-            _viewModel.TatCaDuocChon = chkSelectAll.IsChecked ?? false;
+            // Kiểm tra nếu sender là CheckBox
+            if (sender is CheckBox checkBox)
+            {
+                // Cập nhật trạng thái chọn tất cả
+                _viewModel.TatCaDuocChon = checkBox.IsChecked ?? false;
+
+                // Cập nhật các dòng trong datagrid
+                if (_viewModel.DsKiemKe != null)
+                {
+                    foreach (var item in _viewModel.DsKiemKe)
+                    {
+                        item.IsSelected = _viewModel.TatCaDuocChon;
+                    }
+                }
+            }
         }
 
         private void PageButton_Click(object sender, RoutedEventArgs e)
@@ -160,63 +190,262 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         {
             try
             {
-                // Tạo dialog lưu file
+                // Kiểm tra nếu không có dữ liệu
+                if (_viewModel.DsKiemKe == null || _viewModel.DsKiemKe.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu để xuất Excel!", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                // Hiển thị hộp thoại lưu file
                 SaveFileDialog saveDialog = new SaveFileDialog
                 {
                     Filter = "Excel Files (*.xlsx)|*.xlsx",
                     Title = "Lưu file Excel",
-                    FileName = "DanhSachTaiSanCanBaoTri.xlsx"
+                    FileName = $"DanhSachTaiSanCanBaoTri_{DateTime.Now:yyyyMMdd}.xlsx"
                 };
-
                 if (saveDialog.ShowDialog() == true)
                 {
-                    // Gọi phương thức xuất Excel
-                    XuatDanhSachTaiSanRaExcel(saveDialog.FileName);
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    try
+                    {
+                        // Xuất Excel với tất cả dữ liệu đã lọc
+                        XuatDanhSachTaiSanRaExcel(saveDialog.FileName);
+                        MessageBox.Show("Xuất Excel thành công!", "Thông báo",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    finally
+                    {
+                        Mouse.OverrideCursor = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Mouse.OverrideCursor = null;
+                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-                    MessageBox.Show("Xuất Excel thành công!", "Thông báo",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+
+        private void XuatDanhSachTaiSanRaExcel(string filePath)
+        {
+            try
+            {
+                // Sử dụng thư viện ClosedXML để xuất Excel
+                using (var workbook = new XLWorkbook())
+                {
+                    // Tạo worksheet
+                    var worksheet = workbook.Worksheets.Add("Danh sách bảo trì");
+
+                    // Định dạng tiêu đề
+                    worksheet.Cell("A1").Value = "DANH SÁCH TÀI SẢN CẦN BẢO TRÌ";
+                    worksheet.Cell("A1").Style.Font.Bold = true;
+                    worksheet.Cell("A1").Style.Font.FontSize = 16;
+                    worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    worksheet.Range("A1:H1").Merge();
+
+                    // Thêm ngày xuất báo cáo
+                    worksheet.Cell("A2").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                    worksheet.Range("A2:H2").Merge();
+                    worksheet.Cell("A2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                    worksheet.Cell("A2").Style.Font.Italic = true;
+
+                    // Thêm header dựa trên DataGrid
+                    var headerRow = 4;
+                    worksheet.Cell(headerRow, 1).Value = "STT";
+                    worksheet.Cell(headerRow, 2).Value = "Mã kiểm kê";
+                    worksheet.Cell(headerRow, 3).Value = "Đợt kiểm kê";
+                    worksheet.Cell(headerRow, 4).Value = "Tên tài sản";
+                    worksheet.Cell(headerRow, 5).Value = "Phòng";
+                    worksheet.Cell(headerRow, 6).Value = "Tình trạng";
+                    worksheet.Cell(headerRow, 7).Value = "Vị trí";
+                    worksheet.Cell(headerRow, 8).Value = "Ghi chú";
+
+                    // Định dạng header
+                    var headerRange = worksheet.Range(headerRow, 1, headerRow, 8);
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                    // Lấy dữ liệu đã lọc
+                    var filteredData = _viewModel.DsKiemKe.ToList();
+
+                    // Điền dữ liệu
+                    int row = headerRow + 1;
+                    for (int i = 0; i < filteredData.Count; i++)
+                    {
+                        var item = filteredData[i];
+
+                        worksheet.Cell(row, 1).Value = i + 1; // STT
+                        worksheet.Cell(row, 2).Value = item.MaKiemKeTS;
+                        worksheet.Cell(row, 3).Value = item.MaDotKiemKe?.ToString() ?? "Chưa xác định";
+                        worksheet.Cell(row, 4).Value = item.TenTaiSan ?? $"Tài sản {item.MaTaiSan}"; // Hiển thị tên thay vì mã
+                        worksheet.Cell(row, 5).Value = item.TenPhong ?? $"Phòng {item.MaPhong}"; // Hiển thị tên thay vì mã
+                        worksheet.Cell(row, 6).Value = item.TinhTrang ?? "Chưa xác định";
+                        worksheet.Cell(row, 7).Value = item.ViTriThucTe ?? "";
+                        worksheet.Cell(row, 8).Value = item.GhiChu ?? "";
+
+                        row++;
+                    }
+
+                    // Canh lề và định dạng dữ liệu
+                    var dataRange = worksheet.Range(headerRow + 1, 1, row - 1, 8);
+                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                    // Căn giữa cho một số cột
+                    worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
+                    worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã kiểm kê
+                    worksheet.Column(3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Đợt kiểm kê
+                    worksheet.Column(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
+
+                    // Tự động điều chỉnh độ rộng cột
+                    worksheet.Columns().AdjustToContents();
+
+                    // Thêm chân trang
+                    int footerRow = row + 2;
+                    worksheet.Cell(footerRow, 1).Value = "Tổng số tài sản:";
+                    worksheet.Cell(footerRow, 2).Value = filteredData.Count.ToString();
+                    worksheet.Cell(footerRow, 1).Style.Font.Bold = true;
+
+                    // Lưu file
+                    workbook.SaveAs(filePath);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                throw; // Rethrow để caller biết lỗi
             }
         }
-
-        private void XuatDanhSachTaiSanRaExcel(string filePath)
+      private async void BtnTaoPhieuBaoTri_Click(object sender, RoutedEventArgs e)
+{
+    try
+    {
+        // Lấy Supabase client
+        var client = await SupabaseService.GetClientAsync();
+        if (client == null)
         {
-            // Thêm logic xuất Excel tại đây
-            // Có thể sử dụng thư viện như EPPlus hoặc NPOI
-
-            // Giả lập việc xuất file
-            File.WriteAllText(filePath, "Nội dung xuất Excel");
+            MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu!", "Lỗi",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
         }
 
-        private void BtnTaoPhieuBaoTri_Click(object sender, RoutedEventArgs e)
+        // Mở form tạo phiếu bảo trì mới (không có tài sản được chọn)
+        var formTaoPhieu = new DSBaoTriInputForm(client);
+        formTaoPhieu.Owner = Window.GetWindow(this);
+        var result = formTaoPhieu.ShowDialog();
+        
+        // Nếu người dùng đã lưu thành công, tải lại dữ liệu
+        if (result == true)
+        {
+            await _viewModel.LoadDSKiemKeAsync();
+            MessageBox.Show("Đã tạo phiếu bảo trì thành công!", "Thông báo", 
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Lỗi khi mở form tạo phiếu bảo trì: {ex.Message}", "Lỗi",
+            MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+}
+        private async void BtnSua_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Lấy item được chọn từ CommandParameter
+                if (sender is Button button && button.CommandParameter is int maKiemKeTS)
+                {
+                    // Tìm item trong danh sách
+                    var item = _viewModel.DsKiemKe.FirstOrDefault(x => x.MaKiemKeTS == maKiemKeTS);
+                    if (item == null)
+                    {
+                        MessageBox.Show("Không tìm thấy thông tin tài sản!", "Lỗi",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Lấy client Supabase
+                    var client = await SupabaseService.GetClientAsync();
+                    if (client == null)
+                    {
+                        MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu!", "Lỗi",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Mở form sửa
+                    var formSua = new DSBaoTriInputForm(client, item);
+                    formSua.Owner = Window.GetWindow(this);
+                    var result = formSua.ShowDialog();
+
+                    // Nếu lưu thành công, tải lại dữ liệu
+                    if (result == true)
+                    {
+                        await _viewModel.LoadDSKiemKeAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở form sửa: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async void BtnXoa_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = _viewModel.GetSelectedItems();
-
             if (selectedItems.Count == 0)
             {
-                MessageBox.Show("Vui lòng chọn ít nhất một tài sản để tạo phiếu bảo trì!",
+                MessageBox.Show("Vui lòng chọn ít nhất một tài sản để xóa!",
                     "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            // TODO: Mở form tạo phiếu bảo trì với các tài sản đã chọn
-            MessageBox.Show($"Đã chọn {selectedItems.Count} tài sản để tạo phiếu bảo trì.",
-                "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+            // Hiển thị thông báo xác nhận
+            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa {selectedItems.Count} tài sản đã chọn không?",
+                "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-        private void BtnDong_Click(object sender, RoutedEventArgs e)
-        {
-            // Đóng form hoặc quay lại form trước đó
-            var window = Window.GetWindow(this);
-            if (window != null)
+            if (result == MessageBoxResult.Yes)
             {
-                window.Close();
+                try
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+
+                    // Gọi phương thức xóa và chờ kết quả
+                    bool xoaThanhCong = await _viewModel.XoaTaiSanDaChonAsync();
+
+                    Mouse.OverrideCursor = null;
+
+                    if (xoaThanhCong)
+                    {
+                        MessageBox.Show($"Đã xóa {selectedItems.Count} tài sản thành công!",
+                            "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Tải lại dữ liệu sau khi xóa
+                        await _viewModel.LoadDSKiemKeAsync();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Xóa tài sản không thành công. Vui lòng thử lại sau!",
+                            "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Mouse.OverrideCursor = null;
+                    MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
+
+       
     }
 }

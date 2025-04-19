@@ -3,12 +3,18 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
+using Microsoft.IdentityModel.Tokens;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.BaoTri;
 using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.BaoTri;
+using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.Services.QLToanNha;
 
 namespace Project_QLTS_DNC.ViewModel.Baotri
 {
@@ -104,74 +110,121 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             get => _tatCaDuocChon;
             set
             {
-                _tatCaDuocChon = value;
-                OnPropertyChanged(nameof(TatCaDuocChon));
-
-                // Áp dụng trạng thái được chọn cho tất cả các mục
-                if (DsKiemKe != null)
+                if (_tatCaDuocChon != value)
                 {
-                    foreach (var item in DsKiemKe)
+                    _tatCaDuocChon = value;
+                    OnPropertyChanged(nameof(TatCaDuocChon));
+
+                    // Áp dụng trạng thái được chọn cho tất cả các mục trong danh sách hiển thị
+                    if (DsKiemKe != null)
                     {
-                        item.IsSelected = value;
+                        foreach (var item in DsKiemKe)
+                        {
+                            item.IsSelected = value;
+                        }
                     }
                 }
             }
         }
-
-        private bool _isLoading;
-        public bool IsLoading
+        // Thêm vào DanhSachBaoTriViewModel.cs
+        public void UpdateSelectAllState()
         {
-            get => _isLoading;
-            set
+            if (DsKiemKe != null && DsKiemKe.Count > 0)
             {
-                _isLoading = value;
-                OnPropertyChanged(nameof(IsLoading));
+                // Kiểm tra nếu tất cả các item đều được chọn
+                bool allSelected = DsKiemKe.All(item => item.IsSelected);
+
+                // Cập nhật trạng thái TatCaDuocChon mà không gây ra vòng lặp vô hạn
+                if (_tatCaDuocChon != allSelected)
+                {
+                    _tatCaDuocChon = allSelected;
+                    OnPropertyChanged(nameof(TatCaDuocChon));
+                }
+            }
+        }
+        // Thêm vào DanhSachBaoTriViewModel.cs
+        private void RegisterItemPropertyChanged()
+        {
+            if (DsKiemKe != null)
+            {
+                foreach (var item in DsKiemKe)
+                {
+                    // Đăng ký sự kiện
+                    item.PropertyChanged += Item_PropertyChanged;
+                }
             }
         }
 
-        // Thông tin phân trang
-        private int _trangHienTai = 1;
-        public int TrangHienTai
-        {
-            get => _trangHienTai;
-            set
+            private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
             {
-                _trangHienTai = value;
-                OnPropertyChanged(nameof(TrangHienTai));
-                LoadPageData();
+                if (e.PropertyName == nameof(KiemKeTaiSan.IsSelected))
+                {
+                    // Cập nhật trạng thái chọn tất cả khi có item thay đổi
+                    UpdateSelectAllState();
+                }
             }
-        }
 
-        private int _tongSoTrang = 1;
-        public int TongSoTrang
-        {
-            get => _tongSoTrang;
-            set
+            private bool _isLoading;
+            public bool IsLoading
             {
-                _tongSoTrang = value;
-                OnPropertyChanged(nameof(TongSoTrang));
+                get => _isLoading;
+                set
+                {
+                    _isLoading = value;
+                    OnPropertyChanged(nameof(IsLoading));
+                }
             }
-        }
 
-        private int _soDongMoiTrang = 10;
-        public int SoDongMoiTrang
-        {
-            get => _soDongMoiTrang;
-            set
+            // Thông tin phân trang
+            private int _trangHienTai = 1;
+            public int TrangHienTai
             {
-                _soDongMoiTrang = value;
-                OnPropertyChanged(nameof(SoDongMoiTrang));
-                UpdatePagination();
+                get => _trangHienTai;
+                set
+                {
+                    _trangHienTai = value;
+                    OnPropertyChanged(nameof(TrangHienTai));
+                    LoadPageData();
+                }
             }
-        }
-        #endregion
 
-        private readonly DSBaoTriService _dsBaotriService;
-        private ObservableCollection<KiemKeTaiSan> _dsKiemKeGoc;
+            private int _tongSoTrang = 1;
+            public int TongSoTrang
+            {
+                get => _tongSoTrang;
+                set
+                {
+                    _tongSoTrang = value;
+                    OnPropertyChanged(nameof(TongSoTrang));
+                }
+            }
+
+            private int _soDongMoiTrang = 10;
+            public int SoDongMoiTrang
+            {
+                get => _soDongMoiTrang;
+                set
+                {
+                    _soDongMoiTrang = value;
+                    OnPropertyChanged(nameof(SoDongMoiTrang));
+                    UpdatePagination();
+                }
+            }
+            #endregion
+
+            private readonly DSBaoTriService _dsBaotriService;
+            private readonly TaiSanService _taiSanService;
+            private readonly PhongService _phongService;
+            private ObservableCollection<KiemKeTaiSan> _dsKiemKeGoc;
+
 
         public DanhSachBaoTriViewModel(bool autoLoad = true)
         {
+            // Khởi tạo các service
             _dsBaotriService = new DSBaoTriService();
+            _taiSanService = new TaiSanService(); // Đảm bảo dòng này được thực thi
+            _phongService = new PhongService();   // Đảm bảo dòng này được thực thi
+
             _dsKiemKeView = new CollectionViewSource();
             DsKiemKe = new ObservableCollection<KiemKeTaiSan>();
             _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>();
@@ -186,7 +239,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             if (autoLoad)
             {
                 _ = LoadDSKiemKeAsync();
-                _ = LoadDanhMucAsync();
             }
         }
 
@@ -202,18 +254,87 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
-
+                // Tải danh mục trước
+                await LoadDanhMucAsync();
                 // Lấy dữ liệu từ service
                 var danhSach = await _dsBaotriService.GetKiemKeTaiSanAsync();
+                try
+                {
+                    if (_taiSanService != null && _phongService != null)
+                    {
+                        var dsTaiSan = await _taiSanService.GetDanhSachTaiSanAsync();
+                        var dsPhong = await _phongService.GetDanhSachPhongAsync();
+                        // Cập nhật tên tài sản và tên phòng
+                        foreach (var item in danhSach)
+                        {
+                            // Chuyển đổi int? sang int để so sánh
+                            var taiSanId = item.MaTaiSan.GetValueOrDefault();
+                            var phongId = item.MaPhong.GetValueOrDefault();
+                            var dotKiemKeId = item.MaDotKiemKe.GetValueOrDefault();
+
+                            var taiSan = dsTaiSan.FirstOrDefault(ts => ts.MaTaiSan == taiSanId);
+                            if (taiSan != null)
+                            {
+                                item.TenTaiSan = taiSan.TenTaiSan;
+                            }
+                            else
+                            {
+                                item.TenTaiSan = $"Tài sản {taiSanId}";
+                            }
+
+                            var phong = dsPhong.FirstOrDefault(p => p.MaPhong == phongId);
+                            if (phong != null)
+                            {
+                                item.TenPhong = phong.TenPhong;
+                            }
+                            else
+                            {
+                                item.TenPhong = $"Phòng {phongId}";
+                            }
+
+                            // Xử lý tên đợt kiểm kê (nếu có)
+                            if (string.IsNullOrEmpty(item.TenDotKiemKe) && item.MaDotKiemKe.HasValue)
+                            {
+                                // Thiết lập giá trị mặc định
+                                item.TenDotKiemKe = $"Đợt kiểm kê {dotKiemKeId}";
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Ghi log lỗi để theo dõi
+                    System.Diagnostics.Debug.WriteLine($"Lỗi khi cập nhật tên: {ex.Message}");
+                    // Bỏ qua lỗi này để tránh làm hỏng toàn bộ hàm
+                    // Vẫn hiển thị dữ liệu nhưng không có tên tài sản và tên phòng
+                }
 
                 // Lưu danh sách gốc
                 _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>(danhSach);
 
-                // Cập nhật view
+                // Cập nhật view - Sửa lỗi cú pháp ở đây
+                if (_dsKiemKeView == null)
+                {
+                    _dsKiemKeView = new CollectionViewSource();
+                }
                 _dsKiemKeView.Source = _dsKiemKeGoc;
 
                 // Thiết lập filter ban đầu
-                _dsKiemKeView.Filter += ApplyFilterToItem;
+                ICollectionView view = _dsKiemKeView.View;
+                if (view != null)
+                {
+                    // Xóa filter cũ nếu có
+                    if (view.Filter != null)
+                    {
+                        // Không có cách trực tiếp để xóa filter, nên tạo view mới
+                        _dsKiemKeView = new CollectionViewSource();
+                        _dsKiemKeView.Source = _dsKiemKeGoc;
+                        view = _dsKiemKeView.View;
+                    }
+
+                    // Thêm filter mới
+                    view.Filter = item => FilterMatches((KiemKeTaiSan)item);
+                }
 
                 OnPropertyChanged(nameof(DsKiemKeView));
 
@@ -234,22 +355,30 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
+
+
         private void UpdatePagination()
         {
-            if (_dsKiemKeGoc == null || _dsKiemKeGoc.Count == 0)
-            {
-                TongSoTrang = 1;
+            if (_dsKiemKeGoc == null)
                 return;
-            }
 
-            // Tính số trang dựa trên số lượng item và số item trên mỗi trang
-            TongSoTrang = (_dsKiemKeGoc.Count + SoDongMoiTrang - 1) / SoDongMoiTrang;
+            // Áp dụng bộ lọc để lấy danh sách đã lọc
+            var filteredItems = ApplyFilterToCollection(_dsKiemKeGoc);
+
+            // Tính lại tổng số trang
+            int totalItems = filteredItems.Count;
+            TongSoTrang = (totalItems + SoDongMoiTrang - 1) / SoDongMoiTrang;
 
             // Đảm bảo trang hiện tại không vượt quá tổng số trang
-            if (TrangHienTai > TongSoTrang)
+            if (TrangHienTai > TongSoTrang && TongSoTrang > 0)
                 TrangHienTai = TongSoTrang;
-        }
+            else if (TongSoTrang == 0)
+                TrangHienTai = 1;
 
+            // Thông báo thay đổi
+            OnPropertyChanged(nameof(TrangHienTai));
+            OnPropertyChanged(nameof(TongSoTrang));
+        }
         private void LoadPageData()
         {
             if (_dsKiemKeGoc == null || _dsKiemKeGoc.Count == 0)
@@ -280,6 +409,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
 
             // Cập nhật danh sách hiển thị
             DsKiemKe = new ObservableCollection<KiemKeTaiSan>(pageItems);
+
+            // Đăng ký sự kiện cho các item mới
+            RegisterItemPropertyChanged();
         }
 
         private async Task LoadDanhMucAsync()
@@ -332,19 +464,64 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 e.Accepted = FilterMatches(item);
             }
         }
+        // Thêm vào class DanhSachBaoTriViewModel
+        public async Task RefreshCurrentPageAsync()
+        {
+            await LoadDSKiemKeAsync();
+            // Di chuyển đến trang hiện tại
+            if (TrangHienTai > TongSoTrang)
+                TrangHienTai = TongSoTrang;
+            LoadPageData();
+        }
+        // Chuyển từ bool thành Task<bool> để có thể await
+        public async Task<bool> XoaTaiSanDaChonAsync()
+        {
+            try
+            {
+                var selectedItems = GetSelectedItems();
+                if (selectedItems.Count == 0)
+                    return false;
+
+                // Gọi service để xóa các tài sản đã chọn
+                bool result = await _dsBaotriService.XoaNhieuTaiSanAsync(selectedItems.ToList());
+
+                if (result)
+                {
+                    // Cập nhật lại danh sách sau khi xóa
+                    foreach (var item in selectedItems)
+                    {
+                        _dsKiemKeGoc.Remove(item);
+                    }
+
+                    // Cập nhật phân trang
+                    UpdatePagination();
+
+                    // Tải lại dữ liệu trang hiện tại
+                    LoadPageData();
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return false;
+            }
+        }
 
         private bool FilterMatches(KiemKeTaiSan item)
         {
             bool matchesSearchText = string.IsNullOrEmpty(TuKhoaTimKiem) ||
-                                     item.MaTaiSan.ToString().Contains(TuKhoaTimKiem) ||
-                                     (item.ViTriThucTe?.Contains(TuKhoaTimKiem) ?? false) ||
-                                     (item.GhiChu?.Contains(TuKhoaTimKiem) ?? false);
+                                   item.MaTaiSan.ToString().Contains(TuKhoaTimKiem) ||
+                                   item.MaDotKiemKe.ToString().Contains(TuKhoaTimKiem) ||
+                                   (item.TenTaiSan?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                   (item.ViTriThucTe?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                   (item.GhiChu?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false);
 
-            bool matchesLoaiBaoTri = LoaiBaoTriDuocChon == "Tất cả loại" ||
-                                     item.LoaiBaoTri == LoaiBaoTriDuocChon;
-
-            bool matchesNhomTaiSan = NhomTaiSanDuocChon == "Tất cả nhóm" ||
-                                     item.NhomTaiSan == NhomTaiSanDuocChon;
+           
 
             bool matchesTinhTrang = true;
             if (TinhTrangDuocChon == "Dưới 50%")
@@ -364,9 +541,60 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
             }
 
-            return matchesSearchText && matchesLoaiBaoTri && matchesNhomTaiSan && matchesTinhTrang;
+            return matchesSearchText && matchesTinhTrang;
         }
+        public class TaiSanService
+        {
+            public async Task<List<TaiSanModel>> GetDanhSachTaiSanAsync()
+            {
+                try
+                {
+                    var client = await SupabaseService.GetClientAsync();
+                    if (client == null)
+                        throw new Exception("Không thể kết nối Supabase Client");
 
+                    var response = await client
+                        .From<TaiSanModel>()
+                        .Select("*")
+                        .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
+                        .Get();
+
+                    return response.Models;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi truy vấn dữ liệu tài sản: {ex.Message}", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return new List<TaiSanModel>();
+                }
+            }
+        }
+        public class PhongService
+        {
+            public async Task<List<Phong>> GetDanhSachPhongAsync()
+            {
+                try
+                {
+                    var client = await SupabaseService.GetClientAsync();
+                    if (client == null)
+                        throw new Exception("Không thể kết nối Supabase Client");
+
+                    var response = await client
+                        .From<Phong>()
+                        .Select("*")
+                        .Order("ma_phong", Supabase.Postgrest.Constants.Ordering.Ascending)
+                        .Get();
+
+                    return response.Models;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi truy vấn dữ liệu phòng: {ex.Message}", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return new List<Phong>();
+                }
+            }
+        }
         public void ChuyenTrangTruoc()
         {
             if (TrangHienTai > 1)

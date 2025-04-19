@@ -144,6 +144,13 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
+                // Đảm bảo không có trường ngoài schema trong danhSachPhieu
+                foreach (var phieu in danhSachPhieu)
+                {
+                    // Nếu có các trường bổ sung không thuộc schema, hãy xóa chúng ở đây
+                    // phieu.TruongBoSung = null;
+                }
+
                 // Thêm nhiều phiếu bảo trì
                 var response = await client.From<PhieuBaoTri>().Insert(danhSachPhieu);
 
@@ -166,9 +173,6 @@ namespace Project_QLTS_DNC.Services.BaoTri
             }
         }
 
-        /// <summary>
-        /// Cập nhật tài sản sau khi bảo trì
-        /// </summary>
         public async Task<bool> CapNhatTaiSanSauBaoTriAsync(KiemKeTaiSan taiSan)
         {
             try
@@ -177,13 +181,23 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
-                // Cập nhật thông tin tài sản sau khi bảo trì
-                var response = await client
-                    .From<KiemKeTaiSan>()
-                    .Filter("ma_kiem_ke_ts", Supabase.Postgrest.Constants.Operator.Equals, taiSan.MaKiemKeTS)
-                    .Update(taiSan);
+                // Chuyển đổi từ KiemKeTaiSan sang KiemKeTaiSanDb để loại bỏ các thuộc tính NotMapped
+                var taiSanDb = KiemKeTaiSanDb.FromKiemKeTaiSan(taiSan);
 
-                // Kiểm tra kết quả
+                // Tiếp tục với các tham số chính xác
+                var parameters = new Dictionary<string, object>
+        {
+            { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
+            { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
+            { "p_ma_tai_san", taiSanDb.MaTaiSan },
+            { "p_ma_phong", taiSanDb.MaPhong },
+            { "p_tinh_trang", taiSanDb.TinhTrang },
+            { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
+            { "p_ghi_chu", taiSanDb.GhiChu }
+        };
+
+                var response = await client.Rpc("cap_nhat_tai_san", parameters);
+
                 if (response.ResponseMessage.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"Đã cập nhật tài sản sau bảo trì: {taiSan.MaTaiSan}");
@@ -227,6 +241,93 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 MessageBox.Show($"Lỗi khi truy vấn lịch sử bảo trì: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<PhieuBaoTri>();
+            }
+        }
+        /// <summary>
+        /// Xóa một tài sản kiểm kê
+        /// </summary>
+        public async Task<bool> XoaTaiSanAsync(KiemKeTaiSan taiSan)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                // Gọi hàm SQL trên Supabase
+                var parameters = new Dictionary<string, object>
+        {
+            { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+        };
+
+                var response = await client.Rpc("xoa_tai_san", parameters);
+
+                // Kiểm tra trạng thái HTTP
+                if (response.ResponseMessage.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Đã xóa tài sản: {taiSan.MaKiemKeTS}");
+                    return true;
+                }
+                else
+                {
+                    throw new Exception($"Lỗi khi xóa tài sản: {response.ResponseMessage.ReasonPhrase}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+        /// <summary>
+        /// Xóa nhiều tài sản cùng lúc
+        /// </summary>
+        public async Task<bool> XoaNhieuTaiSanAsync(List<KiemKeTaiSan> danhSachTaiSan)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                bool allSuccess = true;
+                foreach (var taiSan in danhSachTaiSan)
+                {
+                    try
+                    {
+                        var parameters = new Dictionary<string, object>
+                {
+                    { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+                };
+
+                        var response = await client.Rpc("xoa_tai_san", parameters);
+
+                        if (!response.ResponseMessage.IsSuccessStatusCode)
+                        {
+                            allSuccess = false;
+                            Console.WriteLine($"Lỗi khi xóa tài sản {taiSan.MaKiemKeTS}: {response.ResponseMessage.ReasonPhrase}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Đã xóa tài sản: {taiSan.MaKiemKeTS}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        allSuccess = false;
+                        Console.WriteLine($"Lỗi khi xóa tài sản {taiSan.MaKiemKeTS}: {ex.Message}");
+                    }
+                }
+
+                Console.WriteLine($"Đã xóa {danhSachTaiSan.Count} tài sản, trạng thái thành công: {allSuccess}");
+                return allSuccess;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xóa nhiều tài sản: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
         }
     }
