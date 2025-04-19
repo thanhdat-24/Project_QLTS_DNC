@@ -24,30 +24,41 @@ namespace Project_QLTS_DNC.Services
 
         public async Task<List<NhanVienDto>> LayTatCaNhanVienDtoAsync()
         {
-            var _client = await SupabaseService.GetClientAsync();
-
-            var danhSachNhanVien = await _client.From<NhanVienModel>().Get();
-            var danhSachPhongBan = await _client.From<PhongBan>().Get();
-            var danhSachChucVu = await _client.From<ChucVuModel>().Get();
-
-            var phongBanDictionary = danhSachPhongBan.Models.ToDictionary(p => p.MaPhongBan, p => p.TenPhongBan);
-            var chucVuDictionary = danhSachChucVu.Models.ToDictionary(c => c.MaChucVu, c => c.TenChucVu);
-
-            var nhanVienDtos = new List<NhanVienDto>();
-
-            // 👉 Sắp xếp theo MaNV tăng dần
-            var danhSachNhanVienSapXep = danhSachNhanVien.Models.OrderBy(nv => nv.MaNV);
-
-            foreach (var nhanVien in danhSachNhanVienSapXep)
+            try
             {
-                var phongBan = phongBanDictionary.ContainsKey(nhanVien.MaPB) ? phongBanDictionary[nhanVien.MaPB] : "Unknown";
-                var chucVu = chucVuDictionary.ContainsKey(nhanVien.MaCV) ? chucVuDictionary[nhanVien.MaCV] : "Unknown";
+                var _client = await SupabaseService.GetClientAsync();
 
-                var nhanVienDto = new NhanVienDto(nhanVien, phongBan, chucVu);
-                nhanVienDtos.Add(nhanVienDto);
+                var danhSachNhanVien = await _client.From<NhanVienModel>().Get();
+                var danhSachPhongBan = await _client.From<PhongBan>().Get();
+                var danhSachChucVu = await _client.From<ChucVuModel>().Get();
+
+                var phongBanDictionary = danhSachPhongBan.Models
+                    .ToDictionary(p => p.MaPhongBan, p => p.TenPhongBan);
+
+                var chucVuDictionary = danhSachChucVu.Models
+                    .ToDictionary(c => c.MaChucVu, c => c.TenChucVu);
+
+                var nhanVienDtos = new List<NhanVienDto>();
+
+                var danhSachNhanVienSapXep = danhSachNhanVien.Models
+                    .OrderBy(nv => nv.MaNV);
+
+                foreach (var nhanVien in danhSachNhanVienSapXep)
+                {
+                    string tenPhongBan = phongBanDictionary.GetValueOrDefault(nhanVien.MaPB, "Không rõ");
+                    string tenChucVu = chucVuDictionary.GetValueOrDefault(nhanVien.MaCV, "Không rõ");
+
+                    var nhanVienDto = new NhanVienDto(nhanVien, tenPhongBan, tenChucVu);
+                    nhanVienDtos.Add(nhanVienDto);
+                }
+
+                return nhanVienDtos;
             }
-
-            return nhanVienDtos;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy danh sách nhân viên: {ex.Message}");
+                throw;
+            }
         }
 
 

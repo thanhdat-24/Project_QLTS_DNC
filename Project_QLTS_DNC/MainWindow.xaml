@@ -13,7 +13,7 @@
 
             <StackPanel>
                 <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600" >
                     <TreeView Background="Transparent" BorderThickness="0" Foreground="White"
                               FontSize="14" Padding="10" Height="498"  >
                         <TreeViewItem x:Name="btnTrangChu" Header="🏠 Trang chủ" Selected="btnTrangChu_Selected"/>
@@ -92,7 +92,7 @@
                     <Button Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Thông báo" Foreground="White">
                         <materialDesign:PackIcon Kind="Bell" />
                     </Button>
-                    <Button Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Tài khoản" Foreground="White">
+                    <Button x:Name="btnUserProfile" Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Tài khoản" Foreground="White" Click="btnUserProfile_Click">
                         <materialDesign:PackIcon Kind="Account" />
                     </Button>
                     <Button x:Name="btnThoat" Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Đăng xuất" Foreground="White" Click="btnThoat_Click">

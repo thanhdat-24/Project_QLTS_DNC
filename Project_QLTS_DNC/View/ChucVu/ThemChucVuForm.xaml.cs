@@ -1,6 +1,7 @@
 ﻿using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.ChucVu;
+using Project_QLTS_DNC.Services.QLToanNha;
 using Project_QLTS_DNC.ViewModels.NhanVien;
 using System;
 using System.Linq;
@@ -11,32 +12,30 @@ namespace Project_QLTS_DNC.View.ChucVu
 {
     public partial class ThemChucVuForm : Window
     {
-        private ChucVuService _chucVuService;
+        private ChucVuService _chucVuService = new ChucVuService();
         private ChucVuModel _updateCV;
+        private readonly ChucVuForm chucVuForm;
 
-        public ThemChucVuForm(Supabase.Client client)
+        public ThemChucVuForm(ChucVuForm chucvuForm = null)
         {
             InitializeComponent();
             _chucVuService = new ChucVuService();
+            this.chucVuForm = chucvuForm; 
         }
 
-       
-        public ThemChucVuForm(ChucVuModel chucVuUpdate)
+
+
+        public ThemChucVuForm(ChucVuModel chucVuUpdate, ChucVuForm chucvuForm = null)
         {
             InitializeComponent();
             _updateCV = chucVuUpdate;
-            _chucVuService = new ChucVuService();  
+            _chucVuService = new ChucVuService();
+            this.chucVuForm = chucvuForm;
             LoadChucVuData();
         }
 
-        private async Task InitializeAsync(ChucVuModel chucVuUpdate)
-        {
-            _updateCV = chucVuUpdate;
 
-            var client = await SupabaseService.GetClientAsync();  
-            _chucVuService = new ChucVuService(); 
-            LoadChucVuData();
-        }
+
 
         // Lưu chức vụ
         async void btnLuu_Click(object sender, RoutedEventArgs e)
@@ -94,34 +93,21 @@ namespace Project_QLTS_DNC.View.ChucVu
 
                 if (result)
                 {
-                    MessageBox.Show(_updateCV != null ? "Cập nhật chức vụ thành công." : "Thêm chức vụ thành công.",
-                                   "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    
-                    try
+                    if (chucVuForm != null)
                     {
-                        var parentWindow = System.Windows.Window.GetWindow(this);
-                        if (parentWindow != null)
-                        {
-                            var danhSachChucVuViewModel = parentWindow.DataContext as DanhSachChucVuViewModel;
-                            if (danhSachChucVuViewModel != null)
-                            {
-                                await danhSachChucVuViewModel.Refresh();
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"LoadChucVuAsync exception: {ex.Message}");
+                        await chucVuForm.LoadDataGirdChucVu();
                     }
 
+                    //MessageBox.Show(_updateCV != null ? "Cập nhật chức vụ thành công." : "Thêm chức vụ thành công.",
+                    //                "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     this.Close();
                 }
-                else
-                {
-                    MessageBox.Show(_updateCV != null ? "Cập nhật chức vụ thất bại." : "Thêm chức vụ thất bại.",
-                                   "Thông báo", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+
+                //else
+                //{
+                //    MessageBox.Show(_updateCV != null ? "Cập nhật chức vụ thất bại." : "Thêm chức vụ thất bại.",
+                //                   "Thông báo", MessageBoxButton.OK, MessageBoxImage.Error);
+                //}
             }
             catch (Exception ex)
             {

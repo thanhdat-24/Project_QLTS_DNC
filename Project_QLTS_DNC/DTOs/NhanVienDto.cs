@@ -29,6 +29,8 @@ namespace Project_QLTS_DNC.DTOs
         public NhanVienDto(NhanVienModel nhanVien, string tenPhongBan, string tenChucVu)
         {
             MaNv = nhanVien.MaNV;
+            MaPb = nhanVien.MaPB;
+            MaCv = nhanVien.MaCV;
             TenPb = tenPhongBan;
             TenCv = tenChucVu;
             TenNv = nhanVien.TenNV;

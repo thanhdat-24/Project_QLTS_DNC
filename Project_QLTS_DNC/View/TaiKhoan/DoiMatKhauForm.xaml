@@ -78,7 +78,7 @@
                             HorizontalAlignment="Right" VerticalAlignment="Center" 
                             Background="Transparent" BorderThickness="0" Margin="0,0,10,12"
                             Padding="0" >
-                        <materialDesign:PackIcon x:Name="iconShowPassword" Kind="EyeOff" Width="20" Height="20" Foreground="#555"/>
+                        
                     </Button>
                 </Grid>
             </Grid>
@@ -102,7 +102,7 @@
                             HorizontalAlignment="Right" VerticalAlignment="Center" 
                             Background="Transparent" BorderThickness="0" Margin="0,0,10,12"
                             Padding="0" >
-                        <materialDesign:PackIcon x:Name="iconShowPass" Kind="EyeOff" Width="20" Height="20" Foreground="#555"/>
+                        
                     </Button>
                 </Grid>
             </Grid>
@@ -128,7 +128,7 @@
                 HorizontalAlignment="Right" VerticalAlignment="Center" 
                 Background="Transparent" BorderThickness="0" Margin="0,0,10,12"
                 Padding="0" >
-                        <materialDesign:PackIcon x:Name="iconShow" Kind="EyeOff" Width="20" Height="20" Foreground="#555"/>
+                        
                     </Button>
                 </Grid>
             </Grid>

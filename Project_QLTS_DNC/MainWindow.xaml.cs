@@ -17,6 +17,8 @@ using Project_QLTS_DNC.View.ThongSoKyThuat;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using System.Windows.Controls;
 using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.View.NhanVien;
+using Project_QLTS_DNC.View.TaiKhoan;
 
 namespace Project_QLTS_DNC
 {
@@ -29,6 +31,8 @@ namespace Project_QLTS_DNC
 
         private TaiKhoanModel _taiKhoan;
         private List<TaiKhoanModel> _danhSachTaiKhoan;
+        
+
 
         public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
         {
@@ -181,6 +185,7 @@ namespace Project_QLTS_DNC
         private void btnNhanVien_Selected(object sender, RoutedEventArgs e)
         {
 
+            
             MainContentPanel.Content = new View.NhanVien.DanhSachNhanVienForm();
 
 
@@ -291,6 +296,11 @@ namespace Project_QLTS_DNC
         {
             MainContentPanel.Content = new View.QuanLyTaiSan.DanhSachBanGiaoView();
 
+        }
+
+        private void btnUserProfile_Click(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new UserProfileForm();
         }
     }
     public static class MainWindowExtensions

@@ -1,0 +1,434 @@
+﻿<UserControl x:Class="Project_QLTS_DNC.View.TaiKhoan.UserProfileForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Project_QLTS_DNC.View.TaiKhoan"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Background="{DynamicResource MaterialDesignPaper}"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             TextElement.FontWeight="Regular"
+             TextElement.FontSize="13"
+             TextOptions.TextFormattingMode="Ideal" 
+             TextOptions.TextRenderingMode="Auto"
+             FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <UserControl.Resources>
+        <Style x:Key="ProfileFieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Opacity" Value="0.7"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style x:Key="ProfileFieldValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="250"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Profile Header Background -->
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Background with gradient -->
+                <Rectangle Grid.Row="0" Grid.ColumnSpan="2">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0071f5" Offset="0"/>
+                            <GradientStop Color="#3387c8" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+
+                <!-- User Info Section -->
+                <StackPanel Grid.Row="0" Margin="30,30,30,10" VerticalAlignment="Bottom">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Profile Image -->
+                        <Border Grid.Column="0" Width="100" Height="100" CornerRadius="50" Background="White" Margin="0,0,20,0">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="15" ShadowDepth="1" Opacity="0.3"/>
+                            </Border.Effect>
+                            <Grid>
+                                <materialDesign:PackIcon Kind="AccountCircle" Width="90" Height="90" 
+                                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                        Foreground="#0071f5"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- User Name and Position -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Name="txtUserName" Text="{Binding ten_nv}" 
+                                    Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <TextBlock Text="{Binding ten_cv}" Foreground="White" FontSize="16" Opacity="0.9"/>
+                                <TextBlock Text=" • " Foreground="White" FontSize="16" Opacity="0.9"/>
+                                <TextBlock Text="{Binding ten_pb}" Foreground="White" FontSize="16" Opacity="0.9"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Edit Button -->
+                        <Button x:Name="btnDoiThongTin" Grid.Column="2" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Foreground="White" BorderBrush="White"
+                                Content="Đổi thông tin" Click="btnDoiThongTin_Click" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <!-- Profile Content Section -->
+            <materialDesign:Card Grid.Row="1" Margin="30,-30,30,30" VerticalAlignment="Stretch"
+                               materialDesign:ShadowAssist.ShadowDepth="Depth2" 
+                               UniformCornerRadius="8">
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Side Content -->
+                    <StackPanel Grid.Column="0" Margin="30,20,15,30">
+                        <TextBlock Text="THÔNG TIN CÁ NHÂN" 
+                                   FontSize="16" FontWeight="Bold" Margin="0,0,0,20"
+                                   Foreground="{DynamicResource PrimaryHueMidBrush}"/>      
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Mã nhân viên -->
+                            <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,15,0">
+                                <TextBlock Text="MÃ NHÂN VIÊN" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtMaNV" Text="{Binding UserProfile.ma_nv}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Phòng ban -->
+                            <StackPanel Grid.Column="1" Grid.Row="0">
+                                <TextBlock Text="PHÒNG BAN" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtPhongBan" Text="{Binding UserProfile.ten_pb}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Chức vụ -->
+                            <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,15,0">
+                                <TextBlock Text="CHỨC VỤ" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtChucVu" Text="{Binding UserProfile.ten_cv}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Họ và tên -->
+                            <StackPanel Grid.Column="1" Grid.Row="1">
+                                <TextBlock Text="HỌ VÀ TÊN" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtFullName" Text="{Binding UserProfile.ten_nv}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Giới tính -->
+                            <StackPanel Grid.Column="0" Grid.Row="2" Margin="0,0,15,0">
+                                <TextBlock Text="GIỚI TÍNH" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtGender" Text="{Binding UserProfile.gioi_tinh}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Địa chỉ -->
+                            <StackPanel Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2">
+                                <TextBlock Text="ĐỊA CHỈ" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtAddress" Text="{Binding UserProfile.dia_chi}" Style="{StaticResource ProfileFieldValueStyle}"
+                                            TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <!-- Email -->
+                            <StackPanel Grid.Column="0" Grid.Row="3">
+                                <TextBlock Text="EMAIL" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtEmail" Text="{Binding UserProfile.email}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+                            
+
+                            
+
+                            <!-- Số điện thoại -->
+                            <StackPanel Grid.Column="1" Grid.Row="3" Margin="0,0,15,0">
+                                <TextBlock Text="SỐ ĐIỆN THOẠI" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtPhone" Text="{Binding UserProfile.sdt}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Ngày vào làm -->
+                            <StackPanel Grid.Column="0" Grid.Row="4">
+                                <TextBlock Text="NGÀY VÀO LÀM" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtHireDate" Text="{Binding UserProfile.ngay_vao_lam, StringFormat='{}{0:dd/MM/yyyy}'}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Right Side Content -->
+                    <StackPanel Grid.Column="1" Margin="15,20,30,30">
+                        <TextBlock Text="THÔNG TIN TÀI KHOẢN" 
+                                 FontSize="16" FontWeight="Bold" Margin="0,0,0,20"
+                                 Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Username (Fixed typo) -->
+                            <StackPanel Grid.Row="0">
+                                <TextBlock Text="TÊN TÀI KHOẢN" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtUsername" Text="{Binding UserProfile.ten_tai_khoan}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Account Type -->
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="LOẠI TÀI KHOẢN" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <TextBlock x:Name="txtAccountType" Text="{Binding UserProfile.ten_loai_tk}" Style="{StaticResource ProfileFieldValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Account Status -->
+                            <StackPanel Grid.Row="2">
+                                <TextBlock Text="TRẠNG THÁI" Style="{StaticResource ProfileFieldLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="10" Height="10" Fill="#4CAF50" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Hoạt động" Style="{StaticResource ProfileFieldValueStyle}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Change Password Section -->
+                            <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                                <TextBlock Text="QUẢN LÝ MẬT KHẨU" 
+                                         FontSize="16" FontWeight="Bold" Margin="0,10,0,20"
+                                         Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+                                <Button x:Name="btnDoiMatKhau" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Content="Đổi mật khẩu" 
+                                        HorizontalAlignment="Left" Click="btnDoiMatKhau_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+
+            
+            <!-- Edit Profile Overlay (Hidden by default) -->
+            <Grid x:Name="EditProfileOverlay" Grid.RowSpan="2" Visibility="Collapsed"
+                    Background="#99000000">
+                <materialDesign:Card Width="600" Padding="30" 
+                         UniformCornerRadius="12" 
+                         materialDesign:ShadowAssist.ShadowDepth="Depth3">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                            <TextBlock Text="Chỉnh sửa thông tin cá nhân" 
+                           FontSize="20" 
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                            <Border Height="2" Background="{DynamicResource PrimaryHueMidBrush}" 
+                        Margin="0,8,0,0" Opacity="0.5"/>
+                        </StackPanel>
+
+                        <!-- Form Content -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Mã nhân viên -->
+                                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,10,10">
+                                    <TextBlock Text="Mã nhân viên" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="Mã nhân viên" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.ma_nv}"
+                                 IsEnabled="False"/>
+                                </StackPanel>
+
+                                <!-- Phòng ban (Disabled) -->
+                                <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,10,10">
+                                    <TextBlock Text="Phòng ban" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="Phòng ban" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.ten_pb}"
+                                 IsEnabled="False"/>
+                                </StackPanel>
+
+                                <!-- Chức vụ (Disabled) -->
+                                <StackPanel Grid.Column="1" Grid.Row="1" Margin="10,0,0,10">
+                                    <TextBlock Text="Chức vụ" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="Chức vụ" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.ten_cv}"
+                                 IsEnabled="False"/>
+                                </StackPanel>
+
+                                <!-- Họ và tên -->
+                                <StackPanel Grid.Column="0" Grid.Row="2" Margin="0,0,10,10">
+                                    <TextBlock Text="Họ và tên" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="Nhập họ và tên" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.ten_nv, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <!-- Giới tính -->
+                                <StackPanel Grid.Column="1" Grid.Row="2" Margin="10,0,0,10">
+                                    <TextBlock Text="Giới tính" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <ComboBox materialDesign:HintAssist.Hint="Chọn giới tính" 
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  SelectedItem="{Binding UserProfile.gioi_tinh}">
+                                        <ComboBoxItem Content="Nam"/>
+                                        <ComboBoxItem Content="Nữ"/>
+                                        <ComboBoxItem Content="Khác"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- Email -->
+                                <StackPanel Grid.Column="0" Grid.Row="3" Margin="0,0,10,10">
+                                    <TextBlock Text="Email" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="example@gmail.com" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.email, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <!-- Số điện thoại -->
+                                <StackPanel Grid.Column="1" Grid.Row="3" Margin="10,0,0,10">
+                                    <TextBlock Text="Số điện thoại" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="Nhập số điện thoại" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.sdt, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <!-- Ngày vào làm -->
+                                <StackPanel Grid.Column="1" Grid.Row="0" Margin="10,0,0,10">
+                                    <TextBlock Text="Ngày vào làm" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <DatePicker materialDesign:HintAssist.Hint="Chọn ngày vào làm" 
+                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                    SelectedDate="{Binding UserProfile.ngay_vao_lam}"/>
+                                </StackPanel>
+
+                                <!-- Địa chỉ -->
+                                <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                                    <TextBlock Text="Địa chỉ" 
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,0,0,8"/>
+                                    <TextBox materialDesign:HintAssist.Hint="Nhập địa chỉ" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Text="{Binding UserProfile.dia_chi, UpdateSourceTrigger=PropertyChanged}"
+                                 TextWrapping="Wrap" 
+                                 AcceptsReturn="True" 
+                                 MinHeight="100"/>
+                                </StackPanel>
+
+
+
+
+                            </Grid>
+                        </ScrollViewer>
+
+                       
+                        <!-- Actions -->
+                        <StackPanel Grid.Row="2" 
+                                    Orientation="Horizontal" 
+                                    HorizontalAlignment="Right" 
+                                    Margin="0,20,0,0">
+                            <Button Content="Hủy" 
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="0,0,10,0"
+                                    Click="btnHuyDoiThongTin_Click"/>
+
+                            <Button x:Name="btnLuuThayDoi" Content="Lưu thay đổi" Click="btnLuuThayDoi_Click"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    />  
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+
+            <!-- Change Password Overlay (Hidden by default) -->
+            <Grid x:Name="ChangePasswordOverlay" Grid.RowSpan="2" Visibility="Collapsed"
+                  Background="#99000000">
+                <materialDesign:Card Width="500" Padding="24" UniformCornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Change Password" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                        <PasswordBox x:Name="pwdCurrent" materialDesign:HintAssist.Hint="Current Password" 
+                                    Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                    Margin="0,8"/>
+
+                        <PasswordBox x:Name="pwdNew" materialDesign:HintAssist.Hint="New Password" 
+                                    Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                    Margin="0,8"/>
+
+                        <PasswordBox x:Name="pwdConfirm" materialDesign:HintAssist.Hint="Confirm New Password" 
+                                    Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                    Margin="0,8"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <Button x:Name="btnHuyDoiThongTin" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Content="Cancel" Margin="0,0,8,0" Click="btnHuyDoiThongTin_Click"/>
+                            <Button x:Name="btnXacNhanDoiMatKhau" Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Content="Update Password"  Click="btnXacNhanDoiMatKhau_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </materialDesign:Card>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
