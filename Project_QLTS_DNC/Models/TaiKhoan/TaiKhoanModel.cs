@@ -23,5 +23,7 @@ namespace Project_QLTS_DNC.Models
 
         [Column("uid")]
         public string Uid { get; set; }
+        [Column("trang_thai")]
+        public bool TrangThai { get; set; } = true;
     }
 }

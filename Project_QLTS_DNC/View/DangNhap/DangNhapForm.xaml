@@ -6,6 +6,8 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Đăng nhập hệ thống" Height="350" Width="550" WindowStartupLocation="CenterScreen" Background="#F8F9FA">
+
+
     <Grid>
 
         <Grid.ColumnDefinitions>
@@ -14,10 +16,10 @@
         </Grid.ColumnDefinitions>
 
         <ProgressBar x:Name="loadingIndicator" HorizontalAlignment="Center" VerticalAlignment="Center" 
-             Height="50" Width="50" IsIndeterminate="True" Visibility="Collapsed">
+             Height="100" Width="100" IsIndeterminate="True" Visibility="Collapsed">
             <ProgressBar.Style>
                 <Style TargetType="ProgressBar">
-                    <Setter Property="Foreground" Value="RoyalBlue"/>
+                    <Setter Property="Foreground" Value="Green"/>
                     <Setter Property="Height" Value="50"/>
                     <Setter Property="Width" Value="50"/>
                     <Setter Property="Template">
@@ -76,7 +78,7 @@
                         <TextBox x:Name="txtUsername" Grid.Column="1" Height="35" FontSize="13" BorderThickness="0"
                                     materialDesign:TextFieldAssist.UnderlineBrush="#0066b1"
                                     materialDesign:HintAssist.Hint="example@gmail.com"
-                                    Padding="0 4" Margin="0" VerticalContentAlignment="Center"/>
+                                    Padding="0 4" Margin="0" VerticalContentAlignment="Center" KeyDown="txtUsername_KeyDown"/>
                     </Grid>
                 </StackPanel>
 
@@ -97,7 +99,7 @@
                                     BorderThickness="0" Padding="5 8"
                                     materialDesign:TextFieldAssist.UnderlineBrush="#0066b1" 
                                      materialDesign:HintAssist.Hint="Nhập mật khẩu" 
-                                    PasswordChar="*" Visibility="Visible" />
+                                    PasswordChar="*" Visibility="Visible" KeyDown="passwordBox_KeyDown" />
 
                         <TextBox Grid.Column="1" x:Name="txtVisiblePassword" Height="30" FontSize="13" 
                                 BorderThickness="0" Padding="5 8"

@@ -52,33 +52,19 @@ namespace Project_QLTS_DNC.Services.ChucVu
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                
                 var response = await client
                     .From<ChucVuModel>()
-                    .Where(x => x.MaChucVu == chucVu.MaChucVu)
                     .Update(chucVu);
 
-                var updatedModel = response.Models.FirstOrDefault();
-
-                
-                if (updatedModel == null)
-                {
-                    var getResponse = await client
-                        .From<ChucVuModel>()
-                        .Where(x => x.MaChucVu == chucVu.MaChucVu)
-                        .Get();
-
-                    updatedModel = getResponse.Models.FirstOrDefault();
-                }
-
-                return updatedModel;
+                return response.Models.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error updating ChucVu: {ex.Message}");
-                throw new Exception("Có lỗi khi cập nhật chức vụ", ex);
+                System.Diagnostics.Debug.WriteLine($"Update error: {ex.Message}");
+                return null;
             }
         }
+
 
         public async Task<List<ChucVuModel>> TimKiemChucVuAsync(string keyword)
         {
@@ -93,16 +79,15 @@ namespace Project_QLTS_DNC.Services.ChucVu
 
             var results = resultByName.Models.ToList();
 
-            
-            if (long.TryParse(keyword, out long numericKeyword))
+           
+            if (int.TryParse(keyword, out int numericKeyword)) 
             {
                 var resultById = await client
                     .From<ChucVuModel>()
-                    .Filter("ma_cv", Supabase.Postgrest.Constants.Operator.Equals, numericKeyword)
+                    .Filter("ma_cv", Supabase.Postgrest.Constants.Operator.Equals, numericKeyword) 
                     .Order(x => x.MaChucVu, Supabase.Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
-                
                 foreach (var item in resultById.Models)
                 {
                     if (!results.Any(x => x.MaChucVu == item.MaChucVu))
@@ -114,6 +99,7 @@ namespace Project_QLTS_DNC.Services.ChucVu
 
             return results;
         }
+
 
 
 

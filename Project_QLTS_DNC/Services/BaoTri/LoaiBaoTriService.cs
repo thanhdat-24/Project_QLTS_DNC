@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Project_QLTS_DNC.Models.BaoTri;
-using Project_QLTS_DNC.Services;
-using Supabase;
-using Supabase.Postgrest;   
+using Project_QLTS_DNC.Models.NhanVien;
 
 namespace Project_QLTS_DNC.Services.BaoTri
 {
@@ -15,61 +12,23 @@ namespace Project_QLTS_DNC.Services.BaoTri
     {
         public async Task<List<LoaiBaoTri>> LayDanhSachLoaiBT()
         {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                var response = await client.From<LoaiBaoTri>().Get();
-                Console.WriteLine("Số lượng loại bảo trì: " + response.Models.Count);
-                return response.Models;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lấy danh sách loại bảo trì: {ex.Message}");
-                throw;
-            }
+            var client = await SupabaseService.GetClientAsync();
+            var response = await client.From<LoaiBaoTri>().Get();
+            // Kiểm tra dữ liệu trả về
+            Console.WriteLine("Số lượng loại bảo trì: " + response.Models.Count);
+            return response.Models;
         }
 
-        public async Task<LoaiBaoTri> LayLoaiBaoTriTheoMa(int maLoaiBaoTri)
+        // Thêm phương thức ThemLoaiBaoTri
+        public async Task<bool> ThemLoaiBaoTri(LoaiBaoTri loaiBaoTri)
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-                var response = await client.From<LoaiBaoTri>()
-                    .Filter("ma_loai_bao_tri", Supabase.Postgrest.Constants.Operator.Equals, maLoaiBaoTri)
-                    .Single();
-                return response;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lấy loại bảo trì theo mã: {ex.Message}");
-                throw;
-            }
-        }
-
-        public async Task<LoaiBaoTri> ThemLoaiBaoTri(LoaiBaoTri loaiBaoTri)
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-
-                // Tạo dictionary với tham số
-                var parameters = new Dictionary<string, object>
-        {
-            { "ten_loai_param", loaiBaoTri.TenLoai },
-            { "mo_ta_param", loaiBaoTri.MoTa ?? (object)DBNull.Value }
-        };
-
-                // Gọi stored function - không cần đọc phản hồi chi tiết
-                await client.Rpc("insert_loai_bao_tri", parameters);
-
-                // Lấy dữ liệu vừa thêm bằng cách truy vấn theo tên
-                var response = await client.From<LoaiBaoTri>()
-                    .Filter("ten_loai", Supabase.Postgrest.Constants.Operator.Equals, loaiBaoTri.TenLoai)
-                    .Order("ma_loai_bao_tri", Supabase.Postgrest.Constants.Ordering.Descending)
-                    .Limit(1)
-                    .Get();
-
-                return response.Models.FirstOrDefault();
+                // Đảm bảo rằng ID không được đặt khi thêm mới
+                loaiBaoTri.MaLoaiBaoTri = 0;
+                var response = await client.From<LoaiBaoTri>().Insert(loaiBaoTri);
+                return response.Models.Count > 0;
             }
             catch (Exception ex)
             {
@@ -77,25 +36,17 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 throw;
             }
         }
-        public async Task<LoaiBaoTri> CapNhatLoaiBaoTri(LoaiBaoTri loaiBaoTri)
+
+        // Thêm phương thức CapNhatLoaiBaoTri
+        public async Task<bool> CapNhatLoaiBaoTri(LoaiBaoTri loaiBaoTri)
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-
-                // Tạo dictionary với tham số cho stored function
-                var parameters = new Dictionary<string, object>
-        {
-            { "ma_loai_param", loaiBaoTri.MaLoaiBaoTri },
-            { "ten_loai_param", loaiBaoTri.TenLoai },
-            { "mo_ta_param", loaiBaoTri.MoTa ?? (object)DBNull.Value }
-        };
-
-                // Gọi stored function update_loai_bao_tri (cần tạo trước trong PostgreSQL)
-                await client.Rpc("update_loai_bao_tri", parameters);
-
-                // Lấy dữ liệu đã cập nhật
-                return await LayLoaiBaoTriTheoMa(loaiBaoTri.MaLoaiBaoTri);
+                var response = await client.From<LoaiBaoTri>()
+                    .Where(x => x.MaLoaiBaoTri == loaiBaoTri.MaLoaiBaoTri)
+                    .Update(loaiBaoTri);
+                return response.Models.Count > 0;
             }
             catch (Exception ex)
             {
@@ -103,15 +54,24 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 throw;
             }
         }
+
+        // Thêm phương thức XoaLoaiBaoTri
         public async Task<bool> XoaLoaiBaoTri(int maLoaiBaoTri)
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-                await client.From<LoaiBaoTri>()
-                    .Filter("ma_loai_bao_tri", Supabase.Postgrest.Constants.Operator.Equals, maLoaiBaoTri)
-                    .Delete();
-                return true; // Nếu không có exception, coi là thành công
+
+                // Giả sử bạn có một function "xoa_loai_bao_tri" trên Supabase
+                var parameters = new Dictionary<string, object>
+        {
+            { "ma_loai", maLoaiBaoTri }
+        };
+
+                // Gọi RPC
+                await client.Rpc("xoa_loai_bao_tri", parameters);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -119,23 +79,24 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 throw;
             }
         }
-
-        public async Task<List<LoaiBaoTri>> TimKiemLoaiBaoTri(string keyword)
+        // Thêm phương thức TimKiemLoaiBaoTri
+        public async Task<List<LoaiBaoTri>> TimKiemLoaiBaoTri(string searchText)
         {
             try
             {
-                // Lấy tất cả dữ liệu và lọc phía client (do Supabase không hỗ trợ tốt cho search đa điều kiện)
-                var allLoaiBaoTri = await LayDanhSachLoaiBT();
-                if (string.IsNullOrWhiteSpace(keyword))
-                    return allLoaiBaoTri;
+                if (string.IsNullOrWhiteSpace(searchText))
+                {
+                    return await LayDanhSachLoaiBT();
+                }
 
-                keyword = keyword.ToLower();
-                // Tìm theo mã, tên hoặc mô tả
-                return allLoaiBaoTri.Where(lbt =>
-                    lbt.MaLoaiBaoTri.ToString().Contains(keyword) ||
-                    lbt.TenLoai.ToLower().Contains(keyword) ||
-                    (lbt.MoTa != null && lbt.MoTa.ToLower().Contains(keyword)))
-                    .ToList();
+                var client = await SupabaseService.GetClientAsync();
+                // Tìm kiếm dựa trên tên loại hoặc mô tả
+                var response = await client.From<LoaiBaoTri>()
+                    .Where(x => x.TenLoai.Contains(searchText) ||
+                               (x.MoTa != null && x.MoTa.Contains(searchText)))
+                    .Get();
+
+                return response.Models;
             }
             catch (Exception ex)
             {

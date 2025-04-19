@@ -6,27 +6,25 @@ using System.Windows;
 
 namespace Project_QLTS_DNC.View.TaiKhoan
 {
-    /// <summary>
-    /// Interaction logic for ThemLoaiTaiKhoanForm.xaml
-    /// </summary>
     public partial class ThemLoaiTaiKhoanForm : Window
     {
         private LoaiTaiKhoanService _loaiTaiKhoanService;
         private LoaiTaiKhoanModel _updateLoaiTk;
+        private readonly LoaiTaiKhoanForm _loaiTaiKhoanForm;
 
-        public ThemLoaiTaiKhoanForm()
+        public ThemLoaiTaiKhoanForm(LoaiTaiKhoanForm loaiTaiKhoanForm = null)
         {
             InitializeComponent();
             _loaiTaiKhoanService = new LoaiTaiKhoanService();
+            _loaiTaiKhoanForm = loaiTaiKhoanForm; // Lưu reference đến form cha
         }
 
-       
-        public ThemLoaiTaiKhoanForm(LoaiTaiKhoanModel loaiTkUpdate)
+        public ThemLoaiTaiKhoanForm(LoaiTaiKhoanModel loaiTkUpdate, LoaiTaiKhoanForm loaiTaiKhoanForm = null)
         {
             InitializeComponent();
             _updateLoaiTk = loaiTkUpdate;
             _loaiTaiKhoanService = new LoaiTaiKhoanService();
-           
+            _loaiTaiKhoanForm = loaiTaiKhoanForm; // Lưu reference đến form cha
             LoadChucVuData();
         }
 
@@ -41,35 +39,42 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                 return;
             }
 
-            var loaiTk = new LoaiTaiKhoanModel
-            {
-                TenLoaiTk = tenLoaiTk,
-                MoTa = moTa
-            };
-
             try
             {
                 bool success;
 
-              
                 if (_updateLoaiTk != null)
                 {
-                    loaiTk.MaLoaiTk = _updateLoaiTk.MaLoaiTk; 
-                    var result = await _loaiTaiKhoanService.CapNhatLoaiTk(loaiTk);
-                    success = result != null; 
-                    
+                    // Cập nhật loại tài khoản hiện có
+                    _updateLoaiTk.TenLoaiTk = tenLoaiTk;
+                    _updateLoaiTk.MoTa = moTa;
+
+                    var result = await _loaiTaiKhoanService.CapNhatLoaiTk(_updateLoaiTk);
+                    success = result != null;
                 }
                 else
                 {
-                    var result = await _loaiTaiKhoanService.ThemLoaiTaiKhoan(loaiTk); 
-                    success = result != null; 
+                    // Thêm mới loại tài khoản
+                    var loaiTk = new LoaiTaiKhoanModel
+                    {
+                        TenLoaiTk = tenLoaiTk,
+                        MoTa = moTa
+                    };
+
+                    var result = await _loaiTaiKhoanService.ThemLoaiTaiKhoan(loaiTk);
+                    success = result != null;
                 }
 
                 if (success)
                 {
+                    // Gọi phương thức LoadDanhSachLoaiTaiKhoan() của form cha
+                    if (_loaiTaiKhoanForm != null)
+                    {
+                        await _loaiTaiKhoanForm.LoadDanhSachLoaiTaiKhoan();
+                    }
+
                     MessageBox.Show("Lưu thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                     this.DialogResult = true;
-                    
                     this.Close();
                 }
                 else
@@ -89,12 +94,10 @@ namespace Project_QLTS_DNC.View.TaiKhoan
             {
                 txtTenLoaiTaiKhoan.Text = _updateLoaiTk.TenLoaiTk;
                 txtMoTa.Text = _updateLoaiTk.MoTa;
-
                 this.Title = "Cập nhật loại tài khoản";
                 this.txtTieude.Text = "Cập nhật loại tài khoản";
                 this.btnLuu.Content = "Cập nhật";
-
-            }  
+            }
         }
 
         private void btnHuy_Click(object sender, RoutedEventArgs e)

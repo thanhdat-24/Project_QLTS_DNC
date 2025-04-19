@@ -18,12 +18,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
     public partial class frmDuyetPhieu : UserControl
     {
         private ObservableCollection<PhieuCanDuyet> DanhSachTatCaPhieu = new();
+        private bool isLoadingData = false;
 
         public frmDuyetPhieu()
         {
             InitializeComponent();
+            
+            // Đảm bảo ComboBox có lựa chọn mặc định là "Tất cả"
+            if (cboLoaiPhieu != null && cboLoaiPhieu.Items.Count > 0)
+            {
+                cboLoaiPhieu.SelectedIndex = 0;
+            }
+            
             LoadThongKePhieu();
-         }
+        }
 
         private async void dgPhieuCanDuyet_Loaded(object sender, RoutedEventArgs e)
         {
@@ -34,6 +42,11 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         {
             try
             {
+                isLoadingData = true;
+
+                // Hiển thị loading indicator nếu cần
+                SetLoadingState(true);
+
                 var client = await SupabaseService.GetClientAsync();
                 DanhSachTatCaPhieu.Clear();
 
@@ -43,45 +56,110 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 {
                     if (item.MaPhieuNhap.HasValue)
                     {
-                        var pn = await client.From<PhieuNhapKho>().Filter("ma_phieu_nhap", Operator.Equals, item.MaPhieuNhap.Value).Single();
-                        DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PN{pn.MaPhieuNhap}", NgayTaoPhieu = pn.NgayNhap, TrangThaiBool = pn.TrangThai, LoaiPhieu = "Phiếu nhập" });
+                        try
+                        {
+                            var pn = await client.From<PhieuNhapKho>().Filter("ma_phieu_nhap", Operator.Equals, item.MaPhieuNhap.Value).Single();
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PN{pn.MaPhieuNhap}", NgayTaoPhieu = pn.NgayNhap, TrangThaiBool = pn.TrangThai, LoaiPhieu = "Phiếu nhập" });
+                        }
+                        catch (Exception ex)
+                        {
+                            // Bỏ qua lỗi khi không tìm thấy phiếu nhập
+                            Console.WriteLine($"Không tìm thấy phiếu nhập: {ex.Message}");
+                        }
                     }
 
                     if (item.MaPhieuXuat.HasValue)
                     {
-                        var px = await client.From<PhieuXuat>().Filter("ma_phieu_xuat", Operator.Equals, item.MaPhieuXuat.Value).Single();
-                        DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PX{px.MaPhieuXuat}", NgayTaoPhieu = px.NgayXuat, TrangThaiBool = px.TrangThai, LoaiPhieu = "Phiếu xuất" });
+                        try
+                        {
+                            var px = await client.From<PhieuXuat>().Filter("ma_phieu_xuat", Operator.Equals, item.MaPhieuXuat.Value).Single();
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PX{px.MaPhieuXuat}", NgayTaoPhieu = px.NgayXuat, TrangThaiBool = px.TrangThai, LoaiPhieu = "Phiếu xuất" });
+                        }
+                        catch (Exception ex)
+                        {
+                            // Bỏ qua lỗi khi không tìm thấy phiếu xuất
+                            Console.WriteLine($"Không tìm thấy phiếu xuất: {ex.Message}");
+                        }
                     }
 
                     if (item.MaPhieuDeNghiMua.HasValue)
                     {
-                        var pdn = await client.From<phieudenghimua>().Filter("ma_phieu_de_nghi", Operator.Equals, item.MaPhieuDeNghiMua.Value).Single();
-                        DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PDN{pdn.MaPhieuDeNghi}", NgayTaoPhieu = pdn.NgayDeNghi, TrangThaiBool = pdn.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
+                        try
+                        {
+                            var pdn = await client.From<phieudenghimua>().Filter("ma_phieu_de_nghi", Operator.Equals, item.MaPhieuDeNghiMua.Value).Single();
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PDN{pdn.MaPhieuDeNghi}", NgayTaoPhieu = pdn.NgayDeNghi, TrangThaiBool = pdn.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
+                        }
+                        catch (Exception ex)
+                        {
+                            // Bỏ qua lỗi khi không tìm thấy phiếu đề nghị
+                            Console.WriteLine($"Không tìm thấy phiếu đề nghị: {ex.Message}");
+                        }
                     }
 
                     if (item.MaPhieuBaoHong.HasValue)
                     {
-                        var pbh = await client.From<BaoHong>().Filter("ma_phieu_bao_hong", Operator.Equals, item.MaPhieuBaoHong.Value).Single();
-                        DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PBH{pbh.MaPhieuBaoHong}", NgayTaoPhieu = pbh.NgayBaoHong, TrangThaiBool = pbh.TrangThai, LoaiPhieu = "Phiếu báo hỏng" });
+                        try
+                        {
+                            var pbh = await client.From<BaoHong>().Filter("ma_phieu_bao_hong", Operator.Equals, item.MaPhieuBaoHong.Value).Single();
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PBH{pbh.MaPhieuBaoHong}", NgayTaoPhieu = pbh.NgayBaoHong, TrangThaiBool = pbh.TrangThai, LoaiPhieu = "Phiếu báo hỏng" });
+                        }
+                        catch (Exception ex)
+                        {
+                            // Bỏ qua lỗi khi không tìm thấy phiếu báo hỏng
+                            Console.WriteLine($"Không tìm thấy phiếu báo hỏng: {ex.Message}");
+                        }
                     }
                 }
 
+                // Sắp xếp phiếu theo ngày tạo mới nhất
+                var sortedList = new ObservableCollection<PhieuCanDuyet>(
+                    DanhSachTatCaPhieu.OrderByDescending(p => p.NgayTaoPhieu)
+                );
+                DanhSachTatCaPhieu = sortedList;
                 dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
+
+                // Cập nhật UI hiển thị số lượng
+                UpdateItemCount();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi load dữ liệu tổng hợp: {ex.Message}");
+                MessageBox.Show($"Lỗi khi load dữ liệu tổng hợp: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                isLoadingData = false;
+                // Ẩn loading indicator
+                SetLoadingState(false);
             }
         }
 
         private async Task LocDuLieuTheoLoaiVaNgay()
         {
+            if (isLoadingData) return;
+            
+            // Kiểm tra ComboBox đã được khởi tạo chưa
+            if (cboLoaiPhieu == null)
+            {
+                return;
+            }
+
             try
             {
+                isLoadingData = true;
+                SetLoadingState(true);
+
                 var client = await SupabaseService.GetClientAsync();
-                string loaiPhieu = (cboLoaiPhieu.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Tất cả";
-                DateTime? tuNgay = dpTuNgay.SelectedDate;
-                DateTime? denNgay = dpDenNgay.SelectedDate;
+                
+                // Lấy giá trị từ ComboBox an toàn hơn
+                string loaiPhieu = "Tất cả"; // Giá trị mặc định
+                ComboBoxItem selectedItem = cboLoaiPhieu.SelectedItem as ComboBoxItem;
+                if (selectedItem != null)
+                {
+                    loaiPhieu = selectedItem.Content?.ToString() ?? "Tất cả";
+                }
+
+                DateTime? tuNgay = dpTuNgay?.SelectedDate;
+                DateTime? denNgay = dpDenNgay?.SelectedDate;
 
                 var ketQua = new ObservableCollection<PhieuCanDuyet>();
 
@@ -141,21 +219,59 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                     }
                 }
 
-                DanhSachTatCaPhieu = ketQua;
-                dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
+                // Sắp xếp phiếu theo ngày tạo mới nhất
+                var sortedList = new ObservableCollection<PhieuCanDuyet>(
+                    ketQua.OrderByDescending(p => p.NgayTaoPhieu)
+                );
+
+                DanhSachTatCaPhieu = sortedList;
+                
+                // Kiểm tra DataGrid đã được khởi tạo chưa
+                if (dgPhieuCanDuyet != null)
+                {
+                    dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
+                }
+
+                // Cập nhật UI hiển thị số lượng
+                UpdateItemCount();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi lọc dữ liệu: {ex.Message}");
+                MessageBox.Show($"Lỗi lọc dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                isLoadingData = false;
+                SetLoadingState(false);
             }
         }
 
-        private void btnSearch_Click(object sender, RoutedEventArgs e) => TimKiemPhieu(txtSearch.Text);
+        // Thêm phương thức để hiển thị/ẩn trạng thái đang tải
+        private void SetLoadingState(bool isLoading)
+        {
+            // Có thể thêm ProgressBar hiển thị khi đang tải
+            // Ví dụ: loadingIndicator.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
+        }
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) => TimKiemPhieu(txtSearch.Text);
+        private void UpdateItemCount()
+        {
+            // Cập nhật thông tin hiển thị số lượng phiếu sau khi lọc/tìm kiếm
+            if (dgPhieuCanDuyet != null && dgPhieuCanDuyet.Items != null)
+            {
+                int count = dgPhieuCanDuyet.Items.Count;
+                // Hiển thị số lượng phiếu đang hiển thị
+                // Ví dụ: lblItemCount.Content = $"Hiển thị {count} phiếu";
+            }
+        }
+
+        private void btnSearch_Click(object sender, RoutedEventArgs e) => TimKiemPhieu(txtSearch?.Text);
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) => TimKiemPhieu(txtSearch?.Text);
 
         private void TimKiemPhieu(string tuKhoa)
         {
+            if (isLoadingData || dgPhieuCanDuyet == null) return;
+
             if (string.IsNullOrWhiteSpace(tuKhoa))
             {
                 dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
@@ -167,48 +283,62 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             var ketQua = DanhSachTatCaPhieu.Where(p =>
                 p.MaPhieu.ToLower().Contains(tuKhoa) ||
                 p.NgayTaoPhieu.ToString("dd/MM/yyyy").Contains(tuKhoa) ||
-                p.TrangThai.ToLower().Contains(tuKhoa)
+                p.TrangThai.ToLower().Contains(tuKhoa) ||
+                p.LoaiPhieu.ToLower().Contains(tuKhoa)
             ).ToList();
 
             dgPhieuCanDuyet.ItemsSource = ketQua;
+
+            // Cập nhật UI hiển thị số lượng
+            UpdateItemCount();
         }
 
         private void btnDetail_Click(object sender, RoutedEventArgs e)
         {
-            var frm = new frmChiTietPhieuNhap();
-            new Window
+            if (dgPhieuCanDuyet?.SelectedItem == null)
             {
-                Title = "Chi tiết phiếu nhập",
-                Content = frm,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                WindowState = WindowState.Maximized
-            }.ShowDialog();
+                MessageBox.Show("Vui lòng chọn một phiếu để xem chi tiết!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Gọi hàm xem chi tiết
+            btnXemChiTiet_Click(sender, e);
         }
 
         private void btnXemChiTiet_Click(object sender, RoutedEventArgs e)
         {
-            if (dgPhieuCanDuyet.SelectedItem is PhieuCanDuyet selected && selected.MaPhieu.StartsWith("PN") &&
-                long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
+            if (dgPhieuCanDuyet?.SelectedItem is PhieuCanDuyet selected)
             {
-                var frm = new frmXemChiTietNhap();
-                frm.LoadTheoMaPhieu(maPhieuNhap);
-                frm.OnPhieuDuyetThanhCong += async () =>
+                if (selected.MaPhieu.StartsWith("PN") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
                 {
-                    await LoadDuLieuTongHopPhieuAsync();
-                    LoadThongKePhieu();
-                };
+                    var frm = new frmXemChiTietNhap();
+                    frm.LoadTheoMaPhieu(maPhieuNhap);
+                    frm.OnPhieuDuyetThanhCong += async () =>
+                    {
+                        await LoadDuLieuTongHopPhieuAsync();
+                        LoadThongKePhieu();
+                    };
 
-                new Window
+                    Window window = new Window
+                    {
+                        Title = $"Chi tiết phiếu nhập - {selected.MaPhieu}",
+                        Content = frm,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        Width = 1200,
+                        Height = 800,
+                        ResizeMode = ResizeMode.CanResize
+                    };
+                    window.ShowDialog();
+                }
+                else
                 {
-                    Title = $"Chi tiết phiếu nhập - PN{maPhieuNhap}",
-                    Content = frm,
-                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                    WindowState = WindowState.Maximized
-                }.ShowDialog();
+                    MessageBox.Show($"Chức năng xem chi tiết đang được phát triển cho loại phiếu: {selected.LoaiPhieu}",
+                        "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             else
             {
-                MessageBox.Show("Vui lòng chọn một phiếu nhập để xem chi tiết.");
+                MessageBox.Show("Vui lòng chọn một phiếu để xem chi tiết.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -218,19 +348,30 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
                 var list = (await client.From<PhieuNhapKho>().Get()).Models;
-                txtTongPhieuCanDuyet.Text = list.Count(p => p.TrangThai == null).ToString();
-                txtTongPhieuDaDuyet.Text = list.Count(p => p.TrangThai == true).ToString();
-                txtTongPhieuTuChoi.Text = list.Count(p => p.TrangThai == false).ToString();
+
+                // Thêm kiểm tra null trước khi gán giá trị
+                if (txtTongPhieuCanDuyet != null)
+                    txtTongPhieuCanDuyet.Text = list.Count(p => p.TrangThai == null).ToString();
+                    
+                if (txtTongPhieuDaDuyet != null)
+                    txtTongPhieuDaDuyet.Text = list.Count(p => p.TrangThai == true).ToString();
+                    
+                if (txtTongPhieuTuChoi != null)
+                    txtTongPhieuTuChoi.Text = list.Count(p => p.TrangThai == false).ToString();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi load thống kê: {ex.Message}");
+                MessageBox.Show($"Lỗi load thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private async void cboLoaiPhieu_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            await LocDuLieuTheoLoaiVaNgay();
+            // Đảm bảo chỉ xử lý nếu người dùng thực sự thay đổi lựa chọn
+            if (cboLoaiPhieu?.SelectedItem != null)
+            {
+                await LocDuLieuTheoLoaiVaNgay();
+            }
         }
 
         private async void dpTuNgay_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -241,6 +382,12 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         private async void dpDenNgay_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             await LocDuLieuTheoLoaiVaNgay();
+        }
+        
+        // Thêm sự kiện cho nút Refresh
+        private async void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadDuLieuTongHopPhieuAsync();
         }
     }
 }

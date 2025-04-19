@@ -1,8 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 using Project_QLTS_DNC.Models.BaoTri;
-using Project_QLTS_DNC.ViewModel.Baotri;
+using Project_QLTS_DNC.Services.BaoTri;
 
 namespace Project_QLTS_DNC.View.BaoTri
 {
@@ -11,47 +22,17 @@ namespace Project_QLTS_DNC.View.BaoTri
     /// </summary>
     public partial class LoaiBaoTriForm : UserControl
     {
-        private readonly LoaiBaoTriViewModel _viewModel;
-
+        private readonly LoaiBaoTriService _loaiBaoTriService = new(); 
         public LoaiBaoTriForm()
         {
             InitializeComponent();
+            _ = LoadLoaiBaoTri();
 
-            // Khởi tạo ViewModel và gán làm DataContext
-            _viewModel = new LoaiBaoTriViewModel();
-            this.DataContext = _viewModel;
-
-            // Đăng ký sự kiện cho combobox phân trang
-            cboPageSize.SelectionChanged += CboPageSize_SelectionChanged;
         }
-
-        private void CboPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public async Task LoadLoaiBaoTri()
         {
-            if (cboPageSize.SelectedItem != null && _viewModel != null)
-            {
-                ComboBoxItem selected = cboPageSize.SelectedItem as ComboBoxItem;
-                if (selected != null && int.TryParse(selected.Content.ToString(), out int pageSize))
-                {
-                    _viewModel.SoLuongTrenTrang = pageSize;
-                }
-            }
-        }
-        private void EditButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            if (button != null && button.DataContext is LoaiBaoTri loaiBaoTri)
-            {
-                _viewModel.SuaCommand.Execute(loaiBaoTri);
-            }
-        }
-
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            if (button != null && button.DataContext is LoaiBaoTri loaiBaoTri)
-            {
-                _viewModel.XoaCommand.Execute(loaiBaoTri);
-            }
+            List<LoaiBaoTri> dsLoaiBaoTri = await _loaiBaoTriService.LayDanhSachLoaiBT();
+            dgLoaiBaoTri.ItemsSource = dsLoaiBaoTri;
         }
     }
 }

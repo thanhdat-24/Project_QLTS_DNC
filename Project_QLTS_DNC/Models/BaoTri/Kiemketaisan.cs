@@ -45,7 +45,7 @@ namespace Project_QLTS_DNC.Models
 
         // Thuộc tính IsSelected để hỗ trợ chọn dòng trong DataGrid
         private bool _isSelected;
- 
+
         [NotMapped]
         [Supabase.Postgrest.Attributes.Column("IsSelected")] // Bỏ tham số true
         [Newtonsoft.Json.JsonIgnore] // Thêm dòng này để không serialize thuộc tính xuống JSON

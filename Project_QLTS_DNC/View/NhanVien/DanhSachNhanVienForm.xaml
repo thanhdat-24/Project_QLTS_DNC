@@ -65,7 +65,7 @@
 
             <!-- Thêm mới -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="btnThemNhanVien" Style="{StaticResource ActionButton}" Width="130" Background="#4CAF50" Click="btnThemNhanVien_Click">
+                <Button x:Name="btnThemNhanVien" Style="{StaticResource ActionButton}" Width="130" Background="#4CAF50" Click="btnThemNhanVien_Click" >
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
                         <TextBlock Text="Thêm mới" VerticalAlignment="Center" FontWeight="SemiBold" />
@@ -135,17 +135,25 @@
         </materialDesign:Card>
 
         <!-- DataGrid for Employee List with Material Design -->
-        <DataGrid x:Name="dvDanhSachNhanVien" Grid.Row="2" Margin="15,0,15,15" 
+        <DataGrid x:Name="dvDanhSachNhanVien" 
+          Grid.Row="2" 
+          Margin="15,0,15,15" 
           Style="{StaticResource MaterialDesignDataGrid}"
           materialDesign:DataGridAssist.CellPadding="13 8"
           materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+          ItemsSource="{Binding DanhSachNhanVien, 
+                       Mode=TwoWay, 
+                       UpdateSourceTrigger=PropertyChanged}"
           AutoGenerateColumns="False"
-          CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" 
+          CanUserAddRows="False" 
+          CanUserDeleteRows="False" 
+          IsReadOnly="True" 
           Background="White" 
           GridLinesVisibility="All"
           BorderThickness="1"
           BorderBrush="#E0E0E0"
-          RowBackground="White" AlternatingRowBackground="#F9F9F9">
+          RowBackground="White" 
+          AlternatingRowBackground="#F9F9F9">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                     <Setter Property="BorderThickness" Value="0,0,1,0" />
@@ -165,7 +173,7 @@
                         EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
                         Header="" Width="60"/>
                 <DataGridTextColumn Header="Mã nhân viên" Binding="{Binding MaNv}" Width="*"/>
-                <DataGridTextColumn Header="Phòng Ban" Binding="{Binding TenPb}" Width="*"/>
+                <DataGridTextColumn Header="Phòng Ban" Binding="{Binding TenPb}" Width="*" />
                 <DataGridTextColumn Header="Chức vụ" Binding="{Binding TenCv}" Width="*" />
                 <DataGridTextColumn Header="Tên nhân viên" Binding="{Binding TenNv}" Width="*"/>
                 <DataGridTextColumn Header="Giới tính" Binding="{Binding GioiTinh}" Width="*"/>
@@ -173,7 +181,7 @@
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
                 <DataGridTextColumn Header="Số điện thoại" Binding="{Binding Sdt}" Width="*"/>
                 
-                <DataGridTextColumn Header="Ngày vào làm" Binding="{Binding NgayVaoLam}" Width="*"/>
+                <DataGridTextColumn Header="Ngày vào làm" Binding="{Binding NgayVaoLam, StringFormat=dd/MM/yyyy}" Width="*"/>
                 <DataGridTemplateColumn Header="Thao Tác" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

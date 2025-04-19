@@ -16,7 +16,7 @@ public class DanhSachChucVuViewModel : INotifyPropertyChanged
 
     public DanhSachChucVuViewModel()
     {
-        _chucVuService = new ChucVuService(); 
+        _chucVuService = new ChucVuService();
         XoaChucVuCommand = new RelayCommand<int>(async (maChucVu) => await XoaChucVuAsync(maChucVu));
         _ = LoadChucVuAsync();
     }
@@ -24,35 +24,33 @@ public class DanhSachChucVuViewModel : INotifyPropertyChanged
     public async Task LoadChucVuAsync()
     {
         var list = await _chucVuService.GetAllChucVuAsync();
-
-        
-        if (DanhSachChucVu == null)
-            DanhSachChucVu = new ObservableCollection<ChucVuModel>();
-
         DanhSachChucVu.Clear();
 
-        
         foreach (var item in list)
             DanhSachChucVu.Add(item);
 
-       
         OnPropertyChanged(nameof(DanhSachChucVu));
     }
 
-
-    public async Task TimKiemChucVuAsync(string keyword)
+    private string _keyword;
+    public string Keyword
     {
-        if (string.IsNullOrWhiteSpace(keyword))
+        get => _keyword;
+        set
         {
-            await LoadChucVuAsync();
-            return;
+            _keyword = value;
+            OnPropertyChanged();
         }
-
-        var result = await _chucVuService.TimKiemChucVuAsync(keyword);
-        DanhSachChucVu.Clear();
-        foreach (var item in result)
-            DanhSachChucVu.Add(item);
     }
+
+    // Ensure this method accepts a string keyword
+    public async Task<List<ChucVuModel>> TimKiemChucVuAsync(string keyword)
+    {
+        var chucVuService = new ChucVuService();
+        var ketQua = await chucVuService.TimKiemChucVuAsync(keyword);
+        return ketQua;
+    }
+
 
     public async Task<bool> XoaChucVuAsync(int maChucVu)
     {
@@ -66,7 +64,7 @@ public class DanhSachChucVuViewModel : INotifyPropertyChanged
 
     public async Task Refresh()
     {
-        await LoadChucVuAsync();  
+        await LoadChucVuAsync();
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

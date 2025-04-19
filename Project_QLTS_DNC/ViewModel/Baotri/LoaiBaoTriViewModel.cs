@@ -78,7 +78,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-        private int _tongSoTrang = 1; 
+        private int _tongSoTrang = 1;
         public int TongSoTrang
         {
             get => _tongSoTrang;
@@ -163,14 +163,14 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             ThemMoiCommand = new RelayCommand<object>(param => ExecuteThemMoi());
             SuaCommand = new RelayCommand<LoaiBaoTri>(ExecuteSua);
             XoaCommand = new RelayCommand<LoaiBaoTri>(ExecuteXoa);
-            
+
             // Các lệnh phân trang
             VeTrangDauCommand = new RelayCommand<object>(param => TrangHienTai = 1);
             VeTrangTruocCommand = new RelayCommand<object>(param => TrangHienTai = Math.Max(1, TrangHienTai - 1));
             DenTrangSauCommand = new RelayCommand<object>(param => TrangHienTai = Math.Min(TongSoTrang, TrangHienTai + 1));
             DenTrangCuoiCommand = new RelayCommand<object>(param => TrangHienTai = TongSoTrang);
             PageSizeChangedCommand = new RelayCommand<int>(size => SoLuongTrenTrang = size);
-            
+
             // Load dữ liệu ban đầu
             LoadData();
         }
@@ -184,7 +184,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 var dsLoaiBaoTri = await _loaiBaoTriService.LayDanhSachLoaiBT();
                 _allLoaiBaoTri = new ObservableCollection<LoaiBaoTri>(dsLoaiBaoTri);
                 TongSoBanGhi = _allLoaiBaoTri.Count;
-                
+
                 // Hiển thị phân trang chỉ khi có nhiều bản ghi
                 ShowPagination = TongSoBanGhi > SoLuongTrenTrang;
                 CalculateTotalPages();
@@ -261,7 +261,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 if (loaiBaoTri == null) return;
-                
+
                 // Hiển thị form chỉnh sửa
                 var dialogForm = new LoaiBaoTriDialog(loaiBaoTri);
                 if (dialogForm.ShowDialog() == true && dialogForm.LoaiBaoTriResult != null)
@@ -281,13 +281,13 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 if (loaiBaoTri == null) return;
-                
+
                 var result = MessageBox.Show(
                     $"Bạn có chắc chắn muốn xóa loại bảo trì '{loaiBaoTri.TenLoai}'?",
                     "Xác nhận xóa",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
-                
+
                 if (result == MessageBoxResult.Yes)
                 {
                     _ = XoaLoaiBaoTri(loaiBaoTri.MaLoaiBaoTri);

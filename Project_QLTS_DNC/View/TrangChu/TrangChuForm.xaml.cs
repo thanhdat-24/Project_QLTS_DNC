@@ -1,60 +1,90 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
-using System;
-using System.Collections.Generic;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.QLTaiSanService;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Project_QLTS_DNC.View.TrangChu
 {
-    /// <summary>
-    /// Interaction logic for TrangChuForm.xaml
-    /// </summary>
     public partial class TrangChuForm : UserControl
     {
         public TrangChuForm()
         {
             InitializeComponent();
-            LoadBarChart(); // Gọi hàm hiển thị biểu đồ
-
+            // Gọi bất đồng bộ, không chặn UI thread
+            _ = LoadBarChartAsync();
         }
 
-        //Load hiện thị biểu đồ cột
-        private void LoadBarChart()
+        /// <summary>
+        /// Lấy dữ liệu từ Supabase, tính thống kê và vẽ biểu đồ
+        /// </summary>
+        private async Task LoadBarChartAsync()
         {
-            assetChart.Series = new SeriesCollection
+            try
             {
-                new ColumnSeries
-                {
-                    Title = "Số lượng",
-                    Values = new ChartValues<int> { 150, 120, 10, 5 },
-                    Fill = new SolidColorBrush(Color.FromRgb(0x4D, 0x90, 0xFE))
-                }
-            };
+                // 1. Lấy toàn bộ danh sách tài sản
+                var allAssets = await TaiSanService.LayDanhSachTaiSanAsync();
 
-            assetChart.AxisX.Add(new Axis
-            {
-                Labels = new[] { "Tổng TS", "Đang dùng", "Bảo trì", "Sửa chữa" },
-                Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false }
-            });
+                // 2. Lấy danh sách phiếu bảo trì để đếm tài sản đã được bảo trì
+                var danhSachPhieu = await new PhieuBaoTriService().GetPhieuBaoTriAsync();
+                int total = allAssets.Count;
 
-            assetChart.AxisY.Add(new Axis
+                // Đếm tài sản "Đang bảo trì" từ danh sách phiếu bảo trì
+                int daBaoTri = danhSachPhieu
+                    .Where(p => p.MaTaiSan.HasValue)
+                    .Select(p => p.MaTaiSan.Value)
+                    .Distinct()
+                    .Count();
+
+                // Tính số tài sản "Đang dùng" bằng tổng tài sản trừ đi số tài sản "Đang bảo trì"
+                int inUse = total - daBaoTri;
+                //Gán giá trị lên các TextBlock thống kê
+                txtTong.Text = total.ToString();
+                txtDangDung.Text = inUse.ToString();
+                txtBaoTri.Text = daBaoTri.ToString();
+                // 3. Vẽ biểu đồ (loại bỏ cột "Bảo trì")
+                assetChart.Series = new SeriesCollection
+        {
+            new ColumnSeries
             {
                 Title = "Số lượng",
-                LabelFormatter = value => value.ToString()
-            });
+                Values = new ChartValues<int> { total, inUse, daBaoTri },
+                Fill = new SolidColorBrush(Color.FromRgb(0x4D, 0x90, 0xFE))
+            }
+        };
 
-            assetChart.LegendLocation = LegendLocation.Top;
+                // 4. Cấu hình trục X (loại bỏ "Bảo trì")
+                assetChart.AxisX.Clear();
+                assetChart.AxisX.Add(new Axis
+                {
+                    Labels = new[] { "Tổng TS", "Đang sử dụng", "Bảo trì" },
+                    Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false }
+                });
+
+                // 5. Cấu hình trục Y
+                assetChart.AxisY.Clear();
+                assetChart.AxisY.Add(new Axis
+                {
+                    Title = "Số lượng",
+                    LabelFormatter = value => value.ToString()
+                });
+
+                assetChart.LegendLocation = LegendLocation.Bottom;
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải biểu đồ: " + ex.Message);
+            }
         }
+
+
+
+
+
     }
 }

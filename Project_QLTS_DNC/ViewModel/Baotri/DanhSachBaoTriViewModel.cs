@@ -155,67 +155,67 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-            private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(KiemKeTaiSan.IsSelected))
             {
-                if (e.PropertyName == nameof(KiemKeTaiSan.IsSelected))
-                {
-                    // Cập nhật trạng thái chọn tất cả khi có item thay đổi
-                    UpdateSelectAllState();
-                }
+                // Cập nhật trạng thái chọn tất cả khi có item thay đổi
+                UpdateSelectAllState();
             }
+        }
 
-            private bool _isLoading;
-            public bool IsLoading
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set
             {
-                get => _isLoading;
-                set
-                {
-                    _isLoading = value;
-                    OnPropertyChanged(nameof(IsLoading));
-                }
+                _isLoading = value;
+                OnPropertyChanged(nameof(IsLoading));
             }
+        }
 
-            // Thông tin phân trang
-            private int _trangHienTai = 1;
-            public int TrangHienTai
+        // Thông tin phân trang
+        private int _trangHienTai = 1;
+        public int TrangHienTai
+        {
+            get => _trangHienTai;
+            set
             {
-                get => _trangHienTai;
-                set
-                {
-                    _trangHienTai = value;
-                    OnPropertyChanged(nameof(TrangHienTai));
-                    LoadPageData();
-                }
+                _trangHienTai = value;
+                OnPropertyChanged(nameof(TrangHienTai));
+                LoadPageData();
             }
+        }
 
-            private int _tongSoTrang = 1;
-            public int TongSoTrang
+        private int _tongSoTrang = 1;
+        public int TongSoTrang
+        {
+            get => _tongSoTrang;
+            set
             {
-                get => _tongSoTrang;
-                set
-                {
-                    _tongSoTrang = value;
-                    OnPropertyChanged(nameof(TongSoTrang));
-                }
+                _tongSoTrang = value;
+                OnPropertyChanged(nameof(TongSoTrang));
             }
+        }
 
-            private int _soDongMoiTrang = 10;
-            public int SoDongMoiTrang
+        private int _soDongMoiTrang = 10;
+        public int SoDongMoiTrang
+        {
+            get => _soDongMoiTrang;
+            set
             {
-                get => _soDongMoiTrang;
-                set
-                {
-                    _soDongMoiTrang = value;
-                    OnPropertyChanged(nameof(SoDongMoiTrang));
-                    UpdatePagination();
-                }
+                _soDongMoiTrang = value;
+                OnPropertyChanged(nameof(SoDongMoiTrang));
+                UpdatePagination();
             }
-            #endregion
+        }
+        #endregion
 
-            private readonly DSBaoTriService _dsBaotriService;
-            private readonly TaiSanService _taiSanService;
-            private readonly PhongService _phongService;
-            private ObservableCollection<KiemKeTaiSan> _dsKiemKeGoc;
+        private readonly DSBaoTriService _dsBaotriService;
+        private readonly TaiSanService _taiSanService;
+        private readonly PhongService _phongService;
+        private ObservableCollection<KiemKeTaiSan> _dsKiemKeGoc;
 
 
         public DanhSachBaoTriViewModel(bool autoLoad = true)
@@ -521,7 +521,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                                    (item.ViTriThucTe?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false) ||
                                    (item.GhiChu?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false);
 
-           
+
 
             bool matchesTinhTrang = true;
             if (TinhTrangDuocChon == "Dưới 50%")

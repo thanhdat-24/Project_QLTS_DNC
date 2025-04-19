@@ -37,11 +37,19 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             btnIn.Click += btnIn_Click;
         }
 
-        private void PhieuBaoTriView_Loaded(object sender, RoutedEventArgs e)
+        // Trong PhieuBaoTriView.xaml.cs
+        private async void PhieuBaoTriView_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("View đã được load");
-            DataContext = _viewModel; // Đảm bảo lại DataContext
-            LoadDSBaoTriAsync();
+            try
+            {
+                Console.WriteLine("Đang tải dữ liệu...");
+                await LoadDSBaoTriAsync();
+                Console.WriteLine("Tải dữ liệu hoàn tất");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tải: {ex.Message}");
+            }
         }
 
         // Phương thức tải danh sách bảo trì
@@ -66,7 +74,49 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        // Xử lý sự kiện khi ấn nút thêm phiếu bảo trì
+        private async void btnThem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Tạo phiếu bảo trì mới với giá trị mặc định
+                var phieuMoi = _viewModel.CreateNewPhieuBaoTri();
 
+                // Mở cửa sổ thêm mới
+                var addWindow = new Project_QLTS_DNC.Views.EditPhieuBaoTriWindow(phieuMoi);
+                addWindow.Title = "Thêm phiếu bảo trì mới";
+                addWindow.Owner = Window.GetWindow(this);
+
+                // Hiển thị cửa sổ dưới dạng dialog
+                bool? result = addWindow.ShowDialog();
+
+                // Nếu người dùng đã lưu phiếu mới
+                if (result == true)
+                {
+                    // Thêm phiếu bảo trì vào cơ sở dữ liệu
+                    bool success = await _viewModel.AddPhieuBaoTriAsync(addWindow.PhieuBaoTri);
+
+                    if (success)
+                    {
+                        MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Tải lại danh sách bảo trì để cập nhật giao diện
+                        await LoadDSBaoTriAsync();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không thể thêm phiếu bảo trì. Vui lòng kiểm tra lại dữ liệu!", "Lỗi",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         // Xử lý sự kiện khi ấn nút tìm kiếm
         private async void btnTimKiem_Click(object sender, RoutedEventArgs e)
@@ -201,47 +251,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 UpdatePaginationInfo();
             }
         }
-        private async void btnThem_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Tạo một phiếu bảo trì mới với giá trị mặc định
-                var phieuMoi = _viewModel.CreateNewPhieuBaoTri();
-
-                // Mở cửa sổ chỉnh sửa với phiếu mới
-                var editWindow = new Project_QLTS_DNC.Views.EditPhieuBaoTriWindow(phieuMoi);
-                editWindow.Title = "Thêm Phiếu Bảo Trì Mới";
-                editWindow.Owner = Window.GetWindow(this);
-
-                // Hiển thị cửa sổ dưới dạng dialog
-                bool? result = editWindow.ShowDialog();
-
-                // Nếu người dùng đã lưu thay đổi (nhấn nút Save)
-                if (result == true)
-                {
-                    // Thêm phiếu bảo trì vào cơ sở dữ liệu
-                    bool success = await _viewModel.ThemPhieuBaoTriAsync(editWindow.PhieuBaoTri);
-                    if (success)
-                    {
-                        MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Tải lại danh sách bảo trì để cập nhật giao diện
-                        await LoadDSBaoTriAsync();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Không thể thêm phiếu bảo trì! Kiểm tra log để biết thêm chi tiết.", "Lỗi",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi mở cửa sổ thêm mới: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
 
         // Xử lý nút chỉnh sửa
         private async void EditButton_Click(object sender, RoutedEventArgs e)
@@ -290,8 +299,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 }
             }
         }
-
-
 
         // Xử lý khi nhấn nút xóa
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
@@ -464,7 +471,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-       
         // Phương thức thêm nội dung phiếu vào FlowDocument
         private void ThemNoiDungPhieu(System.Windows.Documents.FlowDocument document, PhieuBaoTri phieu)
         {
@@ -492,6 +498,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
             titlePara.TextAlignment = System.Windows.TextAlignment.Center;
             titlePara.Margin = new System.Windows.Thickness(0, 20, 0, 20);
+
             System.Windows.Documents.Run titleRun = new System.Windows.Documents.Run("PHIẾU BẢO TRÌ TÀI SẢN");
             titleRun.FontSize = 18;
             titleRun.FontWeight = System.Windows.FontWeights.Bold;
@@ -513,41 +520,29 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             // Thêm hàng thông tin với định dạng đồng nhất
             AddTableRow(infoTable, "Mã phiếu bảo trì:", phieu.MaBaoTri.ToString());
+            AddTableRow(infoTable, "Mã tài sản:", phieu.MaTaiSan?.ToString() ?? "N/A");
 
-            // Hiển thị cả mã tài sản và tên tài sản
-            string taiSanInfo = phieu.MaTaiSan?.ToString() ?? "N/A";
-            if (!string.IsNullOrEmpty(phieu.TenTaiSan))
+            // Chuyển đổi mã loại bảo trì thành tên
+            string loaiBaoTri = "Không xác định";
+            switch (phieu.MaLoaiBaoTri)
             {
-                taiSanInfo += $" - {phieu.TenTaiSan}";
+                case 1: loaiBaoTri = "Định kỳ"; break;
+                case 2: loaiBaoTri = "Đột xuất"; break;
+                case 3: loaiBaoTri = "Bảo hành"; break;
             }
-            AddTableRow(infoTable, "Tài sản:", taiSanInfo);
 
-            // Sử dụng tên loại bảo trì thay vì mã
-            AddTableRow(infoTable, "Loại bảo trì:", phieu.TenLoaiBaoTri ?? "Không xác định");
+            AddTableRow(infoTable, "Loại bảo trì:", loaiBaoTri);
             AddTableRow(infoTable, "Ngày bảo trì:", phieu.NgayBaoTri?.ToString("dd/MM/yyyy") ?? "N/A");
-
-            // Hiển thị tên người phụ trách thay vì mã
-            string nguoiPhuTrachInfo = "Chưa phân công";
-            if (phieu.MaNV.HasValue)
-            {
-                if (!string.IsNullOrEmpty(phieu.TenNhanVien))
-                {
-                    nguoiPhuTrachInfo = $"{phieu.TenNhanVien} (Mã: {phieu.MaNV})";
-                }
-                else
-                {
-                    nguoiPhuTrachInfo = phieu.MaNV.ToString();
-                }
-            }
-            AddTableRow(infoTable, "Người phụ trách:", nguoiPhuTrachInfo);
-
+            AddTableRow(infoTable, "Người phụ trách:", phieu.MaNV?.ToString() ?? "N/A");
             AddTableRow(infoTable, "Trạng thái:", phieu.TrangThai);
             AddTableRow(infoTable, "Chi phí:", string.Format("{0:N0} VNĐ", phieu.ChiPhi));
+
             section.Blocks.Add(infoTable);
 
             // Tạo nội dung bảo trì
             System.Windows.Documents.Paragraph contentHeaderPara = new System.Windows.Documents.Paragraph();
             contentHeaderPara.Margin = new System.Windows.Thickness(0, 20, 0, 10);
+
             System.Windows.Documents.Run contentHeaderRun = new System.Windows.Documents.Run("NỘI DUNG BẢO TRÌ:");
             contentHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
             contentHeaderPara.Inlines.Add(contentHeaderRun);
@@ -560,12 +555,14 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             contentTable.BorderThickness = new System.Windows.Thickness(1);
             contentTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(600) });
             contentTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
+
             System.Windows.Documents.TableRow contentRow = new System.Windows.Documents.TableRow();
             System.Windows.Documents.TableCell contentCell = new System.Windows.Documents.TableCell();
             contentCell.Padding = new System.Windows.Thickness(8);
 
             System.Windows.Documents.Paragraph contentPara = new System.Windows.Documents.Paragraph();
             contentPara.TextAlignment = System.Windows.TextAlignment.Justify;
+
             System.Windows.Documents.Run contentRun = new System.Windows.Documents.Run(phieu.NoiDung ?? "");
             contentPara.Inlines.Add(contentRun);
             contentCell.Blocks.Add(contentPara);
@@ -578,6 +575,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 System.Windows.Documents.Paragraph noteHeaderPara = new System.Windows.Documents.Paragraph();
                 noteHeaderPara.Margin = new System.Windows.Thickness(0, 20, 0, 10);
+
                 System.Windows.Documents.Run noteHeaderRun = new System.Windows.Documents.Run("GHI CHÚ:");
                 noteHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
                 noteHeaderPara.Inlines.Add(noteHeaderRun);
@@ -590,11 +588,14 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 noteTable.BorderThickness = new System.Windows.Thickness(1);
                 noteTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(600) });
                 noteTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
+
                 System.Windows.Documents.TableRow noteRow = new System.Windows.Documents.TableRow();
                 System.Windows.Documents.TableCell noteCell = new System.Windows.Documents.TableCell();
                 noteCell.Padding = new System.Windows.Thickness(8);
+
                 System.Windows.Documents.Paragraph notePara = new System.Windows.Documents.Paragraph();
                 notePara.TextAlignment = System.Windows.TextAlignment.Justify;
+
                 System.Windows.Documents.Run noteRun = new System.Windows.Documents.Run(phieu.GhiChu);
                 notePara.Inlines.Add(noteRun);
                 noteCell.Blocks.Add(notePara);
@@ -608,6 +609,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             signatureTable.CellSpacing = 0;
             signatureTable.BorderThickness = new System.Windows.Thickness(0);
             signatureTable.Margin = new System.Windows.Thickness(0, 40, 0, 20);
+
             signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
             signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
             signatureTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
@@ -618,9 +620,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Cột người lập phiếu
             System.Windows.Documents.TableCell leftCell = new System.Windows.Documents.TableCell();
             leftCell.BorderThickness = new System.Windows.Thickness(0);
+
             System.Windows.Documents.Paragraph leftHeaderPara = new System.Windows.Documents.Paragraph();
             leftHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
             leftHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
+
             System.Windows.Documents.Run leftHeaderRun = new System.Windows.Documents.Run("Người lập phiếu");
             leftHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
             leftHeaderPara.Inlines.Add(leftHeaderRun);
@@ -629,6 +633,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Thêm chỗ để ký tên
             System.Windows.Documents.Paragraph leftSignPara = new System.Windows.Documents.Paragraph();
             leftSignPara.TextAlignment = System.Windows.TextAlignment.Center;
+
             System.Windows.Documents.Run leftSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
             leftSignRun.FontStyle = System.Windows.FontStyles.Italic;
             leftSignRun.FontSize = 10;
@@ -639,9 +644,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Cột người phụ trách
             System.Windows.Documents.TableCell rightCell = new System.Windows.Documents.TableCell();
             rightCell.BorderThickness = new System.Windows.Thickness(0);
+
             System.Windows.Documents.Paragraph rightHeaderPara = new System.Windows.Documents.Paragraph();
             rightHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
             rightHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
+
             System.Windows.Documents.Run rightHeaderRun = new System.Windows.Documents.Run("Người phụ trách");
             rightHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
             rightHeaderPara.Inlines.Add(rightHeaderRun);
@@ -650,6 +657,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Thêm chỗ để ký tên
             System.Windows.Documents.Paragraph rightSignPara = new System.Windows.Documents.Paragraph();
             rightSignPara.TextAlignment = System.Windows.TextAlignment.Center;
+
             System.Windows.Documents.Run rightSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
             rightSignRun.FontStyle = System.Windows.FontStyles.Italic;
             rightSignRun.FontSize = 10;
@@ -663,6 +671,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             System.Windows.Documents.Paragraph footerPara = new System.Windows.Documents.Paragraph();
             footerPara.TextAlignment = System.Windows.TextAlignment.Right;
             footerPara.Margin = new System.Windows.Thickness(0, 20, 0, 0);
+
             System.Windows.Documents.Run footerRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             footerRun.FontStyle = System.Windows.FontStyles.Italic;
             footerRun.FontSize = 10;

@@ -117,7 +117,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 }
             }
         }
-        
+
         private void BtnTimKiem_Click(object sender, RoutedEventArgs e)
         {
             // Cập nhật từ khóa tìm kiếm
@@ -323,38 +323,38 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 throw; // Rethrow để caller biết lỗi
             }
         }
-      private async void BtnTaoPhieuBaoTri_Click(object sender, RoutedEventArgs e)
-{
-    try
-    {
-        // Lấy Supabase client
-        var client = await SupabaseService.GetClientAsync();
-        if (client == null)
+        private async void BtnTaoPhieuBaoTri_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu!", "Lỗi",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
+            try
+            {
+                // Lấy Supabase client
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu!", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-        // Mở form tạo phiếu bảo trì mới (không có tài sản được chọn)
-        var formTaoPhieu = new DSBaoTriInputForm(client);
-        formTaoPhieu.Owner = Window.GetWindow(this);
-        var result = formTaoPhieu.ShowDialog();
-        
-        // Nếu người dùng đã lưu thành công, tải lại dữ liệu
-        if (result == true)
-        {
-            await _viewModel.LoadDSKiemKeAsync();
-            MessageBox.Show("Đã tạo phiếu bảo trì thành công!", "Thông báo", 
-                MessageBoxButton.OK, MessageBoxImage.Information);
+                // Mở form tạo phiếu bảo trì mới (không có tài sản được chọn)
+                var formTaoPhieu = new DSBaoTriInputForm(client);
+                formTaoPhieu.Owner = Window.GetWindow(this);
+                var result = formTaoPhieu.ShowDialog();
+
+                // Nếu người dùng đã lưu thành công, tải lại dữ liệu
+                if (result == true)
+                {
+                    await _viewModel.LoadDSKiemKeAsync();
+                    MessageBox.Show("Đã tạo phiếu bảo trì thành công!", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở form tạo phiếu bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"Lỗi khi mở form tạo phiếu bảo trì: {ex.Message}", "Lỗi",
-            MessageBoxButton.OK, MessageBoxImage.Error);
-    }
-}
         private async void BtnSua_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -446,6 +446,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-       
+
     }
 }

@@ -27,7 +27,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private ObservableCollection<dynamic> _danhSachDotKiemKe;
         private ObservableCollection<TaiSanModel> _danhSachTaiSan;
         private ObservableCollection<Phong> _danhSachPhong;
-       
+
 
         // Client để kết nối với Supabase
         private readonly Supabase.Client _supabaseClient;
@@ -71,7 +71,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-       
+
         public KiemKeTaiSan KiemKeTaiSan
         {
             get => _kiemKeTaiSan;
@@ -418,7 +418,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 cboTinhTrang.Focus();
                 return false;
             }
-           
+
             return true;
         }
 
@@ -459,24 +459,24 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Có thể thêm xử lý validation khi cần
         }
 
-            // Chỉ cho phép nhập số
-            private void NumericOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
-            {
-                Regex regex = new Regex("[^0-9]+");
-                e.Handled = regex.IsMatch(e.Text);
-            }
+        // Chỉ cho phép nhập số
+        private void NumericOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
 
-            // Hiển thị thông báo loading
-            private void ShowLoadingMessage(bool isShow)
-            {
-                // Sử dụng con trỏ chuột để hiển thị đang xử lý
-                Mouse.OverrideCursor = isShow ? Cursors.Wait : null;
-            }
+        // Hiển thị thông báo loading
+        private void ShowLoadingMessage(bool isShow)
+        {
+            // Sử dụng con trỏ chuột để hiển thị đang xử lý
+            Mouse.OverrideCursor = isShow ? Cursors.Wait : null;
+        }
 
-            // Phương thức hỗ trợ INotifyPropertyChanged
-            protected virtual void OnPropertyChanged(string propertyName)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
+        // Phương thức hỗ trợ INotifyPropertyChanged
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+}

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace Project_QLTS_DNC.DTOs
 {
     public class TaiKhoanDTO
@@ -15,6 +14,7 @@ namespace Project_QLTS_DNC.DTOs
         public string Uid { get; set; }
         public int MaLoaiTk { get; set; }
         public int? MaNv { get; set; }
+        public bool TrangThai { get; set; } = true; 
 
         // Các thuộc tính mở rộng cho UI
         public string TenLoaiTk { get; set; }
@@ -31,7 +31,7 @@ namespace Project_QLTS_DNC.DTOs
             MaNv = taiKhoan.MaNv;
             TenLoaiTk = tenLoaiTaiKhoan;
             TenNV = tenNhanVien;
+            TrangThai = taiKhoan.TrangThai; // Copy trạng thái từ model
         }
     }
 }
-

@@ -497,7 +497,7 @@ HorizontalScrollBarVisibility="Auto">
                         </ComboBox>
                     </StackPanel>
                 </Grid>
-                
+
             </Grid>
         </Grid>
     </Border>
