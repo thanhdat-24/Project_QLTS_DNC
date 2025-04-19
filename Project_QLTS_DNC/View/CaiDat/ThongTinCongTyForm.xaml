@@ -112,12 +112,7 @@
                 </StackPanel>
 
 
-                <!-- Đường dẫn PDF -->
-                <TextBlock Text="Đường dẫn PDF:" Margin="0,10,0,5"/>
-                <TextBox x:Name="txtPdfPath" 
-                         IsReadOnly="True" 
-                         Background="#f0f0f0" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+               
             </StackPanel>
         </Grid>
     </Grid>

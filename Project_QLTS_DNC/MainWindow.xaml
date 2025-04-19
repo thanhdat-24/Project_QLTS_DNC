@@ -5,6 +5,7 @@
         xmlns:local="clr-namespace:Project_QLTS_DNC"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         Title="Trang Chủ - Quản Lý Tài Sản"
+        Loaded="Window_Loaded"
         Height="640" Width="900" WindowState="Maximized" WindowStartupLocation="CenterScreen">
 
     <DockPanel>
@@ -12,7 +13,7 @@
         <Border Background="#0066b1" Width="220" DockPanel.Dock="Left">
 
             <StackPanel>
-                <Image Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
+                <Image x:Name="imgMainLogo" Source="/Resources/Logo/dnc.png" Width="100" Height="100" Margin="10" HorizontalAlignment="Center"/>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Height="600">
                     <TreeView Background="Transparent" BorderThickness="0" Foreground="White"
                               FontSize="14" Padding="10" Height="498"  >
@@ -60,9 +61,13 @@
                                     <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì" Selected="btnBaoTri_Selected_1" />
                                     <TreeViewItem x:Name="btnDSbaotri" Header="📋  Danh sách bảo trì" Selected="btnDSbaotri_Selected_1"/>
                                 </TreeViewItem>
+                                <TreeViewItem Header="🛒 Mua mới">
+                                    <TreeViewItem x:Name="btnPhieuMuaMoi" Header="🧾 Phiếu mua mới" Selected="btnPhieuMuaMoi_Selected"/>
+                                    <TreeViewItem x:Name="btnChiTietPhieuMuaMoi" Header="📋 Chi tiết phiếu mua mới" Selected="btnChiTietPhieuMuaMoi_Selected"/>
+                                </TreeViewItem>
 
 
-                                <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected"/>
+                        <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected"/>
                                 <TreeViewItem Header="📜 Duyệt phiếu" x:Name="btnDuyetPhieu" Selected="btnDuyetPhieu_Selected"/>
 
                                 <TreeViewItem Header="⚙️ Cài đặt">
@@ -137,30 +142,24 @@
                                         Margin="10" Width="200">
                                     <StackPanel>
                                         <TextBlock Text="Tổng tài sản" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtTong" Text="150" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock x:Name="txtTong"  FontSize="28" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Background="#66BB6A" Padding="20" CornerRadius="10"
                                         Margin="10" Width="200">
                                     <StackPanel>
                                         <TextBlock Text="Tài sản đang sử dụng" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtDangDung" Text="120" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock x:Name="txtDangDung"  FontSize="28" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Background="#E57373" Padding="20" CornerRadius="10"
                                         Margin="10" Width="200">
                                     <StackPanel>
                                         <TextBlock Text="Tài sản cần bảo trì" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtBaoTri" Text="10" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock x:Name="txtBaoTri"  FontSize="28" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
-                                <Border Background="#FFA726" Padding="20" CornerRadius="10"
-                                        Margin="10" Width="200">
-                                    <StackPanel>
-                                        <TextBlock Text="Sửa chữa tài sản" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtSuaChua" Text="5" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                                    </StackPanel>
-                                </Border>
+                              
                             </StackPanel>
                         </Grid>
                     </StackPanel>
