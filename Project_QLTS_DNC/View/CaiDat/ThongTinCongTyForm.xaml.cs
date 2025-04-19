@@ -48,7 +48,6 @@ namespace Project_QLTS_DNC.View.CaiDat
                     txtEmail.Text = congTy.Email;
                     txtNguoiDaiDien.Text = congTy.NguoiDaiDien;
                     txtGhiChu.Text = congTy.GhiChu;
-                    txtPdfPath.Text = congTy.PdfPath;
 
                     if (!string.IsNullOrEmpty(congTy.LogoPath) && File.Exists(congTy.LogoPath))
                     {
@@ -112,7 +111,7 @@ namespace Project_QLTS_DNC.View.CaiDat
                 mainWindow?.UpdateLogo(congTy.LogoPath); // congTy.LogoPath là đường dẫn ảnh đã lưu
 
             }
-
+            File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
             File.WriteAllText("logo_path.txt", congTy.LogoPath);
             MessageBox.Show("Thông tin công ty đã được lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -170,7 +169,6 @@ namespace Project_QLTS_DNC.View.CaiDat
                 }
 
                 congTy.PdfPath = pdfPath;
-                txtPdfPath.Text = pdfPath;
                 File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
 
                 MessageBox.Show("PDF đã được lưu thành công!", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
