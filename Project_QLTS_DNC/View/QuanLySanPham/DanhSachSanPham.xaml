@@ -266,7 +266,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Mã Phòng" Binding="{Binding MaPhong}" Width="80" MinWidth="80">
+                        <DataGridTextColumn Header="Mã Phòng" Binding="{Binding TenPhong}" Width="80" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
