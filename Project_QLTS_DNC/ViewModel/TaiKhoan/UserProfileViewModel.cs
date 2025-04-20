@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.TaiKhoan;
 using System;
@@ -17,6 +18,7 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
         private UserProfileDTO _userProfile;
         private readonly AuthService _authService;
         private static string _currentUsername;
+        private readonly TaiKhoanService _taiKhoanService;
 
         public UserProfileDTO UserProfile
         {
@@ -28,18 +30,19 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
             }
         }
 
-        public UserProfileViewModel(UserProfileService profileService)
+        
+        public UserProfileViewModel(
+            UserProfileService profileService,
+            AuthService authService = null,
+            TaiKhoanService taiKhoanService = null)
         {
-            _profileService = profileService;
-            LoadUserProfile().ConfigureAwait(false);
-        }
-
-        public UserProfileViewModel(UserProfileService profileService, AuthService authService)
-        {
-            _profileService = profileService;
+            _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService));
             _authService = authService;
+            _taiKhoanService = taiKhoanService ?? new TaiKhoanService();
             _ = LoadUserProfile();
         }
+
+    
 
         public static void SetCurrentUsername(string username)
         {
@@ -100,15 +103,36 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
             }
         }
 
-        public bool DoiMatKhau(string matKhauCu, string matKhauMoi)
+        public async Task<bool> DoiMatKhauAsync(string matKhauCu, string matKhauMoi)
         {
             try
             {
-                return _profileService.DoiMatKhauAsync(UserProfile.ten_tai_khoan, matKhauCu, matKhauMoi).Result;
+                // Kiểm tra UserProfile và TenTaiKhoan
+                if (UserProfile == null || string.IsNullOrEmpty(UserProfile.ten_tai_khoan))
+                {
+                    Console.WriteLine("Lỗi: UserProfile hoặc TenTaiKhoan không tồn tại");
+                    return false;
+                }
+
+                // Kiểm tra _taiKhoanService
+                if (_taiKhoanService == null)
+                {
+                    Console.WriteLine("Lỗi: TaiKhoanService không được khởi tạo");
+                    return false;
+                }
+
+                // Gọi phương thức đổi mật khẩu
+                return await _taiKhoanService.DoiMatKhauAsync(
+                    UserProfile.ten_tai_khoan,
+                    matKhauCu,
+                    matKhauMoi
+                );
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi đổi mật khẩu: {ex.Message}");
+                // Ghi log lỗi chi tiết
+                Console.WriteLine($"Lỗi trong DoiMatKhau: {ex.Message}");
+                Console.WriteLine($"Chi tiết: {ex.StackTrace}");
                 return false;
             }
         }
