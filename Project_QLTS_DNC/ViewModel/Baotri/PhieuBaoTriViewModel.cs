@@ -23,7 +23,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(DsBaoTri));
             }
         }
-
         private PhieuBaoTri _selectedPhieuBaoTri;
         public PhieuBaoTri SelectedPhieuBaoTri
         {
@@ -34,7 +33,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(SelectedPhieuBaoTri));
             }
         }
-
         private bool _isLoading;
         public bool IsLoading
         {
@@ -45,7 +43,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(IsLoading));
             }
         }
-
         private string _searchText = string.Empty;
         public string SearchText
         {
@@ -56,7 +53,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(SearchText));
             }
         }
-
         private string _selectedTrangThai = "Tất cả trạng thái";
         public string SelectedTrangThai
         {
@@ -67,7 +63,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(SelectedTrangThai));
             }
         }
-
         private string _selectedLoaiBaoTri = "Tất cả loại";
         public string SelectedLoaiBaoTri
         {
@@ -78,7 +73,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(SelectedLoaiBaoTri));
             }
         }
-
         // Danh sách các tài sản cần bảo trì
         private ObservableCollection<PhieuBaoTri> _dsTaiSanCanBaoTri;
         public ObservableCollection<PhieuBaoTri> DsTaiSanCanBaoTri
@@ -126,6 +120,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
                 else
                 {
+                    // Bổ sung thông tin tên cho TenLoaiBaoTri, tạo TenNguoiPhuTrach và TenTaiSan nếu cần
+                    await EnrichPhieuBaoTriDataAsync(danhSachBaoTri);
+
                     DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
                     Console.WriteLine("Đã gán dữ liệu cho DsBaoTri");
                 }
@@ -142,6 +139,61 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
+        // Phương thức làm giàu dữ liệu
+        private async Task EnrichPhieuBaoTriDataAsync(List<PhieuBaoTri> danhSachPhieu)
+        {
+            try
+            {
+                Console.WriteLine("Bổ sung thông tin hiển thị cho phiếu bảo trì...");
+
+                foreach (var phieu in danhSachPhieu)
+                {
+                    // Tên loại bảo trì đã có trong model, không cần truy vấn
+
+                    // Gán tên tài sản
+                    if (phieu.MaTaiSan.HasValue)
+                    {
+                        try
+                        {
+                            phieu.TenTaiSan = await GetTenTaiSanAsync(phieu.MaTaiSan.Value);
+                        }
+                        catch
+                        {
+                            phieu.TenTaiSan = $"Tài sản #{phieu.MaTaiSan}";
+                        }
+                    }
+                    else
+                    {
+                        phieu.TenTaiSan = "Không xác định";
+                    }
+
+                    // Gán tên nhân viên
+                    if (phieu.MaNV.HasValue)
+                    {
+                        try
+                        {
+                            phieu.TenNguoiPhuTrach = await GetTenNhanVienAsync(phieu.MaNV.Value);
+                        }
+                        catch
+                        {
+                            phieu.TenNguoiPhuTrach = $"NV #{phieu.MaNV}";
+                        }
+                    }
+                    else
+                    {
+                        phieu.TenNguoiPhuTrach = "Chưa phân công";
+                    }
+                }
+
+                Console.WriteLine("Hoàn thành bổ sung thông tin hiển thị");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi làm giàu dữ liệu: {ex.Message}");
+                // Không ném lại ngoại lệ, để quá trình tải tiếp tục mà không có thông tin bổ sung
+            }
+        }
+
         // Tìm kiếm phiếu bảo trì
         public async Task SearchPhieuBaoTriAsync(string keyword)
         {
@@ -149,6 +201,10 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 IsLoading = true;
                 var danhSachBaoTri = await _phieuBaoTriService.SearchPhieuBaoTriAsync(keyword);
+
+                // Bổ sung thông tin tên
+                await EnrichPhieuBaoTriDataAsync(danhSachBaoTri);
+
                 DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
             }
             catch (Exception ex)
@@ -168,18 +224,19 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
-
                 // Chuyển đổi tên loại bảo trì thành mã (nếu chọn loại cụ thể)
                 int? maLoaiBaoTri = null;
                 if (loaiBaoTri != "Tất cả loại")
                 {
                     maLoaiBaoTri = ConvertTenLoaiToMa(loaiBaoTri);
                 }
-
                 // Gọi service để lấy dữ liệu đã lọc
                 var danhSachBaoTri = await _phieuBaoTriService.GetPhieuBaoTriTheoLoaiTrangThaiAsync(
                     maLoaiBaoTri,
                     trangThai == "Tất cả trạng thái" ? null : trangThai);
+
+                // Bổ sung thông tin tên
+                await EnrichPhieuBaoTriDataAsync(danhSachBaoTri);
 
                 DsBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachBaoTri);
             }
@@ -201,6 +258,10 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 IsLoading = true;
                 var danhSachCanBaoTri = await _phieuBaoTriService.GetDanhSachCanBaoTriAsync();
+
+                // Bổ sung thông tin tên
+                await EnrichPhieuBaoTriDataAsync(danhSachCanBaoTri);
+
                 DsTaiSanCanBaoTri = new ObservableCollection<PhieuBaoTri>(danhSachCanBaoTri);
             }
             catch (Exception ex)
@@ -222,25 +283,31 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 IsLoading = true;
-
                 // Tạo mã mới cho phiếu bảo trì nếu chưa có
                 if (phieuBaoTri.MaBaoTri <= 0)
                 {
                     int maxMaBaoTri = await _phieuBaoTriService.GetMaxMaBaoTriAsync();
                     phieuBaoTri.MaBaoTri = maxMaBaoTri + 1;
                 }
-
                 // Thiết lập ngày bảo trì nếu chưa có
                 if (phieuBaoTri.NgayBaoTri == DateTime.MinValue)
                 {
                     phieuBaoTri.NgayBaoTri = DateTime.Now;
                 }
-
                 // Thêm phiếu bảo trì vào cơ sở dữ liệu
                 bool result = await _phieuBaoTriService.AddPhieuBaoTriAsync(phieuBaoTri);
-
                 if (result)
                 {
+                    // Cập nhật thông tin tên trước khi thêm vào danh sách
+                    if (phieuBaoTri.MaTaiSan.HasValue)
+                    {
+                        phieuBaoTri.TenTaiSan = await GetTenTaiSanAsync(phieuBaoTri.MaTaiSan.Value);
+                    }
+                    if (phieuBaoTri.MaNV.HasValue)
+                    {
+                        phieuBaoTri.TenNguoiPhuTrach = await GetTenNhanVienAsync(phieuBaoTri.MaNV.Value);
+                    }
+
                     // Thêm phiếu mới vào danh sách hiển thị nếu thành công
                     DsBaoTri.Add(phieuBaoTri);
                     OnPropertyChanged(nameof(DsBaoTri));
@@ -250,7 +317,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 {
                     Console.WriteLine("Thêm phiếu bảo trì thất bại");
                 }
-
                 return result;
             }
             catch (Exception ex)
@@ -273,9 +339,18 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 IsLoading = true;
                 bool result = await _phieuBaoTriService.UpdatePhieuBaoTriAsync(phieuBaoTri);
-
                 if (result)
                 {
+                    // Cập nhật thông tin tên trước khi cập nhật danh sách
+                    if (phieuBaoTri.MaTaiSan.HasValue)
+                    {
+                        phieuBaoTri.TenTaiSan = await GetTenTaiSanAsync(phieuBaoTri.MaTaiSan.Value);
+                    }
+                    if (phieuBaoTri.MaNV.HasValue)
+                    {
+                        phieuBaoTri.TenNguoiPhuTrach = await GetTenNhanVienAsync(phieuBaoTri.MaNV.Value);
+                    }
+
                     // Tìm và cập nhật phiếu trong danh sách hiển thị
                     var existingItem = DsBaoTri.FirstOrDefault(p => p.MaBaoTri == phieuBaoTri.MaBaoTri);
                     if (existingItem != null)
@@ -285,7 +360,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     }
                     OnPropertyChanged(nameof(DsBaoTri));
                 }
-
                 return result;
             }
             catch (Exception ex)
@@ -307,7 +381,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 IsLoading = true;
                 bool result = await _phieuBaoTriService.DeletePhieuBaoTriAsync(maBaoTri);
-
                 if (result)
                 {
                     // Xóa phiếu khỏi danh sách hiển thị nếu thành công
@@ -318,7 +391,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                         OnPropertyChanged(nameof(DsBaoTri));
                     }
                 }
-
                 return result;
             }
             catch (Exception ex)
@@ -351,7 +423,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         public string GetTenLoaiBaoTri(int? maLoai)
         {
             if (!maLoai.HasValue) return "Không xác định";
-
             switch (maLoai.Value)
             {
                 case 1: return "Định kỳ";
@@ -364,19 +435,33 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         // Tạo phiếu bảo trì mới với các giá trị mặc định
         public PhieuBaoTri CreateNewPhieuBaoTri()
         {
-            return new PhieuBaoTri
+            // Lấy ngày hiện tại
+            DateTime ngayHienTai = DateTime.Now;
+            // Tạo phiếu mới với các giá trị mặc định
+            var phieu = new PhieuBaoTri
             {
-                NgayBaoTri = DateTime.Now,
-                TrangThai = "Tốt",
-                ChiPhi = 0,
-                GhiChu = ""
+                // Không gán MaBaoTri, để cơ sở dữ liệu tự động tạo
+                MaTaiSan = null, // Sẽ được chọn bởi người dùng
+                MaLoaiBaoTri = 1, // Mặc định là bảo trì định kỳ (có thể thay đổi)
+                NgayBaoTri = ngayHienTai,
+                MaNV = null, // Sẽ được chọn bởi người dùng
+                NoiDung = "", // Người dùng sẽ nhập
+                TrangThai = "Chưa thực hiện", // Trạng thái mặc định
+                ChiPhi = 0, // Chi phí mặc định
+                GhiChu = "" // Người dùng sẽ nhập
             };
+
+            // Thiết lập các giá trị hiển thị
+            phieu.TenTaiSan = "Chọn tài sản";
+            phieu.TenNguoiPhuTrach = "Chọn nhân viên";
+
+            return phieu;
         }
 
         // Tạo bản sao của phiếu bảo trì để chỉnh sửa
         public PhieuBaoTri ClonePhieuBaoTri(PhieuBaoTri phieu)
         {
-            return new PhieuBaoTri
+            var clonedPhieu = new PhieuBaoTri
             {
                 MaBaoTri = phieu.MaBaoTri,
                 MaTaiSan = phieu.MaTaiSan,
@@ -388,6 +473,12 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 ChiPhi = phieu.ChiPhi,
                 GhiChu = phieu.GhiChu
             };
+
+            // Sao chép thông tin hiển thị
+            clonedPhieu.TenTaiSan = phieu.TenTaiSan;
+            clonedPhieu.TenNguoiPhuTrach = phieu.TenNguoiPhuTrach;
+
+            return clonedPhieu;
         }
 
         // Thêm phương thức để lấy thông tin tài sản
