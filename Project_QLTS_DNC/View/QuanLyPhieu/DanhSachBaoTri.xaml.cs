@@ -400,52 +400,28 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         }
         private async void BtnXoa_Click(object sender, RoutedEventArgs e)
         {
-            var selectedItems = _viewModel.GetSelectedItems();
-            if (selectedItems.Count == 0)
+            try
             {
-                MessageBox.Show("Vui lòng chọn ít nhất một tài sản để xóa!",
-                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                // Gọi phương thức xóa và chờ kết quả
+                bool xoaThanhCong = await _viewModel.XoaTaiSanDaChonAsync();
+
+                // Nếu xóa thành công, không cần tải lại dữ liệu (đã làm trong XoaTaiSanDaChonAsync)
+
+                Mouse.OverrideCursor = null;
             }
-
-            // Hiển thị thông báo xác nhận
-            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa {selectedItems.Count} tài sản đã chọn không?",
-                "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
+            catch (Exception ex)
             {
-                try
-                {
-                    Mouse.OverrideCursor = Cursors.Wait;
-
-                    // Gọi phương thức xóa và chờ kết quả
-                    bool xoaThanhCong = await _viewModel.XoaTaiSanDaChonAsync();
-
-                    Mouse.OverrideCursor = null;
-
-                    if (xoaThanhCong)
-                    {
-                        MessageBox.Show($"Đã xóa {selectedItems.Count} tài sản thành công!",
-                            "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Tải lại dữ liệu sau khi xóa
-                        await _viewModel.LoadDSKiemKeAsync();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Xóa tài sản không thành công. Vui lòng thử lại sau!",
-                            "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Mouse.OverrideCursor = null;
-                    MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                Mouse.OverrideCursor = null;
+                MessageBox.Show(
+                    $"Lỗi khi xóa tài sản: {ex.Message}",
+                    "Lỗi",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
+    }
 
 
     }
-}
