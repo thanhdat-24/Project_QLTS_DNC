@@ -256,6 +256,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 IsLoading = true;
                 // Tải danh mục trước
                 await LoadDanhMucAsync();
+
                 // Lấy dữ liệu từ service
                 var danhSach = await _dsBaotriService.GetKiemKeTaiSanAsync();
                 try
@@ -264,6 +265,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     {
                         var dsTaiSan = await _taiSanService.GetDanhSachTaiSanAsync();
                         var dsPhong = await _phongService.GetDanhSachPhongAsync();
+
                         // Cập nhật tên tài sản và tên phòng
                         foreach (var item in danhSach)
                         {
@@ -317,7 +319,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 {
                     _dsKiemKeView = new CollectionViewSource();
                 }
-                _dsKiemKeView.Source = _dsKiemKeGoc;
+
+                _dsKiemKeView.Source = _dsKiemKeGoc;  // Sửa lỗi cú pháp
 
                 // Thiết lập filter ban đầu
                 ICollectionView view = _dsKiemKeView.View;
@@ -328,7 +331,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     {
                         // Không có cách trực tiếp để xóa filter, nên tạo view mới
                         _dsKiemKeView = new CollectionViewSource();
-                        _dsKiemKeView.Source = _dsKiemKeGoc;
+                        _dsKiemKeView.Source = _dsKiemKeGoc;  // Sửa lỗi cú pháp
                         view = _dsKiemKeView.View;
                     }
 
@@ -337,10 +340,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
 
                 OnPropertyChanged(nameof(DsKiemKeView));
-
                 // Cập nhật phân trang
                 UpdatePagination();
-
                 // Tải dữ liệu trang đầu tiên
                 LoadPageData();
             }
@@ -480,37 +481,75 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 var selectedItems = GetSelectedItems();
                 if (selectedItems.Count == 0)
+                {
+                    System.Windows.MessageBox.Show(
+                        "Vui lòng chọn ít nhất một tài sản để xóa!",
+                        "Thông báo",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+                    return false;
+                }
+
+                // Hiển thị thông báo xác nhận
+                var result = System.Windows.MessageBox.Show(
+                    $"Bạn có chắc chắn muốn xóa {selectedItems.Count} tài sản đã chọn không?",
+                    "Xác nhận xóa",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Question);
+
+                if (result == System.Windows.MessageBoxResult.No)
                     return false;
 
+                // Tạo bản sao của danh sách đã chọn để tránh lỗi
+                var itemsToDelete = selectedItems.ToList();
+
+                // Hiển thị loading
+                System.Windows.MessageBox.Show(
+                    "Đang xóa dữ liệu... Vui lòng chờ trong giây lát.",
+                    "Đang xử lý",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+
                 // Gọi service để xóa các tài sản đã chọn
-                bool result = await _dsBaotriService.XoaNhieuTaiSanAsync(selectedItems.ToList());
+                bool xoaThanhCong = await _dsBaotriService.XoaNhieuTaiSanAsync(itemsToDelete);
 
-                if (result)
+                if (xoaThanhCong)
                 {
-                    // Cập nhật lại danh sách sau khi xóa
-                    foreach (var item in selectedItems)
-                    {
-                        _dsKiemKeGoc.Remove(item);
-                    }
+                    // Tải lại toàn bộ dữ liệu để đảm bảo đồng bộ với database
+                    await LoadDSKiemKeAsync();
 
-                    // Cập nhật phân trang
-                    UpdatePagination();
-
-                    // Tải lại dữ liệu trang hiện tại
-                    LoadPageData();
+                    System.Windows.MessageBox.Show(
+                        $"Đã xóa tài sản thành công!",
+                        "Thông báo",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
 
                     return true;
                 }
+                else
+                {
+                    System.Windows.MessageBox.Show(
+                        "Xóa tài sản không thành công. Có thể do lỗi kết nối hoặc quyền truy cập. " +
+                        "Vui lòng kiểm tra lại kết nối mạng và quyền hạn của tài khoản.",
+                        "Lỗi",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error);
 
-                return false;
+                    return false;
+                }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                System.Windows.MessageBox.Show(
+                    $"Lỗi khi xóa tài sản: {ex.Message}\n\nChi tiết lỗi: {ex.StackTrace}",
+                    "Lỗi",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+
                 return false;
             }
         }
+
 
         private bool FilterMatches(KiemKeTaiSan item)
         {
