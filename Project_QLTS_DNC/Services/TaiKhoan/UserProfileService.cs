@@ -48,7 +48,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
                     return null;
                 }
 
-                // Tìm thông tin nhân viên
+               
                 var nhanVienResult = await client.From<NhanVienModel>()
                     .Where(nv => nv.MaNV == taiKhoan.MaNv)
                     .Get();
@@ -62,7 +62,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
                 var nhanVien = nhanVienResult.Models.First();
                 Console.WriteLine($"Đã tìm thấy nhân viên: {nhanVien.TenNV}");
 
-                // Tìm thông tin phòng ban
+                
                 var phongBanResult = await client.From<PhongBan>()
                     .Where(pb => pb.MaPhongBan == nhanVien.MaPB)
                     .Get();
@@ -78,7 +78,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
                     Console.WriteLine($"Không tìm thấy phòng ban với mã: {nhanVien.MaPB}");
                 }
 
-                // Tìm thông tin chức vụ
+                
                 var chucVuResult = await client.From<ChucVuModel>()
                     .Where(cv => cv.MaChucVu == nhanVien.MaCV)
                     .Get();
@@ -94,7 +94,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
                     Console.WriteLine($"Không tìm thấy chức vụ với mã: {nhanVien.MaCV}");
                 }
 
-                // Tìm thông tin loại tài khoản
+                
                 var loaiTaiKhoanResult = await client.From<LoaiTaiKhoanModel>()
                     .Where(ltk => ltk.MaLoaiTk == taiKhoan.MaLoaiTk)
                     .Get();
@@ -110,7 +110,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
                     Console.WriteLine($"Không tìm thấy loại tài khoản với mã: {taiKhoan.MaLoaiTk}");
                 }
 
-                // Tạo đối tượng UserProfileDTO
+                
                 var userProfile = new UserProfileDTO
                 {
                     ma_nv = nhanVien.MaNV,
@@ -138,49 +138,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
             }
         }
 
-        //public async Task<bool> CapNhatThongTinCaNhanAsync(UserProfileDTO profile)
-        //{
-        //    try
-        //    {
-        //        Console.WriteLine($"Bắt đầu cập nhật thông tin cho nhân viên mã: {profile.ma_nv}");
-        //        var client = await GetClientAsync();
-
-
-        //        if (client == null)
-        //        {
-        //            Console.WriteLine("ERROR: Không thể kết nối đến Supabase");
-        //            return false;
-        //        }
-
-
-        //        var nhanVienUpdate = await client.From<NhanVienModel>()
-        //            .Where(nv => nv.MaNV == profile.ma_nv)
-        //            .Update(new NhanVienModel
-        //            {
-        //                MaNV = profile.ma_nv,
-        //                TenNV = profile.ten_nv,
-        //                GioiTinh = profile.gioi_tinh,
-        //                Email = profile.email,
-        //                SDT = profile.sdt,
-        //                NgayVaoLam = profile.ngay_vao_lam,
-        //                DiaChi = profile.dia_chi
-
-        //            });
-
-        //        bool success = nhanVienUpdate != null && nhanVienUpdate.Models.Any();
-        //        Console.WriteLine(success
-        //            ? $"Cập nhật thông tin nhân viên mã {profile.ma_nv} thành công"
-        //            : $"Cập nhật thông tin nhân viên mã {profile.ma_nv} thất bại");
-
-        //        return success;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Lỗi khi cập nhật thông tin cá nhân: {ex.Message}");
-        //        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        //        return false;
-        //    }
-        //}
+        
         public async Task<bool> CapNhatThongTinCaNhanAsync(UserProfileDTO profile)
         {
             try
@@ -232,34 +190,7 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
             }
         }
 
-        public async Task<bool> DoiMatKhauAsync(string tenTaiKhoan, string matKhauCu, string matKhauMoi)
-        {
-            try
-            {
-                var client = await GetClientAsync();
-
-                // Kiểm tra mật khẩu cũ
-                var taiKhoan = await client.From<TaiKhoanModel>()
-                    .Where(tk => tk.TenTaiKhoan == tenTaiKhoan && tk.MatKhau == matKhauCu)
-                    .Get();
-
-                if (!taiKhoan.Models.Any())
-                {
-                    throw new Exception("Mật khẩu cũ không chính xác");
-                }
-
-                // Cập nhật mật khẩu mới
-                var updateResult = await client.From<TaiKhoanModel>()
-                    .Where(tk => tk.TenTaiKhoan == tenTaiKhoan)
-                    .Update(new TaiKhoanModel { MatKhau = matKhauMoi });
-
-                return updateResult.Models.Any();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi đổi mật khẩu: {ex.Message}");
-                return false;
-            }
-        }
+        
     }
 }
+

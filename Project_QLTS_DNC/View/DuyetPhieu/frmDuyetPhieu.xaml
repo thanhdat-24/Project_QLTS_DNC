@@ -393,14 +393,15 @@
                                 <ComboBox x:Name="cboLoaiPhieu" 
                                     materialDesign:HintAssist.Hint="Chọn loại phiếu"
                                     Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                    Width="150"
+                                    Width="194"
                                     SelectionChanged="cboLoaiPhieu_SelectionChanged"
                                     SelectedIndex="0">
                                     <ComboBoxItem Content="Tất cả"/>
                                     <ComboBoxItem Content="Phiếu nhập"/>
                                     <ComboBoxItem Content="Phiếu xuất"/>
-                                    <ComboBoxItem Content="Phiếu bảo trì"/>
                                     <ComboBoxItem Content="Phiếu báo hỏng"/>
+
+                                    <ComboBoxItem Content="Phiếu bàn giao tài sản"/>
                                     <ComboBoxItem Content="Phiếu đề nghị mua"/>
                                 </ComboBox>
                             </StackPanel>
@@ -561,7 +562,7 @@
                     Padding="0"
                     materialDesign:ButtonAssist.CornerRadius="18"
                     HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center">
+                    VerticalContentAlignment="Center" x:Name="btnIn" Click="btnIn_Click">
                                                     <materialDesign:PackIcon Kind="Printer" Width="20" Height="20" Foreground="White"/>
                                                 </Button>
                                             </StackPanel>
