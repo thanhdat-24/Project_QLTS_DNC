@@ -22,5 +22,14 @@ namespace Project_QLTS_DNC.Models.Phieu
 
         [Column("trang_thai")]
         public bool? TrangThai { get; set; }
+
+        [Column("ma_nv")]
+        public long? MaNV { get; set; }
+
+        [Column("ma_phong")]
+        public long? MaPhong { get; set; }
+
+        [Column("ma_tai_san")]
+        public long? MaTaiSan { get; set; }
     }
 }
