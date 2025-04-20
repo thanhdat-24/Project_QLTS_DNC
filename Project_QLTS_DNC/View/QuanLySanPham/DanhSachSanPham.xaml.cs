@@ -97,7 +97,65 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 MessageBox.Show($"Lỗi khi mở form xuất QR Code: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        /// <summary>
+        /// Xử lý sự kiện khi nhấn nút Xem chi tiết
+        /// </summary>
+        private void BtnViewDetail_Click(object sender, RoutedEventArgs e)
+        {
+            // Lấy nguồn của sự kiện - là nút Xem chi tiết trong DataGridTemplateColumn
+            Button viewButton = sender as Button;
+            if (viewButton == null) return;
 
+            // Lấy context (DataContext) của nút, có thể là TaiSanDTO hoặc DataGridRow
+            var dataContext = viewButton.DataContext;
+            TaiSanDTO selectedTaiSan = dataContext as TaiSanDTO;
+
+            // Nếu không thể lấy trực tiếp, thử tìm từ DataGridRow
+            if (selectedTaiSan == null)
+            {
+                var row = FindParent<DataGridRow>(viewButton);
+                if (row != null)
+                {
+                    selectedTaiSan = row.DataContext as TaiSanDTO;
+                }
+            }
+
+            if (selectedTaiSan == null)
+            {
+                MessageBox.Show("Vui lòng chọn tài sản để xem chi tiết.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                // Tạo overlay
+                Grid overlayGrid = new Grid();
+                overlayGrid.Background = new SolidColorBrush(Color.FromArgb(180, 0, 0, 0));
+
+                // Hiển thị overlay trong DialogHost
+                MainDialogHost.DialogContent = overlayGrid;
+                MainDialogHost.IsOpen = true;
+
+                // Mở form chi tiết tài sản
+                ChiTietTaiSan chiTietForm = new ChiTietTaiSan(selectedTaiSan.MaTaiSan);
+                chiTietForm.Owner = Window.GetWindow(this);
+
+                // Đăng ký sự kiện đóng form để đóng overlay
+                chiTietForm.Closed += (s, args) =>
+                {
+                    // Đóng overlay khi form đóng
+                    MainDialogHost.IsOpen = false;
+                };
+
+                chiTietForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                // Đảm bảo đóng overlay nếu có lỗi
+                MainDialogHost.IsOpen = false;
+                MessageBox.Show($"Lỗi khi mở form chi tiết tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void DanhSachSanPham_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateStatusBar();
