@@ -320,9 +320,9 @@ namespace Project_QLTS_DNC.Services.BaoTri
                         {
                             // Phương pháp 2: Nếu Delete không hoạt động, thử gọi RPC procedure
                             var parameters = new Dictionary<string, object>
-    {
-        { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
-    };
+                         {
+                              { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+                     };
 
                             var rpcResponse = await client.Rpc("xoa_tai_san", parameters);
 

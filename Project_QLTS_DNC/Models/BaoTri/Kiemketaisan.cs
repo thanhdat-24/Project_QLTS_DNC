@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using Supabase.Postgrest.Models;
-using Supabase.Postgrest.Attributes;
 using System.ComponentModel.DataAnnotations.Schema;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+using Newtonsoft.Json; // Thêm namespace này
 
-namespace Project_QLTS_DNC.Models
+namespace Project_QLTS_DNC.Models.BaoTri
 {
     [Supabase.Postgrest.Attributes.Table("kiemketaisan")]
     public class KiemKeTaiSan : BaseModel, INotifyPropertyChanged
@@ -30,52 +31,47 @@ namespace Project_QLTS_DNC.Models
         [Supabase.Postgrest.Attributes.Column("ghi_chu")]
         public string GhiChu { get; set; }
 
-        // Thuộc tính mở rộng để hiển thị tên
+        [Supabase.Postgrest.Attributes.Column("ma_nhom_ts")]
+        public int? MaNhomTS { get; set; }
+
+        // Sửa các thuộc tính không có trong database
         [NotMapped]
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore] // Thêm dòng này
+        public string TenNhomTS { get; set; }
+
+        [NotMapped]
+        [JsonIgnore] // Thêm dòng này
         public string TenTaiSan { get; set; }
 
         [NotMapped]
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore] // Thêm dòng này
         public string TenPhong { get; set; }
 
         [NotMapped]
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore] // Thêm dòng này
         public string TenDotKiemKe { get; set; }
 
-        // Thuộc tính IsSelected để hỗ trợ chọn dòng trong DataGrid
         private bool _isSelected;
-
         [NotMapped]
-        [Supabase.Postgrest.Attributes.Column("IsSelected")] // Bỏ tham số true
-        [Newtonsoft.Json.JsonIgnore] // Thêm dòng này để không serialize thuộc tính xuống JSON
+        [JsonIgnore] // Thêm dòng này
         public bool IsSelected
         {
             get => _isSelected;
             set
             {
-                _isSelected = value;
-                OnPropertyChanged(nameof(IsSelected));
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged(nameof(IsSelected));
+                }
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string tenThuocTinh = null)
+        protected virtual void OnPropertyChanged(string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(tenThuocTinh));
-        }
-
-        public override string ToString()
-        {
-            return $"KiemKe {MaKiemKeTS}: {TenTaiSan ?? $"Tài sản {MaTaiSan}"} - {TinhTrang}";
-        }
-
-        public void CapNhatThongTinMoRong(string tenTaiSan, string tenPhong, string tenDotKiemKe)
-        {
-            TenTaiSan = tenTaiSan;
-            TenPhong = tenPhong;
-            TenDotKiemKe = tenDotKiemKe;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

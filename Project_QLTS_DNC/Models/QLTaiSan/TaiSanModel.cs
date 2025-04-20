@@ -37,5 +37,8 @@ namespace Project_QLTS_DNC.Models.QLTaiSan
 
         [Column("ma_phong")]
         public int? MaPhong { get; set; }
+        // Thêm thuộc tính MaNhomTS
+        [Column("ma_nhom_ts")]
+        public int? MaNhomTS { get; set; }
     }
 }

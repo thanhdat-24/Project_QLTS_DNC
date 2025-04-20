@@ -1,7 +1,7 @@
 ﻿using System;
 using Supabase.Postgrest.Models;
 using Supabase.Postgrest.Attributes;
-
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Project_QLTS_DNC.Models.BaoTri
 {
     // Lớp phụ chỉ dùng cho thao tác với cơ sở dữ liệu
@@ -29,6 +29,13 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Supabase.Postgrest.Attributes.Column("ghi_chu")]
         public string GhiChu { get; set; }
 
+        [Supabase.Postgrest.Attributes.Column("ma_nhom_ts")]
+        public int? MaNhomTS { get; set; }
+
+        
+        [NotMapped] // Thêm dòng này nếu không có cột này trong database
+        public string TenNhomTS { get; set; }
+
         // Phương thức chuyển đổi từ KiemKeTaiSan sang KiemKeTaiSanDb
         public static KiemKeTaiSanDb FromKiemKeTaiSan(KiemKeTaiSan taiSan)
         {
@@ -40,8 +47,11 @@ namespace Project_QLTS_DNC.Models.BaoTri
                 MaPhong = taiSan.MaPhong,
                 TinhTrang = taiSan.TinhTrang,
                 ViTriThucTe = taiSan.ViTriThucTe,
-                GhiChu = taiSan.GhiChu
+                GhiChu = taiSan.GhiChu,
+                MaNhomTS = taiSan.MaNhomTS
+                // Loại bỏ TenNhomTS nếu nó không tồn tại trong database
             };
         }
     }
+
 }

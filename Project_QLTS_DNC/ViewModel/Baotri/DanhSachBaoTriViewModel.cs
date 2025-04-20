@@ -222,8 +222,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         {
             // Khởi tạo các service
             _dsBaotriService = new DSBaoTriService();
-            _taiSanService = new TaiSanService(); // Đảm bảo dòng này được thực thi
-            _phongService = new PhongService();   // Đảm bảo dòng này được thực thi
+            _taiSanService = new TaiSanService();
+            _phongService = new PhongService();
 
             _dsKiemKeView = new CollectionViewSource();
             DsKiemKe = new ObservableCollection<KiemKeTaiSan>();
@@ -233,7 +233,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             TuKhoaTimKiem = string.Empty;
             LoaiBaoTriDuocChon = "Tất cả loại";
             NhomTaiSanDuocChon = "Tất cả nhóm";
-            TinhTrangDuocChon = "Dưới 50%";
+            TinhTrangDuocChon = "Tất cả tình trạng"; // Cập nhật để khớp với giá trị mặc định của ComboBox
 
             // Chỉ tự động tải dữ liệu nếu autoLoad = true
             if (autoLoad)
@@ -248,7 +248,19 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
+        private int? _maNhomTaiSanDuocChon;
+        public int? MaNhomTaiSanDuocChon
+        {
+            get { return _maNhomTaiSanDuocChon; }
+            set
+            {
+                if (_maNhomTaiSanDuocChon != value)
+                {
+                    _maNhomTaiSanDuocChon = value;
+                    OnPropertyChanged(nameof(MaNhomTaiSanDuocChon));
+                }
+            }
+        }
         public async Task LoadDSKiemKeAsync()
         {
             try
@@ -553,34 +565,64 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
 
         private bool FilterMatches(KiemKeTaiSan item)
         {
-            bool matchesSearchText = string.IsNullOrEmpty(TuKhoaTimKiem) ||
-                                   item.MaTaiSan.ToString().Contains(TuKhoaTimKiem) ||
-                                   item.MaDotKiemKe.ToString().Contains(TuKhoaTimKiem) ||
-                                   (item.TenTaiSan?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                                   (item.ViTriThucTe?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                                   (item.GhiChu?.Contains(TuKhoaTimKiem, StringComparison.OrdinalIgnoreCase) ?? false);
-
-
-
-            bool matchesTinhTrang = true;
-            if (TinhTrangDuocChon == "Dưới 50%")
+            // Đầu tiên kiểm tra xem mục có phù hợp với bộ lọc tình trạng không
+            if (!string.IsNullOrEmpty(TinhTrangDuocChon) && TinhTrangDuocChon != "Tất cả tình trạng")
             {
-                // Kiểm tra tình trạng < 50%
-                if (int.TryParse(item.TinhTrang?.Replace("%", ""), out int tinhTrang))
+                // Logic lọc theo tình trạng
+                switch (TinhTrangDuocChon)
                 {
-                    matchesTinhTrang = tinhTrang < 50;
-                }
-            }
-            else if (TinhTrangDuocChon == "Trên 50%")
-            {
-                // Kiểm tra tình trạng >= 50%
-                if (int.TryParse(item.TinhTrang?.Replace("%", ""), out int tinhTrang))
-                {
-                    matchesTinhTrang = tinhTrang >= 50;
+                    case "Cần kiểm tra":
+                        // Xem xét tình trạng của tài sản, điều chỉnh điều kiện này theo nhu cầu thực tế
+                        if (item.TinhTrang != "Cần kiểm tra")
+                            return false;
+                        break;
+                    case "Cần bảo trì":
+                        // Xem xét tình trạng của tài sản, điều chỉnh điều kiện này theo nhu cầu thực tế
+                        if (item.TinhTrang != "Cần bảo trì")
+                            return false;
+                        break;
                 }
             }
 
-            return matchesSearchText && matchesTinhTrang;
+            // Chuẩn bị từ khóa tìm kiếm, chuẩn hóa để so sánh dễ dàng hơn
+            string keyword = TuKhoaTimKiem?.Trim().ToLower() ?? "";
+
+            // Nếu không có từ khóa, luôn trả về true cho điều kiện tìm kiếm
+            if (string.IsNullOrEmpty(keyword))
+                return true;
+
+            // Kiểm tra theo từng trường, sử dụng ToLower() thay vì StringComparison.OrdinalIgnoreCase
+            bool matchesSearchText = false;
+
+            // Kiểm tra mã tài sản
+            if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            // Kiểm tra mã đợt kiểm kê
+            else if (item.MaDotKiemKe.HasValue && item.MaDotKiemKe.ToString().ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            // Kiểm tra tên tài sản
+            else if (item.TenTaiSan != null && item.TenTaiSan.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            // Kiểm tra tên phòng
+            else if (item.TenPhong != null && item.TenPhong.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            // Kiểm tra tên đợt kiểm kê
+            else if (item.TenDotKiemKe != null && item.TenDotKiemKe.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            // Kiểm tra vị trí thực tế
+            else if (item.ViTriThucTe != null && item.ViTriThucTe.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            // Kiểm tra ghi chú
+            else if (item.GhiChu != null && item.GhiChu.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            return matchesSearchText;
         }
         public class TaiSanService
         {
