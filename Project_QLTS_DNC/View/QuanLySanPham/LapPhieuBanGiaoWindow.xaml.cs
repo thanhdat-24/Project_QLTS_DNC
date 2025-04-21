@@ -195,8 +195,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
         }
 
-        // Thay đổi phương thức btnLapPhieu_Click trong LapPhieuBanGiaoWindow.xaml.cs
-
         private async void btnLapPhieu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -226,6 +224,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 DateTime utcTime = localTime.ToUniversalTime();
 
                 var noiDung = txtNoiDung.Text.Trim();
+                var nguoiTiepNhan = txtNguoiTiepNhan.Text.Trim(); // Lấy thông tin người tiếp nhận
 
                 // Phần còn lại giữ nguyên
                 var dsTaiSanDaChon = _dsTaiSanKho.Where(t => t.IsSelected).ToList();
@@ -253,7 +252,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     MaNV = selectedNhanVien.MaNV,
                     MaPhong = selectedPhong.MaPhong,
                     NoiDung = noiDung,
-                    TrangThai = null // Chờ duyệt
+                    TrangThai = null, // Chờ duyệt
+                    CbTiepNhan = nguoiTiepNhan // Thêm thông tin người tiếp nhận
                 };
 
                 // Phần còn lại của hàm giữ nguyên
