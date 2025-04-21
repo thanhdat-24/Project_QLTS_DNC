@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using ClosedXML.Excel;
 using Project_QLTS_DNC.Services;
+using KiemKeTaiSanModel = Project_QLTS_DNC.Models.KiemKe.KiemKeTaiSanModel;
 
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu

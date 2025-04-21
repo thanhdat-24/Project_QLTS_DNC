@@ -26,4 +26,5 @@ public class ChiTietPhieuNhap : BaseModel
 
     [Column("don_gia")]
     public decimal? DonGia { get; set; }  
+
 }

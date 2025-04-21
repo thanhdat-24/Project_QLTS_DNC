@@ -9,7 +9,7 @@ using Supabase.Postgrest.Models;
 namespace Project_QLTS_DNC.Models.KiemKe
 {
     [Table("kiemketaisan")]
-    public class KiemKeTaiSan : BaseModel
+    public class KiemKeTaiSanModel : BaseModel
     {
         [PrimaryKey("ma_kiem_ke_ts", false)]
         public int MaKiemKeTS { get; set; }

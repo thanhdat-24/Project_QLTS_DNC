@@ -15,7 +15,9 @@ using System.Windows.Shapes;
 using Project_QLTS_DNC.Models.Kho;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Supabase;
-
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Models.PhieuXuatKho;
+using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 
 
 namespace Project_QLTS_DNC.View.QuanLyKho
@@ -56,26 +58,62 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private async Task LoadTonKhoAsync()
         {
+            // 1. Load dữ liệu cần thiết
             var tonKhoResult = await _client.From<TonKho>().Get();
-            var list = tonKhoResult.Models;
-
-            // Lấy danh sách kho
             var khoResult = await _client.From<Kho>().Get();
-            _khoLookup = khoResult.Models.ToDictionary(k => k.MaKho, k => k.TenKho);
-
-            // Lấy danh sách nhóm tài sản
             var nhomResult = await _client.From<NhomTaiSan>().Get();
+            var chiTietXuatKhoResult = await _client.From<Project_QLTS_DNC.Models.PhieuXuatKho.ChiTietPhieuXuatInsert>().Get();
+            var chiTietBanGiaoResult = await _client.From<Project_QLTS_DNC.Models.BanGiaoTaiSan.ChiTietBanGiaoModel>().Get();
+
+            var listTonKho = tonKhoResult.Models;
+            var listChiTietXuatKho = chiTietXuatKhoResult.Models;
+            var listChiTietBanGiao = chiTietBanGiaoResult.Models;
+
+            _khoLookup = khoResult.Models.ToDictionary(k => k.MaKho, k => k.TenKho);
             _nhomLookup = nhomResult.Models.ToDictionary(n => n.MaNhomTS, n => n.TenNhom);
 
-            // Gán tên cho mỗi dòng tồn kho
-            foreach (var item in list)
+            // 2. Xử lý từng dòng tồn kho
+            foreach (var item in listTonKho)
             {
+                // Gán tên kho, tên nhóm
                 item.TenKho = _khoLookup.TryGetValue(item.MaKho, out var tenKho) ? tenKho : "";
                 item.TenNhomTS = _nhomLookup.TryGetValue(item.MaNhomTS, out var tenNhom) ? tenNhom : "";
+
+                // 👉 Lúc này MaNhomTS trong TonKho chính là MaTaiSan
+
+                int tongXuatKho = listChiTietXuatKho
+                    .Where(x => x.MaTaiSan == item.MaNhomTS) // So sánh trực tiếp
+                    .Sum(x => x.SoLuong);
+
+                int tongBanGiao = listChiTietBanGiao
+                    .Where(x => x.MaTaiSan == item.MaNhomTS) // So sánh trực tiếp
+                    .Count(); // Nếu 1 dòng = 1 tài sản
+
+                item.SoLuongTon = item.SoLuongNhap - (tongXuatKho + tongBanGiao);
             }
 
-            dgTonKho.ItemsSource = list;
+            dgTonKho.ItemsSource = listTonKho;
         }
+
+        private async Task<int> TinhTongSoLuongTaiSanAsync()
+        {
+            // Load dữ liệu
+            var chiTietXuatKhoResult = await _client.From<Project_QLTS_DNC.Models.PhieuXuatKho.ChiTietPhieuXuatInsert>().Get();
+            var chiTietBanGiaoResult = await _client.From<Project_QLTS_DNC.Models.BanGiaoTaiSan.ChiTietBanGiaoModel>().Get();
+
+            var listChiTietXuatKho = chiTietXuatKhoResult.Models;
+            var listChiTietBanGiao = chiTietBanGiaoResult.Models;
+
+            // Tính tổng
+            int tongXuatKho = listChiTietXuatKho.Sum(x => x.SoLuong);
+            int tongBanGiao = listChiTietBanGiao.Count(); // mỗi dòng = 1 tài sản
+
+            int tongCong = tongXuatKho + tongBanGiao;
+
+            return tongCong;
+        }
+
+
 
         private async void TonKhoView_Loaded(object sender, RoutedEventArgs e)
         {

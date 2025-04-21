@@ -7,6 +7,8 @@ namespace Project_QLTS_DNC.Models.PhieuNhapKho
     [Table("phieunhap")]
     public class PhieuNhap : BaseModel
     {
+        private DateTime _ngaynhap;
+
         [PrimaryKey("ma_phieu_nhap", false)]
         [Column("ma_phieu_nhap")]
         public int MaPhieuNhap { get; set; }
@@ -21,12 +23,24 @@ namespace Project_QLTS_DNC.Models.PhieuNhapKho
         public int MaNCC { get; set; }
 
         [Column("ngay_nhap")]
-        public DateTime NgayNhap { get; set; }
+        public DateTime NgayNhap
+        {
+            get => _ngaynhap;
+            set
+            {
+                if (value == default || value.Year < 1900)
+                    _ngaynhap = DateTime.UtcNow;
+                else
+                    _ngaynhap = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+            }
+        }
 
         [Column("tong_tien")]
         public decimal TongTien { get; set; }
 
         [Column("trang_thai")]
         public bool? TrangThai { get; set; }
+
+       
     }
 }
