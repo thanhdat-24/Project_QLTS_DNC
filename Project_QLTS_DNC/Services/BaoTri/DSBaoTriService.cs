@@ -22,7 +22,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
-                // Thực hiện truy vấn để lấy dữ liệu
+                // Thực hiện truy vấn để lấy dữ liệu kiểm kê
                 var response = await client
                     .From<KiemKeTaiSan>()
                     .Select("*")
@@ -57,12 +57,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 // Khởi tạo truy vấn
                 var query = client.From<KiemKeTaiSan>().Select("*");
 
-                // Áp dụng các điều kiện lọc
-                if (!string.IsNullOrEmpty(nhomTaiSan) && nhomTaiSan != "Tất cả nhóm")
-                {
-                    query = query.Filter("nhom_tai_san", Supabase.Postgrest.Constants.Operator.Equals, nhomTaiSan);
-                }
-
+                // Áp dụng các điều kiện lọc - bỏ qua lọc theo nhóm tài sản vì trường không tồn tại trong schema
                 if (!string.IsNullOrEmpty(loaiBaoTri) && loaiBaoTri != "Tất cả loại")
                 {
                     query = query.Filter("loai_bao_tri", Supabase.Postgrest.Constants.Operator.Equals, loaiBaoTri);
@@ -87,6 +82,14 @@ namespace Project_QLTS_DNC.Services.BaoTri
                         }
                     }
                     result = filteredList;
+                }
+
+                // Lọc theo nhóm tài sản (nếu được chỉ định) trong bộ nhớ sau khi truy vấn
+                if (!string.IsNullOrEmpty(nhomTaiSan) && nhomTaiSan != "Tất cả nhóm")
+                {
+                    // Thực hiện lọc trên bộ nhớ nếu cần
+                    // Lưu ý: Điều này yêu cầu thuộc tính TenNhomTS đã được điền từ trước
+                    result = result.FindAll(item => item.TenNhomTS == nhomTaiSan);
                 }
 
                 Console.WriteLine($"Số lượng tài sản cần bảo trì: {result.Count}");
@@ -144,13 +147,6 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
-                // Đảm bảo không có trường ngoài schema trong danhSachPhieu
-                foreach (var phieu in danhSachPhieu)
-                {
-                    // Nếu có các trường bổ sung không thuộc schema, hãy xóa chúng ở đây
-                    // phieu.TruongBoSung = null;
-                }
-
                 // Thêm nhiều phiếu bảo trì
                 var response = await client.From<PhieuBaoTri>().Insert(danhSachPhieu);
 
@@ -184,17 +180,17 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 // Chuyển đổi từ KiemKeTaiSan sang KiemKeTaiSanDb để loại bỏ các thuộc tính NotMapped
                 var taiSanDb = KiemKeTaiSanDb.FromKiemKeTaiSan(taiSan);
 
-                // Tiếp tục với các tham số chính xác
+                // Tiếp tục với các tham số chính xác - đã loại bỏ MaNhomTS
                 var parameters = new Dictionary<string, object>
-        {
-            { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
-            { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
-            { "p_ma_tai_san", taiSanDb.MaTaiSan },
-            { "p_ma_phong", taiSanDb.MaPhong },
-            { "p_tinh_trang", taiSanDb.TinhTrang },
-            { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
-            { "p_ghi_chu", taiSanDb.GhiChu }
-        };
+                {
+                    { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
+                    { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
+                    { "p_ma_tai_san", taiSanDb.MaTaiSan },
+                    { "p_ma_phong", taiSanDb.MaPhong },
+                    { "p_tinh_trang", taiSanDb.TinhTrang },
+                    { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
+                    { "p_ghi_chu", taiSanDb.GhiChu }
+                };
 
                 var response = await client.Rpc("cap_nhat_tai_san", parameters);
 
@@ -243,6 +239,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 return new List<PhieuBaoTri>();
             }
         }
+
         /// <summary>
         /// Xóa một tài sản kiểm kê
         /// </summary>
@@ -256,9 +253,9 @@ namespace Project_QLTS_DNC.Services.BaoTri
 
                 // Gọi hàm SQL trên Supabase
                 var parameters = new Dictionary<string, object>
-        {
-            { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
-        };
+                {
+                    { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+                };
 
                 var response = await client.Rpc("xoa_tai_san", parameters);
 
@@ -280,6 +277,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 return false;
             }
         }
+
         /// <summary>
         /// Xóa nhiều tài sản cùng lúc
         /// </summary>
@@ -291,42 +289,96 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
-                bool allSuccess = true;
+                int successCount = 0;
+                List<string> errorMessages = new List<string>();
+
+                // Thử xóa trực tiếp từ bảng thay vì gọi procedure
                 foreach (var taiSan in danhSachTaiSan)
                 {
                     try
                     {
-                        var parameters = new Dictionary<string, object>
-                {
-                    { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
-                };
+                        // Phương pháp 1: Không gán giá trị từ Delete()
+                        await client
+                            .From<KiemKeTaiSan>()
+                            .Where(x => x.MaKiemKeTS == taiSan.MaKiemKeTS)
+                            .Delete();
 
-                        var response = await client.Rpc("xoa_tai_san", parameters);
+                        // Kiểm tra việc xóa bằng cách truy vấn lại
+                        var checkResponse = await client
+                            .From<KiemKeTaiSan>()
+                            .Where(x => x.MaKiemKeTS == taiSan.MaKiemKeTS)
+                            .Get();
 
-                        if (!response.ResponseMessage.IsSuccessStatusCode)
+                        if (checkResponse.Models.Count == 0)
                         {
-                            allSuccess = false;
-                            Console.WriteLine($"Lỗi khi xóa tài sản {taiSan.MaKiemKeTS}: {response.ResponseMessage.ReasonPhrase}");
+                            successCount++;
+                            Console.WriteLine($"Đã xóa tài sản: {taiSan.MaKiemKeTS}");
                         }
                         else
                         {
-                            Console.WriteLine($"Đã xóa tài sản: {taiSan.MaKiemKeTS}");
+                            // Phương pháp 2: Nếu Delete không hoạt động, thử gọi RPC procedure
+                            var parameters = new Dictionary<string, object>
+                            {
+                                { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+                            };
+
+                            var rpcResponse = await client.Rpc("xoa_tai_san", parameters);
+
+                            if (rpcResponse.ResponseMessage != null && rpcResponse.ResponseMessage.IsSuccessStatusCode)
+                            {
+                                // Kiểm tra lại sau khi gọi RPC
+                                checkResponse = await client
+                                    .From<KiemKeTaiSan>()
+                                    .Where(x => x.MaKiemKeTS == taiSan.MaKiemKeTS)
+                                    .Get();
+
+                                if (checkResponse.Models.Count == 0)
+                                {
+                                    successCount++;
+                                    Console.WriteLine($"Đã xóa tài sản (qua RPC): {taiSan.MaKiemKeTS}");
+                                }
+                                else
+                                {
+                                    string message = $"Không thể xóa tài sản {taiSan.MaKiemKeTS}";
+                                    errorMessages.Add(message);
+                                    Console.WriteLine(message);
+                                }
+                            }
+                            else
+                            {
+                                string message = $"Không thể xóa tài sản {taiSan.MaKiemKeTS}";
+                                if (rpcResponse.ResponseMessage != null)
+                                {
+                                    message += $" RPC Status: {rpcResponse.ResponseMessage.StatusCode}";
+                                }
+                                errorMessages.Add(message);
+                                Console.WriteLine(message);
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-                        allSuccess = false;
-                        Console.WriteLine($"Lỗi khi xóa tài sản {taiSan.MaKiemKeTS}: {ex.Message}");
+                        string message = $"Lỗi khi xóa tài sản {taiSan.MaKiemKeTS}: {ex.Message}";
+                        errorMessages.Add(message);
+                        Console.WriteLine(message);
                     }
                 }
 
-                Console.WriteLine($"Đã xóa {danhSachTaiSan.Count} tài sản, trạng thái thành công: {allSuccess}");
-                return allSuccess;
+                // Ghi log chi tiết để phân tích
+                if (errorMessages.Count > 0)
+                {
+                    string allErrors = string.Join("\n", errorMessages);
+                    Console.WriteLine($"Các lỗi xảy ra khi xóa:\n{allErrors}");
+                }
+
+                Console.WriteLine($"Đã xóa {successCount}/{danhSachTaiSan.Count} tài sản");
+
+                // Nếu đã xóa ít nhất 1 tài sản, coi như thành công
+                return successCount > 0;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi xóa nhiều tài sản: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"Lỗi nghiêm trọng khi xóa nhiều tài sản: {ex.Message}");
                 return false;
             }
         }

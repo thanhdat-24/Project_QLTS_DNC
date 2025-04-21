@@ -62,16 +62,12 @@ namespace Project_QLTS_DNC.Services.BaoTri
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                // Giả sử bạn có một function "xoa_loai_bao_tri" trên Supabase
-                var parameters = new Dictionary<string, object>
-        {
-            { "ma_loai", maLoaiBaoTri }
-        };
+                // Gọi phương thức Delete mà không gán kết quả cho biến
+                await client.From<LoaiBaoTri>()
+                    .Where(x => x.MaLoaiBaoTri == maLoaiBaoTri)
+                    .Delete();
 
-                // Gọi RPC
-                await client.Rpc("xoa_loai_bao_tri", parameters);
-
-                return true;
+                return true; // Trả về true nếu không có exception
             }
             catch (Exception ex)
             {
@@ -90,13 +86,23 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 }
 
                 var client = await SupabaseService.GetClientAsync();
-                // Tìm kiếm dựa trên tên loại hoặc mô tả
-                var response = await client.From<LoaiBaoTri>()
-                    .Where(x => x.TenLoai.Contains(searchText) ||
-                               (x.MoTa != null && x.MoTa.Contains(searchText)))
-                    .Get();
 
-                return response.Models;
+                // Sử dụng tìm kiếm đơn giản hơn
+                var query = client.From<LoaiBaoTri>();
+
+                // Thêm tham số cho phương thức tìm kiếm
+                var formattedSearch = $"%{searchText}%";
+
+                // Thực hiện truy vấn chỉ theo tên loại trước
+                var response = await query.Get();
+
+                // Lọc kết quả thủ công
+                var results = response.Models
+                    .Where(x => (x.TenLoai != null && x.TenLoai.ToLower().Contains(searchText.ToLower())) ||
+                                (x.MoTa != null && x.MoTa.ToLower().Contains(searchText.ToLower())))
+                    .ToList();
+
+                return results;
             }
             catch (Exception ex)
             {

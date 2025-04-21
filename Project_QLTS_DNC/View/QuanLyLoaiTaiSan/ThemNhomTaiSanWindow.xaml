@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Thêm Nhóm Tài Sản" 
-        Height="450" Width="500"
+        Height="500" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -75,7 +75,7 @@
                           Grid.Row="0" 
                           materialDesign:HintAssist.Hint="Chọn Loại Tài Sản" 
                           Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Margin="0,0,0,15"
+                          Margin="0,5,0,15"
                           SelectionChanged="cboLoaiTaiSan_SelectionChanged"/>
 
                 <!-- Cảnh báo khi chọn Loại Tài Sản có QuanLyRieng = true -->

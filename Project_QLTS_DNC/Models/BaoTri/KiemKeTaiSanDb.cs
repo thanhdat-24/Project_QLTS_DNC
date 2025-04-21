@@ -1,6 +1,8 @@
 ﻿using System;
 using Supabase.Postgrest.Models;
 using Supabase.Postgrest.Attributes;
+using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Project_QLTS_DNC.Models.BaoTri
 {
@@ -29,6 +31,15 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Supabase.Postgrest.Attributes.Column("ghi_chu")]
         public string GhiChu { get; set; }
 
+        // Đánh dấu thuộc tính này là NotMapped vì nó không tồn tại trong schema
+        [NotMapped]
+        [JsonIgnore]
+        public int? MaNhomTS { get; set; }
+
+        [NotMapped]
+        [JsonIgnore]
+        public string TenNhomTS { get; set; }
+
         // Phương thức chuyển đổi từ KiemKeTaiSan sang KiemKeTaiSanDb
         public static KiemKeTaiSanDb FromKiemKeTaiSan(KiemKeTaiSan taiSan)
         {
@@ -41,6 +52,7 @@ namespace Project_QLTS_DNC.Models.BaoTri
                 TinhTrang = taiSan.TinhTrang,
                 ViTriThucTe = taiSan.ViTriThucTe,
                 GhiChu = taiSan.GhiChu
+                // Bỏ thuộc tính MaNhomTS vì nó không tồn tại trong database schema
             };
         }
     }

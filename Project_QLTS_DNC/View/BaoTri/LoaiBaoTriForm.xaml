@@ -264,31 +264,36 @@
                                             Width="*">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Setter Property="TextWrapping" Value="Wrap"/>
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <!-- Cột chứa các nút tác vụ -->
                         <DataGridTemplateColumn Header="Thao tác" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <!-- Nút chỉnh sửa -->
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                ToolTip="Sửa"
-                                                Background="{DynamicResource PrimaryHueLightBrush}" 
-                                                Width="26" Height="26" Padding="2" Margin="0,1">
+                        ToolTip="Sửa"
+                        Command="{Binding DataContext.SuaCommand, 
+                                 RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                        CommandParameter="{Binding}"
+                        Background="{DynamicResource PrimaryHueLightBrush}" 
+                        Width="26" Height="26" Padding="2" Margin="0,1">
                                             <materialDesign:PackIcon Kind="Edit" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                         <!-- Nút xóa -->
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                ToolTip="Xóa" Margin="8,1,0,1"
-                                                Background="{DynamicResource SecondaryDelete}" 
-                                                Width="26" Height="26" 
-                                                Padding="2">
+                        ToolTip="Xóa" Margin="8,1,0,1"
+                        Command="{Binding DataContext.XoaCommand, 
+                                 RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                        CommandParameter="{Binding}"
+                        Background="{DynamicResource SecondaryDelete}" 
+                        Width="26" Height="26" 
+                        Padding="2">
                                             <materialDesign:PackIcon Kind="Delete" Width="15" Height="15" Foreground="White"/>
                                         </Button>
                                     </StackPanel>

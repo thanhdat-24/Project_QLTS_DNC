@@ -5,17 +5,17 @@ using System;
 namespace Project_QLTS_DNC.Models.DuyetPhieu
 {
     [Table("phieudenghimua")]
-    public class phieudenghimua : BaseModel
+    public class denghimua : BaseModel
     {
-        [PrimaryKey("ma_phieu_denghi", false)]
-        [Column("ma_phieu_denghi")]
+        [PrimaryKey("ma_phieu_de_nghi", false)]
+        [Column("ma_phieu_de_nghi")]
         public long MaPhieuDeNghi { get; set; }
 
         [Column("ngay_denghi")]
-        public DateTime NgayDeNghi { get; set; }
+        public DateTime? NgayDeNghiMua { get; set; }
 
         [Column("ma_nv")]
-        public long MaNhanVien { get; set; }
+        public long MaNV { get; set; }
 
         [Column("don_vi_denghi")]
         public string DonViDeNghi { get; set; }

@@ -49,12 +49,5 @@ namespace Project_QLTS_DNC.Models.NhanVien
                     : value;
             }
         }
-
-        
-
-
-
-
-
     }
 }
