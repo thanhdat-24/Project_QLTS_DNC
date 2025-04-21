@@ -176,8 +176,8 @@ namespace Project_QLTS_DNC
                 btnQuanLyCaiDat
             };
 
-            MessageBox.Show($"Tên tài khoản đăng nhập: {ThongTinDangNhap.LoaiTaiKhoanDangNhap?.TenLoaiTk ?? "null"}");
-            MessageBox.Show("Danh sách quyền: " + string.Join(", ", QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi ?? new List<string>()));
+            //MessageBox.Show($"Tên tài khoản đăng nhập: {ThongTinDangNhap.LoaiTaiKhoanDangNhap?.TenLoaiTk ?? "null"}");
+            //MessageBox.Show("Danh sách quyền: " + string.Join(", ", QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi ?? new List<string>()));
 
             // Nếu là admin thì hiển thị tất cả
             if (ThongTinDangNhap.LoaiTaiKhoanDangNhap != null &&
@@ -193,7 +193,7 @@ namespace Project_QLTS_DNC
                     if (parent != null) parent.Visibility = Visibility.Visible;
                 }
 
-                MessageBox.Show("Đang hiển thị toàn bộ TreeView vì là Admin");
+               // MessageBox.Show("Đang hiển thị toàn bộ TreeView vì là Admin");
                 return;
             }
 
