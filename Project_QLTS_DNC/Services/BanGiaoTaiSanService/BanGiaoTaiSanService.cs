@@ -14,7 +14,6 @@ using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Models.PhieuNhapKho;
 using Project_QLTS_DNC.Services;
-using static Supabase.Postgrest.Constants;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.View.QuanLyToanNha;
 using System.Windows;
@@ -53,6 +52,10 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                 var toaNhaResponse = await client.From<ToaNha>().Get();
                 var dsToaNha = toaNhaResponse.Models.ToList();
 
+                // Lấy danh sách kho
+                var khoResponse = await client.From<Kho>().Get();
+                var dsKho = khoResponse.Models.ToList();
+
                 // Chuyển đổi từ model sang DTO
                 var dsBanGiaoDTO = new ObservableCollection<BanGiaoTaiSanDTO>();
 
@@ -67,8 +70,16 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                         MaPhong = bangiao.MaPhong,
                         NoiDung = bangiao.NoiDung,
                         TrangThai = bangiao.TrangThai,
-                        CbTiepNhan = bangiao.CbTiepNhan // Thêm thông tin người tiếp nhận
+                        CbTiepNhan = bangiao.CbTiepNhan,
+                        MaKho = bangiao.MaKho // Thêm mã kho
                     };
+
+                    // Thêm thông tin kho
+                    var kho = dsKho.FirstOrDefault(k => k.MaKho == bangiao.MaKho);
+                    if (kho != null)
+                    {
+                        banGiaoDTO.TenKho = kho.TenKho;
+                    }
 
                     // Thêm thông tin phòng và tòa nhà nếu có
                     if (bangiao.MaPhong.HasValue)

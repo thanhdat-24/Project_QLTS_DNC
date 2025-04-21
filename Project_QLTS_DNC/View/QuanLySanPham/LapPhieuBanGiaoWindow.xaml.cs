@@ -207,6 +207,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 // Lấy thông tin từ form
                 var selectedPhong = cboPhong.SelectedItem as PhongBanGiaoFilter;
                 var selectedNhanVien = cboNhanVien.SelectedItem as NhanVienModel;
+                var selectedKho = cboKho.SelectedItem as KhoBanGiaoFilter;
 
                 // Lấy ngày từ DatePicker và thêm giờ hiện tại
                 DateTime selectedDate = dateBanGiao.SelectedDate ?? DateTime.Now.Date;
@@ -253,7 +254,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     MaPhong = selectedPhong.MaPhong,
                     NoiDung = noiDung,
                     TrangThai = null, // Chờ duyệt
-                    CbTiepNhan = nguoiTiepNhan // Thêm thông tin người tiếp nhận
+                    CbTiepNhan = nguoiTiepNhan, // Thêm thông tin người tiếp nhận
+                    MaKho = selectedKho.MaKho
                 };
 
                 // Phần còn lại của hàm giữ nguyên
@@ -309,7 +311,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 MessageBox.Show("Phòng và kho phải thuộc cùng một tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
-
             // Kiểm tra nhân viên
             if (cboNhanVien.SelectedItem == null)
             {

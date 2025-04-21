@@ -29,6 +29,9 @@ namespace Project_QLTS_DNC.Models.BanGiaoTaiSan
         // Thêm mới trường người tiếp nhận
         [Column("cb_tiep_nhan")]
         public string CbTiepNhan { get; set; }
+
+        [Column("ma_kho")]
+        public int MaKho { get; set; }
     }
 }
 
@@ -83,6 +86,9 @@ namespace Project_QLTS_DNC.DTOs
 
         // Thêm mới người tiếp nhận
         public string CbTiepNhan { get; set; }
+
+        public int MaKho { get; set; }
+        public string TenKho { get; set; }
     }
     public class ChiTietBanGiaoDTO
     {
