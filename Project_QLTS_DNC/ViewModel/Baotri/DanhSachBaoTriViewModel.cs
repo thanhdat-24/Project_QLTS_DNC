@@ -261,16 +261,19 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
             }
         }
+        // Sửa đổi phương thức LoadDSKiemKeAsync để lấy thông tin nhóm tài sản
         public async Task LoadDSKiemKeAsync()
         {
             try
             {
                 IsLoading = true;
+
                 // Tải danh mục trước
                 await LoadDanhMucAsync();
 
                 // Lấy dữ liệu từ service
                 var danhSach = await _dsBaotriService.GetKiemKeTaiSanAsync();
+
                 try
                 {
                     if (_taiSanService != null && _phongService != null)
@@ -278,7 +281,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                         var dsTaiSan = await _taiSanService.GetDanhSachTaiSanAsync();
                         var dsPhong = await _phongService.GetDanhSachPhongAsync();
 
-                        // Cập nhật tên tài sản và tên phòng
+                        // Cập nhật tên tài sản, tên phòng và MaNhomTS
                         foreach (var item in danhSach)
                         {
                             // Chuyển đổi int? sang int để so sánh
@@ -286,16 +289,31 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                             var phongId = item.MaPhong.GetValueOrDefault();
                             var dotKiemKeId = item.MaDotKiemKe.GetValueOrDefault();
 
+                            // Tìm tài sản trong danh sách tài sản
                             var taiSan = dsTaiSan.FirstOrDefault(ts => ts.MaTaiSan == taiSanId);
                             if (taiSan != null)
                             {
                                 item.TenTaiSan = taiSan.TenTaiSan;
+
+                                // Quan trọng: Cập nhật mã nhóm tài sản từ tài sản
+                                item.MaNhomTS = taiSan.MaNhomTS;
+
+                                // Tìm tên nhóm tài sản nếu có
+                                if (DsNhomTaiSan != null && item.MaNhomTS.HasValue)
+                                {
+                                    var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == item.MaNhomTS.Value);
+                                    if (nhomTaiSan != null)
+                                    {
+                                        item.TenNhomTS = nhomTaiSan.TenNhom;
+                                    }
+                                }
                             }
                             else
                             {
                                 item.TenTaiSan = $"Tài sản {taiSanId}";
                             }
 
+                            // Cập nhật tên phòng
                             var phong = dsPhong.FirstOrDefault(p => p.MaPhong == phongId);
                             if (phong != null)
                             {
@@ -320,19 +338,17 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     // Ghi log lỗi để theo dõi
                     System.Diagnostics.Debug.WriteLine($"Lỗi khi cập nhật tên: {ex.Message}");
                     // Bỏ qua lỗi này để tránh làm hỏng toàn bộ hàm
-                    // Vẫn hiển thị dữ liệu nhưng không có tên tài sản và tên phòng
                 }
 
                 // Lưu danh sách gốc
                 _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>(danhSach);
 
-                // Cập nhật view - Sửa lỗi cú pháp ở đây
+                // Cập nhật view
                 if (_dsKiemKeView == null)
                 {
                     _dsKiemKeView = new CollectionViewSource();
                 }
-
-                _dsKiemKeView.Source = _dsKiemKeGoc;  // Sửa lỗi cú pháp
+                _dsKiemKeView.Source = _dsKiemKeGoc;
 
                 // Thiết lập filter ban đầu
                 ICollectionView view = _dsKiemKeView.View;
@@ -343,7 +359,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     {
                         // Không có cách trực tiếp để xóa filter, nên tạo view mới
                         _dsKiemKeView = new CollectionViewSource();
-                        _dsKiemKeView.Source = _dsKiemKeGoc;  // Sửa lỗi cú pháp
+                        _dsKiemKeView.Source = _dsKiemKeGoc;
                         view = _dsKiemKeView.View;
                     }
 
@@ -352,8 +368,10 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
 
                 OnPropertyChanged(nameof(DsKiemKeView));
+
                 // Cập nhật phân trang
                 UpdatePagination();
+
                 // Tải dữ liệu trang đầu tiên
                 LoadPageData();
             }
@@ -367,7 +385,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 IsLoading = false;
             }
         }
-
 
 
         private void UpdatePagination()
@@ -563,67 +580,82 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         }
 
 
+   
+        // Cập nhật phương thức FilterMatches trong DanhSachBaoTriViewModel
         private bool FilterMatches(KiemKeTaiSan item)
         {
-            // Đầu tiên kiểm tra xem mục có phù hợp với bộ lọc tình trạng không
-            if (!string.IsNullOrEmpty(TinhTrangDuocChon) && TinhTrangDuocChon != "Tất cả tình trạng")
+            if (item == null)
+                return false;
+
+            // 1. Lọc theo nhóm tài sản - dựa vào việc kiểm tra tên tài sản có chứa tên nhóm
+            if (!string.IsNullOrEmpty(NhomTaiSanDuocChon) && NhomTaiSanDuocChon != "Tất cả nhóm")
             {
-                // Logic lọc theo tình trạng
-                switch (TinhTrangDuocChon)
+                // Kiểm tra nếu tên tài sản không có hoặc không chứa tên nhóm
+                if (string.IsNullOrEmpty(item.TenTaiSan) ||
+                   !item.TenTaiSan.Contains(NhomTaiSanDuocChon, StringComparison.OrdinalIgnoreCase))
                 {
-                    case "Cần kiểm tra":
-                        // Xem xét tình trạng của tài sản, điều chỉnh điều kiện này theo nhu cầu thực tế
-                        if (item.TinhTrang != "Cần kiểm tra")
-                            return false;
-                        break;
-                    case "Cần bảo trì":
-                        // Xem xét tình trạng của tài sản, điều chỉnh điều kiện này theo nhu cầu thực tế
-                        if (item.TinhTrang != "Cần bảo trì")
-                            return false;
-                        break;
+                    return false;
                 }
             }
 
-            // Chuẩn bị từ khóa tìm kiếm, chuẩn hóa để so sánh dễ dàng hơn
-            string keyword = TuKhoaTimKiem?.Trim().ToLower() ?? "";
+            // 2. Lọc theo tình trạng
+            if (!string.IsNullOrEmpty(TinhTrangDuocChon) && TinhTrangDuocChon != "Tất cả tình trạng")
+            {
+                // Nếu item không có tình trạng, loại bỏ
+                if (string.IsNullOrEmpty(item.TinhTrang))
+                    return false;
 
-            // Nếu không có từ khóa, luôn trả về true cho điều kiện tìm kiếm
+                // So sánh chính xác với tình trạng đã chọn
+                bool tinhTrangMatch = false;
+
+                if (TinhTrangDuocChon == "Cần kiểm tra" && item.TinhTrang == "Cần kiểm tra")
+                    tinhTrangMatch = true;
+                else if (TinhTrangDuocChon == "Cần bảo trì" && item.TinhTrang == "Cần bảo trì")
+                    tinhTrangMatch = true;
+
+                if (!tinhTrangMatch)
+                    return false;
+            }
+
+            // 3. Lọc theo từ khóa tìm kiếm
+            string keyword = TuKhoaTimKiem?.Trim().ToLower() ?? "";
             if (string.IsNullOrEmpty(keyword))
                 return true;
 
-            // Kiểm tra theo từng trường, sử dụng ToLower() thay vì StringComparison.OrdinalIgnoreCase
+            // Kiểm tra các trường thông tin
             bool matchesSearchText = false;
 
-            // Kiểm tra mã tài sản
-            if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
+            // Kiểm tra mã kiểm kê
+            if (item.MaKiemKeTS.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
-
+            // Kiểm tra mã tài sản
+            else if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
+                matchesSearchText = true;
             // Kiểm tra mã đợt kiểm kê
             else if (item.MaDotKiemKe.HasValue && item.MaDotKiemKe.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tên tài sản
             else if (item.TenTaiSan != null && item.TenTaiSan.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tên phòng
             else if (item.TenPhong != null && item.TenPhong.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tên đợt kiểm kê
             else if (item.TenDotKiemKe != null && item.TenDotKiemKe.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra vị trí thực tế
             else if (item.ViTriThucTe != null && item.ViTriThucTe.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
+            // Kiểm tra tình trạng
+            else if (item.TinhTrang != null && item.TinhTrang.ToLower().Contains(keyword))
+                matchesSearchText = true;
             // Kiểm tra ghi chú
             else if (item.GhiChu != null && item.GhiChu.ToLower().Contains(keyword))
                 matchesSearchText = true;
 
             return matchesSearchText;
         }
+        // Cập nhật lớp TaiSanService để lấy cả thông tin nhóm tài sản
         public class TaiSanService
         {
             public async Task<List<TaiSanModel>> GetDanhSachTaiSanAsync()
@@ -634,9 +666,10 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     if (client == null)
                         throw new Exception("Không thể kết nối Supabase Client");
 
+                    // Thực hiện truy vấn để lấy tất cả tài sản kèm mã nhóm tài sản
                     var response = await client
                         .From<TaiSanModel>()
-                        .Select("*")
+                        .Select("*") // Đảm bảo kết quả có cả ma_nhom_ts
                         .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
                         .Get();
 

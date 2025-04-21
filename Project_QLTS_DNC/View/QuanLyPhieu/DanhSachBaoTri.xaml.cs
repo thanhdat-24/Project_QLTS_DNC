@@ -24,10 +24,18 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private DanhSachBaoTriViewModel _viewModel;
         private List<Button> _pageButtons;
         private ICollectionView collectionView;
+        private void RegisterFilterEvents()
+        {
+            // Đăng ký sự kiện SelectionChanged cho các ComboBox
+            cboNhomTaiSan.SelectionChanged += Filter_SelectionChanged;
+            cboTinhTrang.SelectionChanged += Filter_SelectionChanged;
+        }
 
+        // Cập nhật phương thức InitializeComponent hoặc constructor để đăng ký sự kiện
         public DanhSachBaoTriUserControl()
         {
             InitializeComponent();
+
             // Khởi tạo ViewModel và gán làm DataContext
             _viewModel = new DanhSachBaoTriViewModel(false); // Không tự động tải dữ liệu
             this.DataContext = _viewModel;
@@ -42,13 +50,17 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Đăng ký sự kiện cho nút tạo phiếu bảo trì
             btnTaoPhieuBaoTri.Click += BtnTaoPhieuBaoTri_Click;
 
-            // Tải dữ liệu khi control được khởi tạo
-            this.Loaded += DanhSachBaoTriUserControl_Loaded;
+            // Đăng ký sự kiện cho ComboBox lọc
+            RegisterFilterEvents();
 
             // Đăng ký sự kiện cho TextBox tìm kiếm
             txtTimKiem.TextChanged += TxtTimKiem_TextChanged;
             btnTimKiem.Click += BtnTimKiem_Click;
+
+            // Tải dữ liệu khi control được khởi tạo
+            this.Loaded += DanhSachBaoTriUserControl_Loaded;
         }
+        // Cập nhật phương thức LoadNhomTaiSanAsync
         private async Task LoadNhomTaiSanAsync()
         {
             try
@@ -66,6 +78,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 ComboBoxItem defaultItem = new ComboBoxItem();
                 defaultItem.Content = "Tất cả nhóm";
                 defaultItem.IsSelected = true;
+                defaultItem.Tag = null; // Không có mã nhóm
                 cboNhomTaiSan.Items.Add(defaultItem);
 
                 // Thêm các nhóm tài sản từ database
@@ -269,6 +282,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        // Cập nhật phương thức Filter_SelectionChanged với cách lọc mới
         private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is ComboBox comboBox)
@@ -279,24 +293,24 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     var selectedItem = comboBox.SelectedItem as ComboBoxItem;
                     if (selectedItem != null)
                     {
-                        // Cập nhật giá trị trong ViewModel
+                        // Lưu tên nhóm tài sản đã chọn vào ViewModel
                         _viewModel.NhomTaiSanDuocChon = selectedItem.Content.ToString();
 
-                        // Nếu có Tag (mã nhóm), cập nhật thêm mã nhóm
-                        if (selectedItem.Tag != null)
-                        {
-                            int maNhom = Convert.ToInt32(selectedItem.Tag);
-                            _viewModel.MaNhomTaiSanDuocChon = maNhom;
-                        }
-                        else
-                        {
-                            _viewModel.MaNhomTaiSanDuocChon = null; // Tất cả nhóm
-                        }
+                        // Debug: In ra thông tin để theo dõi
+                        System.Diagnostics.Debug.WriteLine($"Đã chọn nhóm tài sản: {_viewModel.NhomTaiSanDuocChon}");
                     }
                 }
                 else if (comboBox == cboTinhTrang)
                 {
-                    // Xử lý như cũ
+                    // Lấy item được chọn từ ComboBox tình trạng
+                    var selectedItem = comboBox.SelectedItem as ComboBoxItem;
+                    if (selectedItem != null)
+                    {
+                        _viewModel.TinhTrangDuocChon = selectedItem.Content.ToString();
+
+                        // Debug: In ra thông tin để theo dõi
+                        System.Diagnostics.Debug.WriteLine($"Đã chọn tình trạng: {_viewModel.TinhTrangDuocChon}");
+                    }
                 }
 
                 // Nếu có CollectionView, cập nhật lại filter

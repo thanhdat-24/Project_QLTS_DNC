@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
-using Newtonsoft.Json; // Thêm namespace này
+using Newtonsoft.Json;
 
 namespace Project_QLTS_DNC.Models.BaoTri
 {
@@ -31,29 +31,30 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Supabase.Postgrest.Attributes.Column("ghi_chu")]
         public string GhiChu { get; set; }
 
-        [Supabase.Postgrest.Attributes.Column("ma_nhom_ts")]
+        // Đánh dấu thuộc tính này là NotMapped và JsonIgnore vì nó không tồn tại trong schema
+        [NotMapped]
+        [JsonIgnore]
         public int? MaNhomTS { get; set; }
 
-        // Sửa các thuộc tính không có trong database
         [NotMapped]
-        [JsonIgnore] // Thêm dòng này
+        [JsonIgnore]
         public string TenNhomTS { get; set; }
 
         [NotMapped]
-        [JsonIgnore] // Thêm dòng này
+        [JsonIgnore]
         public string TenTaiSan { get; set; }
 
         [NotMapped]
-        [JsonIgnore] // Thêm dòng này
+        [JsonIgnore]
         public string TenPhong { get; set; }
 
         [NotMapped]
-        [JsonIgnore] // Thêm dòng này
+        [JsonIgnore]
         public string TenDotKiemKe { get; set; }
 
         private bool _isSelected;
         [NotMapped]
-        [JsonIgnore] // Thêm dòng này
+        [JsonIgnore]
         public bool IsSelected
         {
             get => _isSelected;

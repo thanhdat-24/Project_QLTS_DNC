@@ -22,7 +22,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
-                // Thực hiện truy vấn để lấy dữ liệu
+                // Thực hiện truy vấn để lấy dữ liệu kiểm kê
                 var response = await client
                     .From<KiemKeTaiSan>()
                     .Select("*")
@@ -57,12 +57,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 // Khởi tạo truy vấn
                 var query = client.From<KiemKeTaiSan>().Select("*");
 
-                // Áp dụng các điều kiện lọc
-                if (!string.IsNullOrEmpty(nhomTaiSan) && nhomTaiSan != "Tất cả nhóm")
-                {
-                    query = query.Filter("nhom_tai_san", Supabase.Postgrest.Constants.Operator.Equals, nhomTaiSan);
-                }
-
+                // Áp dụng các điều kiện lọc - bỏ qua lọc theo nhóm tài sản vì trường không tồn tại trong schema
                 if (!string.IsNullOrEmpty(loaiBaoTri) && loaiBaoTri != "Tất cả loại")
                 {
                     query = query.Filter("loai_bao_tri", Supabase.Postgrest.Constants.Operator.Equals, loaiBaoTri);
@@ -87,6 +82,14 @@ namespace Project_QLTS_DNC.Services.BaoTri
                         }
                     }
                     result = filteredList;
+                }
+
+                // Lọc theo nhóm tài sản (nếu được chỉ định) trong bộ nhớ sau khi truy vấn
+                if (!string.IsNullOrEmpty(nhomTaiSan) && nhomTaiSan != "Tất cả nhóm")
+                {
+                    // Thực hiện lọc trên bộ nhớ nếu cần
+                    // Lưu ý: Điều này yêu cầu thuộc tính TenNhomTS đã được điền từ trước
+                    result = result.FindAll(item => item.TenNhomTS == nhomTaiSan);
                 }
 
                 Console.WriteLine($"Số lượng tài sản cần bảo trì: {result.Count}");
@@ -144,13 +147,6 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
-                // Đảm bảo không có trường ngoài schema trong danhSachPhieu
-                foreach (var phieu in danhSachPhieu)
-                {
-                    // Nếu có các trường bổ sung không thuộc schema, hãy xóa chúng ở đây
-                    // phieu.TruongBoSung = null;
-                }
-
                 // Thêm nhiều phiếu bảo trì
                 var response = await client.From<PhieuBaoTri>().Insert(danhSachPhieu);
 
@@ -184,17 +180,17 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 // Chuyển đổi từ KiemKeTaiSan sang KiemKeTaiSanDb để loại bỏ các thuộc tính NotMapped
                 var taiSanDb = KiemKeTaiSanDb.FromKiemKeTaiSan(taiSan);
 
-                // Tiếp tục với các tham số chính xác
+                // Tiếp tục với các tham số chính xác - đã loại bỏ MaNhomTS
                 var parameters = new Dictionary<string, object>
-        {
-            { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
-            { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
-            { "p_ma_tai_san", taiSanDb.MaTaiSan },
-            { "p_ma_phong", taiSanDb.MaPhong },
-            { "p_tinh_trang", taiSanDb.TinhTrang },
-            { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
-            { "p_ghi_chu", taiSanDb.GhiChu }
-        };
+                {
+                    { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
+                    { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
+                    { "p_ma_tai_san", taiSanDb.MaTaiSan },
+                    { "p_ma_phong", taiSanDb.MaPhong },
+                    { "p_tinh_trang", taiSanDb.TinhTrang },
+                    { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
+                    { "p_ghi_chu", taiSanDb.GhiChu }
+                };
 
                 var response = await client.Rpc("cap_nhat_tai_san", parameters);
 
@@ -243,6 +239,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 return new List<PhieuBaoTri>();
             }
         }
+
         /// <summary>
         /// Xóa một tài sản kiểm kê
         /// </summary>
@@ -256,9 +253,9 @@ namespace Project_QLTS_DNC.Services.BaoTri
 
                 // Gọi hàm SQL trên Supabase
                 var parameters = new Dictionary<string, object>
-        {
-            { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
-        };
+                {
+                    { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+                };
 
                 var response = await client.Rpc("xoa_tai_san", parameters);
 
@@ -280,6 +277,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 return false;
             }
         }
+
         /// <summary>
         /// Xóa nhiều tài sản cùng lúc
         /// </summary>
@@ -320,9 +318,9 @@ namespace Project_QLTS_DNC.Services.BaoTri
                         {
                             // Phương pháp 2: Nếu Delete không hoạt động, thử gọi RPC procedure
                             var parameters = new Dictionary<string, object>
-                         {
-                              { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
-                     };
+                            {
+                                { "p_ma_kiem_ke_ts", taiSan.MaKiemKeTS }
+                            };
 
                             var rpcResponse = await client.Rpc("xoa_tai_san", parameters);
 
