@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.DTOs;
@@ -17,33 +18,55 @@ namespace Project_QLTS_DNC.View.NhanVien
     {
         private readonly NhanVienService _nhanVienService;
 
-
         public DanhSachNhanVienForm()
         {
             InitializeComponent();
 
-            var client = SupabaseService.GetClientAsync().Result;
             _nhanVienService = new NhanVienService();
-            _ = LoadDanhSachNhanVienAsync();
+
+            // Load dữ liệu khi control được khởi tạo
+            Loaded += DanhSachNhanVienForm_Loaded;
+        }
+
+        private void DanhSachNhanVienForm_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Load dữ liệu khi form được load
+            LoadDanhSachNhanVienAsync();
             LoadPhongBan();
         }
 
-        private async Task LoadDanhSachNhanVienAsync()
+        public async Task LoadDanhSachNhanVienAsync()
         {
-
-            var danhSach = await _nhanVienService.LayTatCaNhanVienDtoAsync();
-
-
-            if (danhSach != null)
+            try
             {
-                dvDanhSachNhanVien.ItemsSource = danhSach;
+                var nhanVienService = new NhanVienService();
+                var danhSachNhanVien = await nhanVienService.LayTatCaNhanVienDtoAsync();
+
+                
+                foreach (var nhanVien in danhSachNhanVien)
+                {
+                    System.Diagnostics.Debug.WriteLine($"MaPB: {nhanVien.MaPb}, MaCV: {nhanVien.MaCv}, TenNV: {nhanVien.TenNv}");
+                }
+
+                
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    dvDanhSachNhanVien.ItemsSource = danhSachNhanVien;
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách nhân viên: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Error loading employees: {ex}");
             }
         }
 
-        private void btnThemNhanVien_Click(object sender, RoutedEventArgs e)
+        private async void btnThemNhanVien_Click(object sender, RoutedEventArgs e)
         {
-            var themNhanVienWindow = new ThemNhanVienForm();
-            themNhanVienWindow.Show();
+            
+            var themNhanVienWindow = new ThemNhanVienForm(this);
+            themNhanVienWindow.ShowDialog();
+           
         }
 
         private async void btnRefresh_Click(object sender, RoutedEventArgs e)
@@ -58,18 +81,27 @@ namespace Project_QLTS_DNC.View.NhanVien
                 var selectedDto = dvDanhSachNhanVien.SelectedItem as NhanVienDto;
                 if (selectedDto != null)
                 {
+                    // Debug the selected values
+                    System.Diagnostics.Debug.WriteLine($"Selected DTO - MaPb: {selectedDto.MaPb}, MaCv: {selectedDto.MaCv}");
+
                     var nhanVienUpdate = new NhanVienModel
                     {
                         MaNV = selectedDto.MaNv,
+                        MaPB = selectedDto.MaPb,
+                        MaCV = selectedDto.MaCv,
                         TenNV = selectedDto.TenNv,
+                        GioiTinh = selectedDto.GioiTinh,
                         DiaChi = selectedDto.DiaChi,
                         Email = selectedDto.Email,
                         SDT = selectedDto.Sdt,
-                        MaPB = selectedDto.MaPb,
-                        MaCV = selectedDto.MaCv
+                        NgayVaoLam = selectedDto.NgayVaoLam
                     };
 
-                    ThemNhanVienForm formSua = new ThemNhanVienForm(nhanVienUpdate);
+                   
+                    System.Diagnostics.Debug.WriteLine($"Created model - MaPB: {nhanVienUpdate.MaPB}, MaCV: {nhanVienUpdate.MaCV}");
+
+                    
+                    ThemNhanVienForm formSua = new ThemNhanVienForm(nhanVienUpdate, this);
                     formSua.ShowDialog();
                 }
             }
@@ -79,30 +111,43 @@ namespace Project_QLTS_DNC.View.NhanVien
             }
         }
 
-
-        private void btnXoa_Click(object sender, RoutedEventArgs e)
+        private async void btnXoa_Click(object sender, RoutedEventArgs e)
         {
-            if(dvDanhSachNhanVien.SelectedItem != null)
+            try
             {
-                var selectedDto = dvDanhSachNhanVien.SelectedItem as NhanVienDto;
-                if (selectedDto != null)
+                if (dvDanhSachNhanVien.SelectedItem != null)
                 {
-                    MessageBoxResult result = MessageBox.Show($"Bạn có chắc chắn muốn xóa nhân viên {selectedDto.TenNv} không?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                    if (result == MessageBoxResult.Yes)
+                    var selectedDto = dvDanhSachNhanVien.SelectedItem as NhanVienDto;
+                    if (selectedDto != null)
                     {
-                        _nhanVienService.XoaNhanVienAsync(selectedDto.MaNv);
-                        MessageBox.Show("Xóa nhân viên thành công.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                        _ = LoadDanhSachNhanVienAsync();
+                        MessageBoxResult result = MessageBox.Show($"Bạn có chắc chắn muốn xóa nhân viên {selectedDto.TenNv} không?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            bool success = await _nhanVienService.XoaNhanVienAsync(selectedDto.MaNv);
+                            if (success)
+                            {
+                                MessageBox.Show("Xóa nhân viên thành công.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                                await LoadDanhSachNhanVienAsync(); 
+                            }
+                            else
+                            {
+                                MessageBox.Show("Xóa nhân viên thất bại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
                     }
                 }
+                else
+                {
+                    MessageBox.Show("Vui lòng chọn nhân viên để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Vui lòng chọn nhân viên để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Lỗi: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Error deleting employee: {ex}");
             }
         }
 
-        
         private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             await LoadDanhSachNhanVienAsync();
@@ -114,25 +159,20 @@ namespace Project_QLTS_DNC.View.NhanVien
             {
                 string searchText = txtSearch.Text.Trim();
 
-                
                 int? selectedPhongBan = cboPhongBan.SelectedItem is PhongBan selectedPB && selectedPB.MaPhongBan != 0
                     ? selectedPB.MaPhongBan
                     : (int?)null;
 
-                
                 if (string.IsNullOrWhiteSpace(searchText) && selectedPhongBan == null)
                 {
                     MessageBox.Show("Vui lòng nhập thông tin tìm kiếm hoặc chọn phòng ban để lọc.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-               
                 var nhanVienDtos = await _nhanVienService.TimKiemNhanVienAsync(searchText, selectedPhongBan);
 
-                
                 dvDanhSachNhanVien.ItemsSource = nhanVienDtos;
 
-                
                 if (nhanVienDtos.Count == 0)
                 {
                     MessageBox.Show("Không tìm thấy kết quả nào.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -145,13 +185,8 @@ namespace Project_QLTS_DNC.View.NhanVien
             }
         }
 
-
-
-
         private async void cboPhongBan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedPhongBan = cboPhongBan.SelectedItem as PhongBan;
-
             
         }
 
@@ -166,21 +201,18 @@ namespace Project_QLTS_DNC.View.NhanVien
                     
                     var allPhongBan = new PhongBan
                     {
-                        MaPhongBan = 0,  
+                        MaPhongBan = 0,
                         TenPhongBan = "Tất cả"
                     };
 
-                    phongBans.Insert(0, allPhongBan); 
-
-                    
-                    cboPhongBan.ItemsSource = phongBans;
-
-                    
-                    cboPhongBan.DisplayMemberPath = "TenPhongBan";
-                    cboPhongBan.SelectedValuePath = "MaPhongBan";
-
-                    
-                    cboPhongBan.SelectedIndex = 0;
+                    Application.Current.Dispatcher.Invoke(() => {
+                        
+                        phongBans.Insert(0, allPhongBan);
+                        cboPhongBan.ItemsSource = phongBans;
+                        cboPhongBan.DisplayMemberPath = "TenPhongBan";
+                        cboPhongBan.SelectedValuePath = "MaPhongBan";
+                        cboPhongBan.SelectedIndex = 0;
+                    });
                 }
                 else
                 {
@@ -190,10 +222,8 @@ namespace Project_QLTS_DNC.View.NhanVien
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi load phòng ban: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Error loading departments: {ex}");
             }
         }
-
-
-
     }
 }

@@ -40,30 +40,24 @@
                             Margin="10" Width="200">
                             <StackPanel>
                                 <TextBlock Text="Tổng tài sản" FontSize="14" Foreground="White"/>
-                                <TextBlock x:Name="txtTong" Text="150" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock x:Name="txtTong" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Border>
                         <Border Background="#66BB6A" Padding="20" CornerRadius="10"
                             Margin="10" Width="200">
                             <StackPanel>
                                 <TextBlock Text="Tài sản đang sử dụng" FontSize="14" Foreground="White"/>
-                                <TextBlock x:Name="txtDangDung" Text="120" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock x:Name="txtDangDung" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Border>
                         <Border Background="#E57373" Padding="20" CornerRadius="10"
                             Margin="10" Width="200">
                             <StackPanel>
                                 <TextBlock Text="Tài sản cần bảo trì" FontSize="14" Foreground="White"/>
-                                <TextBlock x:Name="txtBaoTri" Text="10" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock x:Name="txtBaoTri" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Border>
-                        <Border Background="#FFA726" Padding="20" CornerRadius="10"
-                            Margin="10" Width="200">
-                            <StackPanel>
-                                <TextBlock Text="Sửa chữa tài sản" FontSize="14" Foreground="White"/>
-                                <TextBlock x:Name="txtSuaChua" Text="5" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                            </StackPanel>
-                        </Border>
+                        
                     </StackPanel>
                 </Grid>
             </StackPanel>

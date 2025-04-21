@@ -18,6 +18,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
     public partial class frmXemChiTietNhap : UserControl
     {
         private ObservableCollection<ChiTietPhieuHienThi> danhSachChiTiet = new();
+        private ChiTietPhieuHienThi thongTinPhieu = new();
         private long maPhieuNhapHienTai;
 
         public event Action OnPhieuDuyetThanhCong;
@@ -72,7 +73,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                                   TenKho = kho.TenKho,
                                   TenNV = nv.TenNV,
                                   MaChiTietPN = ct.MaChiTietPN ?? 0,
-                                  
+                                  MaNhomTS = ct.MaNhomTS,
                                   TenNhomTS = nhom.TenNhom,
                                   TenNCC = ncc.TenNCC,
                                   TenTS = ct.TenTaiSan,
@@ -89,6 +90,13 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 dgChiTietPhieuNhap.ItemsSource = danhSachChiTiet;
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
 
+                // Thiết lập thông tin chung của phiếu để hiển thị trong các TextBlock
+                if (result.Count > 0)
+                {
+                    thongTinPhieu = result.First();
+                    SetupPhieuInfo(thongTinPhieu);
+                }
+
                 bool chuaDuyet = result.Any() && result.First().TrangThai == "Chưa duyệt";
                 btnDuyet.IsEnabled = chuaDuyet;
                 btnTuChoi.IsEnabled = chuaDuyet;
@@ -99,11 +107,41 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             }
         }
 
+        private void SetupPhieuInfo(ChiTietPhieuHienThi phieu)
+        {
+            // Cập nhật các thông tin chi tiết phiếu lên giao diện
+            txtMaPhieu.Text = "PN" + phieu.MaPhieu.ToString();
+            txtTenKho.Text = phieu.TenKho;
+            txtTenNV.Text = phieu.TenNV;
+            txtNgayNhap.Text = phieu.NgayNhap?.ToString("dd/MM/yyyy");
+            txtTenNCC.Text = phieu.TenNCC;
+            txtTrangThai.Text = phieu.TrangThai;
+
+            // Tính tổng tiền từ tất cả các chi tiết
+            decimal tongTien = danhSachChiTiet.Sum(ct => ct.TongTien);
+            txtTongTien.Text = string.Format("{0:N0} VNĐ", tongTien);
+        }
+
         private async void btnDuyet_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                // Hiển thị hộp thoại xác nhận
+                var result = MessageBox.Show(
+                    "Bạn có chắc chắn muốn duyệt phiếu nhập này không?",
+                    "Xác nhận duyệt phiếu",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result != MessageBoxResult.Yes)
+                    return;
+
                 var client = await SupabaseService.GetClientAsync();
+
+                // Hiển thị thông báo đang xử lý
+                btnDuyet.IsEnabled = false;
+                btnTuChoi.IsEnabled = false;
+                btnHuyBo.IsEnabled = false;
 
                 foreach (var ct in danhSachChiTiet)
                 {
@@ -153,6 +191,9 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                         .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)
                         .Update(p);
+
+                    // Cập nhật UI sau khi duyệt
+                    txtTrangThai.Text = "Đã duyệt";
                 }
 
                 MessageBox.Show("✅ Duyệt phiếu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -162,16 +203,32 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             catch (Exception ex)
             {
                 MessageBox.Show("❌ Lỗi khi duyệt phiếu: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                btnDuyet.IsEnabled = true;
+                btnTuChoi.IsEnabled = true;
+                btnHuyBo.IsEnabled = true;
             }
         }
-
-
 
         private async void btnTuChoi_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                // Hiển thị hộp thoại xác nhận
+                var result = MessageBox.Show(
+                    "Bạn có chắc chắn muốn từ chối phiếu nhập này không?",
+                    "Xác nhận từ chối phiếu",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                    return;
+
                 var client = await SupabaseService.GetClientAsync();
+
+                // Hiển thị thông báo đang xử lý
+                btnDuyet.IsEnabled = false;
+                btnTuChoi.IsEnabled = false;
+                btnHuyBo.IsEnabled = false;
 
                 var phieu = await client
                     .From<PhieuNhapKho>()
@@ -186,6 +243,9 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                         .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)
                         .Update(p);
+
+                    // Cập nhật UI sau khi từ chối
+                    txtTrangThai.Text = "Từ chối duyệt";
                 }
 
                 MessageBox.Show("⛔ Phiếu đã bị từ chối!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -194,11 +254,26 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             }
             catch (Exception ex)
             {
-                MessageBox.Show("❌ Lỗi khi từ chối phiếu: " + ex.Message);
+                MessageBox.Show("❌ Lỗi khi từ chối phiếu: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                btnDuyet.IsEnabled = true;
+                btnTuChoi.IsEnabled = true;
+                btnHuyBo.IsEnabled = true;
             }
         }
 
-        private void btnHuyBo_Click(object sender, RoutedEventArgs e) =>
-            Window.GetWindow(this)?.Close();
+        private void btnHuyBo_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị hộp thoại xác nhận nếu cần
+            var result = MessageBox.Show(
+                "Bạn có chắc chắn muốn đóng cửa sổ này không?",
+                "Xác nhận",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Window.GetWindow(this)?.Close();
+            }
+        }
     }
 }

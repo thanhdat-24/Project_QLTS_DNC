@@ -25,17 +25,30 @@ namespace Project_QLTS_DNC.Services
             try
             {
                 var client = await GetClientAsync();
-
                 var response = await client
                     .From<TaiKhoanModel>()
                     .Select("*")
                     .Where(x => x.TenTaiKhoan == tenTaiKhoan && x.MatKhau == matKhau)
                     .Single();
 
+                
+                if (response != null && response.TrangThai == false)
+                {
+                    
+                    throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
+                }
+
                 return response;
             }
-            catch
+            catch (Exception ex)
             {
+               
+                Console.WriteLine($"Lỗi đăng nhập: {ex.Message}");
+
+                
+                if (ex.Message.Contains("khóa"))
+                    throw;
+
                 return null;
             }
         }
@@ -51,5 +64,7 @@ namespace Project_QLTS_DNC.Services
 
             return loaiTaiKhoan?.TenLoaiTk;
         }
+
+       
     }
 }

@@ -104,11 +104,11 @@
                 </TextBox>
 
                 <!-- Search Button with Material Design -->
-                <Button x:Name="btnTimKiem" Grid.Column="2" Style="{StaticResource MaterialDesignRaisedButton}"
+                <Button x:Name="btnSearch" Grid.Column="2" Style="{StaticResource MaterialDesignRaisedButton}"
                         Background="{DynamicResource PrimaryHueMidBrush }" Foreground="White" 
                         materialDesign:ButtonAssist.CornerRadius="4"
                         Height="36" Width="120"
-                        Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}" Click="btnTimKiem_Click">
+                        Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}" Click="btnSearch_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
                         <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>

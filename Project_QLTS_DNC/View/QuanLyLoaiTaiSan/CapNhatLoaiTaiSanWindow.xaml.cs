@@ -21,6 +21,10 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             // Hiển thị thông tin lên form
             txtTenLoaiTaiSan.Text = loaiTaiSan.TenLoaiTaiSan;
             txtMoTa.Text = loaiTaiSan.MoTa;
+            chkQuanLyRieng.IsChecked = loaiTaiSan.QuanLyRieng;
+
+            // Cập nhật hiển thị cảnh báo dựa trên trạng thái checkbox
+            borderCanhBao.Visibility = loaiTaiSan.QuanLyRieng ? Visibility.Visible : Visibility.Collapsed;
 
             // Đặt tiêu đề cửa sổ
             Title = $"Cập nhật loại tài sản: {loaiTaiSan.TenLoaiTaiSan}";
@@ -41,6 +45,13 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             Close();
         }
 
+        // Xử lý sự kiện khi thay đổi trạng thái checkbox Quản Lý Riêng
+        private void chkQuanLyRieng_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị hoặc ẩn cảnh báo dựa trên trạng thái của checkbox
+            borderCanhBao.Visibility = chkQuanLyRieng.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private void btnLuu_Click(object sender, RoutedEventArgs e)
         {
             // Kiểm tra dữ liệu nhập vào
@@ -58,7 +69,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 {
                     MaLoaiTaiSan = LoaiTaiSanSua.MaLoaiTaiSan,
                     TenLoaiTaiSan = txtTenLoaiTaiSan.Text.Trim(),
-                    MoTa = txtMoTa.Text?.Trim()
+                    MoTa = txtMoTa.Text?.Trim(),
+                    QuanLyRieng = chkQuanLyRieng.IsChecked ?? false
                 };
 
                 // Đặt DialogResult để trả về kết quả

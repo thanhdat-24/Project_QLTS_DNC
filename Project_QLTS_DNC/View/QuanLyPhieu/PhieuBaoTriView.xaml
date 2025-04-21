@@ -6,6 +6,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyPhieu"
+        Loaded="PhieuBaoTriView_Loaded"
         mc:Ignorable="d"
         Height="Auto" 
         Width="Auto"
@@ -231,10 +232,10 @@
                   SelectionChanged="FilterComboBox_SelectionChanged"
                   Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
                         <ComboBoxItem Content="Tất cả trạng thái" IsSelected="True"/>
-                        <ComboBoxItem Content="Tốt"/>
-                        <ComboBoxItem Content="Kém"/>
+                        <ComboBoxItem Content="Hỏng nhẹ"/>
+                        <ComboBoxItem Content="Hỏng nặng"/>
                         <ComboBoxItem Content="Cần sửa chữa"/>
-                        <ComboBoxItem Content="hỏng"/>
+                        <ComboBoxItem Content="Thay mới"/>
                     </ComboBox>
                     <ComboBox x:Name="cboLoaiBaoTri" Width="120" Height="42" Margin="5,0" 
                   VerticalContentAlignment="Center"
@@ -252,16 +253,16 @@
 
             <Border Grid.Row="2" BorderThickness="0" Margin="20,10">
                 <DataGrid x:Name="dgPhieuBaoTri" AutoGenerateColumns="False" 
-          HeadersVisibility="Column"
-          BorderThickness="1" BorderBrush="#E0E0E0"
-          Background="White" RowBackground="White"
-          AlternatingRowBackground="#F8F8F8" 
-          GridLinesVisibility="All"
-          CanUserAddRows="False" CanUserDeleteRows="False" 
-          IsReadOnly="True"
-          ColumnHeaderHeight="50" RowHeight="45" 
-          VerticalScrollBarVisibility="Auto"
-          HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
+HeadersVisibility="Column"
+BorderThickness="1" BorderBrush="#E0E0E0"
+Background="White" RowBackground="White"
+AlternatingRowBackground="#F8F8F8" 
+GridLinesVisibility="All"
+CanUserAddRows="False" CanUserDeleteRows="False" 
+IsReadOnly="True"
+ColumnHeaderHeight="50" RowHeight="45" 
+VerticalScrollBarVisibility="Auto"
+HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
@@ -302,12 +303,54 @@
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="50">
                             <DataGridTemplateColumn.Header>
-                                <CheckBox x:Name="chkSelectAll"  />
+                                <CheckBox x:Name="chkSelectAll" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <CheckBox.Style>
+                                        <Style TargetType="CheckBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="CheckBox">
+                                                        <Border BorderBrush="Black" BorderThickness="1" Width="16" Height="16" Background="White">
+                                                            <Path x:Name="CheckMark" Stroke="Green" StrokeThickness="2" 
+                          Data="M 3,7 L 7,12 L 12,3" Visibility="Collapsed" 
+                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </CheckBox.Style>
+                                </CheckBox>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox x:Name="chkSelect" IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
-                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="CheckBox">
+                                                            <Border BorderBrush="Black" BorderThickness="1" Width="16" Height="16" Background="White">
+                                                                <Path x:Name="CheckMark" Stroke="Green" StrokeThickness="2" 
+                              Data="M 3,7 L 7,12 L 12,3" Visibility="Collapsed" 
+                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsChecked" Value="True">
+                                                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -319,8 +362,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Mã tài sản" Width="100" Binding="{Binding MaTaiSan}">
+                        <DataGridTextColumn Header="Tài sản" Width="120" Binding="{Binding TenTaiSan}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -328,8 +370,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Loại bảo trì" Width="110" Binding="{Binding MaLoaiBaoTri}">
+                        <DataGridTextColumn Header="Loại bảo trì" Width="110" Binding="{Binding TenLoaiBaoTri}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -337,7 +378,6 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
                         <DataGridTextColumn Header="Ngày bảo trì" Width="110" Binding="{Binding NgayBaoTri, StringFormat=dd/MM/yyyy}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -346,8 +386,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
-                        <DataGridTextColumn Header="Người phụ trách" Width="130" Binding="{Binding MaNV}">
+                        <DataGridTextColumn Header="Người phụ trách" Width="130" Binding="{Binding TenNguoiPhuTrach}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -355,7 +394,6 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
                         <DataGridTextColumn Header="Nội dung" Width="150" Binding="{Binding NoiDung}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -364,7 +402,6 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
                         <DataGridTemplateColumn Header="Trạng thái" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -372,21 +409,17 @@
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Tốt">
-                                                       
-                                                        <Setter Property="BorderBrush" Value="#FFE69C"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Hỏng nhẹ">
+                                                        
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Kém">
-                                                    
-                                                        <Setter Property="BorderBrush" Value="Black"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Hỏng nặng">
+                                                        
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding TrangThai}" Value="Cần sửa chữa">
-                                                      
-                                                        <Setter Property="BorderBrush" Value="Black"/>
+                                                       
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding TrangThai}" Value="hỏng">
-                                                      
-                                                        <Setter Property="BorderBrush" Value="#F5C6CB"/>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="Thay mới">
+                                                       
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -394,18 +427,20 @@
                                         <TextBlock Text="{Binding TrangThai}" FontWeight="Medium">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
+                                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                    <Setter Property="VerticalAlignment" Value="Center"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Tốt">
-                                                            
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Hỏng nhẹ">
+                                                            <Setter Property="Foreground" Value="#155724"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Kém">
-                                                            
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Hỏng nặng">
+                                                            <Setter Property="Foreground" Value="#856404"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding TrangThai}" Value="Cần sửa chữa">
-                                                           
+                                                            <Setter Property="Foreground" Value="#995107"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding TrangThai}" Value="hỏng">
-                                                            
+                                                        <DataTrigger Binding="{Binding TrangThai}" Value="Thay mới">
+                                                            <Setter Property="Foreground" Value="#721C24"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -415,8 +450,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-
-                        <DataGridTextColumn Header="Chi phí" Width="120" Binding="{Binding ChiPhi, StringFormat=N2}">
+                        <DataGridTextColumn Header="Chi phí" Width="120" Binding="{Binding ChiPhi, StringFormat=N0, ConverterCulture='vi-VN'}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -424,7 +458,6 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
                         <DataGridTextColumn Header="Ghi chú" Width="130" Binding="{Binding GhiChu}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -433,7 +466,6 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
                         <DataGridTemplateColumn Width="110" MinWidth="120" Header="Tùy chọn">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

@@ -66,10 +66,10 @@
             <!-- Nút Thêm mới - Chỉ Admin mới thấy -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
                        Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Button x:Name="btnTaoTaiKhoan" Style="{StaticResource ActionButton}" Width="130" Background="#4CAF50"
+                <Button x:Name="btnTaoTaiKhoan" Style="{StaticResource ActionButton}" Width="140" Background="#4CAF50"
                         Command="{Binding ThemMoiCommand}" Click="btnTaoTaiKhoan_Click">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
+                        <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Foreground="White" Margin="0,0,0,0"/>
                         <TextBlock Text="Tạo tài khoản" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
@@ -100,11 +100,12 @@
 
                 <!-- Search TextBox with Material Design -->
                 <TextBox x:Name="txtTimKiem" Grid.Column="1" 
+                         Text="{Binding TuKhoa, UpdateSourceTrigger=PropertyChanged}"
                          materialDesign:HintAssist.Hint="Tìm theo mã, tên tài khoản hoặc tên nhân viên..."
                          Style="{StaticResource MaterialDesignTextBox}"
-                         VerticalAlignment="Center" Margin="0,0,20,0">
+                         VerticalAlignment="Center" Margin="0,0,20,0" TextChanged="txtTimKiem_TextChanged">
                     <TextBox.InputBindings>
-                        <KeyBinding Key="Return" Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}"/>
+                        <KeyBinding Key="Return" Command="{Binding TimKiemCommand}"/>
                     </TextBox.InputBindings>
                 </TextBox>
 
@@ -116,10 +117,11 @@
                 <ComboBox x:Name="cboLoaiTaiKhoan" Grid.Column="3" Width="180" Margin="0,0,50,0"
                           materialDesign:HintAssist.Hint="Chọn loại tài khoản"
                           Style="{StaticResource MaterialDesignComboBox}"
-                          BorderThickness="0,0,0,1">
-                    <ComboBoxItem Content="Tất cả" IsSelected="True"/>
-                    <ComboBoxItem Content="Admin"/>
-                    <ComboBoxItem Content="User"/>
+                          BorderThickness="0,0,0,1"
+                          ItemsSource="{Binding DanhSachLoaiTaiKhoan}"
+                          SelectedItem="{Binding SelectedLoaiTaiKhoan}"
+                          DisplayMemberPath="TenLoaiTk"
+                          SelectedValuePath="MaLoaiTk"> 
                 </ComboBox>
 
                 <!-- Search Button with Material Design -->
@@ -127,7 +129,7 @@
                         Background="#3F51B5" Foreground="White" 
                         materialDesign:ButtonAssist.CornerRadius="4"
                         Height="36" Width="120"
-                        Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}">
+                        Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}" Click="btnTimKiem_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
                         <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>
@@ -140,7 +142,7 @@
                          Command="{Binding RefreshDataCommand}"
                         ToolTip="Làm mới danh sách"
                         Style="{StaticResource ActionIconButton}"
-                        Background="#B0BEC5">
+                        Background="#B0BEC5" Click="btnRefresh_Click">
                     <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Foreground="#3F51B5"/>
                 </Button>
 
@@ -220,24 +222,54 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <!-- Nút chỉnh sửa -->
-                                <Button Style="{StaticResource ActionIconButton}"
+                                <Button x:Name="btnChinhSua" Style="{StaticResource ActionIconButton}"
                                         ToolTip="Chỉnh sửa tài khoản"
                                         Command="{Binding DataContext.ChinhSuaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"
+                                        CommandParameter="{Binding}" Click="btnChinhSua_Click"
                                         Visibility="{Binding DataContext.CanEditAccount, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <materialDesign:PackIcon Kind="Pencil" Foreground="#673AB7" Height="18" Width="18"/>
                                 </Button>
 
-                                <!-- Nút đổi mật khẩu -->
-                                <Button Style="{StaticResource ActionIconButton}" 
-                                        ToolTip="Đổi mật khẩu"
-                                        Command="{Binding DataContext.DoiMatKhauCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                <!-- Nút khóa tài khoản -->
+                                <!-- Nút khóa/mở khóa tài khoản -->
+                                <Button x:Name="btnToggleLock" Style="{StaticResource ActionIconButton}" 
+                                        Click="btnToggleLock_Click"
                                         CommandParameter="{Binding}"
-                                        Visibility="{Binding DataContext.CanChangePassword, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <materialDesign:PackIcon Kind="Key" Foreground="#FF9800" Height="18" Width="18"/>
+                                        Visibility="{Binding DataContext.CanLockAccount, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <materialDesign:PackIcon>
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Setter Property="Kind" Value="LockOutline" />
+                                                <Setter Property="Foreground" Value="#FF5722" />
+                                                <Setter Property="Height" Value="18" />
+                                                <Setter Property="Width" Value="18" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TrangThai}" Value="False">
+                                                        <Setter Property="Kind" Value="LockOpenOutline" />
+                                                        <Setter Property="Foreground" Value="#4CAF50" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="Khóa tài khoản" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding TrangThai}" Value="False">
+                                                                <Setter Property="Text" Value="Mở khóa tài khoản" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </ToolTip>
+                                    </Button.ToolTip>
                                 </Button>
 
-                                
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -298,13 +330,13 @@
             </StackPanel>
         </Grid>
 
-        <!-- Thông báo khi người dùng không có quyền xem danh sách tài khoản -->
+        <!-- Thông báo khi người dùng không có quyền xem danh sách tài khoản 
         <TextBlock Grid.Row="2"
                    Text="Bạn chỉ có thể xem và quản lý tài khoản của mình"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    FontSize="16"
                    Foreground="{DynamicResource PrimaryHueMidBrush}"
-                   Visibility="{Binding IsRestrictedView, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                   Visibility="{Binding IsRestrictedView, Converter={StaticResource BooleanToVisibilityConverter}}"/> -->
     </Grid>
 </UserControl>

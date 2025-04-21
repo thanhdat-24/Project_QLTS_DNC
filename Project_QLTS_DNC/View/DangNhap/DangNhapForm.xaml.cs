@@ -1,5 +1,6 @@
 ﻿using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.ViewModel.TaiKhoan;
 using System;
 using System.Windows;
 
@@ -36,6 +37,13 @@ namespace Project_QLTS_DNC.View.DangNhap
 
             try
             {
+                loadingIndicator.Visibility = Visibility.Visible;
+                
+
+                btnDangNhap.IsEnabled = false;
+
+                
+
                 var authService = new AuthService();
                 var taiKhoan = await authService.DangNhapAsync(tenTaiKhoan, matKhau);
 
@@ -43,9 +51,9 @@ namespace Project_QLTS_DNC.View.DangNhap
                 {
                     LoggedInTaiKhoan = taiKhoan;
 
-                   
+                    UserProfileViewModel.SetCurrentUsername(tenTaiKhoan);
 
-                    // Lưu thông tin nếu người dùng chọn ghi nhớ
+
                     if (unchkRemember.IsChecked == true)
                     {
                         Properties.Settings.Default.SavedUsername = tenTaiKhoan;
@@ -60,11 +68,11 @@ namespace Project_QLTS_DNC.View.DangNhap
                     }
                     Properties.Settings.Default.Save();
 
-                    MessageBox.Show("Đăng nhập thành công!");
+                    
 
                     this.Hide();
 
-                    var mainWindow = new MainWindow(taiKhoan); // Truyền cả danh sách nếu cần
+                    var mainWindow = new MainWindow(taiKhoan); 
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
 
@@ -78,6 +86,12 @@ namespace Project_QLTS_DNC.View.DangNhap
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi đăng nhập: " + ex.Message);
+            }
+            finally
+            {
+                
+                loadingIndicator.Visibility = Visibility.Collapsed;
+                btnDangNhap.IsEnabled = true;
             }
         }
 
@@ -111,6 +125,24 @@ namespace Project_QLTS_DNC.View.DangNhap
             var quenMatKhauForm = new QuenMatKhauForm();
             quenMatKhauForm.ShowDialog();
             this.Show();
+        }
+
+        private void txtUsername_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                
+                passwordBox.Focus();  
+            }
+        }
+
+        private void passwordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                
+                btnDangNhap_Click(sender,e);  
+            }
         }
     }
 }

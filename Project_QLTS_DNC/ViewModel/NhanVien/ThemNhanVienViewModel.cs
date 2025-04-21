@@ -22,6 +22,35 @@ namespace Project_QLTS_DNC.ViewModels.NhanVien
         private ObservableCollection<ChucVuModel> _danhSachChucVu;
         public NhanVienModel NewNhanVien { get; set; } = new NhanVienModel();
 
+        private PhongBan _selectedPhongBan;
+        public PhongBan SelectedPhongBan
+        {
+            get => _selectedPhongBan;
+            set
+            {
+                if (_selectedPhongBan != value)
+                {
+                    _selectedPhongBan = value;
+                    NewNhanVien.MaPB = value?.MaPhongBan ?? 0; // Gán lại MaPB vào model
+                    OnPropertyChanged(nameof(SelectedPhongBan));
+                }
+            }
+        }
+
+        private ChucVuModel _selectedChucVu;
+        public ChucVuModel SelectedChucVu
+        {
+            get => _selectedChucVu;
+            set
+            {
+                if (_selectedChucVu != value)
+                {
+                    _selectedChucVu = value;
+                    NewNhanVien.MaCV = value?.MaChucVu ?? 0; // Gán lại MaCV vào model
+                    OnPropertyChanged(nameof(SelectedChucVu));
+                }
+            }
+        }
 
 
         public ObservableCollection<PhongBan> DanhSachPhongBan
@@ -103,8 +132,11 @@ namespace Project_QLTS_DNC.ViewModels.NhanVien
                     return false;
                 }
 
-                if (nhanVien.NgayVaoLam == default)
+
+                if (nhanVien.NgayVaoLam == default || nhanVien.NgayVaoLam.Year < 1900)
+                {
                     nhanVien.NgayVaoLam = DateTime.Now;
+                }
 
                 var result = await _nhanVienService.ThemNhanVienAsync(nhanVien);
                 return result != null;

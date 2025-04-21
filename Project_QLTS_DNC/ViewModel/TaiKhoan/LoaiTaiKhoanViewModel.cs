@@ -11,19 +11,20 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
 {
     public class LoaiTaiKhoanViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<LoaiTaiKhoanModel> _loaiTaiKhoans;
+        private ObservableCollection<LoaiTaiKhoanModel> _danhSachLoaiTaiKhoan;
+        private LoaiTaiKhoanModel _loaiTaiKhoanDuocChon;
+        private readonly LoaiTaiKhoanService _service = new LoaiTaiKhoanService();
 
-        private ObservableCollection<PhanQuyen> _danhSachPhanQuyen;
-        public ObservableCollection<PhanQuyen> DanhSachPhanQuyen
+        public ObservableCollection<LoaiTaiKhoanModel> DanhSachLoaiTaiKhoan
         {
-            get => _danhSachPhanQuyen;
-            set { _danhSachPhanQuyen = value; OnPropertyChanged(); }
+            get => _danhSachLoaiTaiKhoan;
+            set { _danhSachLoaiTaiKhoan = value; OnPropertyChanged(); }
         }
 
-        public ObservableCollection<LoaiTaiKhoanModel> LoaiTaiKhoans
+        public LoaiTaiKhoanModel LoaiTaiKhoanDuocChon
         {
-            get => _loaiTaiKhoans;
-            set { _loaiTaiKhoans = value; OnPropertyChanged(); }
+            get => _loaiTaiKhoanDuocChon;
+            set { _loaiTaiKhoanDuocChon = value; OnPropertyChanged(); }
         }
 
         public LoaiTaiKhoanViewModel()
@@ -31,27 +32,9 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
             _ = LoadDataAsync();
         }
 
-
-        private LoaiTaiKhoanModel _loaiTaiKhoanDuocChon;
-        public LoaiTaiKhoanModel LoaiTaiKhoanDuocChon
-        {
-            get => _loaiTaiKhoanDuocChon;
-            set { _loaiTaiKhoanDuocChon = value; OnPropertyChanged(); }
-        }
-
-        private ObservableCollection<LoaiTaiKhoanModel> _danhSachLoaiTaiKhoan;
-        public ObservableCollection<LoaiTaiKhoanModel> DanhSachLoaiTaiKhoan
-        {
-            get => _danhSachLoaiTaiKhoan;
-            set { _danhSachLoaiTaiKhoan = value; OnPropertyChanged(); }
-        }
-
-
-
         public async Task<bool> XoaLoaiTaiKhoanAsync(int maLoaiTk)
         {
-            var service = new LoaiTaiKhoanService();
-            var ketQua = await service.XoaLoaiTaiKhoan(maLoaiTk);
+            var ketQua = await _service.XoaLoaiTaiKhoan(maLoaiTk);
             if (ketQua)
             {
                 await LoadDataAsync();
@@ -60,17 +43,14 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
             return false;
         }
 
-
         public async Task LoadDataAsync()
         {
-            var service = new LoaiTaiKhoanService();
-            var list = await service.LayDSLoaiTK();
+            var list = await _service.LayDSLoaiTK();
             DanhSachLoaiTaiKhoan = new ObservableCollection<LoaiTaiKhoanModel>(list);
-
-            DanhSachPhanQuyen = new ObservableCollection<PhanQuyen>(DanhSachQuyenMacDinh.LayDanhSach());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

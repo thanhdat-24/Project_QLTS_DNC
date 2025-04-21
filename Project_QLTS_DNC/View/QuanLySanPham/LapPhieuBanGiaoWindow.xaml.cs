@@ -195,6 +195,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
         }
 
+        // Thay đổi phương thức btnLapPhieu_Click trong LapPhieuBanGiaoWindow.xaml.cs
+
         private async void btnLapPhieu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -202,31 +204,31 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 // Kiểm tra dữ liệu đầu vào
                 if (!ValidateInput())
                     return;
-
                 ShowLoading(true);
 
                 // Lấy thông tin từ form
                 var selectedPhong = cboPhong.SelectedItem as PhongBanGiaoFilter;
                 var selectedNhanVien = cboNhanVien.SelectedItem as NhanVienModel;
-                var ngayBanGiao = dateBanGiao.SelectedDate ?? DateTime.Now;
+
+                // Lấy ngày từ DatePicker và thêm giờ hiện tại
+                DateTime selectedDate = dateBanGiao.SelectedDate ?? DateTime.Now.Date;
+                DateTime localTime = new DateTime(
+                    selectedDate.Year,
+                    selectedDate.Month,
+                    selectedDate.Day,
+                    DateTime.Now.Hour,
+                    DateTime.Now.Minute,
+                    DateTime.Now.Second,
+                    DateTimeKind.Local  // Chỉ định rõ ràng đây là giờ địa phương
+                );
+
+                // Chuyển đổi sang UTC trước khi lưu vào Supabase
+                DateTime utcTime = localTime.ToUniversalTime();
+
                 var noiDung = txtNoiDung.Text.Trim();
 
-                // Tạo phiếu bàn giao
-                var phieuBanGiao = new BanGiaoTaiSanModel
-                {
-                    NgayBanGiao = ngayBanGiao,
-                    MaNV = selectedNhanVien.MaNV,
-                    MaPhong = selectedPhong.MaPhong,
-                    NoiDung = noiDung,
-                    TrangThai = null // Chờ duyệt
-                };
-
-                // Lưu phiếu bàn giao
-                var phieuBanGiaoResult = await BanGiaoTaiSanService.ThemPhieuBanGiaoAsync(phieuBanGiao);
-
-                // Lấy danh sách tài sản đã chọn
+                // Phần còn lại giữ nguyên
                 var dsTaiSanDaChon = _dsTaiSanKho.Where(t => t.IsSelected).ToList();
-
                 if (dsTaiSanDaChon.Count == 0)
                 {
                     MessageBox.Show("Vui lòng chọn ít nhất một tài sản để bàn giao.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -234,9 +236,29 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     return;
                 }
 
-                // Tạo danh sách chi tiết bàn giao
-                var dsChiTietBanGiao = new List<ChiTietBanGiaoModel>();
+                // THÊM MỚI: Kiểm tra và yêu cầu cấu hình sức chứa cho các nhóm tài sản quản lý riêng
+                bool sucChuaValid = await BanGiaoTaiSanService.KiemTraVaYeuCauCauHinhSucChuaAsync(
+                    selectedPhong.MaPhong,
+                    dsTaiSanDaChon);
+                if (!sucChuaValid)
+                {
+                    ShowLoading(false);
+                    return; // Dừng nếu không thỏa mãn điều kiện sức chứa
+                }
 
+                // Tạo phiếu bàn giao với thời gian UTC
+                var phieuBanGiao = new BanGiaoTaiSanModel
+                {
+                    NgayBanGiao = utcTime,  // Lưu thời gian UTC vào cơ sở dữ liệu
+                    MaNV = selectedNhanVien.MaNV,
+                    MaPhong = selectedPhong.MaPhong,
+                    NoiDung = noiDung,
+                    TrangThai = null // Chờ duyệt
+                };
+
+                // Phần còn lại của hàm giữ nguyên
+                var phieuBanGiaoResult = await BanGiaoTaiSanService.ThemPhieuBanGiaoAsync(phieuBanGiao);
+                var dsChiTietBanGiao = new List<ChiTietBanGiaoModel>();
                 foreach (var taiSan in dsTaiSanDaChon)
                 {
                     dsChiTietBanGiao.Add(new ChiTietBanGiaoModel
@@ -247,13 +269,9 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                         GhiChu = taiSan.GhiChu
                     });
                 }
-
-                // Lưu chi tiết bàn giao
                 var dsChiTietResult = await BanGiaoTaiSanService.ThemChiTietBanGiaoAsync(dsChiTietBanGiao);
-
                 MessageBox.Show($"Lập phiếu bàn giao thành công! Mã phiếu: {phieuBanGiaoResult.MaBanGiaoTS}",
                     "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-
                 this.DialogResult = true;
                 this.Close();
             }

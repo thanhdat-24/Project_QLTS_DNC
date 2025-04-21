@@ -31,6 +31,9 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             _maNhomTSGoc = nhomTaiSanDTO.MaNhomTS;
             _dsLoaiTaiSan = dsLoaiTaiSan;
 
+            // Ẩn cảnh báo khi khởi tạo
+            borderCanhBao.Visibility = Visibility.Collapsed;
+
             // Gán danh sách loại tài sản cho ComboBox
             cboLoaiTaiSan.ItemsSource = _dsLoaiTaiSan;
             cboLoaiTaiSan.DisplayMemberPath = "TenLoaiTaiSan";
@@ -43,8 +46,26 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             txtTenNhom.Text = nhomTaiSanDTO.TenNhom;
             txtMoTa.Text = nhomTaiSanDTO.MoTa;
 
+            // Kiểm tra xem loại tài sản hiện tại có QuanLyRieng không
+            KiemTraVaHienThiCanhBao();
+
             // Gán sự kiện cho nút đóng
             btnDong.Click += btnDong_Click;
+        }
+
+        // Phương thức kiểm tra và hiển thị cảnh báo
+        private void KiemTraVaHienThiCanhBao()
+        {
+            var loaiTaiSanDuocChon = cboLoaiTaiSan.SelectedItem as LoaiTaiSan;
+
+            if (loaiTaiSanDuocChon != null && loaiTaiSanDuocChon.QuanLyRieng)
+            {
+                borderCanhBao.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                borderCanhBao.Visibility = Visibility.Collapsed;
+            }
         }
 
         // Cho phép di chuyển cửa sổ
@@ -61,6 +82,12 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         {
             DialogResult = false;
             Close();
+        }
+
+        // Sự kiện xử lý khi thay đổi loại tài sản được chọn
+        private void cboLoaiTaiSan_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            KiemTraVaHienThiCanhBao();
         }
 
         private async void btnLuu_Click(object sender, RoutedEventArgs e)

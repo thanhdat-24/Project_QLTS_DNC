@@ -11,6 +11,8 @@ namespace Project_QLTS_DNC.Models.NhanVien
     [Table("nhanvien")]
     public class NhanVienModel : BaseModel
     {
+        private DateTime _ngayVaoLam;
+
         [PrimaryKey("ma_nv", false)]
         public int MaNV { get; set; }
 
@@ -36,9 +38,16 @@ namespace Project_QLTS_DNC.Models.NhanVien
         public string SDT { get; set; }
 
         [Column("ngay_vao_lam")]
-        public DateTime NgayVaoLam { get; set; }
-
-        
-        
+        public DateTime NgayVaoLam
+        {
+            get => _ngayVaoLam;
+            set
+            {
+                // Đảm bảo giá trị ngày luôn hợp lệ
+                _ngayVaoLam = (value == default || value.Year < 1900)
+                    ? DateTime.Now
+                    : value;
+            }
+        }
     }
 }

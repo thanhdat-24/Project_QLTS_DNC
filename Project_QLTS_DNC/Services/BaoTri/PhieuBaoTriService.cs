@@ -78,7 +78,6 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Thêm mới phiếu bảo trì
         public async Task<bool> AddPhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
             try
@@ -89,51 +88,59 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
-                // Đảm bảo người dùng đã đăng nhập và token còn hiệu lực
-                var session = client.Auth.CurrentSession;
-                if (session == null || DateTime.Compare(session.ExpiresAt(), DateTime.UtcNow) < 0)
-                {
-                    // Thử làm mới token nếu hết hạn
-                    try
-                    {
-                        await client.Auth.RefreshSession();
-                    }
-                    catch
-                    {
-                        throw new Exception("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
-                    }
-                }
+                // Bỏ qua phần kiểm tra phiên đăng nhập
+                // var session = client.Auth.CurrentSession;
+                // bool sessionExpired = session == null || DateTime.Compare(session.ExpiresAt(), DateTime.UtcNow) < 0;
+                // ...
 
                 // Kiểm tra các giá trị bắt buộc
                 if (phieuBaoTri.MaTaiSan == null)
                 {
-                    throw new Exception("Mã tài sản không được để trống");
-                }
-                if (string.IsNullOrEmpty(phieuBaoTri.NoiDung))
-                {
-                    throw new Exception("Nội dung không được để trống");
-                }
-                if (string.IsNullOrEmpty(phieuBaoTri.TrangThai))
-                {
-                    throw new Exception("Trạng thái không được để trống");
+                    MessageBox.Show("Mã tài sản không được để trống", "Lỗi dữ liệu",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
                 }
 
-                Console.WriteLine($"Đang thêm phiếu bảo trì mới: {phieuBaoTri.MaBaoTri}");
+                if (string.IsNullOrEmpty(phieuBaoTri.NoiDung))
+                {
+                    MessageBox.Show("Nội dung không được để trống", "Lỗi dữ liệu",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(phieuBaoTri.TrangThai))
+                {
+                    MessageBox.Show("Trạng thái không được để trống", "Lỗi dữ liệu",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                Console.WriteLine($"Đang thêm phiếu bảo trì mới: MaTaiSan={phieuBaoTri.MaTaiSan}, NoiDung={phieuBaoTri.NoiDung}");
 
                 // Thực hiện thêm mới
                 var response = await client.From<PhieuBaoTri>().Insert(phieuBaoTri);
 
-                return response != null;
+                if (response == null)
+                {
+                    MessageBox.Show("Không thể thêm phiếu bảo trì. Vui lòng kiểm tra lại dữ liệu!", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Chi tiết lỗi thêm phiếu: {ex.Message}");
+
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
                 }
+
                 MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+
                 return false;
             }
         }
@@ -272,17 +279,65 @@ namespace Project_QLTS_DNC.Services
                     return await GetPhieuBaoTriAsync();
                 }
 
-                // Tìm kiếm phiếu bảo trì theo một số trường
-                var response = await client.From<PhieuBaoTri>().Get();
-                var danhSachPhieu = response.Models;
+                // Lấy toàn bộ danh sách phiếu bảo trì
+                var responsePhieuBaoTri = await client.From<PhieuBaoTri>().Get();
+                var danhSachPhieu = responsePhieuBaoTri.Models;
 
-                // Lọc dữ liệu theo từ khóa
+                // Lấy danh sách tài sản để tìm kiếm theo tên tài sản
+                var responseTaiSan = await client.From<TaiSanModel>().Get();
+                var danhSachTaiSan = responseTaiSan.Models;
+                var taiSanDict = danhSachTaiSan.ToDictionary(ts => ts.MaTaiSan, ts => ts.TenTaiSan?.ToLower() ?? "");
+
+                // Lấy danh sách nhân viên để tìm kiếm theo tên người phụ trách
+                var responseNhanVien = await client.From<NhanVienModel>().Get();
+                var danhSachNhanVien = responseNhanVien.Models;
+                var nhanVienDict = danhSachNhanVien.ToDictionary(nv => nv.MaNV, nv => nv.TenNV?.ToLower() ?? "");
+
+                // Lấy danh sách loại bảo trì để tìm kiếm theo tên loại
+                var responseLoaiBaoTri = await client.From<LoaiBaoTri>().Get();
+                var danhSachLoaiBaoTri = responseLoaiBaoTri.Models;
+                var loaiBaoTriDict = danhSachLoaiBaoTri.ToDictionary(lbt => lbt.MaLoaiBaoTri, lbt => lbt.TenLoai?.ToLower() ?? "");
+
+                // Từ khóa tìm kiếm (chuyển về chữ thường)
+                string lowerKeyword = keyword.ToLower();
+
+                // Tìm các phiếu bảo trì có các tài sản phù hợp với từ khóa tìm kiếm
+                var taiSanIdsMatch = danhSachTaiSan
+                    .Where(ts => ts.TenTaiSan != null && ts.TenTaiSan.ToLower().Contains(lowerKeyword))
+                    .Select(ts => ts.MaTaiSan)
+                    .ToList();
+
+                // Tìm các nhân viên phù hợp với từ khóa tìm kiếm
+                var nhanVienIdsMatch = danhSachNhanVien
+                    .Where(nv => nv.TenNV != null && nv.TenNV.ToLower().Contains(lowerKeyword))
+                    .Select(nv => nv.MaNV)
+                    .ToList();
+
+                // Tìm các loại bảo trì phù hợp với từ khóa tìm kiếm
+                var loaiBaoTriIdsMatch = danhSachLoaiBaoTri
+                    .Where(lbt => lbt.TenLoai != null && lbt.TenLoai.ToLower().Contains(lowerKeyword))
+                    .Select(lbt => lbt.MaLoaiBaoTri)
+                    .ToList();
+
+                // Lọc phiếu bảo trì theo từ khóa
                 return danhSachPhieu.Where(p =>
+                    // Tìm kiếm theo các trường có sẵn trong phiếu bảo trì
                     p.MaBaoTri.ToString().Contains(keyword) ||
                     (p.MaTaiSan != null && p.MaTaiSan.ToString().Contains(keyword)) ||
+                    (p.MaNV != null && p.MaNV.ToString().Contains(keyword)) ||
+                    (p.MaLoaiBaoTri != null && p.MaLoaiBaoTri.ToString().Contains(keyword)) ||
                     (p.NoiDung != null && p.NoiDung.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
                     (p.GhiChu != null && p.GhiChu.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
-                    (p.TrangThai != null && p.TrangThai.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    (p.TrangThai != null && p.TrangThai.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+
+                    // Tìm kiếm theo tên tài sản
+                    (p.MaTaiSan != null && taiSanIdsMatch.Contains(p.MaTaiSan.Value)) ||
+
+                    // Tìm kiếm theo tên người phụ trách
+                    (p.MaNV != null && nhanVienIdsMatch.Contains(p.MaNV.Value)) ||
+
+                    // Tìm kiếm theo tên loại bảo trì
+                    (p.MaLoaiBaoTri != null && loaiBaoTriIdsMatch.Contains(p.MaLoaiBaoTri.Value))
                 ).ToList();
             }
             catch (Exception ex)
@@ -292,7 +347,6 @@ namespace Project_QLTS_DNC.Services
                 return new List<PhieuBaoTri>();
             }
         }
-
         // Lọc phiếu bảo trì theo loại và trạng thái
         public async Task<List<PhieuBaoTri>> GetPhieuBaoTriTheoLoaiTrangThaiAsync(int? maLoaiBaoTri, string trangThai)
         {
@@ -359,108 +413,122 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Xuất dữ liệu ra Excel
-        public bool ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
+        // Xuất dữ liệu ra Excel với tên thay vì mã
+public async Task<bool> ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
+{
+    try
+    {
+        using (var workbook = new XLWorkbook())
         {
-            try
+            var worksheet = workbook.Worksheets.Add("Phiếu Bảo Trì");
+            // Tạo tiêu đề
+            worksheet.Cell("A1").Value = "DANH SÁCH PHIẾU BẢO TRÌ";
+            worksheet.Range("A1:I1").Merge();
+            worksheet.Range("A1:I1").Style.Font.Bold = true;
+            worksheet.Range("A1:I1").Style.Font.FontSize = 16;
+            worksheet.Range("A1:I1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            // Tạo header cho bảng
+            worksheet.Cell("A3").Value = "STT";
+            worksheet.Cell("B3").Value = "Mã bảo trì";
+            worksheet.Cell("C3").Value = "Tên tài sản";
+            worksheet.Cell("D3").Value = "Loại bảo trì";
+            worksheet.Cell("E3").Value = "Ngày bảo trì";
+            worksheet.Cell("F3").Value = "Tên nhân viên";
+            worksheet.Cell("G3").Value = "Nội dung";
+            worksheet.Cell("H3").Value = "Trạng thái";
+            worksheet.Cell("I3").Value = "Chi phí";
+            // Định dạng header
+            var headerRange = worksheet.Range("A3:I3");
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            
+            // Điền dữ liệu vào bảng
+            for (int i = 0; i < danhSachPhieu.Count; i++)
             {
-                using (var workbook = new XLWorkbook())
+                var phieu = danhSachPhieu[i];
+                int row = i + 4;
+                
+                // STT và Mã bảo trì
+                worksheet.Cell(row, 1).Value = i + 1;
+                worksheet.Cell(row, 2).Value = phieu.MaBaoTri;
+                
+                // Lấy tên tài sản thay vì mã
+                string tenTaiSan = "N/A";
+                if (phieu.MaTaiSan.HasValue)
                 {
-                    var worksheet = workbook.Worksheets.Add("Phiếu Bảo Trì");
-
-                    // Tạo tiêu đề
-                    worksheet.Cell("A1").Value = "DANH SÁCH PHIẾU BẢO TRÌ";
-                    worksheet.Range("A1:I1").Merge();
-                    worksheet.Range("A1:I1").Style.Font.Bold = true;
-                    worksheet.Range("A1:I1").Style.Font.FontSize = 16;
-                    worksheet.Range("A1:I1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    // Tạo header cho bảng
-                    worksheet.Cell("A3").Value = "STT";
-                    worksheet.Cell("B3").Value = "Mã bảo trì";
-                    worksheet.Cell("C3").Value = "Mã tài sản";
-                    worksheet.Cell("D3").Value = "Loại bảo trì";
-                    worksheet.Cell("E3").Value = "Ngày bảo trì";
-                    worksheet.Cell("F3").Value = "Mã nhân viên";
-                    worksheet.Cell("G3").Value = "Nội dung";
-                    worksheet.Cell("H3").Value = "Trạng thái";
-                    worksheet.Cell("I3").Value = "Chi phí";
-
-                    // Định dạng header
-                    var headerRange = worksheet.Range("A3:I3");
-                    headerRange.Style.Font.Bold = true;
-                    headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
-                    headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-                    headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                    // Điền dữ liệu vào bảng
-                    for (int i = 0; i < danhSachPhieu.Count; i++)
-                    {
-                        var phieu = danhSachPhieu[i];
-                        int row = i + 4;
-                        worksheet.Cell(row, 1).Value = i + 1;
-                        worksheet.Cell(row, 2).Value = phieu.MaBaoTri;
-                        worksheet.Cell(row, 3).Value = phieu.MaTaiSan?.ToString() ?? "N/A";
-
-                        // Chuyển đổi mã loại bảo trì thành tên
-                        string loaiBaoTri = "Không xác định";
-                        switch (phieu.MaLoaiBaoTri)
-                        {
-                            case 1: loaiBaoTri = "Định kỳ"; break;
-                            case 2: loaiBaoTri = "Đột xuất"; break;
-                            case 3: loaiBaoTri = "Bảo hành"; break;
-                        }
-                        worksheet.Cell(row, 4).Value = loaiBaoTri;
-
-                        worksheet.Cell(row, 5).Value = phieu.NgayBaoTri;
-                        worksheet.Cell(row, 5).Style.DateFormat.Format = "dd/MM/yyyy";
-                        worksheet.Cell(row, 6).Value = phieu.MaNV?.ToString() ?? "N/A";
-                        worksheet.Cell(row, 7).Value = phieu.NoiDung;
-                        worksheet.Cell(row, 8).Value = phieu.TrangThai;
-                        worksheet.Cell(row, 9).Value = phieu.ChiPhi;
-
-                        // Định dạng ô
-                        var rowRange = worksheet.Range(row, 1, row, 9);
-                        rowRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                        rowRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-                    }
-
-                    // Định dạng cột
-                    worksheet.Columns().AdjustToContents();
-
-                    // Thêm ngày xuất báo cáo
-                    int lastRow = danhSachPhieu.Count + 4 + 2;
-                    worksheet.Cell(lastRow, 7).Value = "Ngày xuất báo cáo:";
-                    worksheet.Cell(lastRow, 8).Value = DateTime.Now;
-                    worksheet.Cell(lastRow, 8).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
-                    worksheet.Range(lastRow, 7, lastRow, 8).Style.Font.Italic = true;
-
-                    // Lưu workbook
-                    workbook.SaveAs(filePath);
-
-                    MessageBox.Show("Xuất Excel thành công!", "Thông báo",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    // Mở file sau khi xuất
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = filePath,
-                        UseShellExecute = true
-                    });
-
-                    return true;
+                    tenTaiSan = await GetTenTaiSanAsync(phieu.MaTaiSan.Value);
                 }
+                worksheet.Cell(row, 3).Value = tenTaiSan;
+                
+                // Chuyển đổi mã loại bảo trì thành tên
+                string loaiBaoTri = "Không xác định";
+                switch (phieu.MaLoaiBaoTri)
+                {
+                    case 1: loaiBaoTri = "Định kỳ"; break;
+                    case 2: loaiBaoTri = "Đột xuất"; break;
+                    case 3: loaiBaoTri = "Bảo hành"; break;
+                }
+                worksheet.Cell(row, 4).Value = loaiBaoTri;
+                
+                // Ngày bảo trì
+                worksheet.Cell(row, 5).Value = phieu.NgayBaoTri;
+                worksheet.Cell(row, 5).Style.DateFormat.Format = "dd/MM/yyyy";
+                
+                // Lấy tên nhân viên thay vì mã
+                string tenNhanVien = "N/A";
+                if (phieu.MaNV.HasValue)
+                {
+                    tenNhanVien = await GetTenNhanVienAsync(phieu.MaNV.Value);
+                }
+                worksheet.Cell(row, 6).Value = tenNhanVien;
+                
+                // Các thông tin còn lại
+                worksheet.Cell(row, 7).Value = phieu.NoiDung;
+                worksheet.Cell(row, 8).Value = phieu.TrangThai;
+                worksheet.Cell(row, 9).Value = phieu.ChiPhi;
+                
+                // Định dạng ô
+                var rowRange = worksheet.Range(row, 1, row, 9);
+                rowRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                rowRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             }
-            catch (Exception ex)
+            
+            // Định dạng cột
+            worksheet.Columns().AdjustToContents();
+            
+            // Thêm ngày xuất báo cáo
+            int lastRow = danhSachPhieu.Count + 4 + 2;
+            worksheet.Cell(lastRow, 7).Value = "Ngày xuất báo cáo:";
+            worksheet.Cell(lastRow, 8).Value = DateTime.Now;
+            worksheet.Cell(lastRow, 8).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+            worksheet.Range(lastRow, 7, lastRow, 8).Style.Font.Italic = true;
+            
+            // Lưu workbook
+            workbook.SaveAs(filePath);
+            MessageBox.Show("Xuất Excel thành công!", "Thông báo",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            // Mở file sau khi xuất
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {
-                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
+                FileName = filePath,
+                UseShellExecute = true
+            });
+            
+            return true;
         }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
+            MessageBoxButton.OK, MessageBoxImage.Error);
+        return false;
+    }
+}
 
-        // Lấy tên tài sản theo mã
         public async Task<string> GetTenTaiSanAsync(int maTaiSan)
         {
             try
@@ -470,11 +538,9 @@ namespace Project_QLTS_DNC.Services
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
-
                 var taiSan = await client.From<TaiSanModel>()
                     .Where(t => t.MaTaiSan == maTaiSan)
                     .Single();
-
                 return taiSan?.TenTaiSan ?? "Không xác định";
             }
             catch
@@ -483,7 +549,8 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Lấy tên nhân viên theo mã
+
+        // Thay đổi mức độ truy cập thành public
         public async Task<string> GetTenNhanVienAsync(int maNV)
         {
             try
@@ -493,11 +560,9 @@ namespace Project_QLTS_DNC.Services
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
-
                 var nhanVien = await client.From<NhanVienModel>()
                     .Where(nv => nv.MaNV == maNV)
                     .Single();
-
                 return nhanVien?.TenNV ?? "Không xác định";
             }
             catch
@@ -505,5 +570,35 @@ namespace Project_QLTS_DNC.Services
                 return "Không xác định";
             }
         }
+
+        // Thống kê tổng tài sản đã bảo trì
+        public async Task<int> ThongKeTongTaiSanBaoTriAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                var response = await client.From<PhieuBaoTri>().Get();
+                var danhSachPhieu = response.Models;
+
+                // Lấy danh sách mã tài sản duy nhất đã từng được bảo trì
+                var soLuongTaiSanBaoTri = danhSachPhieu
+                    .Where(p => p.MaTaiSan.HasValue)
+                    .Select(p => p.MaTaiSan.Value)
+                    .Distinct()
+                    .Count();
+
+                return soLuongTaiSanBaoTri;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi thống kê tài sản bảo trì: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return 0;
+            }
+        }
+
     }
 }

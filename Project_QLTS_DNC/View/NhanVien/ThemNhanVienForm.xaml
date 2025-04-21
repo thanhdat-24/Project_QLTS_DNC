@@ -54,27 +54,28 @@
                         <!-- Phòng Ban -->
                         <TextBlock Text="Phòng Ban:" Margin="0,0,0,5" 
                                 FontWeight="Medium" FontSize="14"/>
-                        <ComboBox x:Name="cboPhongBan" ItemsSource="{Binding DanhSachPhongBan}"
-                                materialDesign:HintAssist.Hint="Chọn phòng ban" FontSize="14"
-                                Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                DisplayMemberPath="TenPhongBan"
-                                SelectedValuePath="MaPhongBan"
-                                Height="50"
-                                Margin="0,0,0,20" SelectionChanged="cboPhongBan_SelectionChanged"/>
+                        <ComboBox x:Name="cboPhongBan"
+                                  ItemsSource="{Binding DanhSachPhongBan}"
+                                  DisplayMemberPath="TenPhongBan"
+                                  SelectedItem="{Binding SelectedPhongBan, Mode=TwoWay}"
+                                  materialDesign:HintAssist.Hint="Chọn phòng ban"
+                                  FontSize="14"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  Height="50"
+                                  Margin="0,0,0,20"/>   
 
                         <!-- Chức Vụ -->
                         <TextBlock Text="Chức Vụ:" Margin="0,0,0,5" 
                                 FontWeight="Medium" FontSize="14"/>
                         <ComboBox x:Name="cboChucVu"
-                                ItemsSource="{Binding DanhSachChucVu}"
-                                DisplayMemberPath="TenChucVu"
-                                SelectedValuePath="MaChucVu"
-                                SelectedValue="{Binding SelectedChucVu, Mode=TwoWay}"
-                                materialDesign:HintAssist.Hint="Chọn chức vụ"
-                                FontSize="14"
-                                Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                Height="50"
-                                Margin="0,0,0,20" SelectionChanged="cboChucVu_SelectionChanged"/>
+                                  ItemsSource="{Binding DanhSachChucVu}"
+                                  DisplayMemberPath="TenChucVu"
+                                  SelectedItem="{Binding SelectedChucVu, Mode=TwoWay}"
+                                  materialDesign:HintAssist.Hint="Chọn chức vụ"
+                                  FontSize="14"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  Height="50"
+                                  Margin="0,0,0,20"/>
 
                         <!-- Tên Nhân Viên -->
                         <TextBlock Text="Tên Nhân Viên:" Margin="0,0,0,5" 
@@ -89,8 +90,8 @@
                         <TextBlock Text="Giới Tính:" Margin="0,0,0,5" 
                                 FontWeight="Medium" FontSize="14"/>
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,20">
-                            <RadioButton x:Name="rdoNam" Content="Nam" Margin="0,0,30,0" FontSize="14" />
-                            <RadioButton x:Name="rdoNu" Content="Nữ" FontSize="14" IsChecked="True" />
+                            <RadioButton x:Name="rdoNam" Content="Nam" Margin="0,0,30,0" FontSize="14" IsChecked="True" />
+                            <RadioButton x:Name="rdoNu" Content="Nữ" FontSize="14" />
                         </StackPanel>
                     </StackPanel>
 

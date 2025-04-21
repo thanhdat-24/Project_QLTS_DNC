@@ -22,7 +22,6 @@ namespace Project_QLTS_DNC.Models.TonKho
         [Column("so_luong_xuat")]
         public int SoLuongXuat { get; set; }
 
-        // ❌ Không cần khai báo so_luong_ton vì DB tự tính
 
         [Column("ngay_cap_nhat")]
         public DateTime NgayCapNhat { get; set; }
