@@ -25,6 +25,10 @@ namespace Project_QLTS_DNC.Models.BanGiaoTaiSan
 
         [Column("trang_thai")]
         public bool? TrangThai { get; set; }
+
+        // Thêm mới trường người tiếp nhận
+        [Column("cb_tiep_nhan")]
+        public string CbTiepNhan { get; set; }
     }
 }
 
@@ -49,12 +53,13 @@ namespace Project_QLTS_DNC.Models.BanGiaoTaiSan
         [Column("ghi_chu")]
         public string GhiChu { get; set; }
 
-        
+
     }
 }
 
 namespace Project_QLTS_DNC.DTOs
 {
+
     public class BanGiaoTaiSanDTO
     {
         public int MaBanGiaoTS { get; set; }
@@ -75,8 +80,10 @@ namespace Project_QLTS_DNC.DTOs
         // Thông tin tòa nhà của phòng
         public int? MaToaNha { get; set; }
         public string TenToaNha { get; set; }
-    }
 
+        // Thêm mới người tiếp nhận
+        public string CbTiepNhan { get; set; }
+    }
     public class ChiTietBanGiaoDTO
     {
         public int MaChiTietBG { get; set; }

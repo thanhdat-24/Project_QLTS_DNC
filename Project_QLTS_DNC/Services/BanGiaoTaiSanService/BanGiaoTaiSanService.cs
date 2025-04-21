@@ -26,6 +26,7 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
         /// <summary>
         /// Lấy danh sách phiếu bàn giao tài sản từ Supabase
         /// </summary>
+        // Cập nhật phương thức trong BanGiaoTaiSanService.cs
         public static async Task<ObservableCollection<BanGiaoTaiSanDTO>> LayDanhSachPhieuBanGiaoAsync()
         {
             try
@@ -65,7 +66,8 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                         TenNV = dsNhanVien.FirstOrDefault(nv => nv.MaNV == bangiao.MaNV)?.TenNV ?? $"#{bangiao.MaNV}",
                         MaPhong = bangiao.MaPhong,
                         NoiDung = bangiao.NoiDung,
-                        TrangThai = bangiao.TrangThai
+                        TrangThai = bangiao.TrangThai,
+                        CbTiepNhan = bangiao.CbTiepNhan // Thêm thông tin người tiếp nhận
                     };
 
                     // Thêm thông tin phòng và tòa nhà nếu có
