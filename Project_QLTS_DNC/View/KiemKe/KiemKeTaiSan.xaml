@@ -1,0 +1,130 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.KiemKe.KiemKeTaiSan"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="KIỂM KÊ TÀI SẢN"
+        Width="800" Height="600"
+        Background="White"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <x:Array x:Key="TinhTrangSource" Type="sys:String"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+            <sys:String>Tốt</sys:String>
+            <sys:String>Cần bảo trì</sys:String>
+            <sys:String>Hỏng</sys:String>
+        </x:Array>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề -->
+        <TextBlock Grid.Row="0" Text="KIỂM KÊ TÀI SẢN"
+                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                   FontSize="24" FontWeight="Bold"
+                   Margin="0,0,0,16"/>
+
+        <!-- Nội dung -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Đợt kiểm kê -->
+            <TextBox x:Name="txtTenDotKiemKe"
+             materialDesign:HintAssist.Hint="Đợt kiểm kê"
+             IsReadOnly="True"            
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+         Margin="0,0,8,8" />
+                            
+            <!-- Phòng -->
+            <ComboBox Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"
+                      x:Name="cboPhong"
+                      materialDesign:HintAssist.Hint="Phòng"
+                      DisplayMemberPath="TenPhong"
+                      SelectedValuePath="MaPhong"
+                      SelectionChanged="cboPhong_SelectionChanged"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+
+            <!-- DataGrid hiển thị tài sản -->
+            <DataGrid x:Name="dataGridTaiSan"
+                  Grid.Row="1" Grid.ColumnSpan="2"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="False"
+                  CanUserAddRows="False"
+                  CurrentCellChanged="dataGridTaiSan_CurrentCellChanged">
+                  Margin="0,8,0,0">
+                <DataGrid.Columns>
+                    <!-- Tên tài sản -->
+                    <DataGridTextColumn Header="Tên tài sản"
+                            Binding="{Binding TenTaiSan}"
+                            Width="2*"
+                            IsReadOnly="True"/>
+
+                    <!-- Tình trạng: ComboBox -->
+                    <DataGridTemplateColumn Header="Tình trạng" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TinhTrang}" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox 
+                SelectedItem="{Binding TinhTrang, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                ItemsSource="{StaticResource TinhTrangSource}"
+                VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+
+
+                    <!-- Vị trí thực tế -->
+                    <DataGridTextColumn Header="Vị trí thực tế"
+                            Binding="{Binding ViTriTS}"
+                            Width="2*"
+                            IsReadOnly="True"/>
+
+                    <!-- Ghi chú -->
+                    <DataGridTextColumn Header="Ghi chú"
+                            Binding="{Binding GhiChu}"
+                            Width="2*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </Grid>
+
+        <!-- Nút thao tác -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="btnHuy"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="0,0,16,0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
+                    <TextBlock Text="HUỶ BỎ"/>
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="btnLuu" Click="btnLuu_Click"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{StaticResource PrimaryHueMidBrush}" Foreground="White">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0"/>
+                    <TextBlock Text="LƯU"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
