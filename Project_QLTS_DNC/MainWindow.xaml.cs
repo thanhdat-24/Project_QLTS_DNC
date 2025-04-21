@@ -24,6 +24,8 @@ using Project_QLTS_DNC.View.TaiKhoan;
 
 using System.IO;
 using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.TaiKhoan;
+using Project_QLTS_DNC.Services.TaiKhoan;
 
 namespace Project_QLTS_DNC
 {
@@ -36,20 +38,69 @@ namespace Project_QLTS_DNC
 
         private TaiKhoanModel _taiKhoan;
         private List<TaiKhoanModel> _danhSachTaiKhoan;
-        
 
 
-        public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
+        //public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
+        //{
+        //    InitializeComponent();
+        //    _taiKhoan = taiKhoan;
+        //    _danhSachTaiKhoan = danhSachTaiKhoan;
+        //    ThongTinDangNhap.LoaiTaiKhoanDangNhap = _taiKhoan.LoaiTaiKhoan;
+
+        //    ThongTinDangNhap.LoaiTaiKhoanDangNhap = new LoaiTaiKhoanModel
+        //    {
+        //        MaLoaiTk = _taiKhoan.MaLoaiTk,
+        //        TenLoaiTk = _taiKhoan.LoaiTaiKhoan.TenLoaiTk
+        //    };
+        //    ThongTinDangNhap.TaiKhoanDangNhap = taiKhoan;
+
+        //    if (taiKhoan.LoaiTaiKhoan != null)
+        //    {
+        //        ThongTinDangNhap.LoaiTaiKhoanDangNhap = taiKhoan.LoaiTaiKhoan;
+        //    }
+        //    else
+        //    {
+        //        // Nếu chưa có, tạm gán theo mã (chỉ dùng nếu chắc chắn là Admin)
+        //        ThongTinDangNhap.LoaiTaiKhoanDangNhap = new LoaiTaiKhoanModel
+        //        {
+        //            MaLoaiTk = taiKhoan.MaLoaiTk,
+        //            TenLoaiTk = "Admin" // Hoặc gọi API lấy tên thật nếu cần
+        //        };
+        //    }
+
+        //    //{
+        //    //    MaLoaiTk = _taiKhoan.MaLoaiTk,
+        //    //    TenLoaiTk = "Admin" 
+        //    //};
+
+        //}
+
+        //public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
+        //{
+        //    InitializeComponent();
+        //    _taiKhoan = taiKhoan;
+        //    _danhSachTaiKhoan = danhSachTaiKhoan;
+
+        //    ThongTinDangNhap.TaiKhoanDangNhap = taiKhoan;
+
+        //    // Gọi service để lấy tên loại tài khoản
+        //    var loaiTkService = new LoaiTaiKhoanService();
+        //    var loai = loaiTkService.GetLoaiTaiKhoanByMaLoai(taiKhoan.MaLoaiTk).Result;
+        //    ThongTinDangNhap.LoaiTaiKhoanDangNhap = loai;
+        //}
+
+        public MainWindow()
         {
             InitializeComponent();
-            _taiKhoan = taiKhoan;
-            _danhSachTaiKhoan = danhSachTaiKhoan;
 
-            if (_taiKhoan.MaLoaiTk == 1 && _danhSachTaiKhoan != null)
-            {
-                //danhSachTaiKhoan.ItemsSource = _danhSachTaiKhoan; 
-            }
+            // Lấy từ ThongTinDangNhap
+            _taiKhoan = ThongTinDangNhap.TaiKhoanDangNhap;
+            _danhSachTaiKhoan = new List<TaiKhoanModel>(); // hoặc null nếu không dùng
+
+            // Bây giờ bạn đã có ThongTinDangNhap.LoaiTaiKhoanDangNhap.TenLoaiTk để check quyền
         }
+
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await LoadBarChartAsync();
@@ -63,13 +114,10 @@ namespace Project_QLTS_DNC
                     imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
                 }
             }
-          //HienThiTreeViewTheoPhanQuyen();
+          HienThiTreeViewTheoPhanQuyen();
         }
         private void HienThiTreeViewTheoPhanQuyen()
         {
-            var danhSach = QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi;
-
-            // Các nút con
             var controls = new Dictionary<string, TreeViewItem>
             {
                 { "btnTrangChu", btnTrangChu },
@@ -117,19 +165,41 @@ namespace Project_QLTS_DNC
                 { "btnPhieuIn", btnPhieuIn },
             };
 
-            // Các nhóm cha
-            var parentItems = new List<TreeViewItem>
+                    var parentItems = new List<TreeViewItem>
             {
                 btnQuanlyTaiKhoan,
                 btnQuanlyNhansu,
                 btnQuanLyKho,
                 btnQuanlyToaNha,
-                btnQuanLyBaotri, // Sửa đúng theo tên TreeViewItem trong XAML của bạn
+                btnQuanLyBaotri,
                 btnQuanlymuaMoi,
                 btnQuanLyCaiDat
             };
 
-            // 1. Ẩn hoặc hiện các item con
+            MessageBox.Show($"Tên tài khoản đăng nhập: {ThongTinDangNhap.LoaiTaiKhoanDangNhap?.TenLoaiTk ?? "null"}");
+            MessageBox.Show("Danh sách quyền: " + string.Join(", ", QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi ?? new List<string>()));
+
+            // Nếu là admin thì hiển thị tất cả
+            if (ThongTinDangNhap.LoaiTaiKhoanDangNhap != null &&
+                ThongTinDangNhap.LoaiTaiKhoanDangNhap.TenLoaiTk?.ToLower() == "admin")
+            {
+                foreach (var item in controls.Values)
+                {
+                    if (item != null) item.Visibility = Visibility.Visible;
+                }
+
+                foreach (var parent in parentItems)
+                {
+                    if (parent != null) parent.Visibility = Visibility.Visible;
+                }
+
+                MessageBox.Show("Đang hiển thị toàn bộ TreeView vì là Admin");
+                return;
+            }
+
+            // ❓ Nếu không phải admin, xử lý theo quyền
+            var danhSach = QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi;
+
             foreach (var kv in controls)
             {
                 if (kv.Value != null)
@@ -138,7 +208,6 @@ namespace Project_QLTS_DNC
                 }
             }
 
-            // 2. Nếu tất cả item con đều ẩn → ẩn luôn TreeViewItem cha
             foreach (var parent in parentItems)
             {
                 bool coItemHien = false;
@@ -154,6 +223,7 @@ namespace Project_QLTS_DNC
                 parent.Visibility = coItemHien ? Visibility.Visible : Visibility.Collapsed;
             }
         }
+
 
 
 

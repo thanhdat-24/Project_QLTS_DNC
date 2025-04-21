@@ -129,5 +129,17 @@ namespace Project_QLTS_DNC.Services.TaiKhoan
                 return false;
             }
         }
+
+        public async Task<LoaiTaiKhoanModel?> GetLoaiTaiKhoanByMaLoai(int maLoaiTk)
+        {
+            var client = await SupabaseService.GetClientAsync();
+            var response = await client
+                .From<LoaiTaiKhoanModel>()
+                .Where(x => x.MaLoaiTk == maLoaiTk)
+                .Single();
+
+            return response;
+        }
+
     }
 }
