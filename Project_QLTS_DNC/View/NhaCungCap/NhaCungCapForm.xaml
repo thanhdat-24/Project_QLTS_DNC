@@ -186,7 +186,7 @@
 
             <!-- CÁC CỘT -->
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Mã NCC" Binding="{Binding MaNCC}" Width="110">
+                <DataGridTextColumn Header="Mã NCC" Binding="{Binding MaNCC}" Width="80">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -195,7 +195,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Tên nhà cung cấp" Binding="{Binding TenNCC}" Width="180">
+                <DataGridTextColumn Header="Tên nhà cung cấp" Binding="{Binding TenNCC}" Width="240">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -203,7 +203,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="200">
+                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding DiaChi}" Width="350">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -228,7 +228,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTa}" Width="180">
+                <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTa}" Width="200">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="VerticalAlignment" Value="Center"/>

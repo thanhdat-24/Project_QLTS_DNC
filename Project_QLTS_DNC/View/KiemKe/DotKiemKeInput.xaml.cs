@@ -46,6 +46,8 @@ namespace Project_QLTS_DNC.View.KiemKe
             _client = new Supabase.Client(supabaseUrl, supabaseKey, options);
             await _client.InitializeAsync();
         }
+
+
         public DotKiemKeInput(DotKiemKe? dotKiemKe = null)
         {
             InitializeComponent();
@@ -104,6 +106,11 @@ namespace Project_QLTS_DNC.View.KiemKe
                     if (response.Models.Count > 0)
                     {
                         MessageBox.Show("Thêm đợt kiểm kê thành công!");
+
+                        int maDotKiemKeMoi = response.Models.First().MaDotKiemKe;
+                        var formKiemKe = new KiemKeTaiSan(maDotKiemKeMoi);
+                        formKiemKe.Show(); // Mở form KiemKeTaiSan
+
                         this.Close();
                     }
                     else

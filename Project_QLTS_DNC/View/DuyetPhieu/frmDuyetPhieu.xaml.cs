@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using static Supabase.Postgrest.Constants;
+using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu
 {
@@ -29,7 +30,8 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             {
                 cboLoaiPhieu.SelectedIndex = 0;
             }
-            
+            _ = LocDuLieuTheoLoaiVaNgay(); // Load dữ liệu tất cả phiếu ban đầu
+
             LoadThongKePhieu();
         }
 
@@ -40,6 +42,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
         private async Task LoadDuLieuTongHopPhieuAsync()
         {
+
             try
             {
                 isLoadingData = true;
@@ -86,8 +89,10 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                     {
                         try
                         {
-                            var pdn = await client.From<phieudenghimua>().Filter("ma_phieu_de_nghi", Operator.Equals, item.MaPhieuDeNghiMua.Value).Single();
-                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PDN{pdn.MaPhieuDeNghi}", NgayTaoPhieu = pdn.NgayDeNghi, TrangThaiBool = pdn.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
+                            var pdn = await client.From<denghimua>().Filter("ma_phieu_de_nghi", Operator.Equals, item.MaPhieuDeNghiMua.Value).Single();
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PDN{pdn.MaPhieuDeNghi}",
+                                NgayTaoPhieu = pdn.NgayDeNghiMua ?? DateTime.MinValue,
+                                TrangThaiBool = pdn.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
                         }
                         catch (Exception ex)
                         {
@@ -135,6 +140,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
         private async Task LocDuLieuTheoLoaiVaNgay()
         {
+
             if (isLoadingData) return;
             
             // Kiểm tra ComboBox đã được khởi tạo chưa
@@ -194,16 +200,23 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 // Phiếu đề nghị mua
                 if (loaiPhieu == "Tất cả" || loaiPhieu == "Phiếu đề nghị mua")
                 {
-                    var list = (await client.From<phieudenghimua>().Get()).Models;
+                    var list = (await client.From<denghimua>().Get()).Models;
                     foreach (var p in list)
                     {
-                        if ((!tuNgay.HasValue || p.NgayDeNghi.Date >= tuNgay.Value.Date) &&
-                            (!denNgay.HasValue || p.NgayDeNghi.Date <= denNgay.Value.Date))
+                        if ((!tuNgay.HasValue || (p.NgayDeNghiMua.HasValue && p.NgayDeNghiMua.Value.Date >= tuNgay.Value.Date)) &&
+                            (!denNgay.HasValue || (p.NgayDeNghiMua.HasValue && p.NgayDeNghiMua.Value.Date <= denNgay.Value.Date)))
                         {
-                            ketQua.Add(new PhieuCanDuyet { MaPhieu = $"PDN{p.MaPhieuDeNghi}", NgayTaoPhieu = p.NgayDeNghi, TrangThaiBool = p.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
+                            ketQua.Add(new PhieuCanDuyet
+                            {
+                                MaPhieu = $"PDN{p.MaPhieuDeNghi}",
+                                NgayTaoPhieu = p.NgayDeNghiMua ?? DateTime.MinValue, // fallback nếu null
+                                TrangThaiBool = p.TrangThai,
+                                LoaiPhieu = "Phiếu đề nghị mua"
+                            });
                         }
                     }
                 }
+
 
                 // Phiếu báo hỏng
                 if (loaiPhieu == "Tất cả" || loaiPhieu == "Phiếu báo hỏng")
@@ -216,6 +229,26 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                         {
                             ketQua.Add(new PhieuCanDuyet { MaPhieu = $"PBH{p.MaPhieuBaoHong}", NgayTaoPhieu = p.NgayBaoHong, TrangThaiBool = p.TrangThai, LoaiPhieu = "Phiếu báo hỏng" });
                         }
+                    }
+                }
+                // Phiếu bàn giao tài sản
+                if (loaiPhieu == "Tất cả" || loaiPhieu == "Phiếu bàn giao tài sản")
+                {
+                    var list = (await client.From<BanGiaoTaiSanModel>().Get()).Models;
+                    foreach (var p in list)
+                    {
+                        if ((!tuNgay.HasValue || p.NgayBanGiao.Date >= tuNgay.Value.Date) &&
+     (!denNgay.HasValue || p.NgayBanGiao.Date <= denNgay.Value.Date))
+                        {
+                            ketQua.Add(new PhieuCanDuyet
+                            {
+                                MaPhieu = $"BG{p.MaBanGiaoTS}",
+                                NgayTaoPhieu = p.NgayBanGiao, // Không cần dùng ??
+                                TrangThaiBool = p.TrangThai,
+                                LoaiPhieu = "Phiếu bàn giao"
+                            });
+                        }
+
                     }
                 }
 
@@ -309,6 +342,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         {
             if (dgPhieuCanDuyet?.SelectedItem is PhieuCanDuyet selected)
             {
+                // ✅ Phiếu nhập
                 if (selected.MaPhieu.StartsWith("PN") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
                 {
                     var frm = new frmXemChiTietNhap();
@@ -330,6 +364,93 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                     };
                     window.ShowDialog();
                 }
+                // ✅ Phiếu báo hỏng
+                else if (selected.MaPhieu.StartsWith("PBH") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuBaoHong))
+                {
+                    var frm = new frmXemChiTietBaoHong();
+                    frm.LoadTheoMaPhieu(maPhieuBaoHong);
+                    frm.OnPhieuDuyetThanhCong += async () =>
+                    {
+                        await LoadDuLieuTongHopPhieuAsync();
+                        LoadThongKePhieu();
+                    };
+
+                    Window window = new Window
+                    {
+                        Title = $"Chi tiết phiếu báo hỏng - {selected.MaPhieu}",
+                        Content = frm,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        Width = 1000,
+                        Height = 700,
+                        ResizeMode = ResizeMode.CanResize
+                    };
+                    window.ShowDialog();
+                }
+                // ✅ Phiếu đề nghị mua
+                else if (selected.MaPhieu.StartsWith("PDN") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuDeNghi))
+                {
+                    var frm = new frmXemChiTietDeNghiMua();
+                    frm.LoadTheoMaPhieu(maPhieuDeNghi);
+                    frm.OnPhieuDuyetThanhCong += async () =>
+                    {
+                        await LoadDuLieuTongHopPhieuAsync();
+                        LoadThongKePhieu();
+                    };
+
+                    Window window = new Window
+                    {
+                        Title = $"Chi tiết phiếu đề nghị mua - {selected.MaPhieu}",
+                        Content = frm,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        Width = 1100,
+                        Height = 750,
+                        ResizeMode = ResizeMode.CanResize
+                    };
+                    window.ShowDialog();
+                }
+                // ✅ Phiếu xuất
+                else if (selected.MaPhieu.StartsWith("PX") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuXuat))
+                {
+                    var frm = new frmXemChiTietXuat();
+                    frm.LoadTheoMaPhieu(maPhieuXuat);
+                    frm.OnPhieuDuyetThanhCong += async () =>
+                    {
+                        await LoadDuLieuTongHopPhieuAsync();
+                        LoadThongKePhieu();
+                    };
+
+                    Window window = new Window
+                    {
+                        Title = $"Chi tiết phiếu xuất - {selected.MaPhieu}",
+                        Content = frm,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        Width = 1100,
+                        Height = 750,
+                        ResizeMode = ResizeMode.CanResize
+                    };
+                    window.ShowDialog();
+                }
+                // ✅ Phiếu bàn giao tài sản
+                else if (selected.MaPhieu.StartsWith("BG") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuBanGiao))
+                {
+                    var frm = new frmXemChiTietBanGiao((int)maPhieuBanGiao);
+                    frm.OnPhieuDuyetThanhCong += async () =>
+                    {
+                        await LoadDuLieuTongHopPhieuAsync();
+                        LoadThongKePhieu();
+                    };
+
+                    Window window = new Window
+                    {
+                        Title = $"Chi tiết phiếu bàn giao - {selected.MaPhieu}",
+                        Content = frm,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        Width = 1100,
+                        Height = 750,
+                        ResizeMode = ResizeMode.CanResize
+                    };
+                    window.ShowDialog();
+                }
                 else
                 {
                     MessageBox.Show($"Chức năng xem chi tiết đang được phát triển cho loại phiếu: {selected.LoaiPhieu}",
@@ -342,28 +463,54 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             }
         }
 
+
+
+
         private async void LoadThongKePhieu()
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
-                var list = (await client.From<PhieuNhapKho>().Get()).Models;
 
-                // Thêm kiểm tra null trước khi gán giá trị
+                // Tổng cộng
+                int tongCanDuyet = 0;
+                int tongDaDuyet = 0;
+                int tongTuChoi = 0;
+
+                // Phiếu nhập
+                var listPN = (await client.From<PhieuNhapKho>().Get()).Models;
+                tongCanDuyet += listPN.Count(p => p.TrangThai == null);
+                tongDaDuyet += listPN.Count(p => p.TrangThai == true);
+                tongTuChoi += listPN.Count(p => p.TrangThai == false);
+
+                // Phiếu báo hỏng
+                var listPBH = (await client.From<BaoHong>().Get()).Models;
+                tongCanDuyet += listPBH.Count(p => p.TrangThai == null);
+                tongDaDuyet += listPBH.Count(p => p.TrangThai == true);
+                tongTuChoi += listPBH.Count(p => p.TrangThai == false);
+
+                // Phiếu đề nghị mua
+                var listPDN = (await client.From<denghimua>().Get()).Models;
+                tongCanDuyet += listPDN.Count(p => p.TrangThai == null);
+                tongDaDuyet += listPDN.Count(p => p.TrangThai == true);
+                tongTuChoi += listPDN.Count(p => p.TrangThai == false);
+
+                // Gán thống kê ra TextBlock nếu có
                 if (txtTongPhieuCanDuyet != null)
-                    txtTongPhieuCanDuyet.Text = list.Count(p => p.TrangThai == null).ToString();
-                    
+                    txtTongPhieuCanDuyet.Text = tongCanDuyet.ToString();
+
                 if (txtTongPhieuDaDuyet != null)
-                    txtTongPhieuDaDuyet.Text = list.Count(p => p.TrangThai == true).ToString();
-                    
+                    txtTongPhieuDaDuyet.Text = tongDaDuyet.ToString();
+
                 if (txtTongPhieuTuChoi != null)
-                    txtTongPhieuTuChoi.Text = list.Count(p => p.TrangThai == false).ToString();
+                    txtTongPhieuTuChoi.Text = tongTuChoi.ToString();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi load thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private async void cboLoaiPhieu_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -389,5 +536,13 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         {
             await LoadDuLieuTongHopPhieuAsync();
         }
+
+        private void btnIn_Click(object sender, RoutedEventArgs e)
+        {
+           
+        }
+
+
+
     }
 }

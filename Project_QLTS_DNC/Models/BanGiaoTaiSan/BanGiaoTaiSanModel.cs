@@ -48,6 +48,8 @@ namespace Project_QLTS_DNC.Models.BanGiaoTaiSan
 
         [Column("ghi_chu")]
         public string GhiChu { get; set; }
+
+        
     }
 }
 
@@ -87,6 +89,8 @@ namespace Project_QLTS_DNC.DTOs
         public int? MaNhomTS { get; set; }
         public string TenNhomTS { get; set; }
         public bool IsSelected { get; set; }
+
+        public string TinhTrang { get; set; } = "Tốt";
     }
 
     // Lớp hỗ trợ cho ComboBox phòng trong bàn giao
