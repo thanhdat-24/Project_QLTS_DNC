@@ -16,7 +16,7 @@ namespace Project_QLTS_DNC.Models.TaiKhoan
         [Column("mo_ta")]
         public string MoTa { get; set; }
 
-       
+
         //[System.ComponentModel.DataAnnotations.Schema.NotMapped]
         //public string Icon => TenLoaiTk switch
         //{

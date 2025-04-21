@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Project_QLTS_DNC.Models.TaiKhoan;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.DTOs;
 
 namespace Project_QLTS_DNC.Services
 {
@@ -20,38 +21,75 @@ namespace Project_QLTS_DNC.Services
         }
 
         // Đăng nhập bằng bảng "taikhoan"
+
+        //public async Task<TaiKhoanModel?> DangNhapAsync(string tenTaiKhoan, string matKhau)
+        //{
+        //    try
+        //    {
+        //        var client = await GetClientAsync();
+
+        //        // 1. Lấy thông tin tài khoản
+        //        var taiKhoan = await client
+        //            .From<TaiKhoanModel>()
+        //            .Select("*")
+        //            .Where(x => x.TenTaiKhoan == tenTaiKhoan && x.MatKhau == matKhau)
+        //            .Single();
+
+        //        if (taiKhoan != null && taiKhoan.TrangThai == false)
+        //        {
+        //            throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
+        //        }
+
+        //        // 2. Lấy loại tài khoản (bổ sung cho phân quyền)
+        //        if (taiKhoan != null)
+        //        {
+        //            var loaiTaiKhoan = await client
+        //                .From<LoaiTaiKhoanModel>()
+        //                .Where(x => x.MaLoaiTk == taiKhoan.MaLoaiTk)
+        //                .Single();
+
+        //            taiKhoan.LoaiTaiKhoan = loaiTaiKhoan;
+        //        }
+
+        //        return taiKhoan;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Lỗi đăng nhập: {ex.Message}");
+        //        if (ex.Message.Contains("khóa"))
+        //            throw;
+        //        return null;
+        //    }
+        //}
         public async Task<TaiKhoanModel?> DangNhapAsync(string tenTaiKhoan, string matKhau)
         {
             try
             {
                 var client = await GetClientAsync();
-                var response = await client
+
+                var taiKhoan = await client
                     .From<TaiKhoanModel>()
                     .Select("*")
                     .Where(x => x.TenTaiKhoan == tenTaiKhoan && x.MatKhau == matKhau)
                     .Single();
 
-                
-                if (response != null && response.TrangThai == false)
-                {
-                    
-                    throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
-                }
+                if (taiKhoan == null)
+                    return null;
 
-                return response;
+                if (!taiKhoan.TrangThai)
+                    throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
+
+                return taiKhoan;
             }
             catch (Exception ex)
             {
-               
                 Console.WriteLine($"Lỗi đăng nhập: {ex.Message}");
-
-                
                 if (ex.Message.Contains("khóa"))
                     throw;
-
                 return null;
             }
         }
+
 
         // Lấy tên loại tài khoản từ mã loại
         public async Task<string?> LayTenLoaiTaiKhoanTheoMaLoai(int maLoai)
