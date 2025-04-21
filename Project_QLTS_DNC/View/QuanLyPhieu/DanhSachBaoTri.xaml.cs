@@ -22,10 +22,19 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
     {
         private DanhSachBaoTriViewModel _viewModel;
         private List<Button> _pageButtons;
+        private ICollectionView collectionView;
+        private void RegisterFilterEvents()
+        {
+            // Đăng ký sự kiện SelectionChanged cho các ComboBox
+            cboNhomTaiSan.SelectionChanged += Filter_SelectionChanged;
+            cboTinhTrang.SelectionChanged += Filter_SelectionChanged;
+        }
 
+        // Cập nhật phương thức InitializeComponent hoặc constructor để đăng ký sự kiện
         public DanhSachBaoTriUserControl()
         {
             InitializeComponent();
+
             // Khởi tạo ViewModel và gán làm DataContext
             _viewModel = new DanhSachBaoTriViewModel(false); // Không tự động tải dữ liệu
             this.DataContext = _viewModel;
@@ -40,25 +49,135 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Đăng ký sự kiện cho nút tạo phiếu bảo trì
             btnTaoPhieuBaoTri.Click += BtnTaoPhieuBaoTri_Click;
 
+            // Đăng ký sự kiện cho ComboBox lọc
+            RegisterFilterEvents();
+
+            // Đăng ký sự kiện cho TextBox tìm kiếm
+            txtTimKiem.TextChanged += TxtTimKiem_TextChanged;
+            btnTimKiem.Click += BtnTimKiem_Click;
+
             // Tải dữ liệu khi control được khởi tạo
             this.Loaded += DanhSachBaoTriUserControl_Loaded;
+        }
+        // Cập nhật phương thức LoadNhomTaiSanAsync
+        private async Task LoadNhomTaiSanAsync()
+        {
+            try
+            {
+                // Tạo instance của service
+                var nhomTaiSanService = new NhomTaiSanService();
+
+                // Lấy danh sách nhóm tài sản từ database
+                var dsNhom = await nhomTaiSanService.GetNhomTaiSanAsync();
+
+                // Xóa các item cũ trong ComboBox
+                cboNhomTaiSan.Items.Clear();
+
+                // Thêm item mặc định "Tất cả nhóm"
+                ComboBoxItem defaultItem = new ComboBoxItem();
+                defaultItem.Content = "Tất cả nhóm";
+                defaultItem.IsSelected = true;
+                defaultItem.Tag = null; // Không có mã nhóm
+                cboNhomTaiSan.Items.Add(defaultItem);
+
+                // Thêm các nhóm tài sản từ database
+                foreach (var nhom in dsNhom)
+                {
+                    ComboBoxItem item = new ComboBoxItem();
+                    item.Content = nhom.TenNhom;
+                    item.Tag = nhom.MaNhomTS; // Lưu mã nhóm để sử dụng khi lọc
+                    cboNhomTaiSan.Items.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách nhóm tài sản: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         private async void DanhSachBaoTriUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
+                // Tải danh sách nhóm tài sản
+                await LoadNhomTaiSanAsync();
+
                 // Tải dữ liệu khi control được tải
-                await _viewModel.LoadDSKiemKeAsync(); // Không gán vào biến var
-                                                      // Cập nhật UI phân trang
+                await _viewModel.LoadDSKiemKeAsync();
+
+                // Cập nhật UI phân trang
                 UpdatePaginationUI();
-                // Đăng ký sự kiện PropertyChanged - đã sửa lỗi cú pháp
-                _viewModel.PropertyChanged += ViewModel_PropertyChanged; // Sửa dấu * thành _
+
+                // Đăng ký sự kiện PropertyChanged
+                _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+                // Thiết lập CollectionView và bộ lọc
+                InitializeCollectionView();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void InitializeCollectionView()
+        {
+            // Khởi tạo CollectionView từ nguồn dữ liệu
+            if (_viewModel.DsKiemKe != null)
+            {
+                collectionView = CollectionViewSource.GetDefaultView(_viewModel.DsKiemKe);
+                // Thiết lập filter
+                collectionView.Filter = item => FilterMatches(item as KiemKeTaiSan);
+                // Gán CollectionView cho DataGrid
+                dgDanhSachTaiSan.ItemsSource = collectionView;
+            }
+        }
+
+        private bool FilterMatches(KiemKeTaiSan item)
+        {
+            if (item == null)
+                return false;
+
+            // Chuẩn bị từ khóa tìm kiếm, chuẩn hóa để so sánh dễ dàng hơn
+            string keyword = _viewModel.TuKhoaTimKiem?.Trim().ToLower() ?? "";
+
+            // Nếu không có từ khóa, luôn trả về true cho điều kiện tìm kiếm
+            if (string.IsNullOrEmpty(keyword))
+                return true;
+
+            // Kiểm tra theo từng trường, sử dụng ToLower() thay vì StringComparison.OrdinalIgnoreCase
+            bool matchesSearchText = false;
+
+            // Kiểm tra mã kiểm kê
+            if (item.MaKiemKeTS != null && item.MaKiemKeTS.ToString().ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra mã tài sản
+            else if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra mã đợt kiểm kê
+            else if (item.MaDotKiemKe.HasValue && item.MaDotKiemKe.ToString().ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra tên tài sản
+            else if (item.TenTaiSan != null && item.TenTaiSan.ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra tên phòng
+            else if (item.TenPhong != null && item.TenPhong.ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra tên đợt kiểm kê
+            else if (item.TenDotKiemKe != null && item.TenDotKiemKe.ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra vị trí thực tế
+            else if (item.ViTriThucTe != null && item.ViTriThucTe.ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra tình trạng
+            else if (item.TinhTrang != null && item.TinhTrang.ToLower().Contains(keyword))
+                matchesSearchText = true;
+            // Kiểm tra ghi chú
+            else if (item.GhiChu != null && item.GhiChu.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
+            return matchesSearchText;
         }
 
         private void UpdatePaginationUI()
@@ -69,8 +188,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Cập nhật trạng thái của các nút điều hướng
             btnFirstPage.IsEnabled = _viewModel.TrangHienTai > 1;
             btnPrevPage.IsEnabled = _viewModel.TrangHienTai > 1;
-            btnNextPage.IsEnabled = _viewModel.TrangHienTai < _viewModel.TongSoTrang; // Sửa * thành _
-            btnLastPage.IsEnabled = _viewModel.TrangHienTai < _viewModel.TongSoTrang; // Sửa * thành _
+            btnNextPage.IsEnabled = _viewModel.TrangHienTai < _viewModel.TongSoTrang;
+            btnLastPage.IsEnabled = _viewModel.TrangHienTai < _viewModel.TongSoTrang;
 
             // Đảm bảo các nút luôn hiển thị
             btnFirstPage.Visibility = Visibility.Visible;
@@ -84,6 +203,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             if (e.PropertyName == nameof(_viewModel.TrangHienTai) || e.PropertyName == nameof(_viewModel.TongSoTrang))
             {
                 UpdatePaginationUI();
+            }
+            else if (e.PropertyName == nameof(_viewModel.DsKiemKe))
+            {
+                // Nếu danh sách thay đổi, cập nhật lại CollectionView
+                InitializeCollectionView();
             }
         }
 
@@ -119,13 +243,33 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        private void TxtTimKiem_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Cập nhật từ khóa tìm kiếm trong ViewModel
+            _viewModel.TuKhoaTimKiem = txtTimKiem.Text.Trim();
+
+            // Nếu có CollectionView, cập nhật lại filter
+            if (collectionView != null)
+            {
+                collectionView.Refresh();
+            }
+        }
+
         private void BtnTimKiem_Click(object sender, RoutedEventArgs e)
         {
             // Cập nhật từ khóa tìm kiếm
             _viewModel.TuKhoaTimKiem = txtTimKiem.Text.Trim();
 
-            // Áp dụng bộ lọc và tải lại dữ liệu
-            _viewModel.ApplyFilter();
+            // Nếu có CollectionView, cập nhật lại filter
+            if (collectionView != null)
+            {
+                collectionView.Refresh();
+            }
+            else
+            {
+                // Sử dụng phương thức cũ nếu CollectionView chưa được thiết lập
+                _viewModel.ApplyFilter();
+            }
         }
 
         private void TxtTimKiem_KeyDown(object sender, KeyEventArgs e)
@@ -137,29 +281,49 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        // Cập nhật phương thức Filter_SelectionChanged với cách lọc mới
         private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is ComboBox comboBox)
             {
-                // Xử lý thay đổi theo loại ComboBox - đã được binding trong XAML
-                if (comboBox == cboLoaiBaoTri)
+                if (comboBox == cboNhomTaiSan)
                 {
-                    // ViewModel đã xử lý binding trực tiếp, không cần xử lý thêm
-                    _viewModel.ApplyFilter();
-                }
-                else if (comboBox == cboNhomTaiSan)
-                {
-                    // ViewModel đã xử lý binding trực tiếp, không cần xử lý thêm
-                    _viewModel.ApplyFilter();
+                    // Lấy item được chọn từ ComboBox
+                    var selectedItem = comboBox.SelectedItem as ComboBoxItem;
+                    if (selectedItem != null)
+                    {
+                        // Lưu tên nhóm tài sản đã chọn vào ViewModel
+                        _viewModel.NhomTaiSanDuocChon = selectedItem.Content.ToString();
+
+                        // Debug: In ra thông tin để theo dõi
+                        System.Diagnostics.Debug.WriteLine($"Đã chọn nhóm tài sản: {_viewModel.NhomTaiSanDuocChon}");
+                    }
                 }
                 else if (comboBox == cboTinhTrang)
                 {
-                    // ViewModel đã xử lý binding trực tiếp, không cần xử lý thêm
+                    // Lấy item được chọn từ ComboBox tình trạng
+                    var selectedItem = comboBox.SelectedItem as ComboBoxItem;
+                    if (selectedItem != null)
+                    {
+                        _viewModel.TinhTrangDuocChon = selectedItem.Content.ToString();
+
+                        // Debug: In ra thông tin để theo dõi
+                        System.Diagnostics.Debug.WriteLine($"Đã chọn tình trạng: {_viewModel.TinhTrangDuocChon}");
+                    }
+                }
+
+                // Nếu có CollectionView, cập nhật lại filter
+                if (collectionView != null)
+                {
+                    collectionView.Refresh();
+                }
+                else
+                {
+                    // Sử dụng phương thức cũ nếu CollectionView chưa được thiết lập
                     _viewModel.ApplyFilter();
                 }
             }
         }
-
         private void ChkSelectAll_CheckedChanged(object sender, RoutedEventArgs e)
         {
             // Kiểm tra nếu sender là CheckBox
@@ -422,7 +586,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     MessageBoxImage.Error);
             }
         }
-    }
-
 
     }
+}

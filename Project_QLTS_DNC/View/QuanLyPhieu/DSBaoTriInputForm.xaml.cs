@@ -9,14 +9,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Project_QLTS_DNC.Models;
-using Project_QLTS_DNC.Models.KiemKe;
+using Project_QLTS_DNC.Models.BaoTri;
+using BaoTriKiemKeTaiSan = Project_QLTS_DNC.Models.BaoTri.KiemKeTaiSan;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.View.KiemKe;
 using Supabase;
 using Supabase.Gotrue;
 using Supabase.Postgrest;
-using Supabase.Postgrest.Models;
+// Bỏ dòng này vì đã có trước đó: using Supabase.Postgrest.Models;
+using KiemKeDotKiemKe = Project_QLTS_DNC.Models.KiemKe.DotKiemKe;
 using static Supabase.Postgrest.Constants;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
@@ -24,24 +26,19 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
     public partial class DSBaoTriInputForm : Window, INotifyPropertyChanged
     {
         // Collection để lưu trữ dữ liệu cho các ComboBox
-        private ObservableCollection<dynamic> _danhSachDotKiemKe;
+        private ObservableCollection<KiemKeDotKiemKe> _danhSachDotKiemKe;
         private ObservableCollection<TaiSanModel> _danhSachTaiSan;
         private ObservableCollection<Phong> _danhSachPhong;
-
-
         // Client để kết nối với Supabase
         private readonly Supabase.Client _supabaseClient;
-
         // Đối tượng kiểm kê hiện tại
         private KiemKeTaiSan _kiemKeTaiSan;
-
         // Chế độ (thêm mới hay cập nhật)
         private bool _isUpdateMode;
-
         // Properties với INotifyPropertyChanged để binding
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ObservableCollection<dynamic> DanhSachDotKiemKe
+        public ObservableCollection<KiemKeDotKiemKe> DanhSachDotKiemKe
         {
             get => _danhSachDotKiemKe;
             set
@@ -71,7 +68,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-
         public KiemKeTaiSan KiemKeTaiSan
         {
             get => _kiemKeTaiSan;
@@ -82,36 +78,28 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-
         // Constructor cho trường hợp tạo mới phiếu bảo trì (không có tài sản nào được chọn)
         public DSBaoTriInputForm(Supabase.Client supabaseClient)
         {
             InitializeComponent();
             _supabaseClient = supabaseClient;
             _isUpdateMode = false;
-
             // Khởi tạo collections
-            DanhSachDotKiemKe = new ObservableCollection<dynamic>();
+            DanhSachDotKiemKe = new ObservableCollection<KiemKeDotKiemKe>();
             DanhSachTaiSan = new ObservableCollection<TaiSanModel>();
             DanhSachPhong = new ObservableCollection<Phong>();
-
             // Khởi tạo đối tượng kiểm kê tài sản mới
             KiemKeTaiSan = new KiemKeTaiSan();
-
             // Set DataContext cho binding
             DataContext = this;
-
             // Load dữ liệu khi khởi tạo form
             Loaded += DSBaoTriInputForm_Loaded;
-
             // Đăng ký sự kiện cho các nút
             btnLuu.Click += BtnLuu_Click;
             btnHuy.Click += BtnHuy_Click;
-
             // Đăng ký sự kiện validation cho các trường nhập liệu
             txtGhiChu.TextChanged += TextBox_TextChanged;
             txtViTriThucTe.TextChanged += TextBox_TextChanged;
-
             // Chỉ cho phép nhập số cho các trường số
             txtMaKiemKe.PreviewTextInput += NumericOnly_PreviewTextInput;
         }
@@ -122,29 +110,22 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             InitializeComponent();
             _supabaseClient = supabaseClient;
             _isUpdateMode = true;
-
             // Khởi tạo collections
-            DanhSachDotKiemKe = new ObservableCollection<dynamic>();
+            DanhSachDotKiemKe = new ObservableCollection<KiemKeDotKiemKe>();
             DanhSachTaiSan = new ObservableCollection<TaiSanModel>();
             DanhSachPhong = new ObservableCollection<Phong>();
-
             // Sử dụng đối tượng kiểm kê tài sản đã có
             KiemKeTaiSan = kiemKeTaiSan;
-
             // Set DataContext cho binding
             DataContext = this;
-
             // Load dữ liệu khi khởi tạo form
             Loaded += DSBaoTriInputForm_Loaded;
-
             // Đăng ký sự kiện cho các nút
             btnLuu.Click += BtnLuu_Click;
             btnHuy.Click += BtnHuy_Click;
-
             // Đăng ký sự kiện validation cho các trường nhập liệu
             txtGhiChu.TextChanged += TextBox_TextChanged;
             txtViTriThucTe.TextChanged += TextBox_TextChanged;
-
             // Chỉ cho phép nhập số cho các trường số
             txtMaKiemKe.PreviewTextInput += NumericOnly_PreviewTextInput;
         }
@@ -156,13 +137,10 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 // Hiển thị thông báo loading
                 ShowLoadingMessage(true);
-
                 // Load dữ liệu cho các ComboBox
                 await LoadDataForComboBoxes();
-
                 // Cài đặt các giá trị mặc định hoặc giá trị từ đối tượng hiện tại nếu ở chế độ cập nhật
                 SetupFormData();
-
                 // Ẩn thông báo loading
                 ShowLoadingMessage(false);
             }
@@ -174,62 +152,51 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         }
 
         // Load dữ liệu cho các ComboBox
-        // Trong phương thức LoadDataForComboBoxes(), thay đổi cách bạn thêm dữ liệu vào collections:
-
-        // Trong phương thức LoadDataForComboBoxes
         private async Task LoadDataForComboBoxes()
         {
             try
             {
                 // Tải dữ liệu đợt kiểm kê
-                var dotkiemkeTable = _supabaseClient.Postgrest.Table<DotKiemKe>();
+                var dotkiemkeTable = _supabaseClient.Postgrest.Table<KiemKeDotKiemKe>();
                 var dotkiemkeResponse = await dotkiemkeTable.Get();
                 var dsDotKiemKe = dotkiemkeResponse.Models;
-
                 // Tạo danh sách đối tượng hiển thị đơn giản
                 var dsDotKiemKeBinding = dsDotKiemKe.Select(d => new ComboBoxItem
                 {
                     ID = d.MaDotKiemKe,
                     DisplayText = d.TenDot ?? $"Đợt kiểm kê {d.MaDotKiemKe}"
                 }).ToList();
-
                 // Gán danh sách cho ComboBox
                 cboDotKiemKe.ItemsSource = dsDotKiemKeBinding;
                 cboDotKiemKe.DisplayMemberPath = "DisplayText"; // Chỉ hiển thị tên
                 cboDotKiemKe.SelectedValuePath = "ID";          // Lấy giá trị ID
-
                 // Tương tự với tài sản
                 var taisanTable = _supabaseClient.Postgrest.Table<TaiSanModel>();
                 var taisanResponse = await taisanTable.Get();
                 var dsTaiSan = taisanResponse.Models;
-
                 var dsTaiSanBinding = dsTaiSan.Select(t => new ComboBoxItem
                 {
                     ID = t.MaTaiSan,
                     DisplayText = t.TenTaiSan ?? $"Tài sản {t.MaTaiSan}"
                 }).ToList();
-
                 cboTaiSan.ItemsSource = dsTaiSanBinding;
                 cboTaiSan.DisplayMemberPath = "DisplayText";
                 cboTaiSan.SelectedValuePath = "ID";
-
                 // Tương tự với phòng
                 var phongTable = _supabaseClient.Postgrest.Table<Phong>();
                 var phongResponse = await phongTable.Get();
                 var dsPhong = phongResponse.Models;
-
                 var dsPhongBinding = dsPhong.Select(p => new ComboBoxItem
                 {
                     ID = p.MaPhong,
                     DisplayText = p.TenPhong ?? $"Phòng {p.MaPhong}"
                 }).ToList();
-
                 cboPhong.ItemsSource = dsPhongBinding;
                 cboPhong.DisplayMemberPath = "DisplayText";
                 cboPhong.SelectedValuePath = "ID";
 
                 // Lưu lại danh sách gốc để sử dụng sau này
-                DanhSachDotKiemKe = new ObservableCollection<dynamic>(dsDotKiemKe);
+                DanhSachDotKiemKe = new ObservableCollection<KiemKeDotKiemKe>(dsDotKiemKe);
                 DanhSachTaiSan = new ObservableCollection<TaiSanModel>(dsTaiSan);
                 DanhSachPhong = new ObservableCollection<Phong>(dsPhong);
             }
@@ -244,7 +211,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         {
             public int ID { get; set; }
             public string DisplayText { get; set; }
-
             public override string ToString()
             {
                 return DisplayText;
@@ -259,7 +225,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 // Chế độ cập nhật - Đặt tiêu đề và giá trị từ đối tượng hiện tại
                 Title = "Cập nhật Phiếu Bảo Trì";
                 txtMaKiemKe.Text = KiemKeTaiSan.MaKiemKeTS.ToString();
-
                 // Tìm và chọn các giá trị tương ứng trong ComboBox
                 if (KiemKeTaiSan.MaDotKiemKe.HasValue && cboDotKiemKe.Items.Count > 0)
                 {
@@ -268,7 +233,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     if (dotKiemKeItem != null)
                         cboDotKiemKe.SelectedItem = dotKiemKeItem;
                 }
-
                 if (KiemKeTaiSan.MaTaiSan.HasValue && cboTaiSan.Items.Count > 0)
                 {
                     var taiSanItem = cboTaiSan.Items.Cast<ComboBoxItem>()
@@ -276,7 +240,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     if (taiSanItem != null)
                         cboTaiSan.SelectedItem = taiSanItem;
                 }
-
                 if (KiemKeTaiSan.MaPhong.HasValue && cboPhong.Items.Count > 0)
                 {
                     var phongItem = cboPhong.Items.Cast<ComboBoxItem>()
@@ -284,7 +247,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     if (phongItem != null)
                         cboPhong.SelectedItem = phongItem;
                 }
-
                 // Đặt giá trị cho tình trạng
                 foreach (System.Windows.Controls.ComboBoxItem item in cboTinhTrang.Items)
                 {
@@ -294,7 +256,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         break;
                     }
                 }
-
                 txtViTriThucTe.Text = KiemKeTaiSan.ViTriThucTe;
                 txtGhiChu.Text = KiemKeTaiSan.GhiChu;
             }
@@ -303,7 +264,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 // Chế độ thêm mới - Tạo mã kiểm kê mới
                 Title = "Thêm Phiếu Bảo Trì";
                 GenerateNewId();
-
                 // Thiết lập giá trị mặc định cho ComboBox TinhTrang (chọn item đầu tiên)
                 if (cboTinhTrang.Items.Count > 0)
                     cboTinhTrang.SelectedIndex = 0;
@@ -317,14 +277,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 // Lấy mã kiểm kê lớn nhất hiện tại và tăng lên 1
                 var table = _supabaseClient.Postgrest.Table<KiemKeTaiSan>();
-
                 // Tạo query
                 table.Select("ma_kiem_ke_ts");
                 table.Order("ma_kiem_ke_ts", Ordering.Descending);
                 table.Limit(1);
-
                 var response = await table.Get();
-
                 if (response.Models.Count > 0)
                 {
                     int maxId = response.Models[0].MaKiemKeTS;
@@ -356,10 +313,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 GetDataFromForm();
                 // Hiển thị thông báo đang xử lý
                 ShowLoadingMessage(true);
-
                 // Lấy tham chiếu đến bảng
                 var table = _supabaseClient.Postgrest.Table<KiemKeTaiSan>();
-
                 if (_isUpdateMode)
                 {
                     // Cập nhật dữ liệu
@@ -418,7 +373,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 cboTinhTrang.Focus();
                 return false;
             }
-
             return true;
         }
 
@@ -426,33 +380,29 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private void GetDataFromForm()
         {
             KiemKeTaiSan.MaKiemKeTS = int.Parse(txtMaKiemKe.Text);
-
             // Lấy giá trị từ các ComboBox
             if (cboDotKiemKe.SelectedItem is ComboBoxItem dotKiemKe)
             {
                 KiemKeTaiSan.MaDotKiemKe = dotKiemKe.ID;
             }
-
             if (cboTaiSan.SelectedItem is ComboBoxItem taiSan)
             {
                 KiemKeTaiSan.MaTaiSan = taiSan.ID;
             }
-
             if (cboPhong.SelectedItem is ComboBoxItem phong)
             {
                 KiemKeTaiSan.MaPhong = phong.ID;
             }
-
             // Lấy giá trị tình trạng
             if (cboTinhTrang.SelectedItem is System.Windows.Controls.ComboBoxItem tinhTrang)
             {
                 KiemKeTaiSan.TinhTrang = tinhTrang.Content.ToString();
             }
-
             // Lấy các giá trị khác
             KiemKeTaiSan.ViTriThucTe = txtViTriThucTe.Text;
             KiemKeTaiSan.GhiChu = txtGhiChu.Text;
         }
+
         // Xử lý sự kiện khi nội dung TextBox thay đổi
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
