@@ -5,18 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Đăng nhập hệ thống" Height="350" Width="550" WindowStartupLocation="CenterScreen" Background="#F8F9FA">
+        Title="Đăng nhập hệ thống" Height="350" Width="550" WindowStartupLocation="CenterScreen" Background="#F8F9FA" Icon="/View/DangNhap/login.png">
 
 
     <Grid>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="2.5*"/>
+            <ColumnDefinition Width="25*"/>
+            <ColumnDefinition Width="132*"/>
+            <ColumnDefinition Width="393*"/>
         </Grid.ColumnDefinitions>
 
-        <ProgressBar x:Name="loadingIndicator" HorizontalAlignment="Center" VerticalAlignment="Center" 
-             Height="100" Width="100" IsIndeterminate="True" Visibility="Collapsed">
+        <ProgressBar x:Name="loadingIndicator" HorizontalAlignment="Left" VerticalAlignment="Center" 
+             Height="100" Width="100" IsIndeterminate="True" Visibility="Collapsed" Grid.Column="1" Margin="4,0,0,0">
             <ProgressBar.Style>
                 <Style TargetType="ProgressBar">
                     <Setter Property="Foreground" Value="Green"/>
@@ -44,7 +45,7 @@
         </ProgressBar>
 
         <!-- Avatar Section -->
-        <Border Grid.Column="0" Background="#0066b1" VerticalAlignment="Stretch">
+        <Border Grid.Column="0" Background="#0066b1" Grid.ColumnSpan="2">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Border Width="120" Height="120" Background="#E0E0E0" CornerRadius="60" Margin="0 0 0 15">
                     <Image Source="/Resources/Logo/Logo_Login.png" Stretch="Uniform"/>
@@ -58,9 +59,9 @@
         </Border>
 
         <!-- Login Form Section -->
-        <Border Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="320" 
+        <Border Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Width="320" 
                 Background="White" Padding="25 20" CornerRadius="12" 
-                materialDesign:ElevationAssist.Elevation="Dp4" Margin="0 0 20 0">
+                materialDesign:ElevationAssist.Elevation="Dp4" Margin="27,0,0,0">
             <StackPanel>
                 <TextBlock Text="Đăng nhập hệ thống" FontSize="22" FontWeight="Bold" 
                          HorizontalAlignment="Center" Margin="0 0 0 25"/>
