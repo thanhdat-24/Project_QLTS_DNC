@@ -223,73 +223,73 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
         }
 
-        private async void btnDuyet_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maBanGiao))
-            {
-                MessageBoxResult result = MessageBox.Show(
-                    $"Bạn có chắc chắn muốn duyệt phiếu bàn giao có mã '{maBanGiao}'?",
-                    "Xác nhận duyệt",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
+        //private async void btnDuyet_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maBanGiao))
+        //    {
+        //        MessageBoxResult result = MessageBox.Show(
+        //            $"Bạn có chắc chắn muốn duyệt phiếu bàn giao có mã '{maBanGiao}'?",
+        //            "Xác nhận duyệt",
+        //            MessageBoxButton.YesNo,
+        //            MessageBoxImage.Question);
 
-                if (result == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        bool success = await BanGiaoTaiSanService.DuyetPhieuBanGiaoAsync(maBanGiao, true);
+        //        if (result == MessageBoxResult.Yes)
+        //        {
+        //            try
+        //            {
+        //                bool success = await BanGiaoTaiSanService.DuyetPhieuBanGiaoAsync(maBanGiao, true);
 
-                        if (success)
-                        {
-                            MessageBox.Show("Đã duyệt phiếu bàn giao thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                            await LoadBanGiaoAsync(); // Làm mới danh sách
-                        }
-                        else
-                        {
-                            MessageBox.Show("Không thể duyệt phiếu bàn giao.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Lỗi khi duyệt phiếu bàn giao: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-        }
+        //                if (success)
+        //                {
+        //                    MessageBox.Show("Đã duyệt phiếu bàn giao thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+        //                    await LoadBanGiaoAsync(); // Làm mới danh sách
+        //                }
+        //                else
+        //                {
+        //                    MessageBox.Show("Không thể duyệt phiếu bàn giao.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                MessageBox.Show($"Lỗi khi duyệt phiếu bàn giao: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+        //            }
+        //        }
+        //    }
+        //}
 
-        private async void btnTuChoi_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maBanGiao))
-            {
-                MessageBoxResult result = MessageBox.Show(
-                    $"Bạn có chắc chắn muốn từ chối phiếu bàn giao có mã '{maBanGiao}'?",
-                    "Xác nhận từ chối",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
+        //private async void btnTuChoi_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maBanGiao))
+        //    {
+        //        MessageBoxResult result = MessageBox.Show(
+        //            $"Bạn có chắc chắn muốn từ chối phiếu bàn giao có mã '{maBanGiao}'?",
+        //            "Xác nhận từ chối",
+        //            MessageBoxButton.YesNo,
+        //            MessageBoxImage.Question);
 
-                if (result == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        bool success = await BanGiaoTaiSanService.DuyetPhieuBanGiaoAsync(maBanGiao, false);
+        //        if (result == MessageBoxResult.Yes)
+        //        {
+        //            try
+        //            {
+        //                bool success = await BanGiaoTaiSanService.DuyetPhieuBanGiaoAsync(maBanGiao, false);
 
-                        if (success)
-                        {
-                            MessageBox.Show("Đã từ chối phiếu bàn giao thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                            await LoadBanGiaoAsync(); // Làm mới danh sách
-                        }
-                        else
-                        {
-                            MessageBox.Show("Không thể từ chối phiếu bàn giao.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Lỗi khi từ chối phiếu bàn giao: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-        }
+        //                if (success)
+        //                {
+        //                    MessageBox.Show("Đã từ chối phiếu bàn giao thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+        //                    await LoadBanGiaoAsync(); // Làm mới danh sách
+        //                }
+        //                else
+        //                {
+        //                    MessageBox.Show("Không thể từ chối phiếu bàn giao.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                MessageBox.Show($"Lỗi khi từ chối phiếu bàn giao: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+        //            }
+        //        }
+        //    }
+        //}
 
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {

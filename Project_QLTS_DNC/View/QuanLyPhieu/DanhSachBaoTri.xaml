@@ -187,14 +187,7 @@
                     </Grid>
                 </materialDesign:Card>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <ComboBox x:Name="cboLoaiBaoTri" Width="120" Height="42" Margin="15,0,5,0" 
-                        VerticalContentAlignment="Center"
-                        Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
-                        materialDesign:HintAssist.Hint="Loại bảo trì">
-                        <ComboBoxItem Content="Tất cả loại" IsSelected="True"/>
-                        <ComboBoxItem Content="Định kỳ"/>
-                        <ComboBoxItem Content="Đột xuất"/>
-                    </ComboBox>
+                    
                     <ComboBox x:Name="cboNhomTaiSan" Width="150" Height="42" Margin="15,0,5,0" 
                         VerticalContentAlignment="Center"
                         Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
@@ -206,10 +199,12 @@
                         <ComboBoxItem Content="Thiết bị mạng"/>
                     </ComboBox>
                     <ComboBox x:Name="cboTinhTrang" Width="150" Height="42" Margin="10,0,5,0" 
-                        VerticalContentAlignment="Center"
-                        Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
-                        materialDesign:HintAssist.Hint="Tình trạng">
+    VerticalContentAlignment="Center"
+    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+    SelectedValue="{Binding TinhTrangDuocChon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+    materialDesign:HintAssist.Hint="Tình trạng">
                         <ComboBoxItem Content="Tất cả tình trạng" IsSelected="True"/>
+                        <ComboBoxItem Content="Cần kiểm tra"/>
                         <ComboBoxItem Content="Cần bảo trì"/>
                     </ComboBox>
                 </StackPanel>
@@ -310,8 +305,8 @@ HorizontalScrollBarVisibility="Auto">
                                                         <ControlTemplate TargetType="CheckBox">
                                                             <Border BorderBrush="Black" BorderThickness="1" Width="16" Height="16" Background="White">
                                                                 <Path x:Name="CheckMark" Stroke="Green" StrokeThickness="2" 
-                                                      Data="M 3,7 L 7,12 L 12,3" Visibility="Collapsed" 
-                                                      VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                          Data="M 3,7 L 7,12 L 12,3" Visibility="Collapsed" 
+                                                          VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsChecked" Value="True">
@@ -321,49 +316,49 @@ HorizontalScrollBarVisibility="Auto">
                                                         </ControlTemplate>
                                                     </Setter.Value>
                                                 </Setter>
-                                            </Style>
-                                        </CheckBox.Style>
-                                    </CheckBox>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Mã kiểm kê" Width="140" Binding="{Binding MaKiemKeTS}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Đợt kiểm kê" Width="150" Binding="{Binding TenDotKiemKe}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Tên tài sản" Width="160" Binding="{Binding TenTaiSan}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                    <Setter Property="Margin" Value="5,0,0,0"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Phòng" Width="140" Binding="{Binding TenPhong}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                    <Setter Property="Margin" Value="5,0,0,0"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                                </Style>
+                                            </CheckBox.Style>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Mã kiểm kê" Width="140" Binding="{Binding MaKiemKeTS}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Đợt kiểm kê" Width="150" Binding="{Binding TenDotKiemKe}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Tên tài sản" Width="160" Binding="{Binding TenTaiSan}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="5,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Phòng" Width="140" Binding="{Binding TenPhong}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="5,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Tình trạng" Width="153" Binding="{Binding TinhTrang}">
-                            <DataGridTextColumn.ElementStyle>
+                            <DataGridTextColumn Header="Tình trạng" Width="153" Binding="{Binding TinhTrang}">
+                                <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="TextAlignment" Value="Center"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -393,20 +388,20 @@ HorizontalScrollBarVisibility="Auto">
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
-                                CommandParameter="{Binding MaKiemKeTS}"
-                                ToolTip="Sửa"
-                                Background="{DynamicResource PrimaryHueLightBrush}" 
-                                Width="30" Height="30" Padding="2" Margin="0,1"
-                                Click="BtnSua_Click">
+                                    CommandParameter="{Binding MaKiemKeTS}"
+                                    ToolTip="Sửa"
+                                    Background="{DynamicResource PrimaryHueLightBrush}" 
+                                    Width="30" Height="30" Padding="2" Margin="0,1"
+                                    Click="BtnSua_Click">
                                             <materialDesign:PackIcon Kind="Edit" Width="16" Height="16" Foreground="White"/>
                                         </Button>
                                         <Button x:Name="btnXoa" Style="{StaticResource MaterialDesignIconButton}"
-                                CommandParameter="{Binding MaKiemKeTS}" 
-                                ToolTip="Xóa" Margin="8,1,0,1"
-                                Background="{DynamicResource SecondaryDelete}" 
-                                Width="30" Height="30" 
-                                Padding="2"
-                                Click="BtnXoa_Click">
+                                    CommandParameter="{Binding MaKiemKeTS}" 
+                                    ToolTip="Xóa" Margin="8,1,0,1"
+                                    Background="{DynamicResource SecondaryDelete}" 
+                                    Width="30" Height="30" 
+                                    Padding="2"
+                                    Click="BtnXoa_Click">
                                             <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="White"/>
                                         </Button>
                                     </StackPanel>

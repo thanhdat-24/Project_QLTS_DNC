@@ -331,6 +331,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Tình trạng:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox Grid.Column="1" x:Name="cboTinhTrang">
+                            <ComboBoxItem Content="Cần kiểm tra"/>
                             <ComboBoxItem Content="Cần bảo trì"/>
                         </ComboBox>
                     </Grid>

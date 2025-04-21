@@ -13,7 +13,7 @@ using Project_QLTS_DNC.Models.BaoTri;
 using BaoTriKiemKeTaiSan = Project_QLTS_DNC.Models.BaoTri.KiemKeTaiSan;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using Project_QLTS_DNC.Models.ToaNha;
-using Project_QLTS_DNC.View.KiemKe;
+using Project_QLTS_DNC.View.BaoTri;
 using Supabase;
 using Supabase.Gotrue;
 using Supabase.Postgrest;
