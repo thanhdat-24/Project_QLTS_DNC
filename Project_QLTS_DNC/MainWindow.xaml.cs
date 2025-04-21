@@ -11,7 +11,6 @@ using Supabase.Gotrue;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -19,19 +18,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
-using Supabase.Gotrue;
-using Project_QLTS_DNC.View.QuanLyKho;
-using Project_QLTS_DNC.View.QuanLyTaiSan;
-using Project_QLTS_DNC.View.ThongSoKyThuat;
-using Project_QLTS_DNC.Models.QLNhomTS;
-using System.Windows.Controls;
-using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.View.NhanVien;
 using Project_QLTS_DNC.View.TaiKhoan;
 
 
 using System.IO;
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC
 {
@@ -71,7 +63,100 @@ namespace Project_QLTS_DNC
                     imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
                 }
             }
+          HienThiTreeViewTheoPhanQuyen();
         }
+        private void HienThiTreeViewTheoPhanQuyen()
+        {
+            var danhSach = QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi;
+
+            // Các nút con
+            var controls = new Dictionary<string, TreeViewItem>
+            {
+                { "btnTrangChu", btnTrangChu },
+                { "btnQuanLyTaiKhoan", btnQuanlyTaiKhoan },
+                { "btnDanhSachTaiKhoan", btnDanhSachTaiKhoan },
+                { "btnLoaiTaiKhoan", btnLoaiTaiKhoan },
+                { "btnPhanQuyenTk", btnPhanQuyenTk },
+
+                { "btnQuanLyNhanSu", btnQuanlyNhansu },
+                { "btnNhanVien", btnNhanVien },
+                { "btnChucVu", btnChucVu },
+
+                { "btnQuanLyLoaiTaiSan", btnQuanLyLoaiTaiSan },
+
+                { "btnQuanLyToaNha", btnQuanlyToaNha },
+                { "btnToaNha", btnToaNha },
+                { "btnTang", btnTang },
+                { "btnPhong", btnPhong },
+                { "btnPhongBan", btnPhongBan },
+
+                { "btnQuanLyKho", btnQuanLyKho },
+                { "btnDanhSachKho", btnDanhSachKho },
+                { "btnNhapKho", btnNhapKho },
+                { "btnXuatKho", btnXuatKho },
+                { "btnTonKho", btnTonKho },
+                { "btnBanGiaoTaiSan", btnBanGiaoTaiSan },
+
+                { "btnNhaCungCap", btnNhaCungCap },
+                { "btnTraCuuTaiSan", btnTraCuuTaiSan },
+
+                { "btnQuanLyBaoTri", btnQuanLyBaotri },
+                { "btnBaoTri", btnBaoTri },
+                { "btnPhieuBaoTri", btnPhieubaotri },
+                { "btnDSBaoTri", btnDSbaotri },
+
+                { "btnQuanLyMuaMoi", btnQuanlymuaMoi },
+                { "btnPhieuMuaMoi", btnPhieuMuaMoi },
+                { "btnChiTietPhieuMuaMoi", btnChiTietPhieuMuaMoi },
+
+                { "btnBaoCaoKiemKe", btnBaoCaoKiemKe },
+                { "btnDuyetPhieu", btnDuyetPhieu },
+
+                { "btnQuanLyCaiDat", btnQuanLyCaiDat },
+                { "btnThongTinCongTy", btnThongTinCongTy },
+                { "btnPhieuIn", btnPhieuIn },
+            };
+
+            // Các nhóm cha
+            var parentItems = new List<TreeViewItem>
+            {
+                btnQuanlyTaiKhoan,
+                btnQuanlyNhansu,
+                btnQuanLyKho,
+                btnQuanlyToaNha,
+                btnQuanLyBaotri, // Sửa đúng theo tên TreeViewItem trong XAML của bạn
+                btnQuanlymuaMoi,
+                btnQuanLyCaiDat
+            };
+
+            // 1. Ẩn hoặc hiện các item con
+            foreach (var kv in controls)
+            {
+                if (kv.Value != null)
+                {
+                    kv.Value.Visibility = danhSach.Contains(kv.Key) ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+
+            // 2. Nếu tất cả item con đều ẩn → ẩn luôn TreeViewItem cha
+            foreach (var parent in parentItems)
+            {
+                bool coItemHien = false;
+                foreach (TreeViewItem child in parent.Items)
+                {
+                    if (child.Visibility == Visibility.Visible)
+                    {
+                        coItemHien = true;
+                        break;
+                    }
+                }
+
+                parent.Visibility = coItemHien ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+
+
 
         private async Task LoadBarChartAsync()
         {

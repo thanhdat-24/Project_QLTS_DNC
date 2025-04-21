@@ -273,7 +273,7 @@ namespace Project_QLTS_DNC.Services
                     .Update(new TaiKhoanModel
                     {
                         MatKhau = matKhauMoi,
-                        // Giữ nguyên các thông tin khác
+                       
                         MaTk = taiKhoan.MaTk,
                         TenTaiKhoan = tenTaiKhoan,
                         MaLoaiTk = taiKhoan.MaLoaiTk,
@@ -297,6 +297,36 @@ namespace Project_QLTS_DNC.Services
                 return false;
             }
         }
+
+        public async Task<List<TaiKhoanModel>> TimTaiKhoanTheoEmailNhanVienAsync(string email)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+
+                // Lấy danh sách tài khoản và nhân viên
+                var dsTaiKhoan = await client.From<TaiKhoanModel>().Get();
+                var dsNhanVien = await client.From<NhanVienModel>().Get();
+
+                // Tìm nhân viên có email khớp
+                var nv = dsNhanVien.Models.FirstOrDefault(x => x.Email.ToLower() == email.ToLower());
+                if (nv == null)
+                    return new List<TaiKhoanModel>();
+
+                // Tìm tài khoản liên kết với nhân viên đó
+                var danhSach = dsTaiKhoan.Models
+                    .Where(tk => tk.MaNv == nv.MaNV)
+                    .ToList();
+
+                return danhSach;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tìm tài khoản theo email nhân viên: {ex.Message}");
+                return new List<TaiKhoanModel>();
+            }
+        }
+
     }
 }
 

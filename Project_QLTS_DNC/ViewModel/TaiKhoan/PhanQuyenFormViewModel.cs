@@ -1,48 +1,42 @@
-﻿using Project_QLTS_DNC.Models.TaiKhoan;
+﻿using Project_QLTS_DNC.Models.PhanQuyen;
+using Project_QLTS_DNC.Models.TaiKhoan;
 using Project_QLTS_DNC.Services.TaiKhoan;
+using Project_QLTS_DNC.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using System.Threading.Tasks;
 using System.Windows;
-using Project_QLTS_DNC.Models.PhanQuyen;
-using Project_QLTS_DNC.Helpers;
+using System.Windows.Input;
+
 public class PhanQuyenFormViewModel : INotifyPropertyChanged
 {
     private readonly LoaiTaiKhoanService _loaiTaiKhoanService;
+    private readonly PhanQuyenService _phanQuyenService = new PhanQuyenService();
+
     private ObservableCollection<LoaiTaiKhoanModel> _danhSachLoaiTaiKhoan;
     private LoaiTaiKhoanModel _loaiTaiKhoanDuocChon;
-    private ObservableCollection<PhanQuyen> _danhSachPhanQuyen;
+    private ObservableCollection<NhomChucNang> _danhSachNhomChucNang;
 
     public ObservableCollection<LoaiTaiKhoanModel> DanhSachLoaiTaiKhoan
     {
         get => _danhSachLoaiTaiKhoan;
-        set
-        {
-            _danhSachLoaiTaiKhoan = value;
-            OnPropertyChanged(nameof(DanhSachLoaiTaiKhoan));
-        }
+        set { _danhSachLoaiTaiKhoan = value; OnPropertyChanged(); }
     }
 
     public LoaiTaiKhoanModel LoaiTaiKhoanDuocChon
     {
         get => _loaiTaiKhoanDuocChon;
-        set
-        {
-            _loaiTaiKhoanDuocChon = value;
-            LoadDanhSachPhanQuyen();
-            OnPropertyChanged(nameof(LoaiTaiKhoanDuocChon));
-        }
+        set { _loaiTaiKhoanDuocChon = value; LoadDanhSachPhanQuyen(); OnPropertyChanged(); }
     }
 
-    public ObservableCollection<PhanQuyen> DanhSachPhanQuyen
+    public ObservableCollection<NhomChucNang> DanhSachNhomChucNang
     {
-        get => _danhSachPhanQuyen;
-        set
-        {
-            _danhSachPhanQuyen = value;
-            OnPropertyChanged(nameof(DanhSachPhanQuyen));
-        }
+        get => _danhSachNhomChucNang;
+        set { _danhSachNhomChucNang = value; OnPropertyChanged(); }
     }
 
     public ICommand HuyCommand { get; }
@@ -53,12 +47,15 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
         _loaiTaiKhoanService = loaiTaiKhoanService;
 
         HuyCommand = new RelayCommand(Huy);
-        LuuThayDoiCommand = new RelayCommand(LuuThayDoi, () => LoaiTaiKhoanDuocChon != null);
-
-        LoadDanhSachLoaiTaiKhoan();
+        LuuThayDoiCommand = new RelayCommand(async () => await LuuThayDoi(), () => LoaiTaiKhoanDuocChon != null);
     }
 
-    private async void LoadDanhSachLoaiTaiKhoan()
+    public async Task LoadDataAsync()
+    {
+        await LoadDanhSachLoaiTaiKhoan();
+    }
+
+    private async Task LoadDanhSachLoaiTaiKhoan()
     {
         try
         {
@@ -67,144 +64,120 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Lỗi: {ex.Message}", "Thông báo");
+            MessageBox.Show($"Lỗi tải loại tài khoản: {ex.Message}", "Thông báo");
         }
     }
 
-    private void LoadDanhSachPhanQuyen()
+    private async void LoadDanhSachPhanQuyen()
     {
         if (LoaiTaiKhoanDuocChon == null) return;
 
-        DanhSachPhanQuyen = new ObservableCollection<PhanQuyen>
+        try
         {
-            // Trang chủ
-            new PhanQuyen {
-                TenChucNang = "Trang chủ",
-                IconKind = "Home",
-                Xem = true,
-                HienThi = true
-            },
+            var danhSach = await _phanQuyenService.LayDanhSachQuyenTheoLoaiTkAsync(LoaiTaiKhoanDuocChon.MaLoaiTk);
 
-            // Quản lý tài khoản
-            new PhanQuyen {
-                TenChucNang = "Danh sách tài khoản",
-                IconKind = "AccountList"
-            },
-            new PhanQuyen {
-                TenChucNang = "Loại tài khoản",
-                IconKind = "AccountKey"
-            },
-            new PhanQuyen {
-                TenChucNang = "Phân quyền",
-                IconKind = "AccountCog"
-            },
-
-            // Quản lý nhân sự
-            new PhanQuyen {
-                TenChucNang = "Danh sách nhân viên",
-                IconKind = "AccountGroup"
-            },
-            new PhanQuyen {
-                TenChucNang = "Chức vụ",
-                IconKind = "AccountTie"
-            },
-
-            // Quản lý loại tài sản
-            new PhanQuyen {
-                TenChucNang = "Quản lý loại tài sản",
-                IconKind = "Archive"
-            },
-
-            // Quản lý tòa nhà
-            new PhanQuyen {
-                TenChucNang = "Tòa nhà",
-                IconKind = "Domain"
-            },
-            new PhanQuyen {
-                TenChucNang = "Tầng",
-                IconKind = "FloorPlan"
-            },
-            new PhanQuyen {
-                TenChucNang = "Phòng",
-                IconKind = "RoomService"
-            },
-            new PhanQuyen {
-                TenChucNang = "Phòng ban",
-                IconKind = "Office"
-            },
-
-            // Quản lý kho
-            new PhanQuyen {
-                TenChucNang = "Quản lý kho",
-                IconKind = "Warehouse"
-            },
-            new PhanQuyen {
-                TenChucNang = "Nhập kho",
-                IconKind = "ArchiveDownload"
-            },
-            new PhanQuyen {
-                TenChucNang = "Xuất kho",
-                IconKind = "ArchiveUpload"
-            },
-            new PhanQuyen {
-                TenChucNang = "Tồn kho",
-                IconKind = "Archive"
-            },
-
-            // Các chức năng khác
-            new PhanQuyen {
-                TenChucNang = "Quản lý nhà cung cấp",
-                IconKind = "Factory"
-            },
-            new PhanQuyen {
-                TenChucNang = "Tra cứu tài sản",
-                IconKind = "Magnify"
-            },
-
-            // Bảo trì
-            new PhanQuyen {
-                TenChucNang = "Loại bảo trì",
-                IconKind = "Tools"
-            },
-            new PhanQuyen {
-                TenChucNang = "Danh sách bảo trì",
-                IconKind = "Wrench"
-            },
-
-            // Báo cáo và duyệt
-            new PhanQuyen {
-                TenChucNang = "Báo cáo kiểm kê",
-                IconKind = "FileChart"
-            },
-            new PhanQuyen {
-                TenChucNang = "Duyệt phiếu",
-                IconKind = "FileCheck"
-            },
-
-            // Cài đặt
-            new PhanQuyen {
-                TenChucNang = "Thông tin công ty",
-                IconKind = "Domain"
-            },
-            new PhanQuyen {
-                TenChucNang = "Cài đặt phiếu in",
-                IconKind = "Printer"
+            if (danhSach == null || !danhSach.Any())
+            {
+                MessageBox.Show("Danh sách quyền rỗng hoặc không tải được dữ liệu.", "Cảnh báo");
+                return;
             }
+
+            foreach (var pq in danhSach)
+            {
+                if (string.IsNullOrWhiteSpace(pq.TenChucNang))
+                {
+                    pq.TenChucNang = $"Màn hình {pq.MaManHinh}";
+                }
+            }
+
+            var danhSachPhanQuyen = danhSach.Select(pq => new PhanQuyen
+            {
+                TenChucNang = pq.TenChucNang,
+                MaQuyen = pq.MaQuyen,
+                MaManHinh = pq.MaManHinh,
+                Xem = pq.Xem,
+                Them = pq.Them,
+                Sua = pq.Sua,
+                Xoa = pq.Xoa,
+                HienThi = pq.HienThi,
+                IconKind = "CheckboxMarked"
+            });
+
+            DanhSachNhomChucNang = new ObservableCollection<NhomChucNang>(
+                danhSachPhanQuyen
+                    .GroupBy(p => LayNhomTuMaManHinh(p.MaManHinh))
+                    .Select(g => new NhomChucNang
+                    {
+                        TenNhom = g.Key,
+                        DanhSachQuyen = new ObservableCollection<PhanQuyen>(g.ToList())
+                    })
+            );
+
+            QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = DanhSachNhomChucNang
+                .SelectMany(n => n.DanhSachQuyen)
+                .Where(p => p.HienThi)
+                .Select(p => p.MaManHinh)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Lỗi tải phân quyền: {ex.Message}", "Lỗi");
+        }
+    }
+
+    private string LayNhomTuMaManHinh(string ma)
+    {
+        if (string.IsNullOrWhiteSpace(ma)) return "Khác";
+
+        return ma switch
+        {
+            "btnTrangChu" => "Trang chủ",
+            "btnQuanlyTaiKhoan" or "btnDanhSachTaiKhoan" or "btnLoaiTaiKhoan" or "btnPhanQuyenTk" => "Quản lý tài khoản",
+            "btnQuanlyNhansu" or "btnNhanVien" or "btnChucVu" => "Quản lý nhân sự",
+            "btnQuanLyLoaiTaiSan" => "Loại tài sản",
+            "btnQuanlyToaNha" or "btnToaNha" or "btnTang" or "btnPhong" or "btnPhongBan" => "Tòa nhà",
+            "btnQuanLyKho" or "btnDanhSachKho" or "btnNhapKho" or "btnXuatKho" or "btnTonKho" or "btnBanGiaoTaiSan" => "Quản lý kho",
+            "btnNhaCungCap" => "Nhà cung cấp",
+            "btnTraCuuTaiSan" => "Tra cứu tài sản",
+            "btn_Baotri" or "btnBaoTri" or "btnPhieubaotri" or "btnDSbaotri" => "Bảo trì",
+            "btn_muaMoi" or "btnPhieuMuaMoi" or "btnChiTietPhieuMuaMoi" => "Mua mới",
+            "btnBaoCaoKiemKe" => "Báo cáo kiểm kê",
+            "btnDuyetPhieu" => "Duyệt phiếu",
+            "btn_CaiDat" or "btnThongTinCongTy" or "btnPhieuIn" => "Cài đặt",
+            _ => "Khác"
         };
     }
 
     private void Huy()
     {
-        // Reload danh sách phân quyền
         LoadDanhSachPhanQuyen();
     }
 
-    private void LuuThayDoi()
+    private async Task LuuThayDoi()
     {
         try
         {
-            // TODO: Lưu phân quyền vào database
-            MessageBox.Show("Lưu phân quyền thành công!", "Thông báo");
+            if (LoaiTaiKhoanDuocChon == null) return;
+
+            var danhSach = DanhSachNhomChucNang
+                .SelectMany(n => n.DanhSachQuyen)
+                .Select(pq => new PhanQuyenModel
+                {
+                    MaLoaiTk = LoaiTaiKhoanDuocChon.MaLoaiTk,
+                    MaQuyen = pq.MaQuyen,
+                    Xem = pq.Xem,
+                    Them = pq.Them,
+                    Sua = pq.Sua,
+                    Xoa = pq.Xoa,
+                    HienThi = pq.HienThi
+                }).ToList();
+
+            bool result = await _phanQuyenService.LuuDanhSachPhanQuyenAsync(danhSach);
+
+            if (result)
+                MessageBox.Show("Lưu phân quyền thành công!", "Thông báo");
+            else
+                MessageBox.Show("Không thể lưu phân quyền.", "Lỗi");
         }
         catch (Exception ex)
         {
@@ -212,10 +185,61 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
         }
     }
 
-    // Implement INotifyPropertyChanged
+    public async Task LuuThayDoiAsync()
+    {
+        await LuuThayDoi();
+    }
+
     public event PropertyChangedEventHandler PropertyChanged;
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+public class PhanQuyen : INotifyPropertyChanged
+{
+    public long MaQuyen { get; set; }
+    public string TenChucNang { get; set; }
+    public string MaManHinh { get; set; }
+    public string IconKind { get; set; }
+
+    private bool _xem;
+    private bool _them;
+    private bool _sua;
+    private bool _xoa;
+    private bool _hienThi;
+
+    public bool Xem { get => _xem; set { _xem = value; OnPropertyChanged(); } }
+    public bool Them { get => _them; set { _them = value; OnPropertyChanged(); } }
+    public bool Sua { get => _sua; set { _sua = value; OnPropertyChanged(); } }
+    public bool Xoa { get => _xoa; set { _xoa = value; OnPropertyChanged(); } }
+    public bool HienThi { get => _hienThi; set { _hienThi = value; OnPropertyChanged(); } }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+public class NhomChucNang
+{
+    public string TenNhom { get; set; }
+    public ObservableCollection<PhanQuyen> DanhSachQuyen { get; set; }
+
+    public bool HienThi
+    {
+        get => DanhSachQuyen != null && DanhSachQuyen.All(q => q.HienThi);
+        set
+        {
+            if (DanhSachQuyen != null)
+            {
+                foreach (var q in DanhSachQuyen)
+                {
+                    q.HienThi = value;
+                }
+            }
+        }
     }
 }

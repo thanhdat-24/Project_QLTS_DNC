@@ -99,45 +99,71 @@
                     </Grid>
 
                     <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2" Height="500" Margin="10" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="lstPhanQuyen" ItemsSource="{Binding DanhSachPhanQuyen}">
+                        <ItemsControl ItemsSource="{Binding DanhSachNhomChucNang}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="8">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="250"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                    <materialDesign:Card Margin="0,0,0,16" Padding="10">
+                                        <StackPanel>
 
-                                            <TextBlock Grid.Column="0" Text="{Binding TenChucNang}" FontWeight="Medium" VerticalAlignment="Center"/>
+                                            <!-- Cha: Header Nhóm + Checkbox hiển thị nhóm -->
+                                            <Expander Header="{Binding TenNhom}" IsExpanded="True">
+                                                <Expander.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                                                            <CheckBox Content="Hiển thị" Margin="20,0,0,0"
+                                              IsChecked="{Binding DataContext.HienThi, RelativeSource={RelativeSource AncestorType=Expander}}"
+                                              VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </Expander.HeaderTemplate>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                                <!-- Checkbox đơn giản với binding 2 chiều -->
-                                                <CheckBox Content="Xem" Margin="0,0,15,0" 
-                                                         IsChecked="{Binding Xem, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <!-- Danh sách quyền con -->
+                                                <ItemsControl ItemsSource="{Binding DanhSachQuyen}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="8">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="250"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
 
-                                                <CheckBox Content="Thêm" Margin="0,0,15,0" 
-                                                         IsChecked="{Binding Them, UpdateSourceTrigger=PropertyChanged}"
-                                                         IsEnabled="{Binding Xem}"/>
+                                                                    <!-- Tên chức năng con -->
+                                                                    <TextBlock Grid.Column="0" Text="{Binding TenChucNang}" VerticalAlignment="Center"/>
 
-                                                <CheckBox Content="Sửa" Margin="0,0,15,0" 
-                                                         IsChecked="{Binding Sua, UpdateSourceTrigger=PropertyChanged}"
-                                                         IsEnabled="{Binding Xem}"/>
+                                                                    <!-- Các checkbox phân quyền -->
+                                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                                        <CheckBox Content="Xem" Margin="0,0,10,0" 
+                                                          IsChecked="{Binding Xem, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                        <CheckBox Content="Thêm" Margin="0,0,10,0" 
+                                                          IsChecked="{Binding Them, UpdateSourceTrigger=PropertyChanged}" 
+                                                          IsEnabled="{Binding Xem}"/>
+                                                                        <CheckBox Content="Sửa" Margin="0,0,10,0" 
+                                                          IsChecked="{Binding Sua, UpdateSourceTrigger=PropertyChanged}" 
+                                                          IsEnabled="{Binding Xem}"/>
+                                                                        <CheckBox Content="Xóa" Margin="0,0,10,0" 
+                                                          IsChecked="{Binding Xoa, UpdateSourceTrigger=PropertyChanged}" 
+                                                          IsEnabled="{Binding Xem}"/>
+                                                                        <CheckBox Content="Hiển thị" 
+                                                          IsChecked="{Binding HienThi, UpdateSourceTrigger=PropertyChanged}" 
+                                                          IsEnabled="{Binding Xem}"/>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
 
-                                                <CheckBox Content="Xóa" Margin="0,0,15,0" 
-                                                         IsChecked="{Binding Xoa, UpdateSourceTrigger=PropertyChanged}"
-                                                         IsEnabled="{Binding Xem}"/>
-
-                                                <CheckBox Content="Hiển thị"
-                                                         IsChecked="{Binding HienThi, UpdateSourceTrigger=PropertyChanged}"
-                                                         IsEnabled="{Binding Xem}"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
+                                            </Expander>
+                                        </StackPanel>
+                                    </materialDesign:Card>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
                     </ScrollViewer>
+
                 </DockPanel>
             </materialDesign:Card>
         </Grid>
