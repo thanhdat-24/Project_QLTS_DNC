@@ -53,9 +53,9 @@
                         Loại Tài Khoản
                     </TextBlock>
 
-                    <Button DockPanel.Dock="Bottom" Style="{StaticResource MaterialDesignRaisedButton}" 
+                    <Button x:Name="btnThemLoaiTK" DockPanel.Dock="Bottom" Style="{StaticResource MaterialDesignRaisedButton}" 
                             Margin="0,16,0,0" Content="Thêm Loại Tài Khoản" 
-                            materialDesign:ButtonAssist.CornerRadius="5"/>
+                            materialDesign:ButtonAssist.CornerRadius="5" Click="btnThemLoaiTK_Click"/>
 
                     <ListView x:Name="AccountTypeListView"
                           ItemsSource="{Binding DanhSachLoaiTaiKhoan}"

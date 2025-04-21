@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Project_QLTS_DNC.ViewModels.TaiKhoan
 {
@@ -14,7 +15,7 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
         private ObservableCollection<LoaiTaiKhoanModel> _danhSachLoaiTaiKhoan;
         private LoaiTaiKhoanModel _loaiTaiKhoanDuocChon;
         private readonly LoaiTaiKhoanService _service = new LoaiTaiKhoanService();
-
+        public ICommand TimKiemCommand { get; }
         public ObservableCollection<LoaiTaiKhoanModel> DanhSachLoaiTaiKhoan
         {
             get => _danhSachLoaiTaiKhoan;
@@ -27,8 +28,68 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
             set { _loaiTaiKhoanDuocChon = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Tìm kiếm
+        /// </summary>
+        private string _tuKhoa;
+        public string TuKhoa
+        {
+            get => _tuKhoa;
+            set
+            {
+                _tuKhoa = value;
+                OnPropertyChanged();
+                TimKiem(); 
+            }
+        }
+        public void TimKiem()
+        {
+            if (_danhSachGoc == null) return;
+
+            var keyword = TuKhoa?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(keyword))
+            {
+                DanhSachLoaiTaiKhoan = new ObservableCollection<LoaiTaiKhoanModel>(_danhSachGoc);
+                return;
+            }
+
+            var ketQua = _danhSachGoc.Where(x =>
+                x.MaLoaiTk.ToString().Contains(keyword) || // ← thêm dòng này
+                x.TenLoaiTk.ToLower().Contains(keyword) ||
+                (!string.IsNullOrEmpty(x.MoTa) && x.MoTa.ToLower().Contains(keyword))
+            ).ToList();
+
+            DanhSachLoaiTaiKhoan = new ObservableCollection<LoaiTaiKhoanModel>(ketQua);
+        }
+
+
+        private List<LoaiTaiKhoanModel> _danhSachGoc = new();
+
+
+        private LoaiTaiKhoanModel _loaiTaiKhoanFilter;
+        public LoaiTaiKhoanModel LoaiTaiKhoanFilter
+        {
+            get => _loaiTaiKhoanFilter;
+            set
+            {
+                _loaiTaiKhoanFilter = value;
+                OnPropertyChanged();
+                TimKiem(); // gọi lại tìm kiếm khi chọn loại mới
+            }
+        }
+
+
+        /// <summary>
+        /// Load data
+        /// </summary>
         public LoaiTaiKhoanViewModel()
         {
+            TimKiemCommand = new RelayCommand<string>(TuKhoaTimKiem =>
+            {
+                TuKhoa = TuKhoaTimKiem;
+                TimKiem();
+            });
             _ = LoadDataAsync();
         }
 
@@ -45,9 +106,10 @@ namespace Project_QLTS_DNC.ViewModels.TaiKhoan
 
         public async Task LoadDataAsync()
         {
-            var list = await _service.LayDSLoaiTK();
-            DanhSachLoaiTaiKhoan = new ObservableCollection<LoaiTaiKhoanModel>(list);
+            _danhSachGoc = await _service.LayDSLoaiTK();
+            DanhSachLoaiTaiKhoan = new ObservableCollection<LoaiTaiKhoanModel>(_danhSachGoc);
         }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 

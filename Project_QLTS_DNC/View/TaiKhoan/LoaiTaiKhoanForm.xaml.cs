@@ -29,8 +29,10 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         }
         public async Task LoadDanhSachLoaiTaiKhoan()
         {
-            List<LoaiTaiKhoanModel> danhSach = await _loaiTaiKhoanService.LayDSLoaiTK();
-            dgLoaiTaiKhoan.ItemsSource = danhSach;
+            //List<LoaiTaiKhoanModel> danhSach = await _loaiTaiKhoanService.LayDSLoaiTK();
+            //dgLoaiTaiKhoan.ItemsSource = danhSach;
+            await _viewModel.LoadDataAsync(); // ✅ sử dụng viewmodel
+
         }
         private void btnThem_Click(object sender, RoutedEventArgs e)
         {
@@ -95,5 +97,15 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                 MessageBox.Show("Lỗi: " + ex.Message);
             }
         }
+
+        private void btnTimKiem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is LoaiTaiKhoanViewModel vm)
+            {
+                var keyword = txtTimKiem.Text;
+                vm.TuKhoa = keyword; // TuKhoa đã gọi TimKiem() luôn rồi
+            }
+        }
+
     }
 }
