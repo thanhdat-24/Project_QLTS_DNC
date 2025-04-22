@@ -234,43 +234,52 @@ namespace Project_QLTS_DNC
             {
                 // 1. Lấy toàn bộ danh sách tài sản
                 var allAssets = await TaiSanService.LayDanhSachTaiSanAsync();
-
                 // 2. Lấy danh sách phiếu bảo trì để đếm tài sản đã được bảo trì
                 var danhSachPhieu = await new PhieuBaoTriService().GetPhieuBaoTriAsync();
                 int total = allAssets.Count;
-
                 // Đếm tài sản "Đang bảo trì" từ danh sách phiếu bảo trì
                 int daBaoTri = danhSachPhieu
                     .Where(p => p.MaTaiSan.HasValue)
                     .Select(p => p.MaTaiSan.Value)
                     .Distinct()
                     .Count();
+                // Đếm số tài sản tồn kho - tức là tài sản có MaPhong là null
+                int inStock = allAssets.Count(asset => asset.MaPhong == null);
 
-                // Tính số tài sản "Đang dùng" bằng tổng tài sản trừ đi số tài sản "Đang bảo trì"
-                int inUse = total - daBaoTri;
-                //Gán giá trị lên các TextBlock thống kê
+                // Kiểm tra nếu daBaoTri + inStock > total
+                int inUse;
+                if (daBaoTri + inStock > total)
+                {
+                    inUse = 0; // Mặc định tài sản đang sử dụng = 0
+                }
+                else
+                {
+                    // Tính số tài sản "Đang dùng" bằng tổng tài sản trừ đi số tài sản "Đang bảo trì" và tài sản tồn kho
+                    inUse = total - daBaoTri - inStock;
+                }
+
+                // Gán giá trị lên các TextBlock thống kê
                 txtTong.Text = total.ToString();
                 txtDangDung.Text = inUse.ToString();
                 txtBaoTri.Text = daBaoTri.ToString();
-                // 3. Vẽ biểu đồ (loại bỏ cột "Bảo trì")
+                txtTonKho.Text = inStock.ToString();
+                // 3. Vẽ biểu đồ
                 assetChart.Series = new SeriesCollection
         {
             new ColumnSeries
             {
                 Title = "Số lượng",
-                Values = new ChartValues<int> { total, inUse, daBaoTri },
+                Values = new ChartValues<int> { total, inUse, daBaoTri, inStock },
                 Fill = new SolidColorBrush(Color.FromRgb(0x4D, 0x90, 0xFE))
             }
         };
-
-                // 4. Cấu hình trục X (loại bỏ "Bảo trì")
+                // 4. Cấu hình trục X
                 assetChart.AxisX.Clear();
                 assetChart.AxisX.Add(new Axis
                 {
-                    Labels = new[] { "Tổng TS", "Đang sử dụng", "Bảo trì" },
+                    Labels = new[] { "Tổng TS", "Đang sử dụng", "Bảo trì", "Tồn kho" },
                     Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false }
                 });
-
                 // 5. Cấu hình trục Y
                 assetChart.AxisY.Clear();
                 assetChart.AxisY.Add(new Axis
@@ -278,7 +287,6 @@ namespace Project_QLTS_DNC
                     Title = "Số lượng",
                     LabelFormatter = value => value.ToString()
                 });
-
                 assetChart.LegendLocation = LegendLocation.Bottom;
             }
             catch (System.Exception ex)
@@ -286,6 +294,9 @@ namespace Project_QLTS_DNC
                 MessageBox.Show("Lỗi khi tải biểu đồ: " + ex.Message);
             }
         }
+
+
+
 
         public void UpdateLogo(string logoPath)
         {
