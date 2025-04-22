@@ -390,6 +390,10 @@
                                                                 <Setter Property="Foreground" Value="#FF9800"/>
                                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                             </DataTrigger>
+                                                            <DataTrigger Binding="{Binding TinhTrang}" Value="Hư hỏng">
+                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </DataGridTextColumn.ElementStyle>

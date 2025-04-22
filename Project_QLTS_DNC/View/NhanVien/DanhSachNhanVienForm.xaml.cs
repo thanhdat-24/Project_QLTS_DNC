@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services;
@@ -39,6 +40,12 @@ namespace Project_QLTS_DNC.View.NhanVien
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem danh sách nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 var nhanVienService = new NhanVienService();
                 var danhSachNhanVien = await nhanVienService.LayTatCaNhanVienDtoAsync();
 
@@ -63,7 +70,11 @@ namespace Project_QLTS_DNC.View.NhanVien
 
         private async void btnThemNhanVien_Click(object sender, RoutedEventArgs e)
         {
-            
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var themNhanVienWindow = new ThemNhanVienForm(this);
             themNhanVienWindow.ShowDialog();
            
@@ -76,6 +87,11 @@ namespace Project_QLTS_DNC.View.NhanVien
 
         private void btnSua_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (dvDanhSachNhanVien.SelectedItem != null)
             {
                 var selectedDto = dvDanhSachNhanVien.SelectedItem as NhanVienDto;
@@ -115,6 +131,11 @@ namespace Project_QLTS_DNC.View.NhanVien
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "xoa"))
+                {
+                    MessageBox.Show("Bạn không có quyền xóa nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 if (dvDanhSachNhanVien.SelectedItem != null)
                 {
                     var selectedDto = dvDanhSachNhanVien.SelectedItem as NhanVienDto;

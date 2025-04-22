@@ -95,18 +95,24 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     var khoDictionary = resultKho.Models.ToDictionary(k => k.MaKho, k => k.TenKho);
 
                     // Kết hợp dữ liệu từ TonKho và Kho bằng cách sử dụng dictionary
-                    var tonKhoList = resultTonKho.Models.Select(item => new TonKhoWithTenKho
-                    {
-                        MaTonKho = item.MaTonKho,
-                        MaKho = item.MaKho,
-                        MaNhomTS = item.MaNhomTS,
-                        SoLuongNhap = item.SoLuongNhap,
-                        SoLuongXuat = item.SoLuongXuat,
-                        SoLuongTon = item.SoLuongTon,
-                        NgayCapNhat = item.NgayCapNhat,
-                        // Lấy tên kho từ dictionary
-                        TenKho = khoDictionary.ContainsKey(item.MaKho) ? khoDictionary[item.MaKho] : "Không có tên kho",
-                    }).ToList();
+                    var tonKhoList = resultTonKho.Models
+                        .GroupBy(item => item.MaKho) // Nhóm theo MaKho để loại bỏ trùng
+                        .Select(group =>
+                        {
+                            var firstItem = group.First();
+                            return new TonKhoWithTenKho
+                            {
+                                MaTonKho = firstItem.MaTonKho,
+                                MaKho = firstItem.MaKho,
+                                TenKho = khoDictionary.ContainsKey(firstItem.MaKho) ? khoDictionary[firstItem.MaKho] : "Không có tên kho",
+                                SoLuongTon = firstItem.SoLuongTon,
+                                NgayCapNhat = firstItem.NgayCapNhat,
+                                MaNhomTS = firstItem.MaNhomTS,
+                                SoLuongNhap = firstItem.SoLuongNhap,
+                                SoLuongXuat = firstItem.SoLuongXuat
+                            };
+                        })
+                        .ToList();
 
                     // Gán dữ liệu vào ComboBox
                     cboMaKho.ItemsSource = tonKhoList;

@@ -14,7 +14,6 @@ using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Models.PhieuNhapKho;
 using Project_QLTS_DNC.Services;
-using static Supabase.Postgrest.Constants;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.View.QuanLyToanNha;
 using System.Windows;
@@ -26,6 +25,7 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
         /// <summary>
         /// Lấy danh sách phiếu bàn giao tài sản từ Supabase
         /// </summary>
+        // Cập nhật phương thức trong BanGiaoTaiSanService.cs
         public static async Task<ObservableCollection<BanGiaoTaiSanDTO>> LayDanhSachPhieuBanGiaoAsync()
         {
             try
@@ -52,6 +52,10 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                 var toaNhaResponse = await client.From<ToaNha>().Get();
                 var dsToaNha = toaNhaResponse.Models.ToList();
 
+                // Lấy danh sách kho
+                var khoResponse = await client.From<Kho>().Get();
+                var dsKho = khoResponse.Models.ToList();
+
                 // Chuyển đổi từ model sang DTO
                 var dsBanGiaoDTO = new ObservableCollection<BanGiaoTaiSanDTO>();
 
@@ -65,8 +69,17 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                         TenNV = dsNhanVien.FirstOrDefault(nv => nv.MaNV == bangiao.MaNV)?.TenNV ?? $"#{bangiao.MaNV}",
                         MaPhong = bangiao.MaPhong,
                         NoiDung = bangiao.NoiDung,
-                        TrangThai = bangiao.TrangThai
+                        TrangThai = bangiao.TrangThai,
+                        CbTiepNhan = bangiao.CbTiepNhan,
+                        MaKho = bangiao.MaKho // Thêm mã kho
                     };
+
+                    // Thêm thông tin kho
+                    var kho = dsKho.FirstOrDefault(k => k.MaKho == bangiao.MaKho);
+                    if (kho != null)
+                    {
+                        banGiaoDTO.TenKho = kho.TenKho;
+                    }
 
                     // Thêm thông tin phòng và tòa nhà nếu có
                     if (bangiao.MaPhong.HasValue)
@@ -775,6 +788,144 @@ namespace Project_QLTS_DNC.Services.BanGiaoTaiSanService
                 System.Diagnostics.Debug.WriteLine($"Lỗi khi kiểm tra sức chứa: {ex.Message}");
                 MessageBox.Show($"Lỗi khi kiểm tra sức chứa: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Lấy danh sách vị trí đã sử dụng của nhóm tài sản trong phòng
+        /// </summary>
+        public static async Task<Dictionary<int, List<int>>> LayDanhSachViTriDaSuDungAsync(int maPhong, List<int> dsNhomTS)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                var result = new Dictionary<int, List<int>>();
+
+                // Khởi tạo dictionary với danh sách trống cho mỗi nhóm
+                foreach (var maNhomTS in dsNhomTS)
+                {
+                    result[maNhomTS] = new List<int>();
+                }
+
+                // Lấy danh sách tài sản trong phòng
+                var taiSanResponse = await client.From<TaiSanModel>()
+                    .Filter("ma_phong", Supabase.Postgrest.Constants.Operator.Equals, maPhong)
+                    .Get();
+                var dsTaiSan = taiSanResponse.Models.ToList();
+
+                if (dsTaiSan.Count > 0)
+                {
+                    // Lấy thông tin chi tiết phiếu nhập để biết mã nhóm tài sản
+                    var chiTietPNResponse = await client.From<ChiTietPhieuNhap>().Get();
+                    var dsChiTietPN = chiTietPNResponse.Models.ToList();
+
+                    // Lấy thông tin chi tiết bàn giao để biết vị trí tài sản
+                    var chiTietBGResponse = await client.From<ChiTietBanGiaoModel>().Get();
+                    var dsChiTietBG = chiTietBGResponse.Models.ToList();
+
+                    foreach (var taiSan in dsTaiSan)
+                    {
+                        if (taiSan.MaChiTietPN.HasValue)
+                        {
+                            var chiTietPN = dsChiTietPN.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
+                            if (chiTietPN != null && dsNhomTS.Contains(chiTietPN.MaNhomTS))
+                            {
+                                // Tìm vị trí của tài sản trong chi tiết bàn giao
+                                var chiTietBG = dsChiTietBG.FirstOrDefault(ct => ct.MaTaiSan == taiSan.MaTaiSan);
+                                if (chiTietBG != null)
+                                {
+                                    // Thêm vị trí vào danh sách đã sử dụng của nhóm
+                                    if (!result[chiTietPN.MaNhomTS].Contains(chiTietBG.ViTriTS))
+                                    {
+                                        result[chiTietPN.MaNhomTS].Add(chiTietBG.ViTriTS);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy danh sách vị trí đã sử dụng: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Lấy thông tin sức chứa tối đa của các nhóm tài sản trong phòng
+        /// </summary>
+        public static async Task<Dictionary<int, int>> LaySucChuaToiDaPhongAsync(int maPhong, List<int> dsNhomTS)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                var result = new Dictionary<int, int>();
+
+                // Lấy thông tin sức chứa từ bảng suc_chua_phong_nhom
+                var sucChuaResponse = await client.From<PhongNhomTS>()
+                    .Filter("ma_phong", Supabase.Postgrest.Constants.Operator.Equals, maPhong)
+                    .Filter("ma_nhom_ts", Supabase.Postgrest.Constants.Operator.In, dsNhomTS)
+                    .Get();
+
+                var dsSucChua = sucChuaResponse.Models.ToList();
+
+                // Đưa thông tin vào dictionary
+                foreach (var sucChua in dsSucChua)
+                {
+                    result[sucChua.MaNhomTS] = sucChua.SucChua;
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy sức chứa tối đa: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tạo danh sách vị trí khả dụng cho nhóm tài sản trong phòng
+        /// </summary>
+        public static async Task<Dictionary<int, List<int>>> TaoDanhSachViTriKhaDungAsync(int maPhong, List<int> dsNhomTS)
+        {
+            try
+            {
+                // Lấy thông tin vị trí đã sử dụng
+                var dsViTriDaSuDung = await LayDanhSachViTriDaSuDungAsync(maPhong, dsNhomTS);
+
+                // Lấy thông tin sức chứa tối đa
+                var dsSucChuaToiDa = await LaySucChuaToiDaPhongAsync(maPhong, dsNhomTS);
+
+                var result = new Dictionary<int, List<int>>();
+
+                // Tạo danh sách vị trí khả dụng cho mỗi nhóm
+                foreach (var maNhomTS in dsNhomTS)
+                {
+                    var danhSachViTri = new List<int>();
+
+                    // Nếu có thông tin sức chứa cho nhóm này
+                    if (dsSucChuaToiDa.TryGetValue(maNhomTS, out int sucChuaToiDa))
+                    {
+                        // Tạo danh sách từ 1 đến sức chứa tối đa
+                        for (int i = 1; i <= sucChuaToiDa; i++)
+                        {
+                            danhSachViTri.Add(i);
+                        }
+                    }
+
+                    result[maNhomTS] = danhSachViTri;
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi tạo danh sách vị trí khả dụng: {ex.Message}");
+                throw;
             }
         }
     }

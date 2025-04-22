@@ -5,8 +5,8 @@ using System.Text.Json.Serialization;
 [Table("phieudenghimua")]
 public class MuaMoiTS : BaseModel
 {
-    [PrimaryKey("ma_phieu_denghi", false)]
-    [Column("ma_phieu_denghi")]
+    [PrimaryKey("ma_phieu_de_nghi", false)]
+    [Column("ma_phieu_de_nghi")]
     public int MaPhieuDeNghi { get; set; }
 
     [Column("ngay_denghi")]

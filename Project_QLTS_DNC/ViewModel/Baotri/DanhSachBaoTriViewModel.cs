@@ -296,7 +296,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                                 item.TenTaiSan = taiSan.TenTaiSan;
 
                                 // Quan trọng: Cập nhật mã nhóm tài sản từ tài sản
-                                item.MaNhomTS = taiSan.MaNhomTS;
+                                //item.MaNhomTS = taiSan.MaNhomTS;
 
                                 // Tìm tên nhóm tài sản nếu có
                                 if (DsNhomTaiSan != null && item.MaNhomTS.HasValue)
