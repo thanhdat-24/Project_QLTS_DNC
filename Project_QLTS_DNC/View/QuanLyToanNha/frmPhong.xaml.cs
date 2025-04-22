@@ -139,6 +139,16 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
             }
         }
 
+        private void btnChiTiet_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int maPhong)
+            {
+                var form = new suc_chua_phong_nhom(maPhong);
+                form.ShowDialog();
+            }
+        }
+
+
         private async void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
         {
             txtSearch.Text = "";

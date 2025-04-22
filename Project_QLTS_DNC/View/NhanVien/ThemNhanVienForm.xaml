@@ -12,9 +12,15 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="Thêm Nhân Viên" Height="630" Width="800"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" Icon="/Resources/Icon/add-group (1).png">
 
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25*"/>
+            <ColumnDefinition Width="41*"/>
+            <ColumnDefinition Width="118*"/>
+            <ColumnDefinition Width="616*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,7 +28,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16" CornerRadius="0" Background="#0078D7">
+        <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" CornerRadius="0" Background="#0078D7" Grid.ColumnSpan="4" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="AccountPlus" Height="26" Width="26" Foreground="White" Margin="0,0,10,0"/>
                 <TextBlock x:Name="txtTieude" VerticalAlignment="Center" Text="THÊM NHÂN VIÊN MỚI" FontSize="18" FontWeight="Bold" Foreground="White"/>
@@ -30,7 +36,7 @@
         </materialDesign:ColorZone>
 
         <!-- Content - Organized with StackPanel -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Grid.ColumnSpan="4">
             <StackPanel Margin="30,20,30,20">
                 <!-- Two columns layout using Grid -->
                 <Grid>
@@ -62,7 +68,7 @@
                                   FontSize="14"
                                   Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                   Height="50"
-                                  Margin="0,0,0,20"/>   
+                                  Margin="0,0,0,20"/>
 
                         <!-- Chức Vụ -->
                         <TextBlock Text="Chức Vụ:" Margin="0,0,0,5" 
@@ -138,16 +144,22 @@
         </ScrollViewer>
 
         <!-- Action Buttons -->
-        <Grid Grid.Row="2" Margin="30,10,30,20">
+        <Grid Grid.Row="2" Margin="5,10,30,20" Grid.ColumnSpan="3" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1" x:Name="btnHuy" Content="HỦY" Margin="0,0,15,0" Width="120" Height="45"
+            <Button Grid.Column="1" x:Name="btnHuy"  Margin="0,0,15,0" Width="120" Height="45"
                     Style="{StaticResource MaterialDesignOutlinedButton}"
-                    FontSize="14" FontWeight="Medium"/>
+                    FontSize="14" FontWeight="Medium" Click="btnHuy_Click">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Close" Width="20" Height="20" Margin="0,0,8,0"/>
+                    <TextBlock Text="HỦY" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
 
             <Button Grid.Column="2" x:Name="btnLuu" Width="120" Height="45"
                     Style="{StaticResource MaterialDesignRaisedLightButton}"

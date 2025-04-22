@@ -7,14 +7,16 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
 using System.IO;
+using System.Windows.Data;
+using System.Windows.Data;
 using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.BaoTri;
 using Project_QLTS_DNC.ViewModel.Baotri;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using ClosedXML.Excel;
 using Project_QLTS_DNC.Services;
-using System.Windows.Data;
-using Project_QLTS_DNC.Models.BaoTri;
+using KiemKeTaiSanModel = Project_QLTS_DNC.Models.KiemKe.KiemKeTaiSanModel;
 
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu

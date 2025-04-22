@@ -1,4 +1,5 @@
-﻿using Supabase.Postgrest.Attributes;
+﻿using Project_QLTS_DNC.Models.TaiKhoan;
+using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace Project_QLTS_DNC.Models
@@ -25,5 +26,9 @@ namespace Project_QLTS_DNC.Models
         public string Uid { get; set; }
         [Column("trang_thai")]
         public bool TrangThai { get; set; } = true;
+
+        //[System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        //public LoaiTaiKhoanModel LoaiTaiKhoan { get; set; }
+
     }
 }

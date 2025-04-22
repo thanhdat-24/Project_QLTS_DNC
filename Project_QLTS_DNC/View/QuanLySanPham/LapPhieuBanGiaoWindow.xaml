@@ -7,7 +7,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Lập Phiếu Bàn Giao Tài Sản" 
-        Width="800" Height="600"
+        Width="800" Height="700"
         WindowStartupLocation="CenterScreen"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -44,6 +44,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -108,8 +109,15 @@
                                 Style="{StaticResource MaterialDesignOutlinedDatePicker}"
                                 Margin="8"/>
 
+                    <!-- Người tiếp nhận -->
+                    <TextBox Grid.Row="3" Grid.Column="0" 
+                             x:Name="txtNguoiTiepNhan" 
+                             materialDesign:HintAssist.Hint="Người tiếp nhận"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Margin="8"/>
+
                     <!-- Nội dung -->
-                    <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                    <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
                              x:Name="txtNoiDung" 
                              materialDesign:HintAssist.Hint="Nội dung bàn giao"
                              Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -134,14 +142,15 @@
                                Foreground="{DynamicResource PrimaryHueMidBrush}"/>
 
                     <DataGrid Grid.Row="1" 
-                              x:Name="dgTaiSanKho" 
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              materialDesign:DataGridAssist.CellPadding="8"
-                              BorderThickness="1"
-                              SelectionMode="Extended"
-                              SelectionUnit="FullRow"
-                              IsReadOnly="False">
+          x:Name="dgTaiSanKho" 
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          materialDesign:DataGridAssist.CellPadding="8"
+          BorderThickness="1"
+          SelectionMode="Extended"
+          SelectionUnit="FullRow"
+          IsReadOnly="False"
+          SelectionChanged="dgTaiSanKho_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn Header="Chọn" 
                                                     Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
@@ -169,15 +178,21 @@
                                                 IsReadOnly="True"
                                                 Width="150"/>
 
-                            <DataGridTemplateColumn Header="Vị trí" Width="100">
+                            <DataGridTemplateColumn Header="Vị trí" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBox Text="{Binding ViTriTS, UpdateSourceTrigger=PropertyChanged}" 
-                                                 PreviewTextInput="txtViTri_PreviewTextInput"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 Width="50"
-                                                 materialDesign:HintAssist.Hint="Vị trí"/>
+                                        <ComboBox x:Name="cboViTri"
+          ItemsSource="{Binding ViTriList}"
+          SelectedIndex="0"
+          Width="100"
+          Loaded="cboViTri_Loaded"
+          SelectionChanged="cboViTri_SelectionChanged">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding HienThi}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

@@ -99,7 +99,7 @@
 
                 <!-- Search TextBox with Material Design -->
                 <TextBox x:Name="txtTimKiem" Grid.Column="1" 
-                         materialDesign:HintAssist.Hint="Tìm theo mã, tên tài khoản hoặc tên nhân viên..."
+                         materialDesign:HintAssist.Hint="Tìm theo mã, tên loại tài khoản ..."
                          Style="{StaticResource MaterialDesignTextBox}"
                          VerticalAlignment="Center" Margin="0,0,20,0">
                     <TextBox.InputBindings>
@@ -107,26 +107,30 @@
                     </TextBox.InputBindings>
                 </TextBox>
 
-                <!-- Loại tài khoản Filter Label -->
+                <!-- Loại tài khoản Filter Label 
                 <TextBlock Grid.Column="2" Text="Loại tài khoản:" VerticalAlignment="Center" Margin="0,0,5,0" 
                           FontSize="14" FontWeight="Medium" Foreground="#424242"/>
 
-                <!-- Loại tài khoản ComboBox with Material Design -->
-                <ComboBox x:Name="cboLoaiTaiKhoan" Grid.Column="3" Width="180" Margin="0,0,50,0"
-                          materialDesign:HintAssist.Hint="Chọn loại tài khoản"
+                 Loại tài khoản ComboBox with Material Design
+                <ComboBox x:Name="cboLoaiTaiKhoan"
+                          Grid.Column="3"
+                          Width="180"
+                          Margin="0,0,50,0"
+                          ItemsSource="{Binding DanhSachLoaiTaiKhoan}"
+                          SelectedItem="{Binding LoaiTaiKhoanFilter, Mode=TwoWay}"
+                          DisplayMemberPath="TenLoaiTk"
+                          materialDesign:HintAssist.Hint="Loại tài khoản"
                           Style="{StaticResource MaterialDesignComboBox}"
-                          BorderThickness="0,0,0,1">
-                    <ComboBoxItem Content="Tất cả" IsSelected="True"/>
-                    <ComboBoxItem Content="Admin"/>
-                    <ComboBoxItem Content="User"/>
-                </ComboBox>
+                          BorderThickness="0,0,0,1" />
+                -->
+
 
                 <!-- Search Button with Material Design -->
                 <Button x:Name="btnTimKiem" Grid.Column="4" Style="{StaticResource MaterialDesignRaisedButton}"
                         Background="#3F51B5" Foreground="White" 
                         materialDesign:ButtonAssist.CornerRadius="4"
                         Height="36" Width="120"
-                        Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}">
+                        Command="{Binding TimKiemCommand}" CommandParameter="{Binding Text, ElementName=txtTimKiem}" Click="btnTimKiem_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Foreground="White" Margin="0,0,8,0"/>
                         <TextBlock Text="Tìm kiếm" VerticalAlignment="Center" FontWeight="SemiBold"/>

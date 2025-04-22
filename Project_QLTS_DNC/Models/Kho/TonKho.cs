@@ -44,9 +44,21 @@ public class TonKho : BaseModel
 
     [JsonIgnore]
     public string? TenNhomTS { get; set; }
+       
 
+    }
 
+    [Table("tonkho")]
+    public class TonKhoUpdateDTO : BaseModel
+    {
+        [PrimaryKey("ma_ton_kho", false)]
+        public int MaTonKho { get; set; }
 
+        [Column("so_luong_xuat")]
+        public int SoLuongXuat { get; set; }
+
+        [Column("ngay_cap_nhat")]
+        public DateTime NgayCapNhat { get; set; }
     }
 
 

@@ -57,7 +57,14 @@
                                 <TextBlock x:Name="txtBaoTri" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Border>
-                        
+                        <!-- Thêm thẻ thống kê Tồn kho -->
+                        <Border Background="#42A5F5" Padding="20" CornerRadius="10"
+                            Margin="10" Width="200">
+                            <StackPanel>
+                                <TextBlock Text="Tài sản tồn kho" FontSize="14" Foreground="White"/>
+                                <TextBlock x:Name="txtTonKho" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </StackPanel>

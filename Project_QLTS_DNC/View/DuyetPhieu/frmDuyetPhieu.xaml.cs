@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using static Supabase.Postgrest.Constants;
 using Project_QLTS_DNC.Models.BanGiaoTaiSan;
+using Project_QLTS_DNC.View.DuyetPhieu.InPhieu;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu
 {
@@ -24,20 +25,14 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         public frmDuyetPhieu()
         {
             InitializeComponent();
-            
-            // Đảm bảo ComboBox có lựa chọn mặc định là "Tất cả"
-            if (cboLoaiPhieu != null && cboLoaiPhieu.Items.Count > 0)
-            {
-                cboLoaiPhieu.SelectedIndex = 0;
-            }
-            _ = LocDuLieuTheoLoaiVaNgay(); // Load dữ liệu tất cả phiếu ban đầu
-
-            LoadThongKePhieu();
+            Loaded += dgPhieuCanDuyet_Loaded;
         }
 
         private async void dgPhieuCanDuyet_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadDuLieuTongHopPhieuAsync();
+            cboLoaiPhieu.SelectedIndex = 0; // đảm bảo là "Tất cả"
+            await LocDuLieuTheoLoaiVaNgay();
+            LoadThongKePhieu();
         }
 
         private async Task LoadDuLieuTongHopPhieuAsync()
@@ -90,9 +85,13 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                         try
                         {
                             var pdn = await client.From<denghimua>().Filter("ma_phieu_de_nghi", Operator.Equals, item.MaPhieuDeNghiMua.Value).Single();
-                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PDN{pdn.MaPhieuDeNghi}",
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet
+                            {
+                                MaPhieu = $"PDN{pdn.MaPhieuDeNghi}",
                                 NgayTaoPhieu = pdn.NgayDeNghiMua ?? DateTime.MinValue,
-                                TrangThaiBool = pdn.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
+                                TrangThaiBool = pdn.TrangThai,
+                                LoaiPhieu = "Phiếu đề nghị mua"
+                            });
                         }
                         catch (Exception ex)
                         {
@@ -142,7 +141,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         {
 
             if (isLoadingData) return;
-            
+
             // Kiểm tra ComboBox đã được khởi tạo chưa
             if (cboLoaiPhieu == null)
             {
@@ -155,7 +154,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 SetLoadingState(true);
 
                 var client = await SupabaseService.GetClientAsync();
-                
+
                 // Lấy giá trị từ ComboBox an toàn hơn
                 string loaiPhieu = "Tất cả"; // Giá trị mặc định
                 ComboBoxItem selectedItem = cboLoaiPhieu.SelectedItem as ComboBoxItem;
@@ -258,7 +257,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 );
 
                 DanhSachTatCaPhieu = sortedList;
-                
+
                 // Kiểm tra DataGrid đã được khởi tạo chưa
                 if (dgPhieuCanDuyet != null)
                 {
@@ -338,133 +337,74 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             btnXemChiTiet_Click(sender, e);
         }
 
-        private void btnXemChiTiet_Click(object sender, RoutedEventArgs e)
+        private async void btnXemChiTiet_Click(object sender, RoutedEventArgs e)
         {
-            if (dgPhieuCanDuyet?.SelectedItem is PhieuCanDuyet selected)
+            if (dgPhieuCanDuyet?.SelectedItem is not PhieuCanDuyet selected)
             {
-                // ✅ Phiếu nhập
-                if (selected.MaPhieu.StartsWith("PN") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
-                {
-                    var frm = new frmXemChiTietNhap();
-                    frm.LoadTheoMaPhieu(maPhieuNhap);
-                    frm.OnPhieuDuyetThanhCong += async () =>
-                    {
-                        await LoadDuLieuTongHopPhieuAsync();
-                        LoadThongKePhieu();
-                    };
+                MessageBox.Show("Vui lòng chọn một phiếu để xem chi tiết.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
-                    Window window = new Window
-                    {
-                        Title = $"Chi tiết phiếu nhập - {selected.MaPhieu}",
-                        Content = frm,
-                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                        Width = 1200,
-                        Height = 800,
-                        ResizeMode = ResizeMode.CanResize
-                    };
-                    window.ShowDialog();
-                }
-                // ✅ Phiếu báo hỏng
-                else if (selected.MaPhieu.StartsWith("PBH") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuBaoHong))
-                {
-                    var frm = new frmXemChiTietBaoHong();
-                    frm.LoadTheoMaPhieu(maPhieuBaoHong);
-                    frm.OnPhieuDuyetThanhCong += async () =>
-                    {
-                        await LoadDuLieuTongHopPhieuAsync();
-                        LoadThongKePhieu();
-                    };
+            bool daDuyetHoacTuChoi = false;
+            Window window = null;
 
-                    Window window = new Window
-                    {
-                        Title = $"Chi tiết phiếu báo hỏng - {selected.MaPhieu}",
-                        Content = frm,
-                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                        Width = 1000,
-                        Height = 700,
-                        ResizeMode = ResizeMode.CanResize
-                    };
-                    window.ShowDialog();
-                }
-                // ✅ Phiếu đề nghị mua
-                else if (selected.MaPhieu.StartsWith("PDN") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuDeNghi))
-                {
-                    var frm = new frmXemChiTietDeNghiMua();
-                    frm.LoadTheoMaPhieu(maPhieuDeNghi);
-                    frm.OnPhieuDuyetThanhCong += async () =>
-                    {
-                        await LoadDuLieuTongHopPhieuAsync();
-                        LoadThongKePhieu();
-                    };
+            if (selected.MaPhieu.StartsWith("PN") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
+            {
+                var frm = new frmXemChiTietNhap();
+                frm.LoadTheoMaPhieu(maPhieuNhap);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
 
-                    Window window = new Window
-                    {
-                        Title = $"Chi tiết phiếu đề nghị mua - {selected.MaPhieu}",
-                        Content = frm,
-                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                        Width = 1100,
-                        Height = 750,
-                        ResizeMode = ResizeMode.CanResize
-                    };
-                    window.ShowDialog();
-                }
-                // ✅ Phiếu xuất
-                else if (selected.MaPhieu.StartsWith("PX") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuXuat))
-                {
-                    var frm = new frmXemChiTietXuat();
-                    frm.LoadTheoMaPhieu(maPhieuXuat);
-                    frm.OnPhieuDuyetThanhCong += async () =>
-                    {
-                        await LoadDuLieuTongHopPhieuAsync();
-                        LoadThongKePhieu();
-                    };
+                window = new Window { Title = $"Chi tiết phiếu nhập - {selected.MaPhieu}", Content = frm, Width = 1200, Height = 800 };
+            }
+            else if (selected.MaPhieu.StartsWith("PBH") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuBaoHong))
+            {
+                var frm = new frmXemChiTietBaoHong();
+                frm.LoadTheoMaPhieu(maPhieuBaoHong);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
 
-                    Window window = new Window
-                    {
-                        Title = $"Chi tiết phiếu xuất - {selected.MaPhieu}",
-                        Content = frm,
-                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                        Width = 1100,
-                        Height = 750,
-                        ResizeMode = ResizeMode.CanResize
-                    };
-                    window.ShowDialog();
-                }
-                // ✅ Phiếu bàn giao tài sản
-                else if (selected.MaPhieu.StartsWith("BG") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuBanGiao))
-                {
-                    var frm = new frmXemChiTietBanGiao((int)maPhieuBanGiao);
-                    frm.OnPhieuDuyetThanhCong += async () =>
-                    {
-                        await LoadDuLieuTongHopPhieuAsync();
-                        LoadThongKePhieu();
-                    };
+                window = new Window { Title = $"Chi tiết phiếu báo hỏng - {selected.MaPhieu}", Content = frm, Width = 1000, Height = 700 };
+            }
+            else if (selected.MaPhieu.StartsWith("PDN") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuDeNghi))
+            {
+                var frm = new frmXemChiTietDeNghiMua();
+                frm.LoadTheoMaPhieu(maPhieuDeNghi);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
 
-                    Window window = new Window
-                    {
-                        Title = $"Chi tiết phiếu bàn giao - {selected.MaPhieu}",
-                        Content = frm,
-                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                        Width = 1100,
-                        Height = 750,
-                        ResizeMode = ResizeMode.CanResize
-                    };
-                    window.ShowDialog();
-                }
-                else
-                {
-                    MessageBox.Show($"Chức năng xem chi tiết đang được phát triển cho loại phiếu: {selected.LoaiPhieu}",
-                        "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                window = new Window { Title = $"Chi tiết phiếu đề nghị mua - {selected.MaPhieu}", Content = frm, Width = 1100, Height = 750 };
+            }
+            else if (selected.MaPhieu.StartsWith("PX") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuXuat))
+            {
+                var frm = new frmXemChiTietXuat();
+                frm.LoadTheoMaPhieu(maPhieuXuat);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
+
+                window = new Window { Title = $"Chi tiết phiếu xuất - {selected.MaPhieu}", Content = frm, Width = 1100, Height = 750 };
+            }
+            else if (selected.MaPhieu.StartsWith("BG") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuBanGiao))
+            {
+                var frm = new frmXemChiTietBanGiao((int)maPhieuBanGiao);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
+
+                window = new Window { Title = $"Chi tiết phiếu bàn giao - {selected.MaPhieu}", Content = frm, Width = 1100, Height = 750 };
             }
             else
             {
-                MessageBox.Show("Vui lòng chọn một phiếu để xem chi tiết.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Chức năng xem chi tiết đang được phát triển cho loại phiếu: {selected.LoaiPhieu}",
+                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            window.ResizeMode = ResizeMode.CanResize;
+            window.ShowDialog();
+
+            // ✅ Sau khi form chi tiết đóng → reload nếu có duyệt / từ chối
+            if (daDuyetHoacTuChoi)
+            {
+                await LocDuLieuTheoLoaiVaNgay();
+                LoadThongKePhieu();
             }
         }
-
-
-
 
         private async void LoadThongKePhieu()
         {
@@ -530,19 +470,37 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         {
             await LocDuLieuTheoLoaiVaNgay();
         }
-        
+
         // Thêm sự kiện cho nút Refresh
         private async void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
         {
             await LoadDuLieuTongHopPhieuAsync();
         }
 
+
+
         private void btnIn_Click(object sender, RoutedEventArgs e)
         {
-           
+            if (dgPhieuCanDuyet?.SelectedItem is not PhieuCanDuyet selected)
+            {
+                MessageBox.Show("Vui lòng chọn một phiếu để in!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Chỉ xử lý in phiếu nhập
+            if (selected.MaPhieu.StartsWith("PN") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
+            {
+                var formIn = new frmInPhieuNhap(maPhieuNhap);
+                formIn.Title = $"In phiếu nhập - PN{maPhieuNhap}";
+                formIn.Width = 1000;
+                formIn.Height = 720;
+                formIn.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                formIn.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Chức năng in hiện đang phát triển.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
-
-
-
     }
 }

@@ -22,5 +22,18 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         {
             await viewModel.LuuThayDoiAsync();
         }
+
+        private async void btnThemLoaiTK_Click(object sender, RoutedEventArgs e)
+        {
+            var form = new ThemLoaiTaiKhoanForm();
+            if (form.ShowDialog() == true)
+            {
+                if (DataContext is PhanQuyenFormViewModel vm)
+                {
+                    await vm.LoadDataAsync(); 
+                }
+            }
+        }
+
     }
 }

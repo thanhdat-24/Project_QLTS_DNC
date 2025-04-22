@@ -113,11 +113,26 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
                     })
             );
 
-            QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = DanhSachNhomChucNang
+            //QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = DanhSachNhomChucNang
+            //    .SelectMany(n => n.DanhSachQuyen)
+            //    .Where(p => p.HienThi)
+            //    .Select(p => p.MaManHinh)
+            //    .ToList();
+
+            QuyenNguoiDungHelper.DanhSachQuyen = DanhSachNhomChucNang
                 .SelectMany(n => n.DanhSachQuyen)
-                .Where(p => p.HienThi)
-                .Select(p => p.MaManHinh)
-                .ToList();
+                .Select(p => new PhanQuyenModel
+                {
+                    MaQuyen = p.MaQuyen,
+                    MaManHinh = p.MaManHinh,
+                    TenChucNang = p.TenChucNang,
+                    Xem = p.Xem,
+                    Them = p.Them,
+                    Sua = p.Sua,
+                    Xoa = p.Xoa,
+                    HienThi = p.HienThi
+                }).ToList();
+
         }
         catch (Exception ex)
         {
@@ -128,25 +143,53 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
     private string LayNhomTuMaManHinh(string ma)
     {
         if (string.IsNullOrWhiteSpace(ma)) return "Khác";
+        ma = ma.Trim().ToLowerInvariant();
 
         return ma switch
         {
-            "btnTrangChu" => "Trang chủ",
-            "btnQuanlyTaiKhoan" or "btnDanhSachTaiKhoan" or "btnLoaiTaiKhoan" or "btnPhanQuyenTk" => "Quản lý tài khoản",
-            "btnQuanlyNhansu" or "btnNhanVien" or "btnChucVu" => "Quản lý nhân sự",
-            "btnQuanLyLoaiTaiSan" => "Loại tài sản",
-            "btnQuanlyToaNha" or "btnToaNha" or "btnTang" or "btnPhong" or "btnPhongBan" => "Tòa nhà",
-            "btnQuanLyKho" or "btnDanhSachKho" or "btnNhapKho" or "btnXuatKho" or "btnTonKho" or "btnBanGiaoTaiSan" => "Quản lý kho",
-            "btnNhaCungCap" => "Nhà cung cấp",
-            "btnTraCuuTaiSan" => "Tra cứu tài sản",
-            "btn_Baotri" or "btnBaoTri" or "btnPhieubaotri" or "btnDSbaotri" => "Bảo trì",
-            "btn_muaMoi" or "btnPhieuMuaMoi" or "btnChiTietPhieuMuaMoi" => "Mua mới",
-            "btnBaoCaoKiemKe" => "Báo cáo kiểm kê",
-            "btnDuyetPhieu" => "Duyệt phiếu",
-            "btn_CaiDat" or "btnThongTinCongTy" or "btnPhieuIn" => "Cài đặt",
+            // Trang chủ
+            "btntrangchu" => "Trang chủ",
+
+            // Quản lý tài khoản
+            "btnquanlytaikhoan" or "btndanhsachtaikhoan" or "btnloaitaikhoan" or "btnphanquyentk" => "Quản lý tài khoản",
+
+            // Quản lý nhân sự
+            "btnquanlynhansu" or "btnnhanvien" or "btnchucvu" => "Quản lý nhân sự",
+
+            // Loại tài sản
+            "btnquanlyloaitaisan" => "Loại tài sản",
+
+            // Tòa nhà
+            "btnquanly_toanha" or "btntoanha" or "btntang" or "btnphong" or "btnphongban" => "Tòa nhà",
+
+            // Quản lý kho
+            "btnquanlykho" or "btndanhsachkho" or "btnnhapkho" or "btnxuatkho" or "btntonkho" or "btnbangiaotaisan" => "Quản lý kho",
+
+            // Nhà cung cấp
+            "btnnhacungcap" => "Nhà cung cấp",
+
+            // Tra cứu tài sản
+            "btntracuutaisan" => "Tra cứu tài sản",
+
+            // Bảo trì
+            "btnquanlybaotri" or "btnbaotri" or "btnphieubaotri" or "btndsbaotri" => "Bảo trì",
+
+            // Mua mới
+            "btnquanlymuamoi" or "btnphieumuamoi" or "btnchitietphieumuamoi" => "Mua mới",
+
+            // Báo cáo
+            "btnbaocaokiemke" => "Báo cáo kiểm kê",
+
+            // Duyệt phiếu
+            "btnduyetphieu" => "Duyệt phiếu",
+
+            // Cài đặt
+            "btnquanlycaidat" or "btnthongtincongty" or "btnphieuin" => "Cài đặt",
+
             _ => "Khác"
         };
     }
+
 
     private void Huy()
     {

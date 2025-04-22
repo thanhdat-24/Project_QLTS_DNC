@@ -1,5 +1,7 @@
-﻿using Project_QLTS_DNC.Models;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.TaiKhoan;
 using Project_QLTS_DNC.ViewModel.TaiKhoan;
 using System;
 using System.Windows;
@@ -47,13 +49,60 @@ namespace Project_QLTS_DNC.View.DangNhap
                 var authService = new AuthService();
                 var taiKhoan = await authService.DangNhapAsync(tenTaiKhoan, matKhau);
 
+                //if (taiKhoan != null)
+                //{
+                //    LoggedInTaiKhoan = taiKhoan;
+
+                //    UserProfileViewModel.SetCurrentUsername(tenTaiKhoan);
+
+
+                //    if (unchkRemember.IsChecked == true)
+                //    {
+                //        Properties.Settings.Default.SavedUsername = tenTaiKhoan;
+                //        Properties.Settings.Default.SavedPassword = matKhau;
+                //        Properties.Settings.Default.RememberMe = true;
+                //    }
+                //    else
+                //    {
+                //        Properties.Settings.Default.SavedUsername = "";
+                //        Properties.Settings.Default.SavedPassword = "";
+                //        Properties.Settings.Default.RememberMe = false;
+                //    }
+                //    Properties.Settings.Default.Save();
+
+
+
+                //    this.Hide();
+
+                //    var mainWindow = new MainWindow(taiKhoan); 
+                //    Application.Current.MainWindow = mainWindow;
+                //    mainWindow.Show();
+
+                //    this.Close();
+                //}
                 if (taiKhoan != null)
                 {
                     LoggedInTaiKhoan = taiKhoan;
-
                     UserProfileViewModel.SetCurrentUsername(tenTaiKhoan);
 
+                    var danhSachQuyen = await new PhanQuyenService().LayDanhSachQuyenTheoLoaiTkAsync(taiKhoan.MaLoaiTk);
+                    var manHinhs = danhSachQuyen
+                        .Where(q => q.HienThi)
+                        .Select(q => q.MaManHinh)
+                        .ToList();
 
+                    //QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = manHinhs;
+                    QuyenNguoiDungHelper.DanhSachQuyen = danhSachQuyen;
+
+                    // 🔥 Load thêm loại tài khoản từ MaLoaiTk
+                    var loaiTaiKhoanService = new LoaiTaiKhoanService();
+                    var loaiTaiKhoan = await loaiTaiKhoanService.GetLoaiTaiKhoanByMaLoai(taiKhoan.MaLoaiTk);
+
+                    // 🔐 Lưu vào thông tin đăng nhập toàn cục
+                    ThongTinDangNhap.TaiKhoanDangNhap = taiKhoan;
+                    ThongTinDangNhap.LoaiTaiKhoanDangNhap = loaiTaiKhoan;
+
+                    // ✅ Nhớ lưu RememberMe nếu cần
                     if (unchkRemember.IsChecked == true)
                     {
                         Properties.Settings.Default.SavedUsername = tenTaiKhoan;
@@ -68,16 +117,14 @@ namespace Project_QLTS_DNC.View.DangNhap
                     }
                     Properties.Settings.Default.Save();
 
-                    
-
+                    // 👌 Mở MainWindow
                     this.Hide();
-
-                    var mainWindow = new MainWindow(taiKhoan); 
+                    var mainWindow = new MainWindow(); // Không cần truyền nữa
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
-
                     this.Close();
                 }
+
                 else
                 {
                     MessageBox.Show("Sai tên tài khoản hoặc mật khẩu!");

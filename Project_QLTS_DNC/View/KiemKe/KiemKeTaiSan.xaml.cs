@@ -173,7 +173,7 @@ namespace Project_QLTS_DNC.View.KiemKe
 
             int maPhong = (int)cboPhong.SelectedValue;
 
-            var kiemKeList = _taiSanTheoPhong.Select(item => new Models.KiemKe.KiemKeTaiSan
+            var kiemKeList = _taiSanTheoPhong.Select(item => new Models.KiemKe.KiemKeTaiSanModel
             {
                 MaDotKiemKe = _maDotKiemKe, // <-- lấy từ constructor
                 MaTaiSan = item.MaTaiSan,
@@ -185,7 +185,7 @@ namespace Project_QLTS_DNC.View.KiemKe
 
             foreach (var kk in kiemKeList)
             {
-                await _client.From<Models.KiemKe.KiemKeTaiSan>().Insert(kk);
+                await _client.From<Models.KiemKe.KiemKeTaiSanModel>().Insert(kk);
             }
 
             MessageBox.Show("Lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);

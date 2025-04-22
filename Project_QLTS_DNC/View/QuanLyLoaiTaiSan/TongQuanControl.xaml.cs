@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Project_QLTS_DNC.Models.QLLoaiTS;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.DTOs;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -37,6 +38,59 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             this.Loaded += (s, e) => {
                 CapNhatThongKe();
             };
+        }
+        /// <summary>
+        /// Lấy danh sách tài sản mới nhất và hiển thị lên DataGrid
+        /// </summary>
+        private async Task LoadTaiSanMoiNhat()
+        {
+            try
+            {
+                // Lấy toàn bộ danh sách tài sản
+                var dsTaiSan = await TaiSanService.LayDanhSachTaiSanAsync();
+
+                // Chuyển sang DTO để dễ hiển thị và thêm thông tin từ các bảng liên quan
+                var dsTaiSanDTO = new ObservableCollection<TaiSanDTO>();
+
+                foreach (var taiSan in dsTaiSan)
+                {
+                    var taiSanDTO = TaiSanDTO.FromModel(taiSan);
+
+                    // Lấy thông tin nhóm tài sản nếu có
+                    if (taiSan.MaChiTietPN.HasValue)
+                    {
+                        try
+                        {
+                            var maNhomTS = await ChiTietPhieuNhapService.TimNhomTaiSanTheoTaiSanAsync(taiSan.MaTaiSan);
+                            var dsNhomTS = await NhomTaiSanService.LayDanhSachNhomTaiSanAsync();
+                            var nhomTS = dsNhomTS.FirstOrDefault(n => n.MaNhomTS == maNhomTS);
+
+                            if (nhomTS != null)
+                            {
+                                taiSanDTO.MaNhomTS = maNhomTS;
+                                taiSanDTO.TenNhomTS = nhomTS.TenNhom;
+                            }
+                        }
+                        catch { /* Xử lý lỗi nếu cần */ }
+                    }
+
+                    dsTaiSanDTO.Add(taiSanDTO);
+                }
+
+                // Sắp xếp theo ngày sử dụng giảm dần (mới nhất lên đầu)
+                var dsTaiSanMoiNhat = new ObservableCollection<TaiSanDTO>(
+                    dsTaiSanDTO.OrderByDescending(ts => ts.NgaySuDung)
+                              .Take(15) // Lấy 10 tài sản mới nhất
+                );
+
+                // Hiển thị lên DataGrid
+                dgTaiSanMoiNhat.ItemsSource = dsTaiSanMoiNhat;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách tài sản mới nhất: {ex.Message}",
+                                "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>
@@ -70,6 +124,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 txtTongLoaiTaiSan.Text = DsLoaiTaiSan.Count.ToString();
                 txtTongNhomTaiSan.Text = DsNhomTaiSan.Count.ToString();
                 txtTongTaiSan.Text = soLuongTaiSan.ToString();
+                await LoadTaiSanMoiNhat();
             }
             catch (Exception ex)
             {

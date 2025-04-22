@@ -294,9 +294,17 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                             {
                                 item.TenTaiSan = taiSan.TenTaiSan;
 
+
                                 // Lấy mã nhóm tài sản từ ChiTietPhieuNhap
                                 var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
                                 if (chiTietPN != null && chiTietPN.MaNhomTS > 0)
+
+                                // Quan trọng: Cập nhật mã nhóm tài sản từ tài sản
+                                //item.MaNhomTS = taiSan.MaNhomTS;
+
+                                // Tìm tên nhóm tài sản nếu có
+                                if (DsNhomTaiSan != null && item.MaNhomTS.HasValue)
+
                                 {
                                     // Tìm thông tin nhóm tài sản từ danh sách nhóm
                                     var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
