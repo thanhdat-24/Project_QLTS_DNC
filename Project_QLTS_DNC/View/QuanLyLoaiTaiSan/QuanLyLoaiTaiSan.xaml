@@ -75,9 +75,11 @@
         </materialDesign:Card>
 
         <!-- TabControl -->
+        <!-- Trong file QuanLyLoaiTaiSan.xaml, cần xóa tab Báo Cáo -->
+        <!-- TabControl hiện tại -->
         <TabControl x:Name="tabMain" Grid.Row="2" Margin="15,0,15,15" 
-                    materialDesign:ColorZoneAssist.Mode="PrimaryLight"
-                    Style="{StaticResource MaterialDesignTabControl}">
+            materialDesign:ColorZoneAssist.Mode="PrimaryLight"
+            Style="{StaticResource MaterialDesignTabControl}">
 
             <!-- Tab Tổng Quan -->
             <TabItem Header="TỔNG QUAN" Width="120">
@@ -92,11 +94,6 @@
             <!-- Tab Nhóm Tài Sản -->
             <TabItem Header="NHÓM TÀI SẢN" Width="135">
                 <local:QuanLyNhomTaiSanControl x:Name="nhomTaiSanControl"/>
-            </TabItem>
-
-            <!-- Tab Báo Cáo -->
-            <TabItem Header="BÁO CÁO" Width="120">
-                <local:BaoCaoControl x:Name="baoCaoControl"/>
             </TabItem>
         </TabControl>
     </Grid>

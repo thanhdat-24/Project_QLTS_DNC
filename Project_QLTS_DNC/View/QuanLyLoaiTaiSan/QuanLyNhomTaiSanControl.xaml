@@ -28,7 +28,7 @@
         </Grid.RowDefinitions>
 
         <!-- Action Buttons -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,10">
             <Button x:Name="btnThemMoiNhomTaiSan" Style="{StaticResource ActionButton}" 
                     Background="{DynamicResource SecondaryCreate}" Width="130" 
                     Click="btnThemMoiNhomTaiSan_Click">
