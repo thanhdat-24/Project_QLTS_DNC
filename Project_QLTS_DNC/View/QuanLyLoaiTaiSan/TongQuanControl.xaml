@@ -166,7 +166,7 @@
             </materialDesign:Card>
         </Grid>
 
-        <!-- Summary Chart (Optional) -->
+        <!-- Thay thế phần Chart placeholder bằng danh sách tài sản mới nhất -->
         <Grid Grid.Row="1" Margin="0,20,0,0">
             <materialDesign:Card Padding="15" UniformCornerRadius="8">
                 <Grid>
@@ -175,16 +175,27 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="THỐNG KÊ TÀI SẢN THEO LOẠI" 
-                             FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"
-                             Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <materialDesign:PackIcon Kind="ClockFast" Width="24" Height="24" 
+                                     Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="TÀI SẢN NHẬP GẦN ĐÂY" Margin="10,0,0,0"
+                         FontSize="18" FontWeight="SemiBold"
+                         Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    </StackPanel>
 
-                    <!-- Placeholder for Chart - In actual implementation, you'd add a proper chart control here -->
-                    <Border Grid.Row="1" Background="#F5F5F5" CornerRadius="8">
-                        <TextBlock Text="Biểu đồ thống kê sẽ hiển thị ở đây" 
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                 FontSize="16" Foreground="#757575"/>
-                    </Border>
+                    <!-- DataGrid hiển thị tài sản mới nhất -->
+                    <DataGrid Grid.Row="1" x:Name="dgTaiSanMoiNhat" AutoGenerateColumns="False" 
+                    IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
+                    materialDesign:DataGridAssist.CellPadding="13 8 8 8"
+                    materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="MÃ TS" Binding="{Binding MaTaiSan}" Width="80"/>
+                            <DataGridTextColumn Header="TÊN TÀI SẢN" Binding="{Binding TenTaiSan}" Width="*"/>
+                            <DataGridTextColumn Header="NHÓM" Binding="{Binding TenNhomTS}" Width="150"/>
+                            <DataGridTextColumn Header="SỐ SERI" Binding="{Binding SoSeri}" Width="150"/>
+                            <DataGridTextColumn Header="NGÀY NHẬP" Binding="{Binding NgaySuDung, StringFormat=dd/MM/yyyy}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </materialDesign:Card>
         </Grid>
