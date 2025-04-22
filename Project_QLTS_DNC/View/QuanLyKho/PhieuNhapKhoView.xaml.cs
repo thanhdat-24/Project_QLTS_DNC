@@ -293,5 +293,21 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             }
         }
 
+
+        private void btnChiTiet_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int maPhieuNhap)
+            {
+                var form = new ChiTietPhieuNhapView(maPhieuNhap);
+                form.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Không thể lấy thông tin phiếu nhập.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+
     }
 }
