@@ -16,6 +16,7 @@ using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.TaiKhoan;
 using Project_QLTS_DNC.ViewModel.TaiKhoan;
 using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Helpers;
 namespace Project_QLTS_DNC.View.TaiKhoan
 {
     /// <summary>
@@ -39,6 +40,11 @@ namespace Project_QLTS_DNC.View.TaiKhoan
 
         private void btnTaoTaiKhoan_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachTaiKhoan", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm tài khoản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var taoTaiKhoanForm = new ThemTaiKhoanForm();
             taoTaiKhoanForm.ShowDialog();
         }
@@ -47,7 +53,11 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         {
             try
             {
-                
+                if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachTaiKhoan", "sua"))
+                {
+                    MessageBox.Show("Bạn không có quyền sửa tài khoản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 var selectedTaiKhoan = dgDanhSachTaiKhoan.SelectedItem as TaiKhoanDTO; // Thay dgTaiKhoan bằng tên thực của DataGrid
 
                 if (selectedTaiKhoan == null)
@@ -85,6 +95,11 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachTaiKhoan", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem tài khoản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 // Lấy ViewModel từ DataContext
                 if (DataContext is DanhSachTaiKhoanViewModel viewModel)
                 {

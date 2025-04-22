@@ -3,11 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="THÊM SỨC CHỨA PHÒNG - NHÓM TÀI SẢN"
-        Width="430" Height="360"
+        Width="500" Height="500"
         Background="White"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
-
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,43 +15,53 @@
         </Grid.RowDefinitions>
 
         <!-- Tiêu đề -->
-        <TextBlock Grid.Row="0" Text="THÊM SỨC CHỨA"
-                   FontSize="22" FontWeight="Bold"
-                   Foreground="{DynamicResource PrimaryHueMidBrush}"
-                   Margin="0,0,0,16"/>
+        <TextBlock Text="THÊM SỨC CHỨA" FontSize="24" FontWeight="Bold"
+                   Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,16"/>
 
-        <!-- Form nhập -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Chọn phòng -->
-            <TextBox Grid.Row="0" x:Name="txtMaPhong"
+        <!-- Form nhập liệu -->
+        <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Top">
+            <UniformGrid Columns="2" Margin="0,0,0,8">
+                <!-- Mã phòng -->
+                <TextBox x:Name="txtMaPhong"
                          materialDesign:HintAssist.Hint="Mã phòng"
                          IsReadOnly="True"
-                         IsTabStop="False"
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Margin="0,0,0,12"/>    
+                         Margin="0,0,8,8"/>
 
+                <!-- Nhóm tài sản -->
+                <ComboBox x:Name="cboNhomTS"
+                          materialDesign:HintAssist.Hint="Nhóm tài sản"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Margin="0,0,0,8"
+                          DisplayMemberPath="TenNhom"
+                          SelectedValuePath="MaNhomTS"/>
+            </UniformGrid>
 
-            <!-- Chọn nhóm tài sản -->
-            <ComboBox Grid.Row="1" x:Name="cboNhomTS" Margin="0 0 0 12"
-                      materialDesign:HintAssist.Hint="Nhóm tài sản"
-                      DisplayMemberPath="TenNhom"
-                      SelectedValuePath="MaNhomTS"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+            <UniformGrid Columns="1" Margin="0,0,0,8">
+                <!-- Sức chứa -->
+                <TextBox x:Name="txtSucChua"
+                         materialDesign:HintAssist.Hint="Sức chứa"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,0,8"/>
+            </UniformGrid>
 
-            <!-- Nhập sức chứa -->
-            <TextBox Grid.Row="2" x:Name="txtSucChua" Margin="0"
-                     materialDesign:HintAssist.Hint="Sức chứa"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
-        </Grid>
+            <!-- Nút thêm -->
+            <Button x:Name="btnThem"
+                    Content="➕ Thêm vào danh sách"
+                    Click="btnThem_Click"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="0,0,0,8"
+                    HorizontalAlignment="Left"/>
+
+            <!-- DataGrid -->
+            <DataGrid x:Name="gridSucChua" Height="220" AutoGenerateColumns="False"
+                      CanUserAddRows="False" Margin="0,0,0,8">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tên nhóm tài sản" Binding="{Binding TenNhomTaiSan}" Width="2*"/>
+                    <DataGridTextColumn Header="Sức chứa" Binding="{Binding SucChua}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
 
         <!-- Nút chức năng -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">

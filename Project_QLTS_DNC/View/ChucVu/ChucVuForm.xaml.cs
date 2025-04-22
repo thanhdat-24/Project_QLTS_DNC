@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models.NhanVien;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.ChucVu;
 using Project_QLTS_DNC.ViewModels.NhanVien;
@@ -24,6 +25,11 @@ namespace Project_QLTS_DNC.View.ChucVu
 
         private async void btnThemChucVu_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnChucVu", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm chức vụ!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var client = await SupabaseService.GetClientAsync();
             var themChucVuWindow = new ThemChucVuForm(this);
             themChucVuWindow.ShowDialog();
@@ -31,6 +37,11 @@ namespace Project_QLTS_DNC.View.ChucVu
 
         private void btnSua_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnChucVu", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa chức vụ!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (dvDanhsachchucvu.SelectedItem != null)
             {
                 ChucVuModel chucVuUpdate = (ChucVuModel)dvDanhsachchucvu.SelectedItem;
@@ -61,6 +72,11 @@ namespace Project_QLTS_DNC.View.ChucVu
 
         public async Task LoadDataGirdChucVu()
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnChucVu", "xem"))
+            {
+                MessageBox.Show("Bạn không có quyền xem chức vụ!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var chucVuService = new ChucVuService();
             var danhSachChucVu = await chucVuService.GetAllChucVuAsync();
             dvDanhsachchucvu.ItemsSource = danhSachChucVu;
@@ -72,6 +88,13 @@ namespace Project_QLTS_DNC.View.ChucVu
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnChucVu", "xoa"))
+                {
+                    MessageBox.Show("Bạn không có quyền xóa chức vụ!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+
                 MessageBoxResult tb = MessageBox.Show("Bạn có chắc chắn muốn xóa không?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                 if (tb == MessageBoxResult.Yes)

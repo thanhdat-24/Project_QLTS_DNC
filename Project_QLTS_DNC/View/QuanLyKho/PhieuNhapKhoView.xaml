@@ -247,17 +247,19 @@
                     </DataGridTextColumn>
 
                     <!-- Cột Tùy Chọn: Chỉnh sửa và Xóa -->
-                    <DataGridTemplateColumn Header="Tùy chọn" Width="140">
+                    <DataGridTemplateColumn Header="Tùy chọn" Width="170">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <!-- Chỉnh sửa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
-                            ToolTip="Chỉnh sửa"
-                            Margin="0,0,8,0"                                           
-                            >
-                                        <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                        ToolTip="Xem chi tiết"
+                                        Click="btnChiTiet_Click"
+                                        Tag="{Binding MaPhieuNhap}">    
+                                        <materialDesign:PackIcon Kind="ViewList" Foreground="{StaticResource PrimaryHueLightBrush}"/>
                                     </Button>
+
+                                    <!-- Chỉnh sửa -->
+                                    
 
                                     <!-- Xóa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
@@ -266,6 +268,7 @@
                                         Tag="{Binding MaPhieuNhap}">
                                         <materialDesign:PackIcon Kind="Delete" Foreground="#F44336"/>
                                     </Button>
+                                    
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
