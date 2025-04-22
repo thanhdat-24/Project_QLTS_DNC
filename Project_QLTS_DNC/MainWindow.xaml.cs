@@ -246,28 +246,34 @@ namespace Project_QLTS_DNC
                     .Distinct()
                     .Count();
 
-                // Tính số tài sản "Đang dùng" bằng tổng tài sản trừ đi số tài sản "Đang bảo trì"
-                int inUse = total - daBaoTri;
-                //Gán giá trị lên các TextBlock thống kê
+                // Đếm số tài sản tồn kho - tức là tài sản có MaPhong là null
+                int inStock = allAssets.Count(asset => asset.MaPhong == null);
+
+                // Tính số tài sản "Đang dùng" bằng tổng tài sản trừ đi số tài sản "Đang bảo trì" và tài sản tồn kho
+                int inUse = total - daBaoTri - inStock;
+
+                // Gán giá trị lên các TextBlock thống kê
                 txtTong.Text = total.ToString();
                 txtDangDung.Text = inUse.ToString();
                 txtBaoTri.Text = daBaoTri.ToString();
-                // 3. Vẽ biểu đồ (loại bỏ cột "Bảo trì")
+                txtTonKho.Text = inStock.ToString();
+
+                // 3. Vẽ biểu đồ
                 assetChart.Series = new SeriesCollection
         {
             new ColumnSeries
             {
                 Title = "Số lượng",
-                Values = new ChartValues<int> { total, inUse, daBaoTri },
+                Values = new ChartValues<int> { total, inUse, daBaoTri, inStock },
                 Fill = new SolidColorBrush(Color.FromRgb(0x4D, 0x90, 0xFE))
             }
         };
 
-                // 4. Cấu hình trục X (loại bỏ "Bảo trì")
+                // 4. Cấu hình trục X
                 assetChart.AxisX.Clear();
                 assetChart.AxisX.Add(new Axis
                 {
-                    Labels = new[] { "Tổng TS", "Đang sử dụng", "Bảo trì" },
+                    Labels = new[] { "Tổng TS", "Đang sử dụng", "Bảo trì", "Tồn kho" },
                     Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false }
                 });
 
@@ -286,6 +292,8 @@ namespace Project_QLTS_DNC
                 MessageBox.Show("Lỗi khi tải biểu đồ: " + ex.Message);
             }
         }
+
+
 
         public void UpdateLogo(string logoPath)
         {
