@@ -286,7 +286,7 @@
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileExcel}" 
                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
-                            
+                            Click="btnExportExcel_Click"
                             Margin="0 0 8 0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
@@ -296,7 +296,8 @@
                     <Button Style="{StaticResource MaterialDesignRaisedButton}" 
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileFDP}" 
-                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}">
+                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                            Click="btnExportPDF_Click">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FilePdfBox" Margin="0 0 8 0"/>
                             <TextBlock Text="XUẤT PDF"/>

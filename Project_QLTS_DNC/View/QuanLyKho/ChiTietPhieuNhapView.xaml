@@ -110,6 +110,7 @@
                                 <DataGridTextColumn Header="Nhóm tài sản" Binding="{Binding TenNhomTS}" Width="1.5*"/>
                                 <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}" Width="1*"/>
                                 <DataGridTextColumn Header="Đơn giá" Binding="{Binding DonGia}" Width="1.5*"/>
+                                <DataGridTextColumn Header="TGBH(T)" Binding="{Binding ThoiGianBaoHanh}" Width="1*"/>
                                 <DataGridTemplateColumn Header="Quản lý riêng" Width="Auto">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
