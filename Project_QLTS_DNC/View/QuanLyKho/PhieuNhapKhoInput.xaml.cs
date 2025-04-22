@@ -121,11 +121,21 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 return;
             }
 
+            // Kiểm tra ngày nhập
             if (dpNgayNhap.SelectedDate is not DateTime ngayNhap)
             {
-                MessageBox.Show("Vui lòng chọn ngày nhập.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng chọn ngày nhập hợp lệ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                dpNgayNhap.Focus();
                 return;
             }
+
+            if (ngayNhap.Date < DateTime.Now.Date)
+            {
+                MessageBox.Show("Ngày nhập không được nhỏ hơn ngày hiện tại.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                dpNgayNhap.Focus();
+                return;
+            }
+
 
             decimal tongTien = decimal.TryParse(txtTongTien.Text.Replace(",", ""), out decimal tt) ? tt : 0;
 

@@ -36,26 +36,33 @@
                           Margin="0,0,0,8"/>
             </UniformGrid>
 
-            <UniformGrid Columns="3" Margin="0,0,0,8">
+            <UniformGrid Columns="4" Margin="0,0,0,8">
                 <!-- Số lượng -->
                 <TextBox x:Name="txtSoLuong"
-                         materialDesign:HintAssist.Hint="Số lượng"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Margin="0,0,8,8"/>
+             materialDesign:HintAssist.Hint="Số lượng"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+             Margin="0,0,8,8"/>
 
                 <!-- Đơn giá -->
                 <TextBox x:Name="txtDonGia"
-                         materialDesign:HintAssist.Hint="Đơn giá"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Margin="0,0,8,8"/>
+             materialDesign:HintAssist.Hint="Đơn giá"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+             Margin="0,0,8,8"/>
+
+                <!-- Thời gian bảo hành -->
+                <TextBox x:Name="txtThoiGianBaoHanh"
+             materialDesign:HintAssist.Hint="TG bảo hành (tháng)"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+             Margin="0,0,8,8"/>
 
                 <!-- Checkbox quản lý riêng -->
                 <CheckBox x:Name="chkQuanLyRieng"
-                          Content="QL Riêng"
-                          VerticalAlignment="Center"
-                          FontSize="14"
-                          Margin="0,4,0,0"/>
+              Content="QL Riêng"
+              VerticalAlignment="Center"
+              FontSize="14"
+              Margin="0,4,0,0"/>
             </UniformGrid>
+
 
             <!-- Nút thêm vào danh sách -->
             <Button x:Name="btnThem"
@@ -72,6 +79,7 @@
                     <DataGridTextColumn Header="Tên tài sản" Binding="{Binding TenTaiSan}" Width="*"/>
                     <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}" Width="*"/>
                     <DataGridTextColumn Header="Đơn giá" Binding="{Binding DonGia}" Width="*"/>
+                    <DataGridTextColumn Header="TGBH" Binding="{Binding ThoiGianBaoHanh}" Width="*"/>
                     <DataGridCheckBoxColumn Header="QL Riêng" Binding="{Binding CanQuanLyRieng}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
