@@ -1,113 +1,55 @@
-﻿using System;
+﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+using System;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace Project_QLTS_DNC.Models.BaoHong
 {
-    public class PhieuBaoHong : INotifyPropertyChanged
+    [Table("phieubaohong")]
+    public class PhieuBaoHong : BaseModel, INotifyPropertyChanged
     {
-        private string _maPhieu;
-        private string _maTaiSan;
-        private string _tenTaiSan;
-        private DateTime _ngayLap;
-        private string _nguoiLap;
-        private string _mucDoHong;
-        private string _trangThai;
-        private string _boPhanQuanLy;
-        private string _moTa;
+        [PrimaryKey("ma_phieu_bao_hong", false)]
+        public int MaPhieuBaoHong { get; set; }
 
+        [Column("ma_nv")]
+        public int? MaNV { get; set; }
+
+        [Column("ma_phong")]
+        public int? MaPhong { get; set; }
+
+        [Column("ma_tai_san")]
+        public int? MaTaiSan { get; set; }
+
+        [Column("ngay_bao_hong")]
+        public DateTime? NgayBaoHong { get; set; }
+
+        [Column("hinh_thuc_ghi_nhan")]
+        public string HinhThucGhiNhan { get; set; }
+
+        [Column("mo_ta")]
+        public string MoTa { get; set; }
+
+        [Column("trang_thai")]
+        public string TrangThai { get; set; } = "Chờ xử lý";
+
+        // Các trường JsonIgnore để không lưu vào database
+        [JsonIgnore]
+        public string TenNhanVien { get; set; }
+
+        [JsonIgnore]
+        public string TenPhong { get; set; }
+
+        [JsonIgnore]
+        public string TenTaiSan { get; set; }
+
+        [JsonIgnore]
+        public bool IsSelected { get; set; }
+
+        // Thông báo sự thay đổi thuộc tính
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string MaPhieu
-        {
-            get { return _maPhieu; }
-            set
-            {
-                _maPhieu = value;
-                OnPropertyChanged("MaPhieu");
-            }
-        }
-
-        public string MaTaiSan
-        {
-            get { return _maTaiSan; }
-            set
-            {
-                _maTaiSan = value;
-                OnPropertyChanged("MaTaiSan");
-            }
-        }
-
-        public string TenTaiSan
-        {
-            get { return _tenTaiSan; }
-            set
-            {
-                _tenTaiSan = value;
-                OnPropertyChanged("TenTaiSan");
-            }
-        }
-
-        public DateTime NgayLap
-        {
-            get { return _ngayLap; }
-            set
-            {
-                _ngayLap = value;
-                OnPropertyChanged("NgayLap");
-            }
-        }
-
-        public string NguoiLap
-        {
-            get { return _nguoiLap; }
-            set
-            {
-                _nguoiLap = value;
-                OnPropertyChanged("NguoiLap");
-            }
-        }
-
-        public string MucDoHong
-        {
-            get { return _mucDoHong; }
-            set
-            {
-                _mucDoHong = value;
-                OnPropertyChanged("MucDoHong");
-            }
-        }
-
-        public string TrangThai
-        {
-            get { return _trangThai; }
-            set
-            {
-                _trangThai = value;
-                OnPropertyChanged("TrangThai");
-            }
-        }
-
-        public string BoPhanQuanLy
-        {
-            get { return _boPhanQuanLy; }
-            set
-            {
-                _boPhanQuanLy = value;
-                OnPropertyChanged("BoPhanQuanLy");
-            }
-        }
-
-        public string MoTa
-        {
-            get { return _moTa; }
-            set
-            {
-                _moTa = value;
-                OnPropertyChanged("MoTa");
-            }
-        }
-
-        private void OnPropertyChanged(string propertyName)
+        protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

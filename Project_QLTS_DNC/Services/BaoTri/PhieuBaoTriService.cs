@@ -10,6 +10,7 @@ using ClosedXML.Excel;
 using System.Windows;
 using Supabase.Gotrue;
 using Supabase;
+using Project_QLTS_DNC.ViewModel.Baotri;
 
 namespace Project_QLTS_DNC.Services
 {
@@ -570,7 +571,45 @@ public async Task<bool> ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string fi
                 return "Không xác định";
             }
         }
+        // Lấy thông tin chi tiết của tất cả tài sản
+        public async Task<Dictionary<int, PhieuBaoTriViewModel.TaiSanInfo>> GetAllTaiSanInfoAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    throw new Exception("Không thể kết nối Supabase Client");
+                }
 
+                var response = await client.From<TaiSanModel>().Get();
+                var danhSachTaiSan = response.Models;
+
+                // Chuyển đổi danh sách tài sản sang Dictionary để truy vấn nhanh
+                var taiSanDict = new Dictionary<int, PhieuBaoTriViewModel.TaiSanInfo>();
+
+                foreach (var taiSan in danhSachTaiSan)
+                {
+                    taiSanDict[taiSan.MaTaiSan] = new PhieuBaoTriViewModel.TaiSanInfo
+                    {
+                        MaTaiSan = taiSan.MaTaiSan,
+                        TenTaiSan = taiSan.TenTaiSan ?? "Không có tên",
+                        SoSeri = taiSan.SoSeri ?? "Không có số sê-ri",
+                        TinhTrangSP = taiSan.TinhTrangSP ?? "Không xác định"
+                    };
+                }
+
+                Console.WriteLine($"Đã lấy thông tin chi tiết của {taiSanDict.Count} tài sản");
+                return taiSanDict;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy thông tin tài sản: {ex.Message}");
+                MessageBox.Show($"Lỗi khi lấy thông tin tài sản: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return new Dictionary<int, PhieuBaoTriViewModel.TaiSanInfo>();
+            }
+        }
         // Thống kê tổng tài sản đã bảo trì
         public async Task<int> ThongKeTongTaiSanBaoTriAsync()
         {

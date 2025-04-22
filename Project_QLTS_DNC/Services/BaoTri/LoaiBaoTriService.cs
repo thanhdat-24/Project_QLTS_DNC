@@ -55,19 +55,38 @@ namespace Project_QLTS_DNC.Services.BaoTri
             }
         }
 
-        // Thêm phương thức XoaLoaiBaoTri
+
         public async Task<bool> XoaLoaiBaoTri(int maLoaiBaoTri)
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                // Gọi phương thức Delete mà không gán kết quả cho biến
-                await client.From<LoaiBaoTri>()
-                    .Where(x => x.MaLoaiBaoTri == maLoaiBaoTri)
-                    .Delete();
-
-                return true; // Trả về true nếu không có exception
+                try
+                {
+                    // Thực hiện xóa và xử lý lỗi
+                    await client.From<LoaiBaoTri>()
+                        .Where(x => x.MaLoaiBaoTri == maLoaiBaoTri)
+                        .Delete();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    // Kiểm tra thông báo lỗi để xác định nếu đó là lỗi vi phạm khóa ngoại
+                    string errorMessage = ex.Message.ToLower();
+                    if (errorMessage.Contains("23503") ||
+                        errorMessage.Contains("foreign key constraint") ||
+                        errorMessage.Contains("violates") ||
+                        errorMessage.Contains("referenced"))
+                    {
+                        throw new Exception("Không thể xóa loại bảo trì này vì đang được sử dụng trong các bản ghi bảo trì.");
+                    }
+                    else
+                    {
+                        // Nếu không phải lỗi khóa ngoại, ném lại ngoại lệ gốc
+                        throw;
+                    }
+                }
             }
             catch (Exception ex)
             {

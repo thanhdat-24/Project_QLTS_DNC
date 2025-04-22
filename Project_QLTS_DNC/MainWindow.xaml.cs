@@ -50,10 +50,11 @@ namespace Project_QLTS_DNC
                 //danhSachTaiKhoan.ItemsSource = _danhSachTaiKhoan; 
             }
         }
+        #region Window Loading Functions
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await LoadBarChartAsync();
-            // Đọc đường dẫn logo từ file và hiển thị
+            // Đọc đường dẫn logo từ file và hiển thị 
             string logoPathFile = "logo_path.txt";
             if (File.Exists(logoPathFile))
             {
@@ -63,8 +64,9 @@ namespace Project_QLTS_DNC
                     imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
                 }
             }
-          HienThiTreeViewTheoPhanQuyen();
+            //HienThiTreeViewTheoPhanQuyen(); 
         }
+        #endregion
         private void HienThiTreeViewTheoPhanQuyen()
         {
             var danhSach = QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi;

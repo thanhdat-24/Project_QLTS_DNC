@@ -60,6 +60,24 @@ public class PhieuBaoTri : BaseModel, INotifyPropertyChanged
     [JsonIgnore]
     public string TenTaiSan { get; set; }
 
+    // Thêm thuộc tính mới để lưu số seri của tài sản
+    [JsonIgnore]
+    public string SoSeri { get; set; }
+
+    // Thêm thuộc tính mới để lưu tình trạng của tài sản
+    [JsonIgnore]
+    public string TinhTrangTaiSan { get; set; }
+
+    // Thêm thuộc tính mới để hiển thị thông tin tài sản đầy đủ
+    [JsonIgnore]
+    public string TaiSanChiTiet
+    {
+        get
+        {
+            return $"{TenTaiSan} - SN: {SoSeri} - {TinhTrangTaiSan}";
+        }
+    }
+
     // Phương thức thông báo sự thay đổi thuộc tính
     public event PropertyChangedEventHandler PropertyChanged;
 
