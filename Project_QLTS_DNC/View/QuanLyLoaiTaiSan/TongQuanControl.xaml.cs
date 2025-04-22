@@ -80,7 +80,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 // Sắp xếp theo ngày sử dụng giảm dần (mới nhất lên đầu)
                 var dsTaiSanMoiNhat = new ObservableCollection<TaiSanDTO>(
                     dsTaiSanDTO.OrderByDescending(ts => ts.NgaySuDung)
-                              .Take(10) // Lấy 10 tài sản mới nhất
+                              .Take(15) // Lấy 10 tài sản mới nhất
                 );
 
                 // Hiển thị lên DataGrid
