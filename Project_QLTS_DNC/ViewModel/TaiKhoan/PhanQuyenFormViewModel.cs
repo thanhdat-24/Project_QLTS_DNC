@@ -113,11 +113,26 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
                     })
             );
 
-            QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = DanhSachNhomChucNang
+            //QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = DanhSachNhomChucNang
+            //    .SelectMany(n => n.DanhSachQuyen)
+            //    .Where(p => p.HienThi)
+            //    .Select(p => p.MaManHinh)
+            //    .ToList();
+
+            QuyenNguoiDungHelper.DanhSachQuyen = DanhSachNhomChucNang
                 .SelectMany(n => n.DanhSachQuyen)
-                .Where(p => p.HienThi)
-                .Select(p => p.MaManHinh)
-                .ToList();
+                .Select(p => new PhanQuyenModel
+                {
+                    MaQuyen = p.MaQuyen,
+                    MaManHinh = p.MaManHinh,
+                    TenChucNang = p.TenChucNang,
+                    Xem = p.Xem,
+                    Them = p.Them,
+                    Sua = p.Sua,
+                    Xoa = p.Xoa,
+                    HienThi = p.HienThi
+                }).ToList();
+
         }
         catch (Exception ex)
         {
