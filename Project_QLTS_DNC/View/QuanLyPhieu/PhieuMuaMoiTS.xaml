@@ -49,10 +49,10 @@
                      x:Name="txtGhiChu"
                      materialDesign:HintAssist.Hint="Ghi chú"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8"
-                     x:Name="txtDonVi"
-                     materialDesign:HintAssist.Hint="Đơn vị đề nghị"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+            <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8"
+          x:Name="cboDonViDeNghi"
+          materialDesign:HintAssist.Hint="Đơn vị đề nghị"
+          Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
             <TextBox Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,8,8"
                      x:Name="txtLyDo"
                      materialDesign:HintAssist.Hint="Lý Do"

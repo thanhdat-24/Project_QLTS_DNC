@@ -52,7 +52,6 @@
                     <TreeViewItem Header="📦 Quản lý kho" x:Name="btnQuanLyKho">
                         <TreeViewItem Header="🏢 Danh sách kho" x:Name="btnDanhSachKho" Selected="btnQuanLyKho_Selected"/>
                         <TreeViewItem Header="📥 Nhập kho" x:Name="btnNhapKho" Selected="btnNhapKho_Selected"/>
-                        <TreeViewItem Header="📤 Xuất kho" x:Name="btnXuatKho" Selected="btnXuatKho_Selected"/>
                         <TreeViewItem Header="📦 Tồn kho" x:Name="btnTonKho" Selected="btnTonKho_Selected"/>
                         <TreeViewItem Header="📦 Bàn Giao Tài Sản" x:Name="btnBanGiaoTaiSan" Selected="btnBanGiaoTaiSan_Selected"/>
                     </TreeViewItem>

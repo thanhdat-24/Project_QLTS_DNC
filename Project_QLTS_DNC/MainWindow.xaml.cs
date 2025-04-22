@@ -141,7 +141,7 @@ namespace Project_QLTS_DNC
                 { "btnQuanLyKho", btnQuanLyKho },
                 { "btnDanhSachKho", btnDanhSachKho },
                 { "btnNhapKho", btnNhapKho },
-                { "btnXuatKho", btnXuatKho },
+                //{ "btnXuatKho", btnXuatKho },
                 { "btnTonKho", btnTonKho },
                 { "btnBanGiaoTaiSan", btnBanGiaoTaiSan },
 
@@ -451,13 +451,7 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = nhậpKhoForm; // Thay thế nội dung của ContentControl
         }
 
-        private void btnXuatKho_Selected(object sender, RoutedEventArgs e)
-        {
-            // Hiển thị form xuất kho
-            var xuấtKhoForm = new PhieuXuatKhoView(); // Giả sử bạn đã tạo form XuatKhoForm
-            MainContentPanel.Content = xuấtKhoForm; // Thay thế nội dung của ContentControl
-        }
-
+       
         private void btnTonKho_Selected(object sender, RoutedEventArgs e)
         {
             // Hiển thị form tồn kho
