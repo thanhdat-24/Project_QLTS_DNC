@@ -216,6 +216,15 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                                ToolTip="Xem chi tiết"
+                                                Margin="0,0,4,0"
+                                                Click="btnChiTiet_Click"
+                                                Tag="{Binding MaPhong}">    
+                                            <materialDesign:PackIcon Kind="ViewList" Foreground="{StaticResource PrimaryHueLightBrush}"/>
+                                        </Button>
+                                        
                                         <Button Style="{StaticResource MaterialDesignIconButton}"
                                               Click="BtnEdit_Click"
                                               ToolTip="Sửa"

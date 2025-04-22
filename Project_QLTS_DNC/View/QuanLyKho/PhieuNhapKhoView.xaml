@@ -247,17 +247,19 @@
                     </DataGridTextColumn>
 
                     <!-- Cột Tùy Chọn: Chỉnh sửa và Xóa -->
-                    <DataGridTemplateColumn Header="Tùy chọn" Width="140">
+                    <DataGridTemplateColumn Header="Tùy chọn" Width="170">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <!-- Chỉnh sửa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
-                            ToolTip="Chỉnh sửa"
-                            Margin="0,0,8,0"                                           
-                            >
-                                        <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                        ToolTip="Xem chi tiết"
+                                        Click="btnChiTiet_Click"
+                                        Tag="{Binding MaPhieuNhap}">    
+                                        <materialDesign:PackIcon Kind="ViewList" Foreground="{StaticResource PrimaryHueLightBrush}"/>
                                     </Button>
+
+                                    <!-- Chỉnh sửa -->
+                                    
 
                                     <!-- Xóa -->
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
@@ -266,6 +268,7 @@
                                         Tag="{Binding MaPhieuNhap}">
                                         <materialDesign:PackIcon Kind="Delete" Foreground="#F44336"/>
                                     </Button>
+                                    
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -283,7 +286,7 @@
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileExcel}" 
                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
-                            
+                            Click="btnExportExcel_Click"
                             Margin="0 0 8 0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
@@ -293,7 +296,8 @@
                     <Button Style="{StaticResource MaterialDesignRaisedButton}" 
                             materialDesign:ButtonAssist.CornerRadius="8" 
                             Background="{DynamicResource SecondaryFileFDP}" 
-                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}">
+                            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                            Click="btnExportPDF_Click">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="FilePdfBox" Margin="0 0 8 0"/>
                             <TextBlock Text="XUẤT PDF"/>

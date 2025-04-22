@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Project_QLTS_DNC.Views"
         mc:Ignorable="d"
-        Title="Phiếu Bảo Trì" Height="870" Width="780"
+        Title="Phiếu Bảo Trì" Height="870" Width="800"
         WindowStartupLocation="CenterOwner"
         Background="#F5F5F5">
-
     <Window.Resources>
+        <!-- Thêm BooleanToVisibilityConverter -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
         <!-- Định nghĩa màu tùy chỉnh #0071f5 -->
         <Color x:Key="Primary">#0071f5</Color>
         <Color x:Key="PrimaryLight">#3387c8</Color>
@@ -18,7 +20,6 @@
         <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource Primary}"/>
         <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource PrimaryDark}"/>
         <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource PrimaryLight}"/>
-
         <!--Nền Các nút phụ như , In PDF, Excel-->
         <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#90CAF9"/>
         <SolidColorBrush x:Key="SecondaryAccentForegroundBrush" Color="#FFFFFF"/>
@@ -26,7 +27,6 @@
         <!--nền Excel-->
         <SolidColorBrush x:Key="SecondaryFileFDP" Color="#fc9a13"/>
         <SolidColorBrush x:Key="SecondaryBack" Color="#000000"/>
-
         <Style TargetType="TextBlock" x:Key="LabelStyle">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Medium"/>
@@ -34,7 +34,6 @@
             <Setter Property="Margin" Value="0,5,10,5"/>
             <Setter Property="Foreground" Value="#333333"/>
         </Style>
-
         <Style TargetType="TextBox">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -67,7 +66,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="ComboBox">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -87,9 +85,9 @@
                                     CornerRadius="5">
                                 <Grid>
                                     <ToggleButton x:Name="toggleButton" 
-                                                 BorderBrush="Transparent"
-                                                 Background="Transparent"
-                                                 IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                                BorderBrush="Transparent"
+                                                Background="Transparent"
+                                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
                                         <ToggleButton.Template>
                                             <ControlTemplate TargetType="{x:Type ToggleButton}">
                                                 <Border Background="Transparent">
@@ -99,39 +97,39 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
                                                         <ContentPresenter x:Name="contentPresenter"
-                                                                         ContentTemplate="{TemplateBinding ContentTemplate}"
-                                                                         Content="{TemplateBinding Content}"
-                                                                         HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                         VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                                         Margin="{TemplateBinding Padding}"/>
+                                                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                        Content="{TemplateBinding Content}"
+                                                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                        Margin="{TemplateBinding Padding}"/>
                                                         <Path x:Name="arrow" 
-                                                             Grid.Column="1"
-                                                             Fill="#666666"
-                                                             Data="M0,0 L10,0 L5,5 Z"
-                                                             Width="10"
-                                                             Height="5"
-                                                             Margin="0,0,10,0"/>
+                                                            Grid.Column="1"
+                                                            Fill="#666666"
+                                                            Data="M0,0 L10,0 L5,5 Z"
+                                                            Width="10"
+                                                            Height="5"
+                                                            Margin="0,0,10,0"/>
                                                     </Grid>
                                                 </Border>
                                             </ControlTemplate>
                                         </ToggleButton.Template>
                                     </ToggleButton>
                                     <ContentPresenter x:Name="contentPresenter"
-                                                     Content="{TemplateBinding SelectionBoxItem}"
-                                                     ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                     Margin="{TemplateBinding Padding}"
-                                                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                    Content="{TemplateBinding SelectionBoxItem}"
+                                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                    Margin="{TemplateBinding Padding}"
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                     <Popup x:Name="PART_Popup"
-                                          AllowsTransparency="true"
-                                          IsOpen="{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
-                                          Placement="Bottom"
-                                          PopupAnimation="Slide">
+                                        AllowsTransparency="true"
+                                        IsOpen="{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Placement="Bottom"
+                                        PopupAnimation="Slide">
                                         <Border x:Name="dropDownBorder"
-                                               BorderBrush="#CCCCCC"
-                                               BorderThickness="1"
-                                               Background="White"
-                                               CornerRadius="0,0,5,5">
+                                            BorderBrush="#CCCCCC"
+                                            BorderThickness="1"
+                                            Background="White"
+                                            CornerRadius="0,0,5,5">
                                             <ScrollViewer x:Name="DropDownScrollViewer">
                                                 <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
                                             </ScrollViewer>
@@ -152,7 +150,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="DatePicker">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -162,7 +159,6 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
         </Style>
-
         <Style TargetType="Button" x:Key="PrimaryButton">
             <Setter Property="Width" Value="150"/>
             <Setter Property="Height" Value="42"/>
@@ -189,7 +185,6 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
         <Style TargetType="Button" x:Key="SecondaryButton">
             <Setter Property="Width" Value="150"/>
             <Setter Property="Height" Value="42"/>
@@ -216,26 +211,55 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <!-- Style cho nút xóa lựa chọn -->
+        <Style TargetType="Button" x:Key="ClearButton">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Background" Value="#e0e0e0"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#cccccc"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Style cho ListView gợi ý -->
+        <Style TargetType="ListView" x:Key="SuggestionListStyle">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="MaxHeight" Value="200"/>
+        </Style>
     </Window.Resources>
-
     <Border Background="White" Margin="15" CornerRadius="10">
         <Border.Effect>
             <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
         </Border.Effect>
-
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <!-- Tiêu đề -->
             <Border Grid.Row="0" Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="5" Padding="15">
                 <TextBlock Text="PHIẾU BẢO TRÌ" FontSize="20" FontWeight="Bold" 
-                           HorizontalAlignment="Center" Foreground="White"/>
+                        HorizontalAlignment="Center" Foreground="White"/>
             </Border>
-
             <!-- Form chỉnh sửa -->
             <ScrollViewer Grid.Row="1" Margin="0,20,0,0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
@@ -248,23 +272,114 @@
                         <TextBlock Grid.Column="0" Text="Mã phiếu:" Style="{StaticResource LabelStyle}"/>
                         <TextBox Grid.Column="1" x:Name="txtMaBaoTri" Text="{Binding MaBaoTri}" IsReadOnly="True" Background="#F8F8F8"/>
                     </Grid>
-
-                    <!-- Mã tài sản -->
+                    <!-- Tài sản (Đã thay đổi từ ComboBox sang TextBox tìm kiếm) -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Mã tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Column="1" x:Name="cboMaTaiSan" SelectedValue="{Binding MaTaiSan}" SelectedValuePath="MaTaiSan" IsEditable="False" StaysOpenOnEdit="True">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding TenTaiSan}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <TextBlock Grid.Column="0" Text="Tài sản:" Style="{StaticResource LabelStyle}"/>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <!-- Thanh tìm kiếm -->
+                            <TextBox Grid.Row="0" x:Name="txtSearchTaiSan" Margin="0,5,0,0" 
+                                    KeyUp="txtSearchTaiSan_KeyUp"
+                                    TextChanged="txtSearchTaiSan_TextChanged">
+                                <TextBox.Resources>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type TextBox}">
+                                                    <Border x:Name="border" 
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        Background="{TemplateBinding Background}"
+                                                        CornerRadius="5">
+                                                        <Grid>
+                                                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" 
+                                                                HorizontalScrollBarVisibility="Hidden" 
+                                                                VerticalScrollBarVisibility="Hidden"
+                                                                Margin="{TemplateBinding Padding}"/>
+                                                            <TextBlock Text="Nhập tên, số seri hoặc tình trạng tài sản..." 
+                                                                Foreground="Gray" Margin="12,0,0,0"
+                                                                VerticalAlignment="Center" 
+                                                                Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="true">
+                                                            <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsFocused" Value="true">
+                                                            <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Resources>
+                            </TextBox>
+                            <!-- Danh sách gợi ý -->
+                            <ListView Grid.Row="1" x:Name="lvTaiSanSuggestions" 
+                                    Visibility="Collapsed"
+                                    BorderThickness="1" BorderBrush="#CCCCCC"
+                                    MaxHeight="200" Margin="0,0,0,5"
+                                    SelectionChanged="lvTaiSanSuggestions_SelectionChanged"
+                                    Style="{StaticResource SuggestionListStyle}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="5">
+                                            <TextBlock>
+                                                <Run Text="{Binding TenTaiSan}" FontWeight="SemiBold"/>
+                                                <Run Text=" | "/>
+                                                <Run Text="{Binding SoSeri}" FontStyle="Italic"/>
+                                                <Run Text=" | "/>
+                                                <Run Text="{Binding TinhTrangSP}" Foreground="Gray"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <!-- Thông tin tài sản đã chọn -->
+                            <Border Grid.Row="1" x:Name="selectedTaiSanInfo" 
+                                    BorderThickness="1" BorderBrush="#CCCCCC" 
+                                    Padding="10" CornerRadius="5" Margin="0,0,0,15"
+                                    Background="#F0F8FF" Visibility="Collapsed">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Tên tài sản: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanName"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Số Sê-ri: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanSeri"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Tình trạng: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanStatus"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Hạn bảo hành: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanWarranty"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" x:Name="btnClearTaiSan" Content="Xóa" 
+                                            Style="{StaticResource ClearButton}"
+                                            VerticalAlignment="Top" HorizontalAlignment="Right"
+                                            Click="btnClearTaiSan_Click"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </Grid>
-
                     <!-- Loại bảo trì -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -280,7 +395,6 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </Grid>
-
                     <!-- Ngày bảo trì -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -290,7 +404,6 @@
                         <TextBlock Grid.Column="0" Text="Ngày bảo trì:" Style="{StaticResource LabelStyle}"/>
                         <DatePicker Grid.Column="1" x:Name="dtpNgayBaoTri" SelectedDate="{Binding NgayBaoTri}"/>
                     </Grid>
-
                     <!-- Người phụ trách -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -306,7 +419,6 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </Grid>
-
                     <!-- Nội dung -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -315,9 +427,8 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Nội dung:" Style="{StaticResource LabelStyle}" VerticalAlignment="Top" Margin="0,15,0,0"/>
                         <TextBox Grid.Column="1" x:Name="txtNoiDung" Text="{Binding NoiDung}" Height="100" TextWrapping="Wrap" AcceptsReturn="True" 
-                                 VerticalContentAlignment="Top" Padding="12"/>
+                                VerticalContentAlignment="Top" Padding="12"/>
                     </Grid>
-
                     <!-- Trạng thái -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -332,7 +443,6 @@
                             <ComboBoxItem Content="Thay mới"/>
                         </ComboBox>
                     </Grid>
-
                     <!-- Chi phí -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -342,7 +452,6 @@
                         <TextBlock Grid.Column="0" Text="Chi phí (VNĐ):" Style="{StaticResource LabelStyle}"/>
                         <TextBox Grid.Column="1" x:Name="txtChiPhi" Text="{Binding ChiPhi}"/>
                     </Grid>
-
                     <!-- Ghi chú -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -351,11 +460,10 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Ghi chú:" Style="{StaticResource LabelStyle}" VerticalAlignment="Top" Margin="0,15,0,0"/>
                         <TextBox Grid.Column="1" x:Name="txtGhiChu" Text="{Binding GhiChu}" TextWrapping="Wrap" Height="80" 
-                                 VerticalContentAlignment="Top" AcceptsReturn="True" Padding="12"/>
+                                VerticalContentAlignment="Top" AcceptsReturn="True" Padding="12"/>
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
-
             <!-- Các nút điều khiển -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
                 <Button x:Name="btnSave" Content="Lưu" Style="{StaticResource PrimaryButton}" Click="btnSave_Click"/>

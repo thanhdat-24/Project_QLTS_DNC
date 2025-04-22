@@ -52,7 +52,6 @@
                     <TreeViewItem Header="📦 Quản lý kho" x:Name="btnQuanLyKho">
                         <TreeViewItem Header="🏢 Danh sách kho" x:Name="btnDanhSachKho" Selected="btnQuanLyKho_Selected"/>
                         <TreeViewItem Header="📥 Nhập kho" x:Name="btnNhapKho" Selected="btnNhapKho_Selected"/>
-                        <TreeViewItem Header="📤 Xuất kho" x:Name="btnXuatKho" Selected="btnXuatKho_Selected"/>
                         <TreeViewItem Header="📦 Tồn kho" x:Name="btnTonKho" Selected="btnTonKho_Selected"/>
                         <TreeViewItem Header="📦 Bàn Giao Tài Sản" x:Name="btnBanGiaoTaiSan" Selected="btnBanGiaoTaiSan_Selected"/>
                     </TreeViewItem>
@@ -117,11 +116,11 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Padding="20" Background="White" CornerRadius="10"
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
+         HorizontalAlignment="Center" VerticalAlignment="Center">
                     <StackPanel>
                         <TextBlock Text="Chào mừng đến với hệ thống quản lý tài sản"
-                                   FontSize="22" FontWeight="Bold" Foreground="#37474F"
-                                   TextAlignment="Center" Margin="0,10,0,20"/>
+                    FontSize="22" FontWeight="Bold" Foreground="#37474F"
+                    TextAlignment="Center" Margin="0,10,0,20"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -130,35 +129,42 @@
 
                             <!-- Biểu đồ -->
                             <lvc:CartesianChart x:Name="assetChart"
-                                                Grid.Column="1"
-                                                Margin="10"
-                                                Width="400"
-                                                Height="300"/>
+                                 Grid.Column="1"
+                                 Margin="10"
+                                 Width="400"
+                                 Height="300"/>
 
                             <!-- Các thẻ thống kê -->
                             <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right">
                                 <Border Background="#FFAB40" Padding="20" CornerRadius="10"
-                                        Margin="10" Width="200">
+                         Margin="10" Width="200">
                                     <StackPanel>
                                         <TextBlock Text="Tổng tài sản" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtTong"  FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock x:Name="txtTong" FontSize="28" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Background="#66BB6A" Padding="20" CornerRadius="10"
-                                        Margin="10" Width="200">
+                         Margin="10" Width="200">
                                     <StackPanel>
                                         <TextBlock Text="Tài sản đang sử dụng" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtDangDung"  FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock x:Name="txtDangDung" FontSize="28" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Background="#E57373" Padding="20" CornerRadius="10"
-                                        Margin="10" Width="200">
+                         Margin="10" Width="200">
                                     <StackPanel>
                                         <TextBlock Text="Tài sản cần bảo trì" FontSize="14" Foreground="White"/>
-                                        <TextBlock x:Name="txtBaoTri"  FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock x:Name="txtBaoTri" FontSize="28" FontWeight="Bold" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
-                              
+                                <!-- Thêm thẻ thống kê Tồn kho -->
+                                <Border Background="#42A5F5" Padding="20" CornerRadius="10"
+                         Margin="10" Width="200">
+                                    <StackPanel>
+                                        <TextBlock Text="Tài sản tồn kho" FontSize="14" Foreground="White"/>
+                                        <TextBlock x:Name="txtTonKho" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

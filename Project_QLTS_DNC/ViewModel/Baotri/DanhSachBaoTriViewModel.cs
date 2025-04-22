@@ -31,10 +31,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(DsKiemKe));
             }
         }
-
         private CollectionViewSource _dsKiemKeView;
         public ICollectionView DsKiemKeView => _dsKiemKeView?.View;
-
         private ObservableCollection<LoaiBaoTri> _dsLoaiBaoTri;
         public ObservableCollection<LoaiBaoTri> DsLoaiBaoTri
         {
@@ -45,7 +43,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(DsLoaiBaoTri));
             }
         }
-
         private ObservableCollection<NhomTaiSan> _dsNhomTaiSan;
         public ObservableCollection<NhomTaiSan> DsNhomTaiSan
         {
@@ -56,7 +53,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(DsNhomTaiSan));
             }
         }
-
         private string _tuKhoaTimKiem;
         public string TuKhoaTimKiem
         {
@@ -67,7 +63,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(TuKhoaTimKiem));
             }
         }
-
         private string _loaiBaoTriDuocChon;
         public string LoaiBaoTriDuocChon
         {
@@ -79,7 +74,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 ApplyFilter();
             }
         }
-
         private string _nhomTaiSanDuocChon;
         public string NhomTaiSanDuocChon
         {
@@ -91,7 +85,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 ApplyFilter();
             }
         }
-
         private string _tinhTrangDuocChon;
         public string TinhTrangDuocChon
         {
@@ -103,7 +96,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 ApplyFilter();
             }
         }
-
         private bool _tatCaDuocChon;
         public bool TatCaDuocChon
         {
@@ -114,7 +106,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 {
                     _tatCaDuocChon = value;
                     OnPropertyChanged(nameof(TatCaDuocChon));
-
                     // Áp dụng trạng thái được chọn cho tất cả các mục trong danh sách hiển thị
                     if (DsKiemKe != null)
                     {
@@ -126,6 +117,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
             }
         }
+
         // Thêm vào DanhSachBaoTriViewModel.cs
         public void UpdateSelectAllState()
         {
@@ -133,7 +125,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 // Kiểm tra nếu tất cả các item đều được chọn
                 bool allSelected = DsKiemKe.All(item => item.IsSelected);
-
                 // Cập nhật trạng thái TatCaDuocChon mà không gây ra vòng lặp vô hạn
                 if (_tatCaDuocChon != allSelected)
                 {
@@ -142,6 +133,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
             }
         }
+
         // Thêm vào DanhSachBaoTriViewModel.cs
         private void RegisterItemPropertyChanged()
         {
@@ -215,8 +207,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         private readonly DSBaoTriService _dsBaotriService;
         private readonly TaiSanService _taiSanService;
         private readonly PhongService _phongService;
+        private readonly NhomTaiSanService _nhomTaiSanService;
+        private readonly ChiTietPhieuNhapService _chiTietPhieuNhapService;
         private ObservableCollection<KiemKeTaiSan> _dsKiemKeGoc;
-
 
         public DanhSachBaoTriViewModel(bool autoLoad = true)
         {
@@ -224,7 +217,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             _dsBaotriService = new DSBaoTriService();
             _taiSanService = new TaiSanService();
             _phongService = new PhongService();
-
+            _nhomTaiSanService = new NhomTaiSanService();
+            _chiTietPhieuNhapService = new ChiTietPhieuNhapService();
             _dsKiemKeView = new CollectionViewSource();
             DsKiemKe = new ObservableCollection<KiemKeTaiSan>();
             _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>();
@@ -248,6 +242,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
         private int? _maNhomTaiSanDuocChon;
         public int? MaNhomTaiSanDuocChon
         {
@@ -261,7 +256,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
             }
         }
-        // Sửa đổi phương thức LoadDSKiemKeAsync để lấy thông tin nhóm tài sản
+
+        // Cập nhật phương thức LoadDSKiemKeAsync để lấy thông tin nhóm tài sản thông qua liên kết
         public async Task LoadDSKiemKeAsync()
         {
             try
@@ -281,6 +277,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                         var dsTaiSan = await _taiSanService.GetDanhSachTaiSanAsync();
                         var dsPhong = await _phongService.GetDanhSachPhongAsync();
 
+                        // Lấy tất cả chi tiết phiếu nhập để tìm mã nhóm tài sản
+                        var dsChiTietPhieuNhap = await _chiTietPhieuNhapService.GetDanhSachChiTietPhieuNhapAsync();
+
                         // Cập nhật tên tài sản, tên phòng và MaNhomTS
                         foreach (var item in danhSach)
                         {
@@ -295,15 +294,23 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                             {
                                 item.TenTaiSan = taiSan.TenTaiSan;
 
+
+                                // Lấy mã nhóm tài sản từ ChiTietPhieuNhap
+                                var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
+                                if (chiTietPN != null && chiTietPN.MaNhomTS > 0)
+
                                 // Quan trọng: Cập nhật mã nhóm tài sản từ tài sản
                                 //item.MaNhomTS = taiSan.MaNhomTS;
 
                                 // Tìm tên nhóm tài sản nếu có
                                 if (DsNhomTaiSan != null && item.MaNhomTS.HasValue)
+
                                 {
-                                    var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == item.MaNhomTS.Value);
+                                    // Tìm thông tin nhóm tài sản từ danh sách nhóm
+                                    var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
                                     if (nhomTaiSan != null)
                                     {
+                                        item.MaNhomTS = nhomTaiSan.MaNhomTS;
                                         item.TenNhomTS = nhomTaiSan.TenNhom;
                                     }
                                 }
@@ -362,11 +369,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                         _dsKiemKeView.Source = _dsKiemKeGoc;
                         view = _dsKiemKeView.View;
                     }
-
                     // Thêm filter mới
                     view.Filter = item => FilterMatches((KiemKeTaiSan)item);
                 }
-
                 OnPropertyChanged(nameof(DsKiemKeView));
 
                 // Cập nhật phân trang
@@ -385,7 +390,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 IsLoading = false;
             }
         }
-
 
         private void UpdatePagination()
         {
@@ -409,6 +413,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             OnPropertyChanged(nameof(TrangHienTai));
             OnPropertyChanged(nameof(TongSoTrang));
         }
+
         private void LoadPageData()
         {
             if (_dsKiemKeGoc == null || _dsKiemKeGoc.Count == 0)
@@ -454,8 +459,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 DsLoaiBaoTri = new ObservableCollection<LoaiBaoTri>(dsLoai);
 
                 // Lấy danh sách nhóm tài sản từ database
-                var nhomTaiSanService = new NhomTaiSanService();
-                var dsNhom = await nhomTaiSanService.GetNhomTaiSanAsync();
+                var dsNhom = await _nhomTaiSanService.GetNhomTaiSanAsync();
                 DsNhomTaiSan = new ObservableCollection<NhomTaiSan>(dsNhom);
             }
             catch (Exception ex)
@@ -471,19 +475,18 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             DsKiemKeView?.Refresh();
 
             // Cập nhật lại dữ liệu phân trang
+            UpdatePagination();
             LoadPageData();
         }
 
         private ObservableCollection<KiemKeTaiSan> ApplyFilterToCollection(ObservableCollection<KiemKeTaiSan> collection)
         {
             var result = new ObservableCollection<KiemKeTaiSan>();
-
             foreach (var item in collection)
             {
                 if (FilterMatches(item))
                     result.Add(item);
             }
-
             return result;
         }
 
@@ -494,15 +497,19 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 e.Accepted = FilterMatches(item);
             }
         }
+
         // Thêm vào class DanhSachBaoTriViewModel
         public async Task RefreshCurrentPageAsync()
         {
             await LoadDSKiemKeAsync();
+
             // Di chuyển đến trang hiện tại
             if (TrangHienTai > TongSoTrang)
                 TrangHienTai = TongSoTrang;
+
             LoadPageData();
         }
+
         // Chuyển từ bool thành Task<bool> để có thể await
         public async Task<bool> XoaTaiSanDaChonAsync()
         {
@@ -579,20 +586,18 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-
-   
         // Cập nhật phương thức FilterMatches trong DanhSachBaoTriViewModel
         private bool FilterMatches(KiemKeTaiSan item)
         {
             if (item == null)
                 return false;
 
-            // 1. Lọc theo nhóm tài sản - dựa vào việc kiểm tra tên tài sản có chứa tên nhóm
+            // 1. Lọc theo nhóm tài sản - dựa vào TenNhomTS
             if (!string.IsNullOrEmpty(NhomTaiSanDuocChon) && NhomTaiSanDuocChon != "Tất cả nhóm")
             {
-                // Kiểm tra nếu tên tài sản không có hoặc không chứa tên nhóm
-                if (string.IsNullOrEmpty(item.TenTaiSan) ||
-                   !item.TenTaiSan.Contains(NhomTaiSanDuocChon, StringComparison.OrdinalIgnoreCase))
+                // Kiểm tra nếu tên nhóm tài sản không khớp
+                if (string.IsNullOrEmpty(item.TenNhomTS) ||
+                   !item.TenNhomTS.Equals(NhomTaiSanDuocChon, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -607,7 +612,6 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
 
                 // So sánh chính xác với tình trạng đã chọn
                 bool tinhTrangMatch = false;
-
                 if (TinhTrangDuocChon == "Cần kiểm tra" && item.TinhTrang == "Cần kiểm tra")
                     tinhTrangMatch = true;
                 else if (TinhTrangDuocChon == "Cần bảo trì" && item.TinhTrang == "Cần bảo trì")
@@ -628,87 +632,46 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             // Kiểm tra mã kiểm kê
             if (item.MaKiemKeTS.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra mã tài sản
             else if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra mã đợt kiểm kê
             else if (item.MaDotKiemKe.HasValue && item.MaDotKiemKe.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra tên tài sản
             else if (item.TenTaiSan != null && item.TenTaiSan.ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra tên phòng
             else if (item.TenPhong != null && item.TenPhong.ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra tên đợt kiểm kê
             else if (item.TenDotKiemKe != null && item.TenDotKiemKe.ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra vị trí thực tế
             else if (item.ViTriThucTe != null && item.ViTriThucTe.ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra tình trạng
             else if (item.TinhTrang != null && item.TinhTrang.ToLower().Contains(keyword))
                 matchesSearchText = true;
+
             // Kiểm tra ghi chú
             else if (item.GhiChu != null && item.GhiChu.ToLower().Contains(keyword))
                 matchesSearchText = true;
 
+            // Kiểm tra tên nhóm tài sản
+            else if (item.TenNhomTS != null && item.TenNhomTS.ToLower().Contains(keyword))
+                matchesSearchText = true;
+
             return matchesSearchText;
         }
-        // Cập nhật lớp TaiSanService để lấy cả thông tin nhóm tài sản
-        public class TaiSanService
-        {
-            public async Task<List<TaiSanModel>> GetDanhSachTaiSanAsync()
-            {
-                try
-                {
-                    var client = await SupabaseService.GetClientAsync();
-                    if (client == null)
-                        throw new Exception("Không thể kết nối Supabase Client");
 
-                    // Thực hiện truy vấn để lấy tất cả tài sản kèm mã nhóm tài sản
-                    var response = await client
-                        .From<TaiSanModel>()
-                        .Select("*") // Đảm bảo kết quả có cả ma_nhom_ts
-                        .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
-                        .Get();
-
-                    return response.Models;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi truy vấn dữ liệu tài sản: {ex.Message}", "Lỗi",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return new List<TaiSanModel>();
-                }
-            }
-        }
-        public class PhongService
-        {
-            public async Task<List<Phong>> GetDanhSachPhongAsync()
-            {
-                try
-                {
-                    var client = await SupabaseService.GetClientAsync();
-                    if (client == null)
-                        throw new Exception("Không thể kết nối Supabase Client");
-
-                    var response = await client
-                        .From<Phong>()
-                        .Select("*")
-                        .Order("ma_phong", Supabase.Postgrest.Constants.Ordering.Ascending)
-                        .Get();
-
-                    return response.Models;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Lỗi khi truy vấn dữ liệu phòng: {ex.Message}", "Lỗi",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return new List<Phong>();
-                }
-            }
-        }
         public void ChuyenTrangTruoc()
         {
             if (TrangHienTai > 1)
@@ -742,6 +705,32 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             return new ObservableCollection<KiemKeTaiSan>(
                 DsKiemKe.Where(item => item.IsSelected)
             );
+        }
+    }
+
+    public class ChiTietPhieuNhapService
+    {
+        public async Task<List<ChiTietPhieuNhap>> GetDanhSachChiTietPhieuNhapAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                var response = await client
+                    .From<ChiTietPhieuNhap>()
+                    .Select("*")
+                    .Get();
+
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Lỗi khi truy vấn dữ liệu chi tiết phiếu nhập: {ex.Message}", "Lỗi",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return new List<ChiTietPhieuNhap>();
+            }
         }
     }
 
@@ -785,6 +774,61 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 System.Windows.MessageBox.Show($"Lỗi khi truy vấn dữ liệu nhóm tài sản: {ex.Message}", "Lỗi",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return new List<NhomTaiSan>();
+            }
+        }
+    }
+
+    public class TaiSanService
+    {
+        public async Task<List<TaiSanModel>> GetDanhSachTaiSanAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                // Thực hiện truy vấn để lấy tất cả tài sản
+                var response = await client
+                    .From<TaiSanModel>()
+                    .Select("*")
+                    .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi truy vấn dữ liệu tài sản: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<TaiSanModel>();
+            }
+        }
+    }
+
+    public class PhongService
+    {
+        public async Task<List<Phong>> GetDanhSachPhongAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                var response = await client
+                    .From<Phong>()
+                    .Select("*")
+                    .Order("ma_phong", Supabase.Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi truy vấn dữ liệu phòng: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<Phong>();
             }
         }
     }

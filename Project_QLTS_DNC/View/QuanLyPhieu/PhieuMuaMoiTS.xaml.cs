@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Text.Json.Serialization;
+using Project_QLTS_DNC.Models.ToaNha;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -39,6 +40,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         {
             await InitializeSupabaseAsync();
             await LoadNhanVienAsync();
+            await LoadPhongBanAsync();
         }
 
         private async Task InitializeSupabaseAsync()
@@ -79,7 +81,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     _isEditMode = true;
 
                     // Cập nhật các control với dữ liệu từ phiếu
-                    txtDonVi.Text = _existingPhieu.DonViDeNghi;
+                    cboDonViDeNghi.Text = _existingPhieu.DonViDeNghi;
                     txtLyDo.Text = _existingPhieu.LyDo;
                     txtGhiChu.Text = _existingPhieu.GhiChu;
                     dpNgayDeNghi.SelectedDate = _existingPhieu.NgayDeNghi;
@@ -96,7 +98,21 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 MessageBox.Show($"Lỗi khi tải thông tin phiếu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private async Task LoadPhongBanAsync()
+        {
+            var result = await _client.From<PhongBan>().Get();
 
+            if (result.Models != null)
+            {
+                cboDonViDeNghi.ItemsSource = result.Models;
+                cboDonViDeNghi.DisplayMemberPath = "TenPhongBan";
+                cboDonViDeNghi.SelectedValuePath = "MaPhongBan";
+            }
+            else
+            {
+                cboDonViDeNghi.ItemsSource = null;
+            }
+        }
         private async Task LoadNhanVienAsync()
         {
             var result = await _client.From<NhanVienModel>().Get();
@@ -124,7 +140,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 _isEditMode = true;
 
                 // Cập nhật các control với dữ liệu từ phiếu
-                txtDonVi.Text = _existingPhieu.DonViDeNghi;
+                cboDonViDeNghi.Text = _existingPhieu.DonViDeNghi;
                 txtLyDo.Text = _existingPhieu.LyDo;
                 txtGhiChu.Text = _existingPhieu.GhiChu ?? string.Empty;
                 dpNgayDeNghi.SelectedDate = _existingPhieu.NgayDeNghi;
@@ -147,7 +163,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(txtDonVi.Text))
+                if (string.IsNullOrWhiteSpace(cboDonViDeNghi.Text))
                 {
                     MessageBox.Show("Vui lòng nhập đơn vị đề nghị.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -167,7 +183,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         MaPhieuDeNghi = _existingPhieu.MaPhieuDeNghi,
                         NgayDeNghi = dpNgayDeNghi.SelectedDate ?? DateTime.Now,
                         MaNV = (int)Convert.ToInt64(cboMaNhanVien.SelectedValue),
-                        DonViDeNghi = txtDonVi.Text,
+                        DonViDeNghi = cboDonViDeNghi.Text,
                         LyDo = txtLyDo.Text,
                         GhiChu = txtGhiChu.Text,
                         TrangThai = _existingPhieu.TrangThai // Giữ nguyên trạng thái
@@ -189,7 +205,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         MaPhieuDeNghi = maPhieuMoi,
                         NgayDeNghi = dpNgayDeNghi.SelectedDate ?? DateTime.Now,
                         MaNV = (int)Convert.ToInt64(cboMaNhanVien.SelectedValue),
-                        DonViDeNghi = txtDonVi.Text,
+                        DonViDeNghi = cboDonViDeNghi.Text,
                         LyDo = txtLyDo.Text,
                         GhiChu = txtGhiChu.Text,
                         TrangThai = false // Mặc định là chưa duyệt

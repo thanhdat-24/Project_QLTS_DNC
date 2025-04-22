@@ -62,9 +62,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 await _viewModel.LoadDSBaoTriAsync();
                 Console.WriteLine($"Đã tải {_viewModel.DsBaoTri.Count} phiếu bảo trì từ cơ sở dữ liệu");
 
+                // Cập nhật thông tin tài sản
+                await LoadTaiSanInfoAsync();
+
                 // Áp dụng phân trang
                 ApplyPagination();
-
                 // Cập nhật thông tin phân trang
                 UpdatePaginationInfo();
             }
@@ -76,6 +78,89 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
+        // Phương thức mới để tải thông tin tài sản
+        private async Task LoadTaiSanInfoAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client != null && _viewModel.DsBaoTri != null && _viewModel.DsBaoTri.Any())
+                {
+                    // Lấy danh sách mã tài sản duy nhất
+                    var uniqueAssetIds = _viewModel.DsBaoTri
+                        .Where(p => p.MaTaiSan.HasValue)
+                        .Select(p => p.MaTaiSan.Value)
+                        .Distinct()
+                        .ToList();
+
+                    if (uniqueAssetIds.Any())
+                    {
+                        // Lấy thông tin tài sản từ Supabase
+                        var assets = await client.From<TaiSanModel>()
+                            .Where(t => uniqueAssetIds.Contains(t.MaTaiSan))
+                            .Get();
+
+                        var assetList = assets.Models;
+
+                        // Cập nhật thông tin tài sản vào phiếu bảo trì
+                        foreach (var phieu in _viewModel.DsBaoTri)
+                        {
+                            if (phieu.MaTaiSan.HasValue)
+                            {
+                                var asset = assetList.FirstOrDefault(a => a.MaTaiSan == phieu.MaTaiSan.Value);
+                                if (asset != null)
+                                {
+                                    // Cập nhật định dạng thông tin tài sản: Tên + Số seri + Tình trạng
+                                    phieu.TenTaiSan = $"{asset.TenTaiSan} - {asset.SoSeri} - {asset.TinhTrangSP}";
+                                }
+                                else
+                                {
+                                    phieu.TenTaiSan = $"TS{phieu.MaTaiSan} (Không tìm thấy)";
+                                }
+                            }
+                            else
+                            {
+                                phieu.TenTaiSan = "Không có";
+                            }
+                        }
+                    }
+
+                    // Cập nhật thông tin người phụ trách
+                    var uniqueStaffIds = _viewModel.DsBaoTri
+                        .Where(p => p.MaNV.HasValue)
+                        .Select(p => p.MaNV.Value)
+                        .Distinct()
+                        .ToList();
+
+                    if (uniqueStaffIds.Any())
+                    {
+                        var staffs = await client.From<NhanVienModel>()
+                            .Where(n => uniqueStaffIds.Contains(n.MaNV))
+                            .Get();
+
+                        var staffList = staffs.Models;
+
+                        foreach (var phieu in _viewModel.DsBaoTri)
+                        {
+                            if (phieu.MaNV.HasValue)
+                            {
+                                var staff = staffList.FirstOrDefault(s => s.MaNV == phieu.MaNV.Value);
+                                phieu.TenNguoiPhuTrach = staff?.TenNV ?? $"NV{phieu.MaNV} (Không tìm thấy)";
+                            }
+                            else
+                            {
+                                phieu.TenNguoiPhuTrach = "Không có";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tải thông tin tài sản: {ex.Message}");
+            }
+        }
+
         // Xử lý sự kiện khi ấn nút thêm phiếu bảo trì
         private async void btnThem_Click(object sender, RoutedEventArgs e)
         {
@@ -83,15 +168,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 // Tạo phiếu bảo trì mới với giá trị mặc định
                 var phieuMoi = _viewModel.CreateNewPhieuBaoTri();
-
                 // Mở cửa sổ thêm mới
                 var addWindow = new EditPhieuBaoTriWindow(phieuMoi);
                 addWindow.Title = "Thêm phiếu bảo trì mới";
                 addWindow.Owner = Window.GetWindow(this);
-
                 // Hiển thị cửa sổ dưới dạng dialog
                 bool? result = addWindow.ShowDialog();
-
                 // Nếu người dùng đã lưu phiếu mới
                 if (result == true)
                 {
@@ -100,14 +182,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         $"MaTaiSan={addWindow.PhieuBaoTri.MaTaiSan}, " +
                         $"NoiDung={addWindow.PhieuBaoTri.NoiDung}, " +
                         $"TrangThai={addWindow.PhieuBaoTri.TrangThai}");
-
                     // Thêm phiếu bảo trì vào cơ sở dữ liệu
                     bool success = await _viewModel.AddPhieuBaoTriAsync(addWindow.PhieuBaoTri);
                     if (success)
                     {
                         MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
-
                         // Tải lại danh sách bảo trì để cập nhật giao diện
                         await LoadDSBaoTriAsync();
                     }
@@ -131,6 +211,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             string searchText = txtTimKiem.Text?.Trim() ?? "";
             _currentPage = 1;
             await _viewModel.SearchPhieuBaoTriAsync(searchText);
+            await LoadTaiSanInfoAsync(); // Cập nhật thông tin tài sản sau khi tìm kiếm
             ApplyPagination();
             UpdatePaginationInfo();
         }
@@ -167,6 +248,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 _currentPage = 1;
                 // Áp dụng bộ lọc
                 await _viewModel.FilterPhieuBaoTriAsync(loaiBaoTri, trangThai);
+                await LoadTaiSanInfoAsync(); // Cập nhật thông tin tài sản sau khi lọc
                 // Cập nhật giao diện
                 ApplyPagination();
                 UpdatePaginationInfo();
@@ -268,23 +350,18 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 {
                     // Tạo bản sao của đối tượng phiếu để tránh thay đổi đối tượng gốc
                     var phieuCopy = _viewModel.ClonePhieuBaoTri(phieu);
-
                     // Sử dụng bản sao để mở cửa sổ chỉnh sửa
                     Project_QLTS_DNC.Views.EditPhieuBaoTriWindow editWindow = new Project_QLTS_DNC.Views.EditPhieuBaoTriWindow(phieuCopy);
                     editWindow.Owner = Window.GetWindow(this);
-
                     // Hiển thị cửa sổ dưới dạng dialog
                     bool? result = editWindow.ShowDialog();
-
                     // Nếu người dùng đã lưu thay đổi (nhấn nút Save)
                     if (result == true)
                     {
                         // Thêm logging để debug
                         Console.WriteLine($"Cập nhật phiếu: {editWindow.PhieuBaoTri.MaBaoTri}, {editWindow.PhieuBaoTri.TrangThai}");
-
                         // Cập nhật phiếu bảo trì vào cơ sở dữ liệu
                         bool success = await _viewModel.UpdatePhieuBaoTriAsync(editWindow.PhieuBaoTri);
-
                         if (success)
                         {
                             MessageBox.Show("Cập nhật phiếu bảo trì thành công!", "Thông báo",
@@ -317,20 +394,17 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     "Xác nhận xóa",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
-
                 if (result == MessageBoxResult.Yes)
                 {
                     try
                     {
                         bool success = await _viewModel.DeletePhieuBaoTriAsync(phieu.MaBaoTri);
-
                         if (success)
                         {
                             MessageBox.Show("Xóa phiếu bảo trì thành công!", "Thông báo",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
                             // Cập nhật giao diện
-                            ApplyPagination();
-                            UpdatePaginationInfo();
+                            await LoadDSBaoTriAsync();
                         }
                     }
                     catch (Exception ex)
@@ -375,7 +449,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 // Lấy danh sách dữ liệu hiện tại (có thể là dữ liệu đã lọc)
                 var danhSachXuat = new List<PhieuBaoTri>();
-
                 // Nếu có dữ liệu được chọn thì xuất các phiếu đã chọn
                 List<PhieuBaoTri> selectedPhieu = GetSelectedPhieuBaoTri();
                 if (selectedPhieu.Count > 0)
@@ -387,14 +460,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 {
                     danhSachXuat = items.ToList();
                 }
-
                 if (danhSachXuat.Count == 0)
                 {
                     MessageBox.Show("Không có dữ liệu để xuất Excel!", "Thông báo",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
-
                 // Hiển thị dialog chọn vị trí lưu file
                 var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
@@ -402,11 +473,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     DefaultExt = "xlsx",
                     FileName = $"DanhSachPhieuBaoTri_{DateTime.Now:yyyyMMdd}"
                 };
-
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     // Gọi phương thức xuất Excel từ service
                     _phieuBaoTriService.ExportToExcel(danhSachXuat, saveFileDialog.FileName);
+                    MessageBox.Show("Xuất Excel thành công!", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -474,49 +546,44 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         // Phương thức thêm nội dung phiếu vào FlowDocument
         private async Task ThemNoiDungPhieuAsync(System.Windows.Documents.FlowDocument document, PhieuBaoTri phieu)
         {
-            // Lấy thông tin tên tài sản và tên nhân viên trước
-            string tenTaiSan = "Không xác định";
-            string tenNhanVien = "Không xác định";
+            // Lấy thông tin tài sản và nhân viên chi tiết
+            TaiSanModel taiSanInfo = null;
+            NhanVienModel nhanVienInfo = null;
 
-            // Truy vấn Supabase để lấy tên tài sản
-            if (phieu.MaTaiSan.HasValue)
+            try
             {
-                try
+                var client = await SupabaseService.GetClientAsync();
+                if (client != null)
                 {
-                    var client = await SupabaseService.GetClientAsync();
-                    if (client != null)
+                    // Lấy thông tin tài sản
+                    if (phieu.MaTaiSan.HasValue)
                     {
-                        var taiSan = await client.From<TaiSanModel>()
+                        var taiSanResult = await client.From<TaiSanModel>()
                             .Where(t => t.MaTaiSan == phieu.MaTaiSan.Value)
-                            .Single();
-                        tenTaiSan = taiSan?.TenTaiSan ?? "Không xác định";
+                            .Get();
+                        taiSanInfo = taiSanResult.Models.FirstOrDefault();
+                    }
+
+                    // Lấy thông tin nhân viên
+                    if (phieu.MaNV.HasValue)
+                    {
+                        var nhanVienResult = await client.From<NhanVienModel>()
+                            .Where(nv => nv.MaNV == phieu.MaNV.Value)
+                            .Get();
+                        nhanVienInfo = nhanVienResult.Models.FirstOrDefault();
                     }
                 }
-                catch
-                {
-                    tenTaiSan = "Không xác định";
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy thông tin chi tiết: {ex.Message}");
             }
 
-            // Truy vấn Supabase để lấy tên nhân viên
-            if (phieu.MaNV.HasValue)
-            {
-                try
-                {
-                    var client = await SupabaseService.GetClientAsync();
-                    if (client != null)
-                    {
-                        var nhanVien = await client.From<NhanVienModel>()
-                            .Where(nv => nv.MaNV == phieu.MaNV.Value)
-                            .Single();
-                        tenNhanVien = nhanVien?.TenNV ?? "Không xác định";
-                    }
-                }
-                catch
-                {
-                    tenNhanVien = "Không xác định";
-                }
-            }
+            // Chuẩn bị các thông tin để hiển thị
+            string tenTaiSan = taiSanInfo?.TenTaiSan ?? "Không xác định";
+            string soSeri = taiSanInfo?.SoSeri ?? "Không xác định";
+            string tinhTrangSP = taiSanInfo?.TinhTrangSP ?? "Không xác định";
+            string tenNhanVien = nhanVienInfo?.TenNV ?? "Không xác định";
 
             // Tạo section cho phiếu
             System.Windows.Documents.Section section = new System.Windows.Documents.Section();
@@ -555,7 +622,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             infoTable.BorderThickness = new System.Windows.Thickness(1);
 
             // Định nghĩa cột với độ rộng cụ thể
-            infoTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(200) });
             infoTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(400) });
 
             // Khởi tạo RowGroup
@@ -564,9 +630,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Thêm hàng thông tin với định dạng đồng nhất
             AddTableRow(infoTable, "Mã phiếu bảo trì:", phieu.MaBaoTri.ToString());
 
-            // Hiển thị mã tài sản và tên tài sản
+            // Hiển thị mã tài sản và thông tin tài sản chi tiết
             AddTableRow(infoTable, "Mã tài sản:", phieu.MaTaiSan?.ToString() ?? "N/A");
             AddTableRow(infoTable, "Tên tài sản:", tenTaiSan);
+            AddTableRow(infoTable, "Số seri:", soSeri);
+            AddTableRow(infoTable, "Tình trạng tài sản:", tinhTrangSP);
 
             // Chuyển đổi mã loại bảo trì thành tên
             string loaiBaoTri = "Không xác định";
@@ -582,7 +650,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Hiển thị mã nhân viên và tên nhân viên
             AddTableRow(infoTable, "Mã nhân viên:", phieu.MaNV?.ToString() ?? "N/A");
             AddTableRow(infoTable, "Người phụ trách:", tenNhanVien);
-
             AddTableRow(infoTable, "Trạng thái:", phieu.TrangThai);
             AddTableRow(infoTable, "Chi phí:", string.Format("{0:N0} VNĐ", phieu.ChiPhi));
             section.Blocks.Add(infoTable);
@@ -619,7 +686,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 System.Windows.Documents.Paragraph noteHeaderPara = new System.Windows.Documents.Paragraph();
                 noteHeaderPara.Margin = new System.Windows.Thickness(0, 20, 0, 10);
-
                 System.Windows.Documents.Run noteHeaderRun = new System.Windows.Documents.Run("GHI CHÚ:");
                 noteHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
                 noteHeaderPara.Inlines.Add(noteHeaderRun);
@@ -632,14 +698,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 noteTable.BorderThickness = new System.Windows.Thickness(1);
                 noteTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(600) });
                 noteTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
                 System.Windows.Documents.TableRow noteRow = new System.Windows.Documents.TableRow();
                 System.Windows.Documents.TableCell noteCell = new System.Windows.Documents.TableCell();
                 noteCell.Padding = new System.Windows.Thickness(8);
-
                 System.Windows.Documents.Paragraph notePara = new System.Windows.Documents.Paragraph();
                 notePara.TextAlignment = System.Windows.TextAlignment.Justify;
-
                 System.Windows.Documents.Run noteRun = new System.Windows.Documents.Run(phieu.GhiChu);
                 notePara.Inlines.Add(noteRun);
                 noteCell.Blocks.Add(notePara);
@@ -653,7 +716,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             signatureTable.CellSpacing = 0;
             signatureTable.BorderThickness = new System.Windows.Thickness(0);
             signatureTable.Margin = new System.Windows.Thickness(0, 40, 0, 20);
-
             signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
             signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
             signatureTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
@@ -664,11 +726,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Cột người lập phiếu
             System.Windows.Documents.TableCell leftCell = new System.Windows.Documents.TableCell();
             leftCell.BorderThickness = new System.Windows.Thickness(0);
-
             System.Windows.Documents.Paragraph leftHeaderPara = new System.Windows.Documents.Paragraph();
             leftHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
             leftHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
-
             System.Windows.Documents.Run leftHeaderRun = new System.Windows.Documents.Run("Người lập phiếu");
             leftHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
             leftHeaderPara.Inlines.Add(leftHeaderRun);
@@ -677,7 +737,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Thêm chỗ để ký tên
             System.Windows.Documents.Paragraph leftSignPara = new System.Windows.Documents.Paragraph();
             leftSignPara.TextAlignment = System.Windows.TextAlignment.Center;
-
             System.Windows.Documents.Run leftSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
             leftSignRun.FontStyle = System.Windows.FontStyles.Italic;
             leftSignRun.FontSize = 10;
@@ -688,11 +747,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Cột người phụ trách
             System.Windows.Documents.TableCell rightCell = new System.Windows.Documents.TableCell();
             rightCell.BorderThickness = new System.Windows.Thickness(0);
-
             System.Windows.Documents.Paragraph rightHeaderPara = new System.Windows.Documents.Paragraph();
             rightHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
             rightHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
-
             System.Windows.Documents.Run rightHeaderRun = new System.Windows.Documents.Run("Người phụ trách");
             rightHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
             rightHeaderPara.Inlines.Add(rightHeaderRun);
@@ -701,7 +758,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Thêm chỗ để ký tên
             System.Windows.Documents.Paragraph rightSignPara = new System.Windows.Documents.Paragraph();
             rightSignPara.TextAlignment = System.Windows.TextAlignment.Center;
-
             System.Windows.Documents.Run rightSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
             rightSignRun.FontStyle = System.Windows.FontStyles.Italic;
             rightSignRun.FontSize = 10;
@@ -715,7 +771,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             System.Windows.Documents.Paragraph footerPara = new System.Windows.Documents.Paragraph();
             footerPara.TextAlignment = System.Windows.TextAlignment.Right;
             footerPara.Margin = new System.Windows.Thickness(0, 20, 0, 0);
-
             System.Windows.Documents.Run footerRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             footerRun.FontStyle = System.Windows.FontStyles.Italic;
             footerRun.FontSize = 10;
@@ -766,7 +821,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private List<PhieuBaoTri> GetSelectedPhieuBaoTri()
         {
             List<PhieuBaoTri> selectedPhieus = new List<PhieuBaoTri>();
-
             if (dgPhieuBaoTri.ItemsSource is IEnumerable<PhieuBaoTri> items)
             {
                 foreach (var item in items)
@@ -777,7 +831,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     }
                 }
             }
-
             return selectedPhieus;
         }
     }

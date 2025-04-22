@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Project_QLTS_DNC.Models.ThongTinCongTy
 {
-    class ThongTinCongTy
+    public class ThongTinCongTy
     {
         public string Ten { get; set; }
         public string MaSoThue { get; set; }

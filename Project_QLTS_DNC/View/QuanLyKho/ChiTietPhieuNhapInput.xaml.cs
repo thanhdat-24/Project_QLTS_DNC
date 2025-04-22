@@ -105,41 +105,58 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             if (cboNhomTaiSan.SelectedItem is not NhomTaiSan nhom)
             {
-                MessageBox.Show("Vui lòng chọn nhóm tài sản trước khi thêm.");
+                MessageBox.Show("Vui lòng chọn nhóm tài sản trước khi thêm.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!int.TryParse(txtSoLuong.Text, out int soLuong))
+            if (string.IsNullOrWhiteSpace(txtSoLuong.Text) || !int.TryParse(txtSoLuong.Text.Trim(), out int soLuong) || soLuong <= 0)
             {
-                MessageBox.Show("Số lượng không hợp lệ.");
+                MessageBox.Show("Vui lòng nhập số lượng hợp lệ (số nguyên dương).", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!decimal.TryParse(txtDonGia.Text, out decimal donGia))
+            if (string.IsNullOrWhiteSpace(txtDonGia.Text) || !decimal.TryParse(txtDonGia.Text.Trim(), out decimal donGia) || donGia <= 0)
             {
-                MessageBox.Show("Đơn giá không hợp lệ.");
+                MessageBox.Show("Vui lòng nhập đơn giá hợp lệ (số thực dương).", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // 👉 KHÔNG sinh mã ở đây
-            var item = new ChiTietPhieuNhap
+            if (string.IsNullOrWhiteSpace(txtThoiGianBaoHanh.Text) || !int.TryParse(txtThoiGianBaoHanh.Text.Trim(), out int thoiGianBaoHanh) || thoiGianBaoHanh < 0)
             {
-                MaChiTietPN = 0, // placeholder, sẽ sinh sau khi nhấn "Lưu"
-                MaPhieuNhap = _maPhieuNhap,
+                MessageBox.Show("Vui lòng nhập thời gian bảo hành hợp lệ (số nguyên >= 0).", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Kiểm tra trùng nhóm tài sản
+            if (_danhSachTam.Any(x => x.MaNhomTS == nhom.MaNhomTS))
+            {
+                MessageBox.Show("Nhóm tài sản này đã được thêm trước đó.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // ✅ Thêm vào danh sách tạm
+            var chiTiet = new ChiTietPhieuNhap
+            {
+                MaPhieuNhap = int.Parse(txtMaPhieuNhap.Text), // Lấy mã phiếu nhập đang mở form
                 MaNhomTS = nhom.MaNhomTS,
-                TenTaiSan = nhom.TenNhom,
+                TenTaiSan = nhom.TenNhom, // Gán tên nhóm tài sản vào
                 SoLuong = soLuong,
                 DonGia = donGia,
+                ThoiGianBaoHanh = thoiGianBaoHanh,
                 CanQuanLyRieng = chkQuanLyRieng.IsChecked == true
             };
 
-            _danhSachTam.Add(item);
+            _danhSachTam.Add(chiTiet);
 
+            // Cập nhật DataGrid
             gridTaiSan.ItemsSource = null;
             gridTaiSan.ItemsSource = _danhSachTam;
 
+            // Reset form
+            cboNhomTaiSan.SelectedIndex = -1;
             txtSoLuong.Clear();
             txtDonGia.Clear();
+            txtThoiGianBaoHanh.Clear();
             chkQuanLyRieng.IsChecked = false;
         }
 
@@ -147,31 +164,32 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             if (_danhSachTam.Count == 0)
             {
-                MessageBox.Show("Chưa có tài sản nào để lưu.");
+                MessageBox.Show("Vui lòng thêm ít nhất một tài sản trước khi lưu.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            try
+            foreach (var item in _danhSachTam)
             {
-                foreach (var item in _danhSachTam)
+                var chiTietInsert = new ChiTietPhieuNhapInsert
                 {
-                    // 👉 Sinh mã cho từng dòng
-                    int maMoi = (int)await SinhMaChiTietPhieuNhapAsync(_client);
-                    item.MaChiTietPN = maMoi;
+                    MaPhieuNhap = item.MaPhieuNhap,
+                    MaNhomTS = item.MaNhomTS,
+                    TenTaiSan = item.TenTaiSan,
+                    SoLuong = item.SoLuong,
+                    DonGia = item.DonGia,
+                    ThoiGianBaoHanh = item.ThoiGianBaoHanh,
+                    CanQuanLyRieng = item.CanQuanLyRieng
+                };
 
-                    var response = await _client.From<ChiTietPhieuNhap>().Insert(item);
-                    if (response.Model == null)
-                        throw new Exception("Không thể lưu chi tiết: " + item.TenTaiSan);
-                }
+                await _client.From<ChiTietPhieuNhapInsert>().Insert(chiTietInsert);
+            }
 
-                MessageBox.Show("Đã lưu toàn bộ chi tiết thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi lưu: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            MessageBox.Show("Lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+            this.Close();
         }
+
+
+
 
 
         private void btnHuy_Click(object sender, RoutedEventArgs e)

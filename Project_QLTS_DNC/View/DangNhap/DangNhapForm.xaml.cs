@@ -91,7 +91,9 @@ namespace Project_QLTS_DNC.View.DangNhap
                         .Select(q => q.MaManHinh)
                         .ToList();
 
-                    QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = manHinhs;
+                    //QuyenNguoiDungHelper.DanhSachMaManHinhDuocHienThi = manHinhs;
+                    QuyenNguoiDungHelper.DanhSachQuyen = danhSachQuyen;
+
                     // 🔥 Load thêm loại tài khoản từ MaLoaiTk
                     var loaiTaiKhoanService = new LoaiTaiKhoanService();
                     var loaiTaiKhoan = await loaiTaiKhoanService.GetLoaiTaiKhoanByMaLoai(taiKhoan.MaLoaiTk);

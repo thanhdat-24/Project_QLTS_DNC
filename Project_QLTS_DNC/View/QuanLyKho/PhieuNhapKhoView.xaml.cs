@@ -293,5 +293,185 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             }
         }
 
+
+        private void btnChiTiet_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int maPhieuNhap)
+            {
+                var form = new ChiTietPhieuNhapView(maPhieuNhap);
+                form.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Không thể lấy thông tin phiếu nhập.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        private void btnExportExcel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (dgSanPham.ItemsSource == null)
+                {
+                    MessageBox.Show("Không có dữ liệu để xuất.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files|*.xlsx",
+                    Title = "Lưu file Excel",
+                    FileName = "DanhSachPhieuNhap.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Danh sách phiếu nhập");
+
+                        // Header
+                        string[] headers = { "Mã phiếu nhập", "Tên kho", "Người lập phiếu", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
+                        for (int i = 0; i < headers.Length; i++)
+                        {
+                            worksheet.Cell(1, i + 1).Value = headers[i];
+                            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
+                            worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                            worksheet.Cell(1, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Cell(1, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        }
+
+                        int row = 2;
+                        foreach (dynamic item in dgSanPham.ItemsSource)
+                        {
+                            worksheet.Cell(row, 1).Value = item.MaPhieuNhap;
+                            worksheet.Cell(row, 2).Value = item.TenKho;
+                            worksheet.Cell(row, 3).Value = item.TenNhanVien;
+                            worksheet.Cell(row, 4).Value = item.TenNCC;
+                            worksheet.Cell(row, 5).Value = item.NgayNhap.ToString("dd/MM/yyyy");
+                            worksheet.Cell(row, 6).Value = item.TongTien;
+                            worksheet.Cell(row, 7).Value = item.TrangThai;
+
+                            for (int i = 1; i <= 7; i++)
+                            {
+                                worksheet.Cell(row, i).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                worksheet.Cell(row, i).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                                worksheet.Cell(row, i).Style.Alignment.Horizontal = (i == 6) ? XLAlignmentHorizontalValues.Right : XLAlignmentHorizontalValues.Center;
+                            }
+
+                            worksheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0 VNĐ";
+                            row++;
+                        }
+
+                        worksheet.Columns().AdjustToContents();
+                        workbook.SaveAs(saveFileDialog.FileName);
+                    }
+
+                    MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi xuất Excel: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        private void btnExportPDF_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (dgSanPham.ItemsSource == null)
+                {
+                    MessageBox.Show("Không có dữ liệu để xuất.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "PDF Files|*.pdf",
+                    Title = "Lưu file PDF",
+                    FileName = "DanhSachPhieuNhap.pdf"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    var document = new PdfSharpCore.Pdf.PdfDocument();
+                    var page = document.AddPage();
+                    page.Orientation = PdfSharpCore.PageOrientation.Landscape; 
+
+                    var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                    var fontHeader = new PdfSharpCore.Drawing.XFont("Arial", 14, PdfSharpCore.Drawing.XFontStyle.Bold);
+                    var fontContent = new PdfSharpCore.Drawing.XFont("Arial", 10, PdfSharpCore.Drawing.XFontStyle.Regular);
+
+                    double margin = 40;
+                    double y = margin;
+                    double rowHeight = 25;
+                    double[] columnWidths = { 60, 100, 100, 150, 80, 90, 80 }; 
+
+                    // Vẽ tiêu đề
+                    gfx.DrawString("DANH SÁCH PHIẾU NHẬP", fontHeader, PdfSharpCore.Drawing.XBrushes.Black,
+                        new PdfSharpCore.Drawing.XRect(0, y, page.Width, page.Height),
+                        PdfSharpCore.Drawing.XStringFormats.TopCenter);
+
+                    y += 40;
+
+                    // Header bảng
+                    string[] headers = { "Mã PN", "Tên kho", "Người lập", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
+                    double x = margin;
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        gfx.DrawRectangle(PdfSharpCore.Drawing.XPens.Black, PdfSharpCore.Drawing.XBrushes.LightBlue, x, y, columnWidths[i], rowHeight);
+                        gfx.DrawString(headers[i], fontContent, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XRect(x, y, columnWidths[i], rowHeight), PdfSharpCore.Drawing.XStringFormats.Center);
+                        x += columnWidths[i];
+                    }
+
+                    y += rowHeight;
+
+                    // Nội dung bảng
+                    foreach (dynamic item in dgSanPham.ItemsSource)
+                    {
+                        x = margin;
+                        string[] data = {
+                    item.MaPhieuNhap.ToString(),
+                    item.TenKho,
+                    item.TenNhanVien,
+                    item.TenNCC,
+                    ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy"),
+                    string.Format("{0:N0} VNĐ", item.TongTien),
+                    item.TrangThai.ToString()
+                };
+
+                        for (int i = 0; i < data.Length; i++)
+                        {
+                            gfx.DrawRectangle(PdfSharpCore.Drawing.XPens.Black, x, y, columnWidths[i], rowHeight);
+                            gfx.DrawString(data[i], fontContent, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XRect(x + 5, y + 5, columnWidths[i] - 10, rowHeight - 10), PdfSharpCore.Drawing.XStringFormats.TopLeft);
+                            x += columnWidths[i];
+                        }
+
+                        y += rowHeight;
+
+                        // Thêm trang mới nếu hết trang
+                        if (y > page.Height - margin - rowHeight)
+                        {
+                            page = document.AddPage();
+                            page.Orientation = PdfSharpCore.PageOrientation.Landscape; 
+                            gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                            y = margin;
+                        }
+                    }
+
+                    document.Save(saveFileDialog.FileName);
+
+                    MessageBox.Show("Xuất file PDF thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi xuất PDF: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
     }
 }
