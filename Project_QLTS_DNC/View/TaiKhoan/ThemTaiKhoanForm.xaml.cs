@@ -267,5 +267,11 @@ namespace Project_QLTS_DNC.View.TaiKhoan
         // Thêm các biến thành viên vào đầu lớp ThemTaiKhoanForm
         private int _editingTaiKhoanId;
         private bool _isEditMode = false;
+
+        private void btnHuy_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
+        }
     }
 }

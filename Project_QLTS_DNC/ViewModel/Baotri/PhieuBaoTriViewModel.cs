@@ -84,6 +84,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 OnPropertyChanged(nameof(DsTaiSanCanBaoTri));
             }
         }
+        
+        // Thêm Dictionary để lưu thông tin chi tiết tài sản
+        private Dictionary<int, TaiSanInfo> _taiSanDict;
         #endregion
 
         private readonly PhieuBaoTriService _phieuBaoTriService;
@@ -93,6 +96,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             _phieuBaoTriService = new PhieuBaoTriService();
             DsBaoTri = new ObservableCollection<PhieuBaoTri>();
             DsTaiSanCanBaoTri = new ObservableCollection<PhieuBaoTri>();
+            _taiSanDict = new Dictionary<int, TaiSanInfo>();
             // Không tự động gọi LoadDSBaoTriAsync() trong constructor
         }
 
@@ -100,6 +104,15 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         protected virtual void OnPropertyChanged(string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        // Tạo lớp để lưu thông tin tài sản
+        public class TaiSanInfo
+        {
+            public int MaTaiSan { get; set; }
+            public string TenTaiSan { get; set; }
+            public string SoSeri { get; set; }
+            public string TinhTrangSP { get; set; }
         }
 
         #region Data Loading Methods
@@ -120,6 +133,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 }
                 else
                 {
+                    // Tải thông tin tài sản trước
+                    await LoadTaiSanInfoAsync();
+                    
                     // Bổ sung thông tin tên cho TenLoaiBaoTri, tạo TenNguoiPhuTrach và TenTaiSan nếu cần
                     await EnrichPhieuBaoTriDataAsync(danhSachBaoTri);
 
@@ -146,26 +162,16 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 Console.WriteLine("Bổ sung thông tin hiển thị cho phiếu bảo trì...");
 
+                // Đảm bảo đã tải thông tin tài sản
+                if (_taiSanDict == null || _taiSanDict.Count == 0)
+                {
+                    await LoadTaiSanInfoAsync();
+                }
+
                 foreach (var phieu in danhSachPhieu)
                 {
-                    // Tên loại bảo trì đã có trong model, không cần truy vấn
-
-                    // Gán tên tài sản
-                    if (phieu.MaTaiSan.HasValue)
-                    {
-                        try
-                        {
-                            phieu.TenTaiSan = await GetTenTaiSanAsync(phieu.MaTaiSan.Value);
-                        }
-                        catch
-                        {
-                            phieu.TenTaiSan = $"Tài sản #{phieu.MaTaiSan}";
-                        }
-                    }
-                    else
-                    {
-                        phieu.TenTaiSan = "Không xác định";
-                    }
+                    // Cập nhật thông tin hiển thị tài sản
+                    UpdateTaiSanDisplayInfo(phieu);
 
                     // Gán tên nhân viên
                     if (phieu.MaNV.HasValue)
@@ -274,6 +280,49 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 IsLoading = false;
             }
         }
+        
+        // Thêm phương thức LoadTaiSanInfoAsync để tải thông tin chi tiết tài sản
+        public async Task LoadTaiSanInfoAsync()
+        {
+            try
+            {
+                Console.WriteLine("Đang tải thông tin chi tiết tài sản...");
+                // Lấy danh sách tất cả các tài sản từ service
+                _taiSanDict = await _phieuBaoTriService.GetAllTaiSanInfoAsync();
+                Console.WriteLine($"Đã tải được thông tin của {_taiSanDict?.Count ?? 0} tài sản");
+                
+                // Cập nhật thông tin hiển thị cho các phiếu đã có
+                if (DsBaoTri != null && DsBaoTri.Count > 0)
+                {
+                    foreach (var phieu in DsBaoTri)
+                    {
+                        UpdateTaiSanDisplayInfo(phieu);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tải thông tin tài sản: {ex.Message}");
+            }
+        }
+        
+        // Helper để cập nhật thông tin hiển thị của tài sản
+        private void UpdateTaiSanDisplayInfo(PhieuBaoTri phieu)
+        {
+            if (phieu.MaTaiSan.HasValue && _taiSanDict != null && _taiSanDict.TryGetValue(phieu.MaTaiSan.Value, out var taiSan))
+            {
+                // Định dạng theo yêu cầu: Tên tài sản, Số seri, Tình trạng
+                phieu.TenTaiSan = $"{taiSan.TenTaiSan}\nSố sê-ri: {taiSan.SoSeri}\nTình trạng: {taiSan.TinhTrangSP}";
+            }
+            else if (phieu.MaTaiSan.HasValue)
+            {
+                phieu.TenTaiSan = $"Tài sản #{phieu.MaTaiSan}";
+            }
+            else
+            {
+                phieu.TenTaiSan = "Không xác định";
+            }
+        }
         #endregion
 
         #region CRUD Operations
@@ -298,11 +347,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 bool result = await _phieuBaoTriService.AddPhieuBaoTriAsync(phieuBaoTri);
                 if (result)
                 {
-                    // Cập nhật thông tin tên trước khi thêm vào danh sách
-                    if (phieuBaoTri.MaTaiSan.HasValue)
-                    {
-                        phieuBaoTri.TenTaiSan = await GetTenTaiSanAsync(phieuBaoTri.MaTaiSan.Value);
-                    }
+                    // Cập nhật thông tin hiển thị trước khi thêm vào danh sách
+                    UpdateTaiSanDisplayInfo(phieuBaoTri);
+                    
                     if (phieuBaoTri.MaNV.HasValue)
                     {
                         phieuBaoTri.TenNguoiPhuTrach = await GetTenNhanVienAsync(phieuBaoTri.MaNV.Value);
@@ -341,11 +388,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 bool result = await _phieuBaoTriService.UpdatePhieuBaoTriAsync(phieuBaoTri);
                 if (result)
                 {
-                    // Cập nhật thông tin tên trước khi cập nhật danh sách
-                    if (phieuBaoTri.MaTaiSan.HasValue)
-                    {
-                        phieuBaoTri.TenTaiSan = await GetTenTaiSanAsync(phieuBaoTri.MaTaiSan.Value);
-                    }
+                    // Cập nhật thông tin hiển thị trước khi cập nhật danh sách
+                    UpdateTaiSanDisplayInfo(phieuBaoTri);
+                    
                     if (phieuBaoTri.MaNV.HasValue)
                     {
                         phieuBaoTri.TenNguoiPhuTrach = await GetTenNhanVienAsync(phieuBaoTri.MaNV.Value);

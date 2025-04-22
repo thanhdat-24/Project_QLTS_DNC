@@ -354,7 +354,7 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Mã phiếu" Width="90" Binding="{Binding MaBaoTri}">
+                        <DataGridTextColumn Header="Mã phiếu" Width="86" Binding="{Binding MaBaoTri}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -362,15 +362,18 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Tài sản" Width="120" Binding="{Binding TenTaiSan}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Loại bảo trì" Width="110" Binding="{Binding TenLoaiBaoTri}">
+                        <DataGridTemplateColumn Header="Tài sản" Width="250">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5,3">
+                                        <TextBlock Text="{Binding TenTaiSan}" FontWeight="Medium" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding SoSeri, StringFormat=Số sê-ri: {0}}" Foreground="#555" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding TinhTrang, StringFormat=Tình trạng: {0}}" Foreground="#555" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Loại bảo trì" Width="100" Binding="{Binding TenLoaiBaoTri}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -402,7 +405,7 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Header="Trạng thái" Width="120">
+                        <DataGridTemplateColumn Header="Trạng thái" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border CornerRadius="15" Padding="10,5" HorizontalAlignment="Center">
@@ -450,7 +453,7 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Chi phí" Width="120" Binding="{Binding ChiPhi, StringFormat=N0, ConverterCulture='vi-VN'}">
+                        <DataGridTextColumn Header="Chi phí" Width="100" Binding="{Binding ChiPhi, StringFormat=N0, ConverterCulture='vi-VN'}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
