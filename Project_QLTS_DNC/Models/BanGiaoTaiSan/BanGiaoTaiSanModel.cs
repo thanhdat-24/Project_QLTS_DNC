@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
@@ -152,5 +153,7 @@ namespace Project_QLTS_DNC.DTOs
         public bool IsSelected { get; set; }
         public int ViTriTS { get; set; } = 1; // Mặc định vị trí là 1
         public string GhiChu { get; set; }
+
+        public ObservableCollection<ViTriTSItem> ViTriList { get; set; } = new ObservableCollection<ViTriTSItem>();
     }
 }

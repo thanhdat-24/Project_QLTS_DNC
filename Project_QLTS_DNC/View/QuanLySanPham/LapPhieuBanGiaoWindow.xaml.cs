@@ -20,6 +20,7 @@ using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 using Project_QLTS_DNC.Services.BanGiaoTaiSanService;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.View.QuanLyToanNha;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -29,6 +30,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         private ObservableCollection<KhoBanGiaoFilter> _dsKho;
         private ObservableCollection<NhanVienModel> _dsNhanVien;
         private ObservableCollection<TaiSanKhoBanGiaoDTO> _dsTaiSanKho;
+        private Dictionary<int, List<int>> _viTriDaSuDung = new Dictionary<int, List<int>>();
+        private Dictionary<int, List<int>> _viTriKhaDung = new Dictionary<int, List<int>>();
 
         private int? _maToaNhaPhong = null;
         private int? _maToaNhaKho = null;
@@ -152,6 +155,81 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
         }
 
+        private async Task CapNhatDanhSachViTriAsync()
+        {
+            try
+            {
+                if (_dsTaiSanKho == null || _dsTaiSanKho.Count == 0 || !_maToaNhaPhong.HasValue)
+                    return;
+
+                var selectedPhong = cboPhong.SelectedItem as PhongBanGiaoFilter;
+                if (selectedPhong == null)
+                    return;
+
+                // Lấy danh sách nhóm tài sản
+                var dsNhomTS = _dsTaiSanKho
+                    .Where(ts => ts.MaNhomTS.HasValue)
+                    .Select(ts => ts.MaNhomTS.Value)
+                    .Distinct()
+                    .ToList();
+
+                if (dsNhomTS.Count == 0)
+                    return;
+
+                // Lấy danh sách vị trí đã sử dụng
+                _viTriDaSuDung = await BanGiaoTaiSanService.LayDanhSachViTriDaSuDungAsync(selectedPhong.MaPhong, dsNhomTS);
+
+                // Lấy danh sách vị trí khả dụng
+                _viTriKhaDung = await BanGiaoTaiSanService.TaoDanhSachViTriKhaDungAsync(selectedPhong.MaPhong, dsNhomTS);
+
+                // Cập nhật danh sách vị trí cho mỗi tài sản
+                foreach (var taiSan in _dsTaiSanKho)
+                {
+                    if (taiSan.MaNhomTS.HasValue)
+                    {
+                        int maNhomTS = taiSan.MaNhomTS.Value;
+
+                        // Xóa danh sách vị trí cũ
+                        taiSan.ViTriList.Clear();
+
+                        // Nếu có danh sách vị trí khả dụng cho nhóm này
+                        // Nếu có thông tin sức chứa cho nhóm này
+                        if (_viTriKhaDung.TryGetValue(maNhomTS, out List<int> dsViTri))
+                        {
+                            List<int> daDaSuDung = _viTriDaSuDung.TryGetValue(maNhomTS, out List<int> ds) ? ds : new List<int>();
+
+                            // Thêm tất cả vị trí vào danh sách
+                            foreach (int viTri in dsViTri)
+                            {
+                                taiSan.ViTriList.Add(new ViTriTSItem
+                                {
+                                    ViTri = viTri,
+                                    DaDuocSuDung = daDaSuDung.Contains(viTri),
+                                    IsConfigurationNeeded = false
+                                });
+                            }
+
+                            // Add code here to handle default selection if needed
+                        }
+                        else
+                        {
+                            // No configured capacity - add a special item
+                            taiSan.ViTriList.Add(new ViTriTSItem
+                            {
+                                ViTri = 0,  // Invalid position that will trigger validation
+                                DaDuocSuDung = false,
+                                IsConfigurationNeeded = true
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi cập nhật danh sách vị trí: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private async Task LoadTaiSanTrongKho()
         {
             try
@@ -163,6 +241,9 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 {
                     _dsTaiSanKho = await BanGiaoTaiSanService.LayDanhSachTaiSanTrongKhoAsync(_maToaNhaPhong.Value);
                     dgTaiSanKho.ItemsSource = _dsTaiSanKho;
+
+                    // Cập nhật danh sách vị trí
+                    await CapNhatDanhSachViTriAsync();
                 }
             }
             catch (Exception ex)
@@ -175,13 +256,77 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
         }
 
-        private void txtViTri_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        // Thêm sự kiện cho ComboBox vị trí
+        private void cboViTri_Loaded(object sender, RoutedEventArgs e)
         {
-            // Chỉ cho phép nhập số
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
+            // Xử lý sự kiện khi ComboBox được tải
+            ComboBox cbo = sender as ComboBox;
+            if (cbo != null && cbo.Items.Count > 0 && cbo.SelectedItem == null)
+            {
+                // Mặc định chọn vị trí đầu tiên nếu chưa có vị trí được chọn
+                cbo.SelectedIndex = 0;
+            }
         }
 
+        private async void cboViTri_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cbo = sender as ComboBox;
+            if (cbo != null && cbo.SelectedItem != null)
+            {
+                var taiSan = cbo.DataContext as TaiSanKhoBanGiaoDTO;
+                if (taiSan != null)
+                {
+                    var viTriItem = cbo.SelectedItem as ViTriTSItem;
+                    if (viTriItem != null)
+                    {
+                        // Check if configuration is needed
+                        if (viTriItem.IsConfigurationNeeded)
+                        {
+                            // Show configuration dialog
+                            MessageBoxResult result = MessageBox.Show(
+                                $"Phòng chưa được cấu hình sức chứa cho nhóm tài sản '{taiSan.TenNhomTS}'. Bạn có muốn cấu hình ngay không?",
+                                "Cảnh báo", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                            if (result == MessageBoxResult.Yes)
+                            {
+                                // Get selected room
+                                var selectedPhong = cboPhong.SelectedItem as PhongBanGiaoFilter;
+                                if (selectedPhong != null && taiSan.MaNhomTS.HasValue)
+                                {
+                                    // Open configuration form
+                                    var configWindow = new suc_chua_phong_nhom(selectedPhong.MaPhong);
+                                    configWindow.ShowDialog();
+
+                                    // Reload position list after configuration
+                                    await CapNhatDanhSachViTriAsync();
+
+                                    // Try to select the first available position
+                                    if (taiSan.ViTriList.Count > 0)
+                                    {
+                                        var firstNonConfigItem = taiSan.ViTriList.FirstOrDefault(v => !v.IsConfigurationNeeded);
+                                        if (firstNonConfigItem != null)
+                                        {
+                                            cbo.SelectedItem = firstNonConfigItem;
+                                            taiSan.ViTriTS = firstNonConfigItem.ViTri;
+                                        }
+                                    }
+                                }
+                            }
+                            // Don't update ViTriTS
+                            return;
+                        }
+
+                        // Update asset position as normal
+                        taiSan.ViTriTS = viTriItem.ViTri;
+                    }
+                }
+            }
+        }
+        private async void dgTaiSanKho_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Nếu có tài sản được chọn/hủy, cập nhật danh sách vị trí
+            await CapNhatDanhSachViTriAsync();
+        }
         private void btnHuy_Click(object sender, RoutedEventArgs e)
         {
             // Xác nhận trước khi đóng
@@ -337,11 +482,23 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             }
 
             // Kiểm tra vị trí
+            // Trong phương thức ValidateInput, thay đổi phần kiểm tra vị trí:
             foreach (var taiSan in dsTaiSanDaChon)
             {
                 if (taiSan.ViTriTS <= 0)
                 {
-                    MessageBox.Show($"Vị trí của tài sản '{taiSan.TenTaiSan}' phải là số dương.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Kiểm tra xem có phải do chưa cấu hình sức chứa
+                    bool needsConfiguration = taiSan.ViTriList.Any(v => v.IsConfigurationNeeded);
+                    if (needsConfiguration)
+                    {
+                        MessageBox.Show($"Vui lòng cấu hình sức chứa cho tài sản '{taiSan.TenTaiSan}' trước khi bàn giao.",
+                            "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Vị trí của tài sản '{taiSan.TenTaiSan}' phải là số dương.",
+                            "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                     return false;
                 }
             }
