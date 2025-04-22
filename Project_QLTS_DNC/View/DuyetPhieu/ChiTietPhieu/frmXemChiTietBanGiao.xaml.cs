@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using static Supabase.Postgrest.Constants;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 {
@@ -66,34 +67,32 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
 
+                // Cập nhật mã phòng cho từng tài sản trong chi tiết bàn giao
                 foreach (var ct in _dsChiTiet)
                 {
-                    // Lấy đúng bản gốc tài sản từ Supabase
                     var response = await client
                         .From<TaiSanModel>()
-                        .Filter("ma_tai_san", Supabase.Postgrest.Constants.Operator.Equals, ct.MaTaiSan)
+                        .Filter("ma_tai_san", Operator.Equals, ct.MaTaiSan)
                         .Get();
 
                     var taiSan = response.Models.FirstOrDefault();
                     if (taiSan != null)
                     {
-                        // ✅ Gán lại phòng mới
                         taiSan.MaPhong = _phieu.MaPhong;
 
-                        // ✅ Update lại tài sản đầy đủ
+                        // Update lại tài sản
                         await client.From<TaiSanModel>().Update(taiSan);
                     }
                 }
 
-                // ✅ Cập nhật trạng thái phiếu bàn giao
+                // Cập nhật trạng thái duyệt phiếu bàn giao
                 var ketQua = await BanGiaoTaiSanService.DuyetPhieuBanGiaoAsync(_maPhieuBanGiao, true);
 
                 if (ketQua)
                 {
                     MessageBox.Show("✅ Duyệt phiếu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    OnPhieuDuyetThanhCong?.Invoke(); // Gọi sự kiện load lại danh sách
-                    Window.GetWindow(this)?.Close(); // Đóng form sau duyệt
+                    OnPhieuDuyetThanhCong?.Invoke();
+                    Window.GetWindow(this)?.Close();
                 }
                 else
                 {
@@ -105,6 +104,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 MessageBox.Show("Lỗi khi duyệt: " + ex.Message);
             }
         }
+
 
 
         private async void btnTuChoi_Click(object sender, RoutedEventArgs e)

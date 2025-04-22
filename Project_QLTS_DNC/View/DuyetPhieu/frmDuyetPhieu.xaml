@@ -609,7 +609,7 @@
                                 </Style>
                             </DataGrid.Style>
                         </DataGrid>
-                        
+
                     </materialDesign:Card>
                 </Grid>
             </TabItem>
