@@ -502,7 +502,7 @@ namespace Project_QLTS_DNC
 
         private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.CaiDat.PhieuInForm();
+            MainContentPanel.Content = new View.CaiDat.CaiDatPhieuInForm();
 
         }
 
