@@ -240,10 +240,7 @@ namespace Project_QLTS_DNC.View.NhanVien
             }
         }
 
-        private void btnHuy_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        
 
         private void cboPhongBan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -335,6 +332,13 @@ namespace Project_QLTS_DNC.View.NhanVien
                 System.Diagnostics.Debug.WriteLine($"Error loading data for ComboBoxes: {ex.Message}");
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        
+
+        private void btnHuy_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
