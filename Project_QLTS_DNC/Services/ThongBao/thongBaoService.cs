@@ -179,26 +179,200 @@ namespace Project_QLTS_DNC.Services.ThongBao
             }
         }
 
-        //public async Task<bool> XoaThongBaoDaDocAsync()
-        //{
-        //    try
-        //    {
-        //        var client = await GetClientAsync();
-        //        int maTaiKhoan = Helpers.ThongTinDangNhap.TaiKhoanDangNhap.MaTk;
+        /// <summary>
+        /// Duyệt phiếu bàn giao tài sản
+        /// </summary>
+        /// <param ></param>
+        /// <returns></returns>
+        public async Task GuiThongBao_AdminDaDuyetPhieuBanGiaoAsync(int maPhieuBanGiao, int maAdminDuyet, string tenAdmin)
+        {
+            var client = await GetClientAsync();
 
-        //        var response = await client
-        //            .From<ThongBaoModel>()
-        //            .Where(x => x.DaDoc == true && x.MaTaiKhoan == maTaiKhoan)
-        //            .Delete();
+            // Lấy danh sách tất cả admin
+            var dsAdmin = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaLoaiTk == 1) // 1 = admin
+                .Get();
 
-        //        return response != null;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"[Lỗi xóa thông báo đã đọc] {ex.Message}");
-        //        return false;
-        //    }
-        //}
+            foreach (var admin in dsAdmin.Models)
+            {
+                if (admin.MaTk == maAdminDuyet)
+                    continue; // Bỏ qua chính người duyệt
+
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"✅ Admin {tenAdmin} đã duyệt phiếu bàn giao #{maPhieuBanGiao}",
+                    MaTaiKhoan = admin.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+        public async Task GuiThongBao_AdminTuChoiPhieuBanGiaoAsync(int maPhieuBanGiao, int maAdminTuChoi, string tenAdmin)
+        {
+            var client = await GetClientAsync();
+
+            // Lấy danh sách tất cả admin
+            var dsAdmin = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaLoaiTk == 1) // 1 = admin
+                .Get();
+
+            foreach (var admin in dsAdmin.Models)
+            {
+                if (admin.MaTk == maAdminTuChoi)
+                    continue; // Không gửi lại cho chính người từ chối
+
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"❌ Admin {tenAdmin} đã từ chối phiếu bàn giao #{maPhieuBanGiao}",
+                    MaTaiKhoan = admin.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+
+
+        public async Task GuiThongBaoPhieuBanGiao_DaDuyetAsync(int maPhieuBanGiao, int maNvNguoiTao)
+        {
+            var client = await GetClientAsync();
+
+            var taiKhoanNguoiTao = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaNv == maNvNguoiTao)
+                .Single();
+
+            if (taiKhoanNguoiTao != null)
+            {
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"✅ Phiếu bàn giao #{maPhieuBanGiao} đã được duyệt",
+                    MaTaiKhoan = taiKhoanNguoiTao.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+
+        public async Task GuiThongBaoPhieuBanGiao_TuChoiAsync(int maPhieuBanGiao, int maNvNguoiTao)
+        {
+            var client = await GetClientAsync();
+
+            var taiKhoanNguoiTao = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaNv == maNvNguoiTao)
+                .Single();
+
+            if (taiKhoanNguoiTao != null)
+            {
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"❌ Phiếu bàn giao #{maPhieuBanGiao} đã bị từ chối",
+                    MaTaiKhoan = taiKhoanNguoiTao.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gửi thông báo duyệt nhập kho
+        /// </summary>
+        /// <param></param>
+        /// <param ></param>
+        /// <returns></returns>
+
+        public async Task GuiThongBaoPhieuNhapKho_DaDuyetAsync(int maPhieuNhap, int maNvNguoiTao)
+        {
+            var client = await GetClientAsync();
+
+            var taiKhoanNguoiTao = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaNv == maNvNguoiTao)
+                .Single();
+
+            if (taiKhoanNguoiTao != null)
+            {
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"✅ Phiếu nhập kho #{maPhieuNhap} đã được duyệt",
+                    MaTaiKhoan = taiKhoanNguoiTao.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+
+        public async Task GuiThongBaoPhieuNhapKho_TuChoiAsync(int maPhieuNhap, int maNvNguoiTao)
+        {
+            var client = await GetClientAsync();
+
+            var taiKhoanNguoiTao = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaNv == maNvNguoiTao)
+                .Single();
+
+            if (taiKhoanNguoiTao != null)
+            {
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"❌ Phiếu nhập kho #{maPhieuNhap} đã bị từ chối",
+                    MaTaiKhoan = taiKhoanNguoiTao.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+
+
+        public async Task GuiThongBao_AdminDaDuyetPhieuNhapKhoAsync(int maPhieuNhap, int maAdminDuyet, string tenAdmin)
+        {
+            var client = await GetClientAsync();
+
+            var dsAdmin = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaLoaiTk == 1)
+                .Get();
+
+            foreach (var admin in dsAdmin.Models)
+            {
+                if (admin.MaTk == maAdminDuyet)
+                    continue;
+
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"✅ Admin {tenAdmin} đã duyệt phiếu nhập kho #{maPhieuNhap}",
+                    MaTaiKhoan = admin.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
+
+        public async Task GuiThongBao_AdminTuChoiPhieuNhapKhoAsync(int maPhieuNhap, int maAdminTuChoi, string tenAdmin)
+        {
+            var client = await GetClientAsync();
+
+            var dsAdmin = await client
+                .From<TaiKhoanModel>()
+                .Where(x => x.MaLoaiTk == 1) // 1 = admin
+                .Get();
+
+            foreach (var admin in dsAdmin.Models)
+            {
+                if (admin.MaTk == maAdminTuChoi)
+                    continue; // Bỏ qua chính người từ chối
+
+                await ThemThongBaoAsync(new ThongBaoModel
+                {
+                    NoiDung = $"❌ Admin {tenAdmin} đã từ chối phiếu nhập kho #{maPhieuNhap}",
+                    MaTaiKhoan = admin.MaTk,
+                    ThoiGian = DateTime.Now,
+                    DaDoc = false
+                });
+            }
+        }
 
     }
 }

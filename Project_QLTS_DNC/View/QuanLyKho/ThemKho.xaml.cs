@@ -133,11 +133,37 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 return;
             }
 
+            var danhSachKho = await LayDanhSachKhoAsync();
+
+            // ✅ Kiểm tra trùng tên kho
+            bool tenKhoTrung = _selectedKho == null
+                ? danhSachKho.Any(k => k.TenKho.Trim().ToLower() == txtTenKho.Text.Trim().ToLower())
+                : danhSachKho.Any(k => k.TenKho.Trim().ToLower() == txtTenKho.Text.Trim().ToLower() && k.MaKho != _selectedKho.MaKho);
+
+            if (tenKhoTrung)
+            {
+                MessageBox.Show("Tên kho đã tồn tại. Vui lòng nhập tên khác.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // ✅ Kiểm tra mỗi tòa nhà chỉ có 1 kho
+            if (_selectedKho == null && danhSachKho.Any(k => k.MaToaNha == selectedToaNha.MaToaNha))
+            {
+                MessageBox.Show("Tòa nhà này đã có kho. Mỗi tòa nhà chỉ được có 1 kho!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_selectedKho != null && danhSachKho.Any(k => k.MaToaNha == selectedToaNha.MaToaNha && k.MaKho != _selectedKho.MaKho))
+            {
+                MessageBox.Show("Tòa nhà này đã có kho khác. Mỗi tòa nhà chỉ được có 1 kho!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var newKho = new Kho
             {
                 MaKho = maKhoMoi,
-                TenKho = txtTenKho.Text,
-                MoTa = txtMoTa.Text,
+                TenKho = txtTenKho.Text.Trim(),
+                MoTa = txtMoTa.Text.Trim(),
                 MaToaNha = selectedToaNha.MaToaNha
             };
 
@@ -147,9 +173,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
                 if (_selectedKho == null)
                 {
-                    // 👉 Nếu thêm mới
                     var response = await client.From<Kho>().Insert(newKho);
-
                     if (response.Models.Count > 0)
                     {
                         MessageBox.Show("Lưu kho thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -162,39 +186,15 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 }
                 else
                 {
-                    // 👉 Nếu đang cập nhật kho cũ
-                    var result = await client.From<Kho>().Get();
-
-                    if (result.Models.Any())
+                    var response = await client.From<Kho>().Update(newKho);
+                    if (response.Models.Count > 0)
                     {
-                        var existingKho = result.Models.FirstOrDefault(k => k.MaKho == _selectedKho.MaKho);
-
-                        if (existingKho != null)
-                        {
-                            existingKho.TenKho = newKho.TenKho;
-                            existingKho.MoTa = newKho.MoTa;
-                            existingKho.MaToaNha = newKho.MaToaNha;
-
-                            var updateResponse = await client.From<Kho>().Update(existingKho);
-
-                            if (updateResponse.Models.Count > 0)
-                            {
-                                MessageBox.Show("Cập nhật kho thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                                this.Close();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Không thể cập nhật kho!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show("Kho không tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
+                        MessageBox.Show("Cập nhật kho thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        this.Close();
                     }
                     else
                     {
-                        MessageBox.Show("Không có dữ liệu kho.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Không thể cập nhật kho!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -203,7 +203,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show($"Lỗi khi lưu kho: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
     }
 }
