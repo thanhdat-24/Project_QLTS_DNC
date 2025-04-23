@@ -1,8 +1,10 @@
 ﻿using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.BanGiaoTaiSanService;
+using Project_QLTS_DNC.Services.ThongBao;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -123,6 +125,15 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 {
                     phieu.TrangThai = true;
                     await client.From<BanGiaoTaiSanModel>().Update(phieu);
+
+                    // 🔔 Gửi thông báo đã duyệt cho người tạo phiếu
+                    await new ThongBaoService().GuiThongBaoPhieuBanGiao_DaDuyetAsync(_maPhieuBanGiao, phieu.MaNV);
+                    await new ThongBaoService().GuiThongBao_AdminDaDuyetPhieuBanGiaoAsync(
+                        _maPhieuBanGiao,
+                        ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
+                        ThongTinDangNhap.TaiKhoanDangNhap.TenTaiKhoan
+                    );
+
                 }
 
                 MessageBox.Show("✅ Duyệt phiếu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -151,6 +162,30 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 var ketQua = await BanGiaoTaiSanService.DuyetPhieuBanGiaoAsync(_maPhieuBanGiao, false);
                 if (ketQua)
                 {
+                    // 🔍 Lấy thông tin phiếu để biết ai là người tạo
+                    var client = await SupabaseService.GetClientAsync();
+                    var phieuResp = await client
+                        .From<BanGiaoTaiSanModel>()
+                        .Filter("ma_bang_giao_ts", Operator.Equals, _maPhieuBanGiao)
+                        .Get();
+
+                    var phieu = phieuResp.Models.FirstOrDefault();
+
+                    if (phieu != null)
+                    {
+                        // 🔔 Gửi thông báo từ chối
+                        await new ThongBaoService().GuiThongBaoPhieuBanGiao_TuChoiAsync(
+                            _maPhieuBanGiao,
+                            phieu.MaNV
+                        );
+                        await new ThongBaoService().GuiThongBao_AdminTuChoiPhieuBanGiaoAsync(
+                                _maPhieuBanGiao,
+                                ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
+                                ThongTinDangNhap.TaiKhoanDangNhap.TenTaiKhoan
+);
+
+                    }
+
                     MessageBox.Show("❌ Phiếu đã bị từ chối.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     await LoadDuLieuPhieu();
                 }

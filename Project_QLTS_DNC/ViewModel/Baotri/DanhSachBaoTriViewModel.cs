@@ -266,123 +266,215 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         }
 
         public async Task LoadDSKiemKeAsync()
-{
-    try
-    {
-        IsLoading = true;
-        
-        // Tải danh mục trước
-        await LoadDanhMucAsync();
-        
-        // Lấy dữ liệu tài sản từ _dsBaotriService thay vì _taiSanService
-        var dsTaiSanCanKiemTra = await _dsBaotriService.GetDanhSachTaiSanCanKiemTraAsync();
-        var dsPhong = await _phongService.GetDanhSachPhongAsync();
-        var dsChiTietPhieuNhap = await _chiTietPhieuNhapService.GetDanhSachChiTietPhieuNhapAsync();
-        
-        // Chuyển đổi từ TaiSanModel sang KiemKeTaiSan
-        var danhSach = new List<KiemKeTaiSan>();
-        int maKiemKe = 1; // Khởi tạo mã kiểm kê (có thể điều chỉnh logic tạo mã)
-        
-        foreach (var taiSan in dsTaiSanCanKiemTra)
         {
-            var kiemKeTaiSan = new KiemKeTaiSan
+            try
             {
-                MaKiemKeTS = maKiemKe++,
-                MaTaiSan = taiSan.MaTaiSan,
-                MaPhong = taiSan.MaPhong,
-                TinhTrang = taiSan.TinhTrangSP,
-                ViTriThucTe = "", // Có thể thiết lập giá trị mặc định hoặc để trống
-                GhiChu = taiSan.GhiChu
-            };
-            
-            // Kết hợp tên tài sản với số seri (nếu có)
-            if (!string.IsNullOrEmpty(taiSan.SoSeri))
-                kiemKeTaiSan.TenTaiSan = $"{taiSan.TenTaiSan} - {taiSan.SoSeri}";
-            else
-                kiemKeTaiSan.TenTaiSan = taiSan.TenTaiSan;
-            
-            // Tìm thông tin phòng
-            var phong = dsPhong.FirstOrDefault(p => p.MaPhong == taiSan.MaPhong);
-            if (phong != null)
-            {
-                kiemKeTaiSan.TenPhong = phong.TenPhong;
-            }
-            else
-            {
-                kiemKeTaiSan.TenPhong = $"Phòng {taiSan.MaPhong}";
-            }
-            
-            // Tìm thông tin nhóm tài sản từ chi tiết phiếu nhập
-            if (taiSan.MaChiTietPN.HasValue)
-            {
-                var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
-                if (chiTietPN != null && chiTietPN.MaNhomTS > 0 && DsNhomTaiSan != null)
+                IsLoading = true;
+
+                // Tải danh mục trước
+                await LoadDanhMucAsync();
+
+                // Lấy dữ liệu từ bảng kiemketaisan
+                var dsKiemKe = await _dsBaotriService.GetKiemKeTaiSanAsync();
+
+                // Nếu không có dữ liệu trong bảng kiemketaisan, lấy từ bảng taisan với filter "Cần kiểm tra"
+                if (dsKiemKe == null || dsKiemKe.Count == 0)
                 {
-                    var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
-                    if (nhomTaiSan != null)
+                    // Lấy danh sách tài sản có trạng thái "Cần kiểm tra"
+                    var dsTaiSanCanKiemTra = await _dsBaotriService.GetDanhSachTaiSanCanKiemTraAsync();
+                    var dsPhong = await _phongService.GetDanhSachPhongAsync();
+                    var dsChiTietPhieuNhap = await _chiTietPhieuNhapService.GetDanhSachChiTietPhieuNhapAsync();
+
+                    // Chuyển đổi từ TaiSanModel sang KiemKeTaiSan
+                    var danhSach = new List<KiemKeTaiSan>();
+                    int maKiemKe = 1;
+
+                    foreach (var taiSan in dsTaiSanCanKiemTra)
                     {
-                        kiemKeTaiSan.MaNhomTS = nhomTaiSan.MaNhomTS;
-                        kiemKeTaiSan.TenNhomTS = nhomTaiSan.TenNhom;
+                        // Chỉ lấy những tài sản có tình trạng "Cần kiểm tra"
+                        if (taiSan.TinhTrangSP != "Cần kiểm tra")
+                            continue;
+
+                        var kiemKeTaiSan = new KiemKeTaiSan
+                        {
+                            MaKiemKeTS = maKiemKe++,
+                            MaTaiSan = taiSan.MaTaiSan,
+                            MaPhong = taiSan.MaPhong,
+                            TinhTrang = taiSan.TinhTrangSP,
+                            ViTriThucTe = "", // Có thể thiết lập giá trị mặc định hoặc để trống
+                            GhiChu = taiSan.GhiChu
+                        };
+
+                        // Kết hợp tên tài sản với số seri (nếu có)
+                        if (!string.IsNullOrEmpty(taiSan.SoSeri))
+                            kiemKeTaiSan.TenTaiSan = $"{taiSan.TenTaiSan} - {taiSan.SoSeri}";
+                        else
+                            kiemKeTaiSan.TenTaiSan = taiSan.TenTaiSan;
+
+                        // Tìm thông tin phòng
+                        var phong = dsPhong.FirstOrDefault(p => p.MaPhong == taiSan.MaPhong);
+                        if (phong != null)
+                        {
+                            kiemKeTaiSan.TenPhong = phong.TenPhong;
+                        }
+                        else
+                        {
+                            kiemKeTaiSan.TenPhong = $"Phòng {taiSan.MaPhong}";
+                        }
+
+                        // Tìm thông tin nhóm tài sản từ chi tiết phiếu nhập
+                        if (taiSan.MaChiTietPN.HasValue)
+                        {
+                            var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
+                            if (chiTietPN != null && chiTietPN.MaNhomTS > 0 && DsNhomTaiSan != null)
+                            {
+                                var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
+                                if (nhomTaiSan != null)
+                                {
+                                    kiemKeTaiSan.MaNhomTS = nhomTaiSan.MaNhomTS;
+                                    kiemKeTaiSan.TenNhomTS = nhomTaiSan.TenNhom;
+                                }
+                            }
+                        }
+
+                        // Thiết lập MaDotKiemKe và TenDotKiemKe mặc định (có thể điều chỉnh theo nhu cầu)
+                        kiemKeTaiSan.MaDotKiemKe = DateTime.Now.Year * 100 + DateTime.Now.Month; // Ví dụ: 202405
+                        kiemKeTaiSan.TenDotKiemKe = $"Đợt kiểm kê tháng {DateTime.Now.Month}/{DateTime.Now.Year}";
+
+                        // Thêm vào danh sách
+                        danhSach.Add(kiemKeTaiSan);
+                    }
+
+                    // Cập nhật danh sách đã được tạo từ bảng taisan
+                    dsKiemKe = danhSach;
+                }
+                else
+                {
+                    // Nếu có dữ liệu trong bảng kiemketaisan, bổ sung thông tin liên kết
+                    var dsTaiSan = await _taiSanService.GetDanhSachTaiSanAsync();
+                    var dsPhong = await _phongService.GetDanhSachPhongAsync();
+                    var dsChiTietPhieuNhap = await _chiTietPhieuNhapService.GetDanhSachChiTietPhieuNhapAsync();
+
+                    // Bổ sung thông tin từ các bảng liên kết
+                    foreach (var kiemKe in dsKiemKe)
+                    {
+                        if (kiemKe.MaTaiSan.HasValue)
+                        {
+                            // Lấy thông tin tài sản
+                            var taiSan = dsTaiSan.FirstOrDefault(ts => ts.MaTaiSan == kiemKe.MaTaiSan);
+                            if (taiSan != null)
+                            {
+                                // Cập nhật tình trạng từ tài sản nếu chưa có
+                                if (string.IsNullOrEmpty(kiemKe.TinhTrang))
+                                {
+                                    kiemKe.TinhTrang = taiSan.TinhTrangSP;
+                                }
+
+                                // Cập nhật tên tài sản
+                                if (string.IsNullOrEmpty(kiemKe.TenTaiSan))
+                                {
+                                    if (!string.IsNullOrEmpty(taiSan.SoSeri))
+                                        kiemKe.TenTaiSan = $"{taiSan.TenTaiSan} - {taiSan.SoSeri}";
+                                    else
+                                        kiemKe.TenTaiSan = taiSan.TenTaiSan;
+                                }
+
+                                // Cập nhật mã phòng nếu không có
+                                if (!kiemKe.MaPhong.HasValue && taiSan.MaPhong.HasValue)
+                                {
+                                    kiemKe.MaPhong = taiSan.MaPhong;
+                                }
+
+                                // Tìm thông tin nhóm tài sản từ chi tiết phiếu nhập
+                                if (taiSan.MaChiTietPN.HasValue)
+                                {
+                                    var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
+                                    if (chiTietPN != null && chiTietPN.MaNhomTS > 0 && DsNhomTaiSan != null)
+                                    {
+                                        var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
+                                        if (nhomTaiSan != null)
+                                        {
+                                            kiemKe.MaNhomTS = nhomTaiSan.MaNhomTS;
+                                            kiemKe.TenNhomTS = nhomTaiSan.TenNhom;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Lấy thông tin phòng
+                        if (kiemKe.MaPhong.HasValue)
+                        {
+                            var phong = dsPhong.FirstOrDefault(p => p.MaPhong == kiemKe.MaPhong);
+                            if (phong != null)
+                            {
+                                kiemKe.TenPhong = phong.TenPhong;
+                            }
+                            else
+                            {
+                                kiemKe.TenPhong = $"Phòng {kiemKe.MaPhong}";
+                            }
+                        }
+
+                        // Thiết lập tên đợt kiểm kê nếu chưa có
+                        if (string.IsNullOrEmpty(kiemKe.TenDotKiemKe) && kiemKe.MaDotKiemKe.HasValue)
+                        {
+                            kiemKe.TenDotKiemKe = $"Đợt kiểm kê {kiemKe.MaDotKiemKe}";
+                        }
                     }
                 }
-            }
-            
-            // Thiết lập MaDotKiemKe và TenDotKiemKe mặc định (có thể điều chỉnh theo nhu cầu)
-            kiemKeTaiSan.MaDotKiemKe = DateTime.Now.Year * 100 + DateTime.Now.Month; // Ví dụ: 202405
-            kiemKeTaiSan.TenDotKiemKe = $"Đợt kiểm kê tháng {DateTime.Now.Month}/{DateTime.Now.Year}";
-            
-            // Thêm vào danh sách
-            danhSach.Add(kiemKeTaiSan);
-        }
-        
-        // Lưu danh sách gốc
-        _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>(danhSach);
-        
-        // Cập nhật view
-        if (_dsKiemKeView == null)
-        {
-            _dsKiemKeView = new CollectionViewSource();
-        }
-        _dsKiemKeView.Source = _dsKiemKeGoc;
-        
-        // Thiết lập filter ban đầu
-        ICollectionView view = _dsKiemKeView.View;
-        if (view != null)
-        {
-            // Xóa filter cũ nếu có
-            if (view.Filter != null)
-            {
-                // Không có cách trực tiếp để xóa filter, nên tạo view mới
-                _dsKiemKeView = new CollectionViewSource();
+
+                // Chỉ lấy những tài sản có tình trạng "Cần kiểm tra"
+                dsKiemKe = dsKiemKe.Where(item => item.TinhTrang == "Cần kiểm tra").ToList();
+
+                // Lưu danh sách gốc
+                _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>(dsKiemKe);
+
+                // Cập nhật view
+                if (_dsKiemKeView == null)
+                {
+                    _dsKiemKeView = new CollectionViewSource();
+                }
                 _dsKiemKeView.Source = _dsKiemKeGoc;
-                view = _dsKiemKeView.View;
+
+                // Thiết lập filter ban đầu
+                ICollectionView view = _dsKiemKeView.View;
+                if (view != null)
+                {
+                    // Xóa filter cũ nếu có
+                    if (view.Filter != null)
+                    {
+                        // Không có cách trực tiếp để xóa filter, nên tạo view mới
+                        _dsKiemKeView = new CollectionViewSource();
+                        _dsKiemKeView.Source = _dsKiemKeGoc;
+                        view = _dsKiemKeView.View;
+                    }
+
+                    // Thêm filter mới
+                    view.Filter = item => FilterMatches((KiemKeTaiSan)item);
+                }
+
+                OnPropertyChanged(nameof(DsKiemKeView));
+
+                // Cập nhật phân trang
+                UpdatePagination();
+
+                // Tải dữ liệu trang đầu tiên
+                LoadPageData();
+
+                // Đăng ký sự kiện cho các item mới
+                RegisterItemPropertyChanged();
             }
-            
-            // Thêm filter mới
-            view.Filter = item => FilterMatches((KiemKeTaiSan)item);
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
-        
-        OnPropertyChanged(nameof(DsKiemKeView));
-        
-        // Cập nhật phân trang
-        UpdatePagination();
-        
-        // Tải dữ liệu trang đầu tiên
-        LoadPageData();
-        
-        // Đăng ký sự kiện cho các item mới
-        RegisterItemPropertyChanged();
-    }
-    catch (Exception ex)
-    {
-        System.Windows.MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
-            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-    }
-    finally
-    {
-        IsLoading = false;
-    }
-}
         private void UpdatePagination()
         {
             if (_dsKiemKeGoc == null)

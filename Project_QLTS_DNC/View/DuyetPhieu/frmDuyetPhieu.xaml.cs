@@ -31,6 +31,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
         private async void dgPhieuCanDuyet_Loaded(object sender, RoutedEventArgs e)
         {
+
             cboLoaiPhieu.SelectedIndex = 0; // đảm bảo là "Tất cả"
             await LocDuLieuTheoLoaiVaNgay();
             LoadThongKePhieu();
