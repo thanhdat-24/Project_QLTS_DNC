@@ -23,19 +23,19 @@ using static Supabase.Postgrest.Constants;
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using iTextVerticalAlignment = iText.Layout.Properties.VerticalAlignment;
 
-namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
+namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 {
-    public partial class frmInPhieuLichSuDiChuyenTaiSan : Window
+    public partial class frmChiTietDiChuyenTS : Window
     {
         private long maLichSu;
         private LichSuHienThi thongTinPhieu;
         private List<LichSuHienThi> danhSachChiTiet = new();
 
-        public frmInPhieuLichSuDiChuyenTaiSan(long ma)
+        public frmChiTietDiChuyenTS(long ma)
         {
             InitializeComponent();
             maLichSu = ma;
-            Loaded += frmInPhieuLichSuDiChuyenTaiSan_Loaded;
+            Loaded += frmChiTietDiChuyenTS_Loaded;
         }
 
         public class LichSuHienThi
@@ -49,7 +49,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             public DateTime NgayBanGiao { get; set; }
         }
 
-        private async void frmInPhieuLichSuDiChuyenTaiSan_Loaded(object sender, RoutedEventArgs e)
+        private async void frmChiTietDiChuyenTS_Loaded(object sender, RoutedEventArgs e)
         {
             await LoadData();
         }

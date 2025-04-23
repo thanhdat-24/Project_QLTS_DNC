@@ -547,6 +547,18 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 };
                 formIn.ShowDialog();
             }
+            else if (selected.MaPhieu.StartsWith("LS") && long.TryParse(selected.MaPhieu.Substring(2), out long maLichSu))
+            {
+                var formIn = new frmInPhieuLichSuDiChuyenTaiSan(maLichSu)
+                {
+                    Title = $"In phiếu lịch sử di chuyển - LS{maLichSu}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+
             else
             {
                 MessageBox.Show("Chức năng in cho loại phiếu này hiện chưa được hỗ trợ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);

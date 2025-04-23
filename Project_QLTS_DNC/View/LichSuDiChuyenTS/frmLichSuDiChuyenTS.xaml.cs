@@ -127,6 +127,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
+            
             _keyword = txtSearch.Text.Trim();
             _ = LoadLichSuAsync();
         }
@@ -142,15 +143,21 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void btnChiTiet_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && long.TryParse(btn.Tag?.ToString(), out long maLichSu))
+            if (dgDiChuyen.SelectedItem is LichSuDTO selected)
             {
-                var frm = new frmXemChiTietLichSuDiChuyen();
-                frm.LoadTheoMaPhieu(maLichSu);
-                var window = new Window { Title = "Chi tiết phiếu di chuyển", Content = frm, Width = 1000, Height = 700 };
-                window.ShowDialog();
-                _ = LoadLichSuAsync();
+                var frm = new frmChiTietDiChuyenTS(selected.MaLichSu);
+                frm.Title = $"Chi tiết phiếu lịch sử - LS{selected.MaLichSu}";
+                frm.Width = 1000;
+                frm.Height = 720;
+                frm.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                frm.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn một phiếu để xem chi tiết!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
 
         private void btnThemDiChuyen_click(object sender, RoutedEventArgs e)
         {
@@ -159,19 +166,35 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
             _ = LoadLichSuAsync();
         }
 
-        private void btnXuatExcel_Click(object sender, RoutedEventArgs e)
+
+
+        private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Chức năng xuất Excel sẽ được bổ sung sau.", "Thông báo");
+            if (dgDiChuyen.SelectedItem is not LichSuDTO selected)
+            {
+                MessageBox.Show("Vui lòng chọn một phiếu để xóa!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var confirm = MessageBox.Show($"Bạn có chắc muốn xoá phiếu di chuyển \"LS{selected.MaLichSu}\"?",
+                                          "Xác nhận xoá",
+                                          MessageBoxButton.YesNo,
+                                          MessageBoxImage.Warning);
+
+            if (confirm == MessageBoxResult.Yes)
+            {
+                var success = await LichSuDiChuyenService.XoaPhieuLichSuAsync(selected.MaLichSu);
+                if (success)
+                {
+                    MessageBox.Show("🗑Đã xoá phiếu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadLichSuAsync(); // Cập nhật lại danh sách
+                }
+                else
+                {
+                    MessageBox.Show("Xoá phiếu thất bại. Vui lòng thử lại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
-        private void btnXuatPDF_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Chức năng xuất PDF sẽ được bổ sung sau.", "Thông báo");
-        }
-
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Chức năng xoá phiếu sẽ được bổ sung sau.", "Thông báo");
-        }
     }
 }

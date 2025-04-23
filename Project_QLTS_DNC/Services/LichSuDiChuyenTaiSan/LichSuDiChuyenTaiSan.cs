@@ -46,12 +46,37 @@ namespace Project_QLTS_DNC.Services
             return new ObservableCollection<LichSuDTO>(danhSach);
         }
 
+
         public static async Task<List<Phong>> LayDanhSachPhongAsync()
         {
             var client = await SupabaseService.GetClientAsync();
             var result = await client.From<Phong>().Get();
             return result.Models;
         }
+        public static async Task<bool> XoaPhieuLichSuAsync(long maLichSu)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+
+                await client
+                    .From<LichSuDiChuyenTaiSan>()
+                    .Where(x => x.MaLichSu == maLichSu)
+                    .Delete();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi khi xóa phiếu: " + ex.Message);
+                return false;
+            }
+        }
+
+
+
+
+
     }
 
     public class LichSuDTO
