@@ -163,7 +163,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
             if (response.Model != null)
             {
-                MessageBox.Show("Đã lưu phiếu nhập thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                
 
                 // 👉 Mở form nhập chi tiết
                 var chiTietForm = new ChiTietPhieuNhapInput(maPhieuMoi, selectedMaNCC);
