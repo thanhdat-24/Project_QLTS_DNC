@@ -146,7 +146,7 @@ namespace Project_QLTS_DNC
 
                 { "btnQuanLyCaiDat", btnQuanLyCaiDat },
                 { "btnThongTinCongTy", btnThongTinCongTy },
-                { "btnPhieuIn", btnPhieuIn },
+                //{ "btnPhieuIn", btnPhieuIn },
             };
 
                     var parentItems = new List<TreeViewItem>
