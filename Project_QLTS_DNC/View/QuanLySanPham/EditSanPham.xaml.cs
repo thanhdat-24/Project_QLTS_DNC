@@ -54,7 +54,10 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 txtMaQR.Text = _taiSan.MaQR;
                 dpNgaySuDung.SelectedDate = _taiSan.NgaySuDung;
                 dpHanBH.SelectedDate = _taiSan.HanBH;
-                txtTinhTrang.Text = _taiSan.TinhTrangSP;
+
+                // Đặt trạng thái cho ComboBox tình trạng dựa vào giá trị hiện tại
+                SetTinhTrangComboBox(_taiSan.TinhTrangSP);
+
                 txtGhiChu.Text = _taiSan.GhiChu;
 
                 // Load danh sách phòng vào combobox
@@ -75,6 +78,38 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // Phương thức mới để đặt giá trị cho ComboBox tình trạng
+        private void SetTinhTrangComboBox(string tinhTrangValue)
+        {
+            // Mặc định là "Không xác định" nếu không tìm thấy
+            int selectedIndex = 4;
+
+            if (!string.IsNullOrEmpty(tinhTrangValue))
+            {
+                // Tìm giá trị tương ứng trong ComboBox
+                switch (tinhTrangValue.Trim())
+                {
+                    case "Mới":
+                        selectedIndex = 0;
+                        break;
+                    case "Đang hoạt động":
+                        selectedIndex = 1;
+                        break;
+                    case "Cần kiểm tra":
+                        selectedIndex = 2;
+                        break;
+                    case "Hư hỏng":
+                        selectedIndex = 3;
+                        break;
+                    case "Không xác định":
+                        selectedIndex = 4;
+                        break;
+                }
+            }
+
+            cboTinhTrang.SelectedIndex = selectedIndex;
         }
 
         private void BtnCapNhat_Click(object sender, RoutedEventArgs e)
@@ -104,12 +139,22 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             _taiSan.MaQR = txtMaQR.Text.Trim();
             _taiSan.NgaySuDung = dpNgaySuDung.SelectedDate;
             _taiSan.HanBH = dpHanBH.SelectedDate;
-            _taiSan.TinhTrangSP = txtTinhTrang.Text.Trim();
+
+            // Lấy tình trạng từ ComboBox thay vì TextBox
+            if (cboTinhTrang.SelectedItem != null)
+            {
+                ComboBoxItem selectedItem = cboTinhTrang.SelectedItem as ComboBoxItem;
+                _taiSan.TinhTrangSP = selectedItem?.Content.ToString();
+            }
+            else
+            {
+                _taiSan.TinhTrangSP = "Không xác định";
+            }
+
             _taiSan.GhiChu = txtGhiChu.Text.Trim();
 
-            // Cập nhật mã phòng từ combobox
-            var selectedPhong = cboPhong.SelectedItem as PhongFilter;
-            _taiSan.MaPhong = selectedPhong?.MaPhong;
+            // Không cập nhật mã phòng vì control đã bị vô hiệu hóa
+            // Giữ nguyên giá trị cũ của _taiSan.MaPhong
         }
 
         private async void UpdateTaiSanInDatabase()

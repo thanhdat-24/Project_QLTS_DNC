@@ -84,7 +84,8 @@
                             <ComboBox Grid.Row="4" Grid.Column="0" Margin="0 8 8 8"
                                     x:Name="cboPhong"
                                     materialDesign:HintAssist.Hint="Phòng"
-                                    Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                                    Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                    IsEnabled="False">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding TenPhong}"/>
@@ -103,10 +104,17 @@
                                         materialDesign:HintAssist.Hint="Hạn bảo hành"
                                         Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
 
-                            <TextBox Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
-                                    x:Name="txtTinhTrang"
-                                    materialDesign:HintAssist.Hint="Tình trạng sản phẩm"
-                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            <!-- Thay đổi TextBox thành ComboBox cho Tình trạng sản phẩm -->
+                            <ComboBox Grid.Row="2" Grid.Column="1" Margin="8 8 0 8"
+                                     x:Name="cboTinhTrang"
+                                     materialDesign:HintAssist.Hint="Tình trạng sản phẩm"
+                                     Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                                <ComboBoxItem Content="Mới"/>
+                                <ComboBoxItem Content="Đang hoạt động"/>
+                                <ComboBoxItem Content="Cần kiểm tra"/>
+                                <ComboBoxItem Content="Hư hỏng"/>
+                                <ComboBoxItem Content="Không xác định"/>
+                            </ComboBox>
 
                             <TextBox Grid.Row="3" Grid.Column="1" Margin="8 8 0 8" 
                                     x:Name="txtMaChiTietPNRef"

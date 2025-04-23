@@ -421,11 +421,11 @@
         <!-- Footer -->
         <Grid Grid.Row="2" Background="{DynamicResource MaterialDesignBackground}" Margin="15">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <!--<Button Content="IN CHI TIẾT" 
+                <Button Content="IN CHI TIẾT" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Width="120" 
                         Margin="0,0,16,0"
-                        Click="BtnPrint_Click"/>-->
+                        Click="BtnPrint_Click"/>
                 <Button Content="ĐÓNG" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Width="100" 
