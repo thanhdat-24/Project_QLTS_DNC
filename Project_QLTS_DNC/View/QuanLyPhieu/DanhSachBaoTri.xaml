@@ -365,14 +365,22 @@ HorizontalScrollBarVisibility="Auto">
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Vị trí" Width="140" Binding="{Binding ViTriThucTe}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="Vị trí" Width="140">
+   <DataGridTemplateColumn.CellTemplate>
+       <DataTemplate>
+           <TextBlock Text="{Binding ViTriThucTe, Mode=TwoWay}" 
+                      TextAlignment="Center" 
+                      VerticalAlignment="Center"/>
+       </DataTemplate>
+   </DataGridTemplateColumn.CellTemplate>
+   <DataGridTemplateColumn.CellEditingTemplate>
+       <DataTemplate>
+           <TextBox Text="{Binding ViTriThucTe, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                    TextAlignment="Center" 
+                    VerticalAlignment="Center"/>
+       </DataTemplate>
+   </DataGridTemplateColumn.CellEditingTemplate>
+</DataGridTemplateColumn>
                         <DataGridTextColumn Header="Ghi chú" Width="170" Binding="{Binding GhiChu}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">

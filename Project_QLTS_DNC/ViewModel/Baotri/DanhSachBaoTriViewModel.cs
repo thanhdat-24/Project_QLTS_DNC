@@ -74,78 +74,78 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 ApplyFilter();
             }
         }
-        private string _nhomTaiSanDuocChon;
-        public string NhomTaiSanDuocChon
-        {
-            get => _nhomTaiSanDuocChon;
-            set
+            private string _nhomTaiSanDuocChon;
+            public string NhomTaiSanDuocChon
             {
-                _nhomTaiSanDuocChon = value;
-                OnPropertyChanged(nameof(NhomTaiSanDuocChon));
-                ApplyFilter();
-            }
-        }
-        private string _tinhTrangDuocChon;
-        public string TinhTrangDuocChon
-        {
-            get => _tinhTrangDuocChon;
-            set
-            {
-                _tinhTrangDuocChon = value;
-                OnPropertyChanged(nameof(TinhTrangDuocChon));
-                ApplyFilter();
-            }
-        }
-        private bool _tatCaDuocChon;
-        public bool TatCaDuocChon
-        {
-            get => _tatCaDuocChon;
-            set
-            {
-                if (_tatCaDuocChon != value)
+                get => _nhomTaiSanDuocChon;
+                set
                 {
-                    _tatCaDuocChon = value;
-                    OnPropertyChanged(nameof(TatCaDuocChon));
-                    // Áp dụng trạng thái được chọn cho tất cả các mục trong danh sách hiển thị
-                    if (DsKiemKe != null)
+                    _nhomTaiSanDuocChon = value;
+                    OnPropertyChanged(nameof(NhomTaiSanDuocChon));
+                    ApplyFilter();
+                }
+            }
+            private string _tinhTrangDuocChon;
+            public string TinhTrangDuocChon
+            {
+                get => _tinhTrangDuocChon;
+                set
+                {
+                    _tinhTrangDuocChon = value;
+                    OnPropertyChanged(nameof(TinhTrangDuocChon));
+                    ApplyFilter();
+                }
+            }
+            private bool _tatCaDuocChon;
+            public bool TatCaDuocChon
+            {
+                get => _tatCaDuocChon;
+                set
+                {
+                    if (_tatCaDuocChon != value)
                     {
-                        foreach (var item in DsKiemKe)
+                        _tatCaDuocChon = value;
+                        OnPropertyChanged(nameof(TatCaDuocChon));
+                        // Áp dụng trạng thái được chọn cho tất cả các mục trong danh sách hiển thị
+                        if (DsKiemKe != null)
                         {
-                            item.IsSelected = value;
+                            foreach (var item in DsKiemKe)
+                            {
+                                item.IsSelected = value;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Thêm vào DanhSachBaoTriViewModel.cs
-        public void UpdateSelectAllState()
-        {
-            if (DsKiemKe != null && DsKiemKe.Count > 0)
+            // Thêm vào DanhSachBaoTriViewModel.cs
+            public void UpdateSelectAllState()
             {
-                // Kiểm tra nếu tất cả các item đều được chọn
-                bool allSelected = DsKiemKe.All(item => item.IsSelected);
-                // Cập nhật trạng thái TatCaDuocChon mà không gây ra vòng lặp vô hạn
-                if (_tatCaDuocChon != allSelected)
+                if (DsKiemKe != null && DsKiemKe.Count > 0)
                 {
-                    _tatCaDuocChon = allSelected;
-                    OnPropertyChanged(nameof(TatCaDuocChon));
+                    // Kiểm tra nếu tất cả các item đều được chọn
+                    bool allSelected = DsKiemKe.All(item => item.IsSelected);
+                    // Cập nhật trạng thái TatCaDuocChon mà không gây ra vòng lặp vô hạn
+                    if (_tatCaDuocChon != allSelected)
+                    {
+                        _tatCaDuocChon = allSelected;
+                        OnPropertyChanged(nameof(TatCaDuocChon));
+                    }
                 }
             }
-        }
 
-        // Thêm vào DanhSachBaoTriViewModel.cs
-        private void RegisterItemPropertyChanged()
-        {
-            if (DsKiemKe != null)
+            // Thêm vào DanhSachBaoTriViewModel.cs
+            private void RegisterItemPropertyChanged()
             {
-                foreach (var item in DsKiemKe)
+                if (DsKiemKe != null)
                 {
-                    // Đăng ký sự kiện
-                    item.PropertyChanged += Item_PropertyChanged;
+                    foreach (var item in DsKiemKe)
+                    {
+                        // Đăng ký sự kiện
+                        item.PropertyChanged += Item_PropertyChanged;
+                    }
                 }
             }
-        }
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -153,6 +153,14 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 // Cập nhật trạng thái chọn tất cả khi có item thay đổi
                 UpdateSelectAllState();
+            }
+            else if (e.PropertyName == nameof(KiemKeTaiSan.ViTriThucTe))
+            {
+                // Khi ViTriThucTe thay đổi, cập nhật vào danh sách gốc
+                if (sender is KiemKeTaiSan taiSan)
+                {
+                    CapNhatViTriThucTe(taiSan);
+                }
             }
         }
 
@@ -257,140 +265,124 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-        // Cập nhật phương thức LoadDSKiemKeAsync để lấy thông tin nhóm tài sản thông qua liên kết
         public async Task LoadDSKiemKeAsync()
+{
+    try
+    {
+        IsLoading = true;
+        
+        // Tải danh mục trước
+        await LoadDanhMucAsync();
+        
+        // Lấy dữ liệu tài sản từ _dsBaotriService thay vì _taiSanService
+        var dsTaiSanCanKiemTra = await _dsBaotriService.GetDanhSachTaiSanCanKiemTraAsync();
+        var dsPhong = await _phongService.GetDanhSachPhongAsync();
+        var dsChiTietPhieuNhap = await _chiTietPhieuNhapService.GetDanhSachChiTietPhieuNhapAsync();
+        
+        // Chuyển đổi từ TaiSanModel sang KiemKeTaiSan
+        var danhSach = new List<KiemKeTaiSan>();
+        int maKiemKe = 1; // Khởi tạo mã kiểm kê (có thể điều chỉnh logic tạo mã)
+        
+        foreach (var taiSan in dsTaiSanCanKiemTra)
         {
-            try
+            var kiemKeTaiSan = new KiemKeTaiSan
             {
-                IsLoading = true;
-
-                // Tải danh mục trước
-                await LoadDanhMucAsync();
-
-                // Lấy dữ liệu từ service
-                var danhSach = await _dsBaotriService.GetKiemKeTaiSanAsync();
-
-                try
+                MaKiemKeTS = maKiemKe++,
+                MaTaiSan = taiSan.MaTaiSan,
+                MaPhong = taiSan.MaPhong,
+                TinhTrang = taiSan.TinhTrangSP,
+                ViTriThucTe = "", // Có thể thiết lập giá trị mặc định hoặc để trống
+                GhiChu = taiSan.GhiChu
+            };
+            
+            // Kết hợp tên tài sản với số seri (nếu có)
+            if (!string.IsNullOrEmpty(taiSan.SoSeri))
+                kiemKeTaiSan.TenTaiSan = $"{taiSan.TenTaiSan} - {taiSan.SoSeri}";
+            else
+                kiemKeTaiSan.TenTaiSan = taiSan.TenTaiSan;
+            
+            // Tìm thông tin phòng
+            var phong = dsPhong.FirstOrDefault(p => p.MaPhong == taiSan.MaPhong);
+            if (phong != null)
+            {
+                kiemKeTaiSan.TenPhong = phong.TenPhong;
+            }
+            else
+            {
+                kiemKeTaiSan.TenPhong = $"Phòng {taiSan.MaPhong}";
+            }
+            
+            // Tìm thông tin nhóm tài sản từ chi tiết phiếu nhập
+            if (taiSan.MaChiTietPN.HasValue)
+            {
+                var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
+                if (chiTietPN != null && chiTietPN.MaNhomTS > 0 && DsNhomTaiSan != null)
                 {
-                    if (_taiSanService != null && _phongService != null)
+                    var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
+                    if (nhomTaiSan != null)
                     {
-                        var dsTaiSan = await _taiSanService.GetDanhSachTaiSanAsync();
-                        var dsPhong = await _phongService.GetDanhSachPhongAsync();
-
-                        // Lấy tất cả chi tiết phiếu nhập để tìm mã nhóm tài sản
-                        var dsChiTietPhieuNhap = await _chiTietPhieuNhapService.GetDanhSachChiTietPhieuNhapAsync();
-
-                        // Cập nhật tên tài sản, tên phòng và MaNhomTS
-                        foreach (var item in danhSach)
-                        {
-                            // Chuyển đổi int? sang int để so sánh
-                            var taiSanId = item.MaTaiSan.GetValueOrDefault();
-                            var phongId = item.MaPhong.GetValueOrDefault();
-                            var dotKiemKeId = item.MaDotKiemKe.GetValueOrDefault();
-
-                            // Tìm tài sản trong danh sách tài sản
-                            var taiSan = dsTaiSan.FirstOrDefault(ts => ts.MaTaiSan == taiSanId);
-                            if (taiSan != null)
-                            {
-                                item.TenTaiSan = taiSan.TenTaiSan;
-
-
-                                // Lấy mã nhóm tài sản từ ChiTietPhieuNhap
-                                var chiTietPN = dsChiTietPhieuNhap.FirstOrDefault(ct => ct.MaChiTietPN == taiSan.MaChiTietPN);
-                                if (chiTietPN != null && chiTietPN.MaNhomTS > 0)
-
-                                // Quan trọng: Cập nhật mã nhóm tài sản từ tài sản
-                                //item.MaNhomTS = taiSan.MaNhomTS;
-
-                                // Tìm tên nhóm tài sản nếu có
-                                if (DsNhomTaiSan != null && item.MaNhomTS.HasValue)
-
-                                {
-                                    // Tìm thông tin nhóm tài sản từ danh sách nhóm
-                                    var nhomTaiSan = DsNhomTaiSan.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
-                                    if (nhomTaiSan != null)
-                                    {
-                                        item.MaNhomTS = nhomTaiSan.MaNhomTS;
-                                        item.TenNhomTS = nhomTaiSan.TenNhom;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                item.TenTaiSan = $"Tài sản {taiSanId}";
-                            }
-
-                            // Cập nhật tên phòng
-                            var phong = dsPhong.FirstOrDefault(p => p.MaPhong == phongId);
-                            if (phong != null)
-                            {
-                                item.TenPhong = phong.TenPhong;
-                            }
-                            else
-                            {
-                                item.TenPhong = $"Phòng {phongId}";
-                            }
-
-                            // Xử lý tên đợt kiểm kê (nếu có)
-                            if (string.IsNullOrEmpty(item.TenDotKiemKe) && item.MaDotKiemKe.HasValue)
-                            {
-                                // Thiết lập giá trị mặc định
-                                item.TenDotKiemKe = $"Đợt kiểm kê {dotKiemKeId}";
-                            }
-                        }
+                        kiemKeTaiSan.MaNhomTS = nhomTaiSan.MaNhomTS;
+                        kiemKeTaiSan.TenNhomTS = nhomTaiSan.TenNhom;
                     }
                 }
-                catch (Exception ex)
-                {
-                    // Ghi log lỗi để theo dõi
-                    System.Diagnostics.Debug.WriteLine($"Lỗi khi cập nhật tên: {ex.Message}");
-                    // Bỏ qua lỗi này để tránh làm hỏng toàn bộ hàm
-                }
-
-                // Lưu danh sách gốc
-                _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>(danhSach);
-
-                // Cập nhật view
-                if (_dsKiemKeView == null)
-                {
-                    _dsKiemKeView = new CollectionViewSource();
-                }
-                _dsKiemKeView.Source = _dsKiemKeGoc;
-
-                // Thiết lập filter ban đầu
-                ICollectionView view = _dsKiemKeView.View;
-                if (view != null)
-                {
-                    // Xóa filter cũ nếu có
-                    if (view.Filter != null)
-                    {
-                        // Không có cách trực tiếp để xóa filter, nên tạo view mới
-                        _dsKiemKeView = new CollectionViewSource();
-                        _dsKiemKeView.Source = _dsKiemKeGoc;
-                        view = _dsKiemKeView.View;
-                    }
-                    // Thêm filter mới
-                    view.Filter = item => FilterMatches((KiemKeTaiSan)item);
-                }
-                OnPropertyChanged(nameof(DsKiemKeView));
-
-                // Cập nhật phân trang
-                UpdatePagination();
-
-                // Tải dữ liệu trang đầu tiên
-                LoadPageData();
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
+            
+            // Thiết lập MaDotKiemKe và TenDotKiemKe mặc định (có thể điều chỉnh theo nhu cầu)
+            kiemKeTaiSan.MaDotKiemKe = DateTime.Now.Year * 100 + DateTime.Now.Month; // Ví dụ: 202405
+            kiemKeTaiSan.TenDotKiemKe = $"Đợt kiểm kê tháng {DateTime.Now.Month}/{DateTime.Now.Year}";
+            
+            // Thêm vào danh sách
+            danhSach.Add(kiemKeTaiSan);
         }
-
+        
+        // Lưu danh sách gốc
+        _dsKiemKeGoc = new ObservableCollection<KiemKeTaiSan>(danhSach);
+        
+        // Cập nhật view
+        if (_dsKiemKeView == null)
+        {
+            _dsKiemKeView = new CollectionViewSource();
+        }
+        _dsKiemKeView.Source = _dsKiemKeGoc;
+        
+        // Thiết lập filter ban đầu
+        ICollectionView view = _dsKiemKeView.View;
+        if (view != null)
+        {
+            // Xóa filter cũ nếu có
+            if (view.Filter != null)
+            {
+                // Không có cách trực tiếp để xóa filter, nên tạo view mới
+                _dsKiemKeView = new CollectionViewSource();
+                _dsKiemKeView.Source = _dsKiemKeGoc;
+                view = _dsKiemKeView.View;
+            }
+            
+            // Thêm filter mới
+            view.Filter = item => FilterMatches((KiemKeTaiSan)item);
+        }
+        
+        OnPropertyChanged(nameof(DsKiemKeView));
+        
+        // Cập nhật phân trang
+        UpdatePagination();
+        
+        // Tải dữ liệu trang đầu tiên
+        LoadPageData();
+        
+        // Đăng ký sự kiện cho các item mới
+        RegisterItemPropertyChanged();
+    }
+    catch (Exception ex)
+    {
+        System.Windows.MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
+            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+    }
+    finally
+    {
+        IsLoading = false;
+    }
+}
         private void UpdatePagination()
         {
             if (_dsKiemKeGoc == null)
@@ -436,14 +428,52 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             // Tính vị trí bắt đầu của trang
             int startIndex = (TrangHienTai - 1) * SoDongMoiTrang;
 
-            // Lấy dữ liệu cho trang hiện tại
+            // Lấy dữ liệu cho trang hiện tại - KHÔNG TẠO ĐỐI TƯỢNG MỚI
             var pageItems = filteredItems
                 .Skip(startIndex)
                 .Take(SoDongMoiTrang)
                 .ToList();
 
-            // Cập nhật danh sách hiển thị
-            DsKiemKe = new ObservableCollection<KiemKeTaiSan>(pageItems);
+            // Cập nhật danh sách hiển thị mà không tạo mới các item
+            if (DsKiemKe == null)
+            {
+                DsKiemKe = new ObservableCollection<KiemKeTaiSan>();
+            }
+
+            // Giữ lại các item đang được hiển thị và có trong trang mới
+            var currentItems = new List<KiemKeTaiSan>(DsKiemKe);
+            var itemsToKeep = currentItems.Where(current =>
+                pageItems.Any(page => page.MaKiemKeTS == current.MaKiemKeTS)).ToList();
+
+            // Xóa các item không còn trong trang mới
+            foreach (var item in currentItems.Except(itemsToKeep).ToList())
+            {
+                DsKiemKe.Remove(item);
+            }
+
+            // Thêm các item mới vào đúng vị trí
+            for (int i = 0; i < pageItems.Count; i++)
+            {
+                var pageItem = pageItems[i];
+
+                // Kiểm tra xem item đã có trong danh sách chưa
+                var existingItem = DsKiemKe.FirstOrDefault(item => item.MaKiemKeTS == pageItem.MaKiemKeTS);
+
+                if (existingItem != null)
+                {
+                    // Nếu item đã tồn tại nhưng không đúng vị trí
+                    int currentIndex = DsKiemKe.IndexOf(existingItem);
+                    if (currentIndex != i)
+                    {
+                        DsKiemKe.Move(currentIndex, i);
+                    }
+                }
+                else
+                {
+                    // Nếu item chưa tồn tại, thêm vào đúng vị trí
+                    DsKiemKe.Insert(i, pageItem);
+                }
+            }
 
             // Đăng ký sự kiện cho các item mới
             RegisterItemPropertyChanged();
@@ -585,8 +615,17 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 return false;
             }
         }
+        public void CapNhatViTriThucTe(KiemKeTaiSan taiSanDaCapNhat)
+        {
+            // Tìm tài sản tương ứng trong danh sách gốc
+            var taiSanGoc = _dsKiemKeGoc.FirstOrDefault(ts => ts.MaKiemKeTS == taiSanDaCapNhat.MaKiemKeTS);
 
-        // Cập nhật phương thức FilterMatches trong DanhSachBaoTriViewModel
+            if (taiSanGoc != null)
+            {
+                // Cập nhật giá trị trong danh sách gốc
+                taiSanGoc.ViTriThucTe = taiSanDaCapNhat.ViTriThucTe;
+            }
+        }
         private bool FilterMatches(KiemKeTaiSan item)
         {
             if (item == null)
@@ -597,7 +636,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             {
                 // Kiểm tra nếu tên nhóm tài sản không khớp
                 if (string.IsNullOrEmpty(item.TenNhomTS) ||
-                   !item.TenNhomTS.Equals(NhomTaiSanDuocChon, StringComparison.OrdinalIgnoreCase))
+                    !item.TenNhomTS.Equals(NhomTaiSanDuocChon, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -616,6 +655,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     tinhTrangMatch = true;
                 else if (TinhTrangDuocChon == "Cần bảo trì" && item.TinhTrang == "Cần bảo trì")
                     tinhTrangMatch = true;
+                else if (TinhTrangDuocChon == item.TinhTrang)
+                    tinhTrangMatch = true;
 
                 if (!tinhTrangMatch)
                     return false;
@@ -632,39 +673,30 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             // Kiểm tra mã kiểm kê
             if (item.MaKiemKeTS.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra mã tài sản
             else if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra mã đợt kiểm kê
             else if (item.MaDotKiemKe.HasValue && item.MaDotKiemKe.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
-
-            // Kiểm tra tên tài sản
+            // Kiểm tra tên tài sản (bao gồm cả số seri)
             else if (item.TenTaiSan != null && item.TenTaiSan.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tên phòng
             else if (item.TenPhong != null && item.TenPhong.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tên đợt kiểm kê
             else if (item.TenDotKiemKe != null && item.TenDotKiemKe.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra vị trí thực tế
             else if (item.ViTriThucTe != null && item.ViTriThucTe.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tình trạng
             else if (item.TinhTrang != null && item.TinhTrang.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra ghi chú
             else if (item.GhiChu != null && item.GhiChu.ToLower().Contains(keyword))
                 matchesSearchText = true;
-
             // Kiểm tra tên nhóm tài sản
             else if (item.TenNhomTS != null && item.TenNhomTS.ToLower().Contains(keyword))
                 matchesSearchText = true;

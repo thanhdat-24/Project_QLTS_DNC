@@ -31,7 +31,6 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Supabase.Postgrest.Attributes.Column("ghi_chu")]
         public string GhiChu { get; set; }
 
-        // Đánh dấu thuộc tính này là NotMapped vì nó không tồn tại trong schema
         [NotMapped]
         [JsonIgnore]
         public int? MaNhomTS { get; set; }
@@ -52,7 +51,7 @@ namespace Project_QLTS_DNC.Models.BaoTri
                 TinhTrang = taiSan.TinhTrang,
                 ViTriThucTe = taiSan.ViTriThucTe,
                 GhiChu = taiSan.GhiChu
-                // Bỏ thuộc tính MaNhomTS vì nó không tồn tại trong database schema
+               
             };
         }
     }
