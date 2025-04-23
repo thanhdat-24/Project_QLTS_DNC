@@ -1,7 +1,16 @@
-﻿using System;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Services;
+using Supabase;
+using System;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,15 +21,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
-using Supabase;
-using Project_QLTS_DNC.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Project_QLTS_DNC.Services;
-using Project_QLTS_DNC.Models;
-using System.Collections.ObjectModel;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -64,6 +64,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem danh sách kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 var result = await _client.From<Kho>().Get();
 
                 if (result.Models.Any())
@@ -102,12 +107,22 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void btnViewDetail_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             ThemKho themKhoForm = new ThemKho();
             themKhoForm.ShowDialog(); // Mở form Thêm Kho
         }
         // Phương thức để mở form chỉnh sửa kho
         private void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa danh sách kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Lấy kho được chọn từ DataContext
             Button button = sender as Button;
             Kho selectedKho = button.DataContext as Kho;
@@ -121,6 +136,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         }
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa danh sách kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Lấy kho được chọn từ DataContext của nút
             Button button = sender as Button;
             Kho selectedKho = button.DataContext as Kho;

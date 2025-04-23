@@ -1,6 +1,16 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using ClosedXML.Excel;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.NhaCungCap;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Services;
+using Supabase;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,15 +23,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ClosedXML.Excel;
-using Microsoft.Win32;
-using System.ComponentModel;
-using System.Data;
-using Supabase;
-using Project_QLTS_DNC.Models.PhieuNhapKho;
-using Project_QLTS_DNC.Models.NhanVien;
-using Project_QLTS_DNC.Models.NhaCungCap;
-using Project_QLTS_DNC.Services;
 
 
 namespace Project_QLTS_DNC.View.QuanLyKho
@@ -227,6 +228,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void btnThemKho_click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhapKho", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm nhập kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var form = new PhieuNhapKhoInput();
             form.ShowDialog();
             _ = LoadPhieuNhapAsync();
@@ -235,6 +241,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         // Phương thức để mở form ThemKho và truyền dữ liệu kho cần sửa
         private void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhapKho", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa nhập kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Lấy kho được chọn từ DataContext
             Button button = sender as Button;
             Kho selectedKho = button.DataContext as Kho;
@@ -248,6 +259,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         }
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhapKho", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa nhập kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maPhieuNhap))
             {
                 MessageBoxResult result = MessageBox.Show(
@@ -296,6 +312,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void btnChiTiet_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhapKho", "xem"))
+            {
+                MessageBox.Show("Bạn không có quyền xem chi tiết nhập kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (sender is Button btn && btn.Tag is int maPhieuNhap)
             {
                 var form = new ChiTietPhieuNhapView(maPhieuNhap);

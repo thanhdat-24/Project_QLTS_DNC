@@ -92,6 +92,7 @@ namespace Project_QLTS_DNC.View.BaoTri
 
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
+
             Button button = sender as Button;
             LoaiBaoTri item = button?.Tag as LoaiBaoTri;
 
@@ -140,6 +141,11 @@ namespace Project_QLTS_DNC.View.BaoTri
                     viewModel.SoLuongTrenTrang = pageSize;
                 }
             }
+        }
+
+        private void btnThem_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         // Thêm code xử lý các event khác nếu cần

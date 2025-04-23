@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using static Supabase.Postgrest.Constants;
 using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 using Project_QLTS_DNC.View.DuyetPhieu.InPhieu;
+using Project_QLTS_DNC.Models.LichSu;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu
 {
@@ -30,6 +31,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
         private async void dgPhieuCanDuyet_Loaded(object sender, RoutedEventArgs e)
         {
+
             cboLoaiPhieu.SelectedIndex = 0; // đảm bảo là "Tất cả"
             await LocDuLieuTheoLoaiVaNgay();
             LoadThongKePhieu();
@@ -37,17 +39,12 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
         private async Task LoadDuLieuTongHopPhieuAsync()
         {
-
             try
             {
                 isLoadingData = true;
-
-                // Hiển thị loading indicator nếu cần
                 SetLoadingState(true);
-
                 var client = await SupabaseService.GetClientAsync();
                 DanhSachTatCaPhieu.Clear();
-
                 var tongHop = await client.From<TongHopPhieu>().Get();
 
                 foreach (var item in tongHop.Models)
@@ -59,11 +56,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                             var pn = await client.From<PhieuNhapKho>().Filter("ma_phieu_nhap", Operator.Equals, item.MaPhieuNhap.Value).Single();
                             DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PN{pn.MaPhieuNhap}", NgayTaoPhieu = pn.NgayNhap, TrangThaiBool = pn.TrangThai, LoaiPhieu = "Phiếu nhập" });
                         }
-                        catch (Exception ex)
-                        {
-                            // Bỏ qua lỗi khi không tìm thấy phiếu nhập
-                            Console.WriteLine($"Không tìm thấy phiếu nhập: {ex.Message}");
-                        }
+                        catch { }
                     }
 
                     if (item.MaPhieuXuat.HasValue)
@@ -73,11 +66,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                             var px = await client.From<PhieuXuat>().Filter("ma_phieu_xuat", Operator.Equals, item.MaPhieuXuat.Value).Single();
                             DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PX{px.MaPhieuXuat}", NgayTaoPhieu = px.NgayXuat, TrangThaiBool = px.TrangThai, LoaiPhieu = "Phiếu xuất" });
                         }
-                        catch (Exception ex)
-                        {
-                            // Bỏ qua lỗi khi không tìm thấy phiếu xuất
-                            Console.WriteLine($"Không tìm thấy phiếu xuất: {ex.Message}");
-                        }
+                        catch { }
                     }
 
                     if (item.MaPhieuDeNghiMua.HasValue)
@@ -85,19 +74,9 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                         try
                         {
                             var pdn = await client.From<denghimua>().Filter("ma_phieu_de_nghi", Operator.Equals, item.MaPhieuDeNghiMua.Value).Single();
-                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet
-                            {
-                                MaPhieu = $"PDN{pdn.MaPhieuDeNghi}",
-                                NgayTaoPhieu = pdn.NgayDeNghiMua ?? DateTime.MinValue,
-                                TrangThaiBool = pdn.TrangThai,
-                                LoaiPhieu = "Phiếu đề nghị mua"
-                            });
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PDN{pdn.MaPhieuDeNghi}", NgayTaoPhieu = pdn.NgayDeNghiMua ?? DateTime.MinValue, TrangThaiBool = pdn.TrangThai, LoaiPhieu = "Phiếu đề nghị mua" });
                         }
-                        catch (Exception ex)
-                        {
-                            // Bỏ qua lỗi khi không tìm thấy phiếu đề nghị
-                            Console.WriteLine($"Không tìm thấy phiếu đề nghị: {ex.Message}");
-                        }
+                        catch { }
                     }
 
                     if (item.MaPhieuBaoHong.HasValue)
@@ -107,22 +86,27 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                             var pbh = await client.From<BaoHong>().Filter("ma_phieu_bao_hong", Operator.Equals, item.MaPhieuBaoHong.Value).Single();
                             DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"PBH{pbh.MaPhieuBaoHong}", NgayTaoPhieu = pbh.NgayBaoHong, TrangThaiBool = pbh.TrangThai, LoaiPhieu = "Phiếu báo hỏng" });
                         }
-                        catch (Exception ex)
+                        catch { }
+                    }
+
+                    if (item.MaLichSuDiChuyen.HasValue)
+                    {
+                        try
                         {
-                            // Bỏ qua lỗi khi không tìm thấy phiếu báo hỏng
-                            Console.WriteLine($"Không tìm thấy phiếu báo hỏng: {ex.Message}");
+                            var ls = await client.From<LichSuDiChuyenTaiSan>().Filter("ma_lich_su", Operator.Equals, item.MaLichSuDiChuyen.Value).Single();
+                            DanhSachTatCaPhieu.Add(new PhieuCanDuyet { MaPhieu = $"LS{ls.MaLichSu}", NgayTaoPhieu = ls.NgayBanGiao ?? DateTime.MinValue, TrangThaiBool = ls.TrangThai, LoaiPhieu = "Phiếu lịch sử di chuyển tài sản" });
                         }
+                        catch { }
                     }
                 }
 
-                // Sắp xếp phiếu theo ngày tạo mới nhất
-                var sortedList = new ObservableCollection<PhieuCanDuyet>(
-                    DanhSachTatCaPhieu.OrderByDescending(p => p.NgayTaoPhieu)
-                );
-                DanhSachTatCaPhieu = sortedList;
-                dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
+                DanhSachTatCaPhieu = new ObservableCollection<PhieuCanDuyet>(
+                DanhSachTatCaPhieu
+                .Where(p => p.NgayTaoPhieu != null)
+                .OrderByDescending(p => p.NgayTaoPhieu)
+  );
 
-                // Cập nhật UI hiển thị số lượng
+                dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
                 UpdateItemCount();
             }
             catch (Exception ex)
@@ -132,7 +116,6 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             finally
             {
                 isLoadingData = false;
-                // Ẩn loading indicator
                 SetLoadingState(false);
             }
         }
@@ -250,6 +233,25 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
                     }
                 }
+
+                // Phiếu lịch sử di chuyển tài sản
+                if (loaiPhieu == "Tất cả" || loaiPhieu == "Phiếu lịch sử di chuyển tài sản")
+                {
+                    var list = (await client.From<LichSuDiChuyenTaiSan>().Get()).Models;
+                    foreach (var p in list)
+                    {
+                        ketQua.Add(new PhieuCanDuyet
+                        {
+                            MaPhieu = $"LS{p.MaLichSu}",
+                            NgayTaoPhieu = p.NgayBanGiao ?? DateTime.Now, // fallback tránh lọc null
+                            TrangThaiBool = p.TrangThai,
+                            LoaiPhieu = "Phiếu lịch sử di chuyển tài sản"
+                        });
+                    }
+                }
+
+
+
 
                 // Sắp xếp phiếu theo ngày tạo mới nhất
                 var sortedList = new ObservableCollection<PhieuCanDuyet>(
@@ -387,6 +389,14 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
                 window = new Window { Title = $"Chi tiết phiếu bàn giao - {selected.MaPhieu}", Content = frm, Width = 1100, Height = 750 };
             }
+            else if (selected.MaPhieu.StartsWith("LS") && long.TryParse(selected.MaPhieu.Substring(2), out long maLichSu))
+            {
+                var frm = new frmXemChiTietLichSuDiChuyen();
+                frm.LoadTheoMaPhieu(maLichSu);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
+
+                window = new Window { Title = $"Chi tiết phiếu lịch sử di chuyển tài sản - {selected.MaPhieu}", Content = frm, Width = 1000, Height = 700 };
+            }
             else
             {
                 MessageBox.Show($"Chức năng xem chi tiết đang được phát triển cho loại phiếu: {selected.LoaiPhieu}",
@@ -412,12 +422,11 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                // Tổng cộng
                 int tongCanDuyet = 0;
                 int tongDaDuyet = 0;
                 int tongTuChoi = 0;
 
-                // Phiếu nhập
+                // Phiếu nhập kho
                 var listPN = (await client.From<PhieuNhapKho>().Get()).Models;
                 tongCanDuyet += listPN.Count(p => p.TrangThai == null);
                 tongDaDuyet += listPN.Count(p => p.TrangThai == true);
@@ -435,21 +444,35 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 tongDaDuyet += listPDN.Count(p => p.TrangThai == true);
                 tongTuChoi += listPDN.Count(p => p.TrangThai == false);
 
-                // Gán thống kê ra TextBlock nếu có
-                if (txtTongPhieuCanDuyet != null)
-                    txtTongPhieuCanDuyet.Text = tongCanDuyet.ToString();
+                // Phiếu xuất kho
+                var listPX = (await client.From<PhieuXuat>().Get()).Models;
+                tongCanDuyet += listPX.Count(p => p.TrangThai == null);
+                tongDaDuyet += listPX.Count(p => p.TrangThai == true);
+                tongTuChoi += listPX.Count(p => p.TrangThai == false);
 
-                if (txtTongPhieuDaDuyet != null)
-                    txtTongPhieuDaDuyet.Text = tongDaDuyet.ToString();
+                // Phiếu bàn giao
+                var listBG = (await client.From<BanGiaoTaiSanModel>().Get()).Models;
+                tongCanDuyet += listBG.Count(p => p.TrangThai == null);
+                tongDaDuyet += listBG.Count(p => p.TrangThai == true);
+                tongTuChoi += listBG.Count(p => p.TrangThai == false);
 
-                if (txtTongPhieuTuChoi != null)
-                    txtTongPhieuTuChoi.Text = tongTuChoi.ToString();
+                // Phiếu lịch sử di chuyển
+                var listLS = (await client.From<LichSuDiChuyenTaiSan>().Get()).Models;
+                tongCanDuyet += listLS.Count(p => p.TrangThai == null);
+                tongDaDuyet += listLS.Count(p => p.TrangThai == true);
+                tongTuChoi += listLS.Count(p => p.TrangThai == false);
+
+                // Gán ra TextBlock
+                txtTongPhieuCanDuyet.Text = tongCanDuyet.ToString();
+                txtTongPhieuDaDuyet.Text = tongDaDuyet.ToString();
+                txtTongPhieuTuChoi.Text = tongTuChoi.ToString();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi load thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
 
         private async void cboLoaiPhieu_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -487,20 +510,80 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 return;
             }
 
-            // Chỉ xử lý in phiếu nhập
             if (selected.MaPhieu.StartsWith("PN") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuNhap))
             {
-                var formIn = new frmInPhieuNhap(maPhieuNhap);
-                formIn.Title = $"In phiếu nhập - PN{maPhieuNhap}";
-                formIn.Width = 1000;
-                formIn.Height = 720;
-                formIn.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                var formIn = new frmInPhieuNhap(maPhieuNhap)
+                {
+                    Title = $"In phiếu nhập - PN{maPhieuNhap}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
                 formIn.ShowDialog();
             }
+            else if (selected.MaPhieu.StartsWith("PX") && long.TryParse(selected.MaPhieu.Substring(2), out long maPhieuXuat))
+            {
+                var formIn = new frmInPhieuXuat(maPhieuXuat)
+                {
+                    Title = $"In phiếu xuất - PX{maPhieuXuat}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+            else if (selected.MaPhieu.StartsWith("PBH") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuBH))
+            {
+                var formIn = new frmInPhieuBaoHong(maPhieuBH)
+                {
+                    Title = $"In phiếu báo hỏng - PBH{maPhieuBH}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+            else if (selected.MaPhieu.StartsWith("BG") && int.TryParse(selected.MaPhieu.Substring(2), out int maPhieuBanGiao))
+            {
+                var formIn = new frmInPhieuBanGiao(maPhieuBanGiao)
+                {
+                    Title = $"In phiếu bàn giao - BG{maPhieuBanGiao}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+            else if (selected.MaPhieu.StartsWith("PDN") && long.TryParse(selected.MaPhieu.Substring(3), out long maPhieuDeNghi))
+            {
+                var formIn = new frmInPhieuDeNghiMua(maPhieuDeNghi)
+                {
+                    Title = $"In phiếu đề nghị mua - PDN{maPhieuDeNghi}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+            else if (selected.MaPhieu.StartsWith("LS") && long.TryParse(selected.MaPhieu.Substring(2), out long maLichSu))
+            {
+                var formIn = new frmInPhieuLichSuDiChuyenTaiSan(maLichSu)
+                {
+                    Title = $"In phiếu lịch sử di chuyển - LS{maLichSu}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+
             else
             {
-                MessageBox.Show("Chức năng in hiện đang phát triển.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Chức năng in cho loại phiếu này hiện chưa được hỗ trợ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+
+
+
     }
 }

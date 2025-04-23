@@ -99,13 +99,21 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 dgChiTietPhieuNhap.ItemsSource = danhSachChiTiet;
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
 
+                if (result.Count == 0)
+                {
+                    MessageBox.Show("Phiếu này không có thông tin chi tiết để duyệt!!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    btnDuyet.IsEnabled = false;
+                    btnTuChoi.IsEnabled = false;
+                    return;
+                }
+
                 bool chuaDuyet = phieu.TrangThai == null;
                 btnDuyet.IsEnabled = chuaDuyet;
                 btnTuChoi.IsEnabled = chuaDuyet;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("❌ Lỗi khi load phiếu đề nghị mua: " + ex.Message);
+                MessageBox.Show("Lỗi khi load phiếu đề nghị mua: " + ex.Message);
             }
         }
 

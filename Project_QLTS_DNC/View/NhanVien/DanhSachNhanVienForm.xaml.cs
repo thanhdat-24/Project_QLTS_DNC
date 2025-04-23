@@ -76,28 +76,7 @@ namespace Project_QLTS_DNC.View.NhanVien
                 return;
             }
 
-            if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "xem"))
-            {
-                MessageBox.Show("Bạn không có quyền xem danh sách nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "sua"))
-            {
-                MessageBox.Show("Bạn không có quyền sửa nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "xoa"))
-            {
-                MessageBox.Show("Bạn không có quyền xóa nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (!QuyenNguoiDungHelper.HasPermission("btnNhanVien", "them"))
-            {
-                MessageBox.Show("Bạn không có quyền thêm nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            
             var themNhanVienWindow = new ThemNhanVienForm(this);
             themNhanVienWindow.ShowDialog();
            

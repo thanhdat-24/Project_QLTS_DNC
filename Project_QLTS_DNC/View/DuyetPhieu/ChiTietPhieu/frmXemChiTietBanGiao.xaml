@@ -136,7 +136,7 @@
                                               Width="36"
                                               Height="36"
                                               VerticalAlignment="Center"/>
-                        <TextBlock Text="CHI TIẾT PHIẾU ĐỀ NGHỊ MUA" 
+                        <TextBlock Text="CHI TIẾT PHIẾU BÀN GIAO TÀI SẢN" 
                                  FontSize="28" 
                                  FontWeight="Bold" 
                                  Foreground="{DynamicResource PrimaryHueMidBrush}"
@@ -191,7 +191,7 @@
 
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                     <TextBlock Text="Nhân viên tiếp nhận:" Style="{StaticResource InfoLabel}" MinWidth="100"/>
-                                    <TextBlock x:Name="txtTenNVTiepNhan" Text="{Binding TenNVBanGiao}" Style="{StaticResource InfoValue}"/>
+                                    <TextBlock x:Name="txtcbTiepNhan" Text="{Binding txtcbTiepNhan}" Style="{StaticResource InfoValue}"/>
                                 </StackPanel>
 
 

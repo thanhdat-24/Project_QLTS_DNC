@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using static Supabase.Postgrest.Constants;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Services.ThongBao;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 {
@@ -90,14 +93,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 dgChiTietPhieuNhap.ItemsSource = danhSachChiTiet;
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
 
-                // Thiết lập thông tin chung của phiếu để hiển thị trong các TextBlock
-                if (result.Count > 0)
+                // Nếu không có dữ liệu chi tiết
+                if (danhSachChiTiet.Count == 0)
                 {
-                    thongTinPhieu = result.First();
-                    SetupPhieuInfo(thongTinPhieu);
+                    MessageBox.Show("Phiếu này không có thông tin chi tiết để duyệt.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    btnDuyet.IsEnabled = false;
+                    btnTuChoi.IsEnabled = false;
+                    return;
                 }
 
-                bool chuaDuyet = result.Any() && result.First().TrangThai == "Chưa duyệt";
+                // Thiết lập thông tin chung
+                thongTinPhieu = result.First();
+                SetupPhieuInfo(thongTinPhieu);
+
+                bool chuaDuyet = result.First().TrangThai == "Chưa duyệt";
                 btnDuyet.IsEnabled = chuaDuyet;
                 btnTuChoi.IsEnabled = chuaDuyet;
             }
@@ -187,6 +196,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 {
                     var p = phieu.Models.First();
                     p.TrangThai = true;
+
+                    // 🔔 Gửi thông báo đã duyệt cho người tạo phiếu
+
+                    await new ThongBaoService().GuiThongBaoPhieuNhapKho_DaDuyetAsync(
+                            (int)maPhieuNhapHienTai,
+                           (int) p.MaNV
+                        );
+
+                    await new ThongBaoService().GuiThongBao_AdminDaDuyetPhieuNhapKhoAsync(
+                        (int)maPhieuNhapHienTai,
+                        ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
+                        ThongTinDangNhap.TaiKhoanDangNhap.TenTaiKhoan
+                    );
+
                     await client
                         .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)
@@ -239,6 +262,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 {
                     var p = phieu.Models.First();
                     p.TrangThai = false; // ❌ cập nhật thành "Từ chối duyệt"
+
+                    // 🔔 Gửi thông báo đã từ chối cho người tạo phiếu
+                    await new ThongBaoService().GuiThongBaoPhieuNhapKho_TuChoiAsync(
+                        (int)p.MaPhieuNhap,
+                        (int)p.MaNV
+                    );
+
+                    await new ThongBaoService().GuiThongBao_AdminTuChoiPhieuNhapKhoAsync(
+                        (int)p.MaPhieuNhap,
+                        (int)ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
+                        ThongTinDangNhap.TaiKhoanDangNhap.TenTaiKhoan
+                    );
+
+
                     await client
                         .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)

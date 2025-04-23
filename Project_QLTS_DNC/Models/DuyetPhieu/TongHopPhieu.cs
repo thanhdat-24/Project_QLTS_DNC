@@ -18,4 +18,7 @@ public class TongHopPhieu : BaseModel
 
     [Column("ma_phieu_bao_hong")]
     public long? MaPhieuBaoHong { get; set; }
+
+    [Column("ma_lich_su")]
+    public long? MaLichSuDiChuyen { get; set; }
 }

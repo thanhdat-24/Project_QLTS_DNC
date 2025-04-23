@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models.ToaNha;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services.QLToanNha;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnPhong", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem phòng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 var danhSach = await PhongService.LayDanhSachPhongAsync();
                 DanhSachPhong.Clear();
                 DanhSachGoc.Clear();
@@ -68,6 +74,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnPhong", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm phòng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var form = new frmThemPhong();
             form.ShowDialog(); // 👉 Chỉ mở form lên thôi, không xử lý gì sau đó hết
         }
@@ -76,6 +87,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnPhong", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa phòng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if ((sender as Button)?.DataContext is Phong phongCanXoa)
             {
                 var result = MessageBox.Show($"Bạn có chắc muốn xóa phòng '{phongCanXoa.TenPhong}'?",
@@ -112,6 +128,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnPhong", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa phòng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if ((sender as Button)?.DataContext is Phong phongChon)
             {
                 var form = new frmSuaPhong(phongChon);

@@ -274,7 +274,7 @@
                                 </DataGridTextColumn>
 
 
-                                <DataGridTextColumn Header="Tên tài sản" Binding="{Binding TenNhom}" Width="180">
+                                <DataGridTextColumn Header="Tên tài sản" Binding="{Binding TenTaiSan}" Width="180">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource CellCenteredWrap}"/>
                                     </DataGridTextColumn.ElementStyle>

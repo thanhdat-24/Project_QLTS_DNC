@@ -8,6 +8,9 @@ using Project_QLTS_DNC.Models.PhieuNhapKho;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.NhaCungCap;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.ThongBao;
+using Project_QLTS_DNC.Services.ThongBao;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -163,7 +166,15 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
             if (response.Model != null)
             {
-                
+                MessageBox.Show("Đã lưu phiếu nhập thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                var thongBaoService = new ThongBaoService();
+                await thongBaoService.ThongBaoTaoPhieuAsync(
+                    maPhieuMoi,
+                    "phiếu nhập kho",
+                    ThongTinDangNhap.TaiKhoanDangNhap.MaTk
+                );
+
+
 
                 // 👉 Mở form nhập chi tiết
                 var chiTietForm = new ChiTietPhieuNhapInput(maPhieuMoi, selectedMaNCC);
@@ -176,6 +187,10 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 // 👉 Cập nhật lại tổng tiền
                 phieuNhap.TongTien = tongTienCapNhat;
                 await _client.From<PhieuNhap>().Update(phieuNhap);
+
+                
+
+                
 
                 this.Close();
             }

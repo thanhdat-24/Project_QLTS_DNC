@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models.ToaNha;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services.QLToanNha;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnTang", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem tầng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 var tangs = await TangService.LayDanhSachTangAsync();
 
                 DanhSachTang.Clear();
@@ -47,6 +53,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnTang", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm tầng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var form = new frmThemTang();
             if (form.ShowDialog() == true)
             {
@@ -77,6 +88,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnTang", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa tầng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var btn = sender as Button;
             if (btn?.DataContext is Tang tangChon)
             {
@@ -110,6 +126,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnTang", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa tầng tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var btn = sender as Button;
             if (btn?.DataContext is Tang tangCanXoa)
             {
