@@ -178,9 +178,10 @@
                     </DataGridTextColumn>
 
                     <!-- Cột Tòa Nhà -->
+                    <!-- Cột Tòa Nhà -->
                     <DataGridTextColumn Header="Tòa Nhà"
-                        Binding="{Binding MaToaNha}"
-                        Width="259">
+                    Binding="{Binding TenToaNha}"
+                    Width="259">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -188,6 +189,7 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
+
 
                     <!-- Cột Tùy Chọn: Chỉnh sửa và Xóa -->
                     <DataGridTemplateColumn Header="Tùy chọn" Width="160">
