@@ -1,6 +1,16 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using ClosedXML.Excel;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.NhaCungCap;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Services;
+using Supabase;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,15 +23,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ClosedXML.Excel;
-using Microsoft.Win32;
-using System.ComponentModel;
-using System.Data;
-using Supabase;
-using Project_QLTS_DNC.Models.PhieuNhapKho;
-using Project_QLTS_DNC.Models.NhanVien;
-using Project_QLTS_DNC.Models.NhaCungCap;
-using Project_QLTS_DNC.Services;
 
 
 namespace Project_QLTS_DNC.View.QuanLyKho
@@ -227,6 +228,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void btnThemKho_click(object sender, RoutedEventArgs e)
         {
+            
             var form = new PhieuNhapKhoInput();
             form.ShowDialog();
             _ = LoadPhieuNhapAsync();
