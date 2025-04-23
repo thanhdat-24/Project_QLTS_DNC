@@ -25,8 +25,20 @@ namespace Project_QLTS_DNC.Models.BaoTri
         [Supabase.Postgrest.Attributes.Column("tinh_trang")]
         public string TinhTrang { get; set; }
 
+        private string _viTriThucTe;
         [Supabase.Postgrest.Attributes.Column("vi_tri_thuc_te")]
-        public string ViTriThucTe { get; set; }
+        public string ViTriThucTe
+        {
+            get => _viTriThucTe;
+            set
+            {
+                if (_viTriThucTe != value)
+                {
+                    _viTriThucTe = value;
+                    OnPropertyChanged(nameof(ViTriThucTe));
+                }
+            }
+        }
 
         [Supabase.Postgrest.Attributes.Column("ghi_chu")]
         public string GhiChu { get; set; }

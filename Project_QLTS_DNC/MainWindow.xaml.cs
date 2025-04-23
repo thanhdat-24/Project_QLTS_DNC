@@ -28,73 +28,43 @@ using Project_QLTS_DNC.Models.TaiKhoan;
 using Project_QLTS_DNC.Services.TaiKhoan;
 using Project_QLTS_DNC.Services.ThongBao;
 using Project_QLTS_DNC.Models.ThongBao;
+using System.ComponentModel;
 
 namespace Project_QLTS_DNC
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         //public event Action<string> TreeViewItemSelected;
 
         private TaiKhoanModel _taiKhoan;
         private List<TaiKhoanModel> _danhSachTaiKhoan;
 
+        private int _soThongBaoChuaDoc;
+        public int SoThongBaoChuaDoc
+        {
+            get => _soThongBaoChuaDoc;
+            set
+            {
+                _soThongBaoChuaDoc = value;
+                OnPropertyChanged(nameof(SoThongBaoChuaDoc));
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
-        //public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
-        //{
-        //    InitializeComponent();
-        //    _taiKhoan = taiKhoan;
-        //    _danhSachTaiKhoan = danhSachTaiKhoan;
-        //    ThongTinDangNhap.LoaiTaiKhoanDangNhap = _taiKhoan.LoaiTaiKhoan;
 
-        //    ThongTinDangNhap.LoaiTaiKhoanDangNhap = new LoaiTaiKhoanModel
-        //    {
-        //        MaLoaiTk = _taiKhoan.MaLoaiTk,
-        //        TenLoaiTk = _taiKhoan.LoaiTaiKhoan.TenLoaiTk
-        //    };
-        //    ThongTinDangNhap.TaiKhoanDangNhap = taiKhoan;
 
-        //    if (taiKhoan.LoaiTaiKhoan != null)
-        //    {
-        //        ThongTinDangNhap.LoaiTaiKhoanDangNhap = taiKhoan.LoaiTaiKhoan;
-        //    }
-        //    else
-        //    {
-        //        // Nếu chưa có, tạm gán theo mã (chỉ dùng nếu chắc chắn là Admin)
-        //        ThongTinDangNhap.LoaiTaiKhoanDangNhap = new LoaiTaiKhoanModel
-        //        {
-        //            MaLoaiTk = taiKhoan.MaLoaiTk,
-        //            TenLoaiTk = "Admin" // Hoặc gọi API lấy tên thật nếu cần
-        //        };
-        //    }
-
-        //    //{
-        //    //    MaLoaiTk = _taiKhoan.MaLoaiTk,
-        //    //    TenLoaiTk = "Admin" 
-        //    //};
-
-        //}
-
-        //public MainWindow(TaiKhoanModel taiKhoan, List<TaiKhoanModel> danhSachTaiKhoan = null)
-        //{
-        //    InitializeComponent();
-        //    _taiKhoan = taiKhoan;
-        //    _danhSachTaiKhoan = danhSachTaiKhoan;
-
-        //    ThongTinDangNhap.TaiKhoanDangNhap = taiKhoan;
-
-        //    // Gọi service để lấy tên loại tài khoản
-        //    var loaiTkService = new LoaiTaiKhoanService();
-        //    var loai = loaiTkService.GetLoaiTaiKhoanByMaLoai(taiKhoan.MaLoaiTk).Result;
-        //    ThongTinDangNhap.LoaiTaiKhoanDangNhap = loai;
-        //}
 
         public MainWindow()
         {
             InitializeComponent();
-
+            this.DataContext = this;
             // Lấy từ ThongTinDangNhap
             _taiKhoan = ThongTinDangNhap.TaiKhoanDangNhap;
             _danhSachTaiKhoan = new List<TaiKhoanModel>(); // hoặc null nếu không dùng
@@ -105,6 +75,12 @@ namespace Project_QLTS_DNC
         #region Window Loading Functions
 
 
+        private async Task CapNhatSoThongBaoChuaDocAsync()
+        {
+            var thongBaoService = new ThongBaoService();
+            var danhSach = await thongBaoService.LayThongBaoTheoNguoiDungAsync();
+            SoThongBaoChuaDoc = danhSach.Count(tb => !tb.DaDoc);
+        }
 
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -120,7 +96,8 @@ namespace Project_QLTS_DNC
                     imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
                 }
             }
-            //HienThiTreeViewTheoPhanQuyen(); 
+            HienThiTreeViewTheoPhanQuyen();
+             await CapNhatSoThongBaoChuaDocAsync();
         }
         #endregion
         private void HienThiTreeViewTheoPhanQuyen()
@@ -229,6 +206,36 @@ namespace Project_QLTS_DNC
                 }
 
                 parent.Visibility = coItemHien ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private void ThongBao_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is ThongBaoModel tb)
+            {
+                // Đánh dấu đã đọc
+                _ = new ThongBaoService().DanhDauDaDocAsync(tb.Id);
+
+                // Kiểm tra loại phiếu và mở chi tiết tương ứng
+                //if (!string.IsNullOrEmpty(tb.LoaiPhieu) && tb.MaPhieu.HasValue)
+                //{
+                //    string loai = tb.LoaiPhieu.ToLower();
+
+                //    if (loai.Contains("đề nghị"))
+                //    {
+                //        var form = new ChiTietPhieuDeNghiWindow(tb.MaPhieu.Value);
+                //        form.ShowDialog();
+                //    }
+                //    else if (loai.Contains("bảo trì"))
+                //    {
+                //        var form = new ChiTietPhieuBaoTriWindow(tb.MaPhieu.Value);
+                //        form.ShowDialog();
+                //    }
+                //    else
+                //    {
+                //        MessageBox.Show("Loại phiếu này chưa được hỗ trợ mở chi tiết.", "Thông báo");
+                //    }
+                //}
             }
         }
 
@@ -577,6 +584,20 @@ namespace Project_QLTS_DNC
 
             dsThongBao.ItemsSource = danhSach.Take(10).ToList();
             popupThongBao.IsOpen = true;
+            SoThongBaoChuaDoc = danhSach.Count(tb => !tb.DaDoc);
+
+        }
+        private void btnXoaThongBaoDaDoc_Click(object sender, RoutedEventArgs e)
+        {
+            if (dsThongBao.ItemsSource is IEnumerable<ThongBaoModel> thongBaoList)
+            {
+                // Lọc lại: chỉ giữ những thông báo CHƯA đọc
+                var chuaDocList = thongBaoList.Where(tb => !tb.DaDoc).ToList();
+                dsThongBao.ItemsSource = chuaDocList;
+
+                // 👇 Nếu bạn dùng badge đếm, nhớ cập nhật lại số
+                SoThongBaoChuaDoc = chuaDocList.Count;
+            }
         }
 
         private void btnDiChuyenTaiSan_Selected(object sender, RoutedEventArgs e)

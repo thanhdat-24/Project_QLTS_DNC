@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.BaoTri;
+using Project_QLTS_DNC.Models.QLTaiSan;
 using Supabase;
 
 namespace Project_QLTS_DNC.Services.BaoTri
@@ -13,7 +14,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
         /// <summary>
         /// Lấy danh sách tài sản cần kiểm kê từ cơ sở dữ liệu
         /// </summary>
-        public async Task<List<KiemKeTaiSan>> GetKiemKeTaiSanAsync()
+        public async Task<List<KiemKeTaiSan>> GetKiemKeTaiSanAsync(string tinhTrangFilter = null)
         {
             try
             {
@@ -22,10 +23,17 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
 
+                // Khởi tạo truy vấn
+                var query = client.From<KiemKeTaiSan>().Select("*");
+
+                // Lọc theo tình trạng nếu có
+                if (!string.IsNullOrEmpty(tinhTrangFilter))
+                {
+                    query = query.Filter("tinh_trang", Supabase.Postgrest.Constants.Operator.Equals, tinhTrangFilter);
+                }
+
                 // Thực hiện truy vấn để lấy dữ liệu kiểm kê
-                var response = await client
-                    .From<KiemKeTaiSan>()
-                    .Select("*")
+                var response = await query
                     .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
@@ -37,6 +45,32 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 MessageBox.Show($"Lỗi khi truy vấn dữ liệu kiểm kê tài sản: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<KiemKeTaiSan>();
+            }
+        }
+        public async Task<List<TaiSanModel>> GetDanhSachTaiSanCanKiemTraAsync()
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                    throw new Exception("Không thể kết nối Supabase Client");
+
+                // Thực hiện truy vấn để lấy tài sản có tình trạng "Cần kiểm tra"
+                var response = await client
+                    .From<TaiSanModel>()
+                    .Select("*")
+                    .Filter("tinh_trang_sp", Supabase.Postgrest.Constants.Operator.Equals, "Cần kiểm tra")
+                    .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                System.Diagnostics.Debug.WriteLine($"Số lượng tài sản cần kiểm tra: {response.Models.Count}");
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi truy vấn dữ liệu tài sản cần kiểm tra: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return new List<TaiSanModel>();
             }
         }
 
@@ -173,6 +207,9 @@ namespace Project_QLTS_DNC.Services.BaoTri
         {
             try
             {
+                // Lưu giá trị hiện tại để đề phòng mất dữ liệu
+                string viTriThucTeBanDau = taiSan.ViTriThucTe;
+
                 var client = await SupabaseService.GetClientAsync();
                 if (client == null)
                     throw new Exception("Không thể kết nối Supabase Client");
@@ -182,21 +219,28 @@ namespace Project_QLTS_DNC.Services.BaoTri
 
                 // Tiếp tục với các tham số chính xác - đã loại bỏ MaNhomTS
                 var parameters = new Dictionary<string, object>
-                {
-                    { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
-                    { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
-                    { "p_ma_tai_san", taiSanDb.MaTaiSan },
-                    { "p_ma_phong", taiSanDb.MaPhong },
-                    { "p_tinh_trang", taiSanDb.TinhTrang },
-                    { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
-                    { "p_ghi_chu", taiSanDb.GhiChu }
-                };
+        {
+            { "p_ma_kiem_ke_ts", taiSanDb.MaKiemKeTS },
+            { "p_ma_dot_kiem_ke", taiSanDb.MaDotKiemKe },
+            { "p_ma_tai_san", taiSanDb.MaTaiSan },
+            { "p_ma_phong", taiSanDb.MaPhong },
+            { "p_tinh_trang", taiSanDb.TinhTrang },
+            { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
+            { "p_ghi_chu", taiSanDb.GhiChu }
+        };
 
                 var response = await client.Rpc("cap_nhat_tai_san", parameters);
 
                 if (response.ResponseMessage.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"Đã cập nhật tài sản sau bảo trì: {taiSan.MaTaiSan}");
+
+                    // Đảm bảo giá trị không bị mất nếu có lỗi
+                    if (string.IsNullOrEmpty(taiSan.ViTriThucTe) && !string.IsNullOrEmpty(viTriThucTeBanDau))
+                    {
+                        taiSan.ViTriThucTe = viTriThucTeBanDau;
+                    }
+
                     return true;
                 }
                 else
