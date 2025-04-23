@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using static Supabase.Postgrest.Constants;
 using Project_QLTS_DNC.Models.PhieuXuatKho;
+using Project_QLTS_DNC.Models.QLTaiSan;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 {
@@ -28,7 +29,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             public long MaPhieuXuat { get; set; }
             public long MaChiTiet { get; set; }
             public long MaTaiSan { get; set; }
-            public string TenNhom { get; set; }
+            public string TenTaiSan { get; set; }
             public int SoLuong { get; set; }
             public string TenKhoXuat { get; set; }
             public string TenKhoNhan { get; set; }
@@ -47,7 +48,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 var dsChiTiet = await client.From<ChiTietPhieuXuatModel>().Get();
                 var dsKho = await client.From<Kho>().Get();
                 var dsNV = await client.From<NhanVienModel>().Get();
-                var dsNhomTS = await client.From<NhomTaiSan>().Get();
+                var dsTaiSan = await client.From<TaiSanModel>().Get();
 
                 var phieu = dsPhieu.Models.FirstOrDefault(p => p.MaPhieuXuat == maPhieuXuat);
                 if (phieu == null)
@@ -56,23 +57,26 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                     return;
                 }
 
+                // Gán thông tin chung
                 txtMaPhieu.Text = "PX" + phieu.MaPhieuXuat;
                 txtNgayXuat.Text = phieu.NgayXuat.ToString("dd/MM/yyyy");
-                txtTrangThai.Text = phieu.TrangThai == true ? "Đã duyệt" :
-                                    phieu.TrangThai == false ? "Từ chối duyệt" : "Chưa duyệt";
+                txtTrangThai.Text = phieu.TrangThai == true ? "Đã duyệt"
+                                      : phieu.TrangThai == false ? "Từ chối duyệt"
+                                      : "Chưa duyệt";
                 txtTenKhoXuat.Text = dsKho.Models.FirstOrDefault(k => k.MaKho == phieu.MaKhoXuat)?.TenKho ?? "(Không rõ)";
                 txtTenKhoNhan.Text = dsKho.Models.FirstOrDefault(k => k.MaKho == phieu.MaKhoNhan)?.TenKho ?? "(Không rõ)";
                 txtTenNV.Text = dsNV.Models.FirstOrDefault(n => n.MaNV == phieu.MaNV)?.TenNV ?? "(Không rõ)";
 
+                // Load chi tiết
                 var chiTiet = (from ct in dsChiTiet.Models
                                where ct.MaPhieuXuat == maPhieuXuat
-                               let nhom = dsNhomTS.Models.FirstOrDefault(n => n.MaNhomTS == ct.MaTaiSan)
+                               let ts = dsTaiSan.Models.FirstOrDefault(t => t.MaTaiSan == ct.MaTaiSan)
                                select new ChiTietPhieuXuatHienThi
                                {
                                    MaPhieuXuat = ct.MaPhieuXuat,
                                    MaChiTiet = ct.MaChiTietXK,
                                    MaTaiSan = ct.MaTaiSan,
-                                   TenNhom = nhom?.TenNhom ?? "(Không rõ)",
+                                   TenTaiSan = ts?.TenTaiSan ?? "(Không rõ)",
                                    SoLuong = ct.SoLuong,
                                    TenKhoXuat = txtTenKhoXuat.Text,
                                    TenKhoNhan = txtTenKhoNhan.Text,
@@ -85,15 +89,24 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
 
                 bool chuaDuyet = phieu.TrangThai == null;
-                btnDuyet.IsEnabled = chuaDuyet;
-                btnTuChoi.IsEnabled = chuaDuyet;
+                bool coChiTiet = danhSachChiTiet.Any();
+
+                btnDuyet.IsEnabled = chuaDuyet && coChiTiet;
+                btnTuChoi.IsEnabled = chuaDuyet && coChiTiet;
                 btnHuyBo.IsEnabled = true;
+
+                // Nếu không có chi tiết, cảnh báo
+                if (!coChiTiet)
+                {
+                    MessageBox.Show("Phiếu này không có thông tin chi tiết để duyệt!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("❌ Lỗi khi load phiếu xuất: " + ex.Message);
             }
         }
+
 
         private async void btnDuyet_Click(object sender, RoutedEventArgs e)
         {
@@ -114,7 +127,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 
                     if (tonKho == null)
                     {
-                        MessageBox.Show($"❌ Khu vực \"{ct.TenKhoXuat}\" không có tài sản \"{ct.TenNhom}\".", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show($"❌ Khu vực \"{ct.TenKhoXuat}\" không có tài sản \"{ct.TenTaiSan}\".", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
 
@@ -124,7 +137,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                     if (ct.SoLuong > soLuongTon)
                     {
                         MessageBox.Show(
-                            $"❌ Tài sản \"{ct.TenNhom}\" tại kho \"{ct.TenKhoXuat}\" không đủ tồn kho.\n" +
+                            $"❌ Tài sản \"{ct.TenTaiSan}\" tại kho \"{ct.TenKhoXuat}\" không đủ tồn kho.\n" +
                             $"✔️ Hiện còn: {soLuongTon} | ❌ Cần xuất: {ct.SoLuong}",
                             "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;

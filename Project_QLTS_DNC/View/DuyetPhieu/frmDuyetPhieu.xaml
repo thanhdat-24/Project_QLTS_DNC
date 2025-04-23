@@ -400,9 +400,9 @@
                                     <ComboBoxItem Content="Phiếu nhập"/>
                                     <ComboBoxItem Content="Phiếu xuất"/>
                                     <ComboBoxItem Content="Phiếu báo hỏng"/>
-
                                     <ComboBoxItem Content="Phiếu bàn giao tài sản"/>
                                     <ComboBoxItem Content="Phiếu đề nghị mua"/>
+                                    <ComboBoxItem Content="Phiếu lịch sử di chuyển tài sản"/>
                                 </ComboBox>
                             </StackPanel>
 

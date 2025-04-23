@@ -90,14 +90,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 dgChiTietPhieuNhap.ItemsSource = danhSachChiTiet;
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
 
-                // Thiết lập thông tin chung của phiếu để hiển thị trong các TextBlock
-                if (result.Count > 0)
+                // Nếu không có dữ liệu chi tiết
+                if (danhSachChiTiet.Count == 0)
                 {
-                    thongTinPhieu = result.First();
-                    SetupPhieuInfo(thongTinPhieu);
+                    MessageBox.Show("Phiếu này không có thông tin chi tiết để duyệt.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    btnDuyet.IsEnabled = false;
+                    btnTuChoi.IsEnabled = false;
+                    return;
                 }
 
-                bool chuaDuyet = result.Any() && result.First().TrangThai == "Chưa duyệt";
+                // Thiết lập thông tin chung
+                thongTinPhieu = result.First();
+                SetupPhieuInfo(thongTinPhieu);
+
+                bool chuaDuyet = result.First().TrangThai == "Chưa duyệt";
                 btnDuyet.IsEnabled = chuaDuyet;
                 btnTuChoi.IsEnabled = chuaDuyet;
             }

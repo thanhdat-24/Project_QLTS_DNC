@@ -75,6 +75,8 @@ namespace Project_QLTS_DNC.View.NhanVien
                 MessageBox.Show("Bạn không có quyền thêm nhân viên!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+
+            
             var themNhanVienWindow = new ThemNhanVienForm(this);
             themNhanVienWindow.ShowDialog();
            

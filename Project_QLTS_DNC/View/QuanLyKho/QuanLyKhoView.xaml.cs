@@ -1,7 +1,16 @@
-﻿using System;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Services;
+using Supabase;
+using System;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,15 +21,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
-using Supabase;
-using Project_QLTS_DNC.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Project_QLTS_DNC.Services;
-using Project_QLTS_DNC.Models;
-using System.Collections.ObjectModel;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -102,6 +102,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private void btnViewDetail_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             ThemKho themKhoForm = new ThemKho();
             themKhoForm.ShowDialog(); // Mở form Thêm Kho
         }

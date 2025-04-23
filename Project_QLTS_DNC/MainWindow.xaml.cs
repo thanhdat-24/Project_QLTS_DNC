@@ -102,11 +102,15 @@ namespace Project_QLTS_DNC
             // Bây giờ bạn đã có ThongTinDangNhap.LoaiTaiKhoanDangNhap.TenLoaiTk để check quyền
         }
 
+        #region Window Loading Functions
+
+
+
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await LoadBarChartAsync();
-            // Đọc đường dẫn logo từ file và hiển thị
+            // Đọc đường dẫn logo từ file và hiển thị 
             string logoPathFile = "logo_path.txt";
             if (File.Exists(logoPathFile))
             {
@@ -116,8 +120,9 @@ namespace Project_QLTS_DNC
                     imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
                 }
             }
-          HienThiTreeViewTheoPhanQuyen();
+            //HienThiTreeViewTheoPhanQuyen(); 
         }
+        #endregion
         private void HienThiTreeViewTheoPhanQuyen()
         {
             var controls = new Dictionary<string, TreeViewItem>
@@ -504,7 +509,7 @@ namespace Project_QLTS_DNC
 
         private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
         {
-            MainContentPanel.Content = new View.CaiDat.PhieuInForm();
+            MainContentPanel.Content = new View.CaiDat.CaiDatPhieuInForm();
 
         }
 

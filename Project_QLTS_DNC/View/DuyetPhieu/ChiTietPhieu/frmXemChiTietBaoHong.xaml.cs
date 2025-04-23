@@ -64,7 +64,6 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                     var phong = dsPhong.Models.FirstOrDefault(x => x.MaPhong == p.MaPhong);
                     var ts = dsTS.Models.FirstOrDefault(x => x.MaTaiSan == p.MaTaiSan);
 
-
                     return new BaoHongHienThi
                     {
                         MaPhieuBaoHong = p.MaPhieuBaoHong,
@@ -82,21 +81,30 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 dgChiTietBaoHong.ItemsSource = danhSachChiTiet;
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
 
+                if (danhSachChiTiet.Count == 0)
+                {
+                    MessageBox.Show("Phiếu báo hỏng này không có thông tin chi tiết để duyệt!!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    btnDuyet.IsEnabled = false;
+                    btnTuChoi.IsEnabled = false;
+                    return;
+                }
+
                 if (danhSachChiTiet.Count > 0)
                 {
                     thongTinPhieu = danhSachChiTiet.First();
                     SetupPhieuInfo(thongTinPhieu);
                 }
 
-                bool chuaDuyet = result.Any() && result.First().TrangThai == "Chưa duyệt";
+                bool chuaDuyet = result.Any() && result.First().TrangThaiBool == null;
                 btnDuyet.IsEnabled = chuaDuyet;
                 btnTuChoi.IsEnabled = chuaDuyet;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("❌ Lỗi khi load phiếu báo hỏng: " + ex.Message);
+                MessageBox.Show("Lỗi khi load phiếu báo hỏng: " + ex.Message);
             }
         }
+
 
         private void SetupPhieuInfo(BaoHongHienThi phieu)
         {
