@@ -16,9 +16,7 @@ namespace Project_QLTS_DNC.Models.PhieuXuatKho
         [Column("ma_tai_san")]
         public int MaTaiSan { get; set; }
 
-        [Column("so_luong")]
-        public int SoLuong { get; set; }
-
+     
         [Column("ma_nhom_ts")]
         public long? MaNhomTS { get; set; }
 

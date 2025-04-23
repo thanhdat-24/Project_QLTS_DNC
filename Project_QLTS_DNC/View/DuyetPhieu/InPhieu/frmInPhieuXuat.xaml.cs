@@ -49,12 +49,14 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 LoadingOverlay.Visibility = Visibility.Visible;
                 var client = await SupabaseService.GetClientAsync();
 
+                // Lấy các dữ liệu từ bảng liên quan
                 var listPhieu = await client.From<PhieuXuat>().Get();
                 var listChiTiet = await client.From<ChiTietPhieuXuatModel>().Get();
                 var listKho = await client.From<Kho>().Get();
                 var listNV = await client.From<NhanVienModel>().Get();
                 var listTaiSan = await client.From<TaiSanModel>().Get();
 
+                // Lấy phiếu xuất tương ứng
                 var phieu = listPhieu.Models.FirstOrDefault(p => p.MaPhieuXuat == maPhieuXuat);
                 if (phieu == null) throw new Exception("Không tìm thấy phiếu xuất!");
 
@@ -62,6 +64,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 var khoNhan = listKho.Models.FirstOrDefault(k => k.MaKho == phieu.MaKhoNhan)?.TenKho ?? "???";
                 var nhanVien = listNV.Models.FirstOrDefault(nv => nv.MaNV == phieu.MaNV)?.TenNV ?? "???";
 
+                // Khởi tạo thông tin phiếu xuất
                 thongTinPhieu = new ChiTietPhieuXuatDTO
                 {
                     MaPhieu = phieu.MaPhieuXuat,
@@ -69,9 +72,11 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                     TenKhoNhan = khoNhan,
                     TenNV = nhanVien,
                     NgayXuat = phieu.NgayXuat,
-                    TrangThai = phieu.TrangThai == true ? "Đã duyệt" : phieu.TrangThai == false ? "Từ chối duyệt" : "Chưa duyệt"
+                    TrangThai = phieu.TrangThai == true ? "Đã duyệt" : phieu.TrangThai == false ? "Từ chối duyệt" : "Chưa duyệt",
+                    SoLuong = int.TryParse(phieu.SoLuong, out int soLuong) ? soLuong : 0 // Lấy số lượng từ PhieuXuat
                 };
 
+                // Cập nhật thông tin vào các TextBlock
                 txtMaPhieu.Text = "PX" + thongTinPhieu.MaPhieu;
                 txtTenKhoXuat.Text = thongTinPhieu.TenKhoXuat;
                 txtTenKhoNhan.Text = thongTinPhieu.TenKhoNhan;
@@ -79,6 +84,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 txtNgayXuat.Text = thongTinPhieu.NgayXuat?.ToString("dd/MM/yyyy") ?? "";
                 txtTrangThai.Text = thongTinPhieu.TrangThai;
 
+                // Lấy chi tiết phiếu xuất
                 danhSachChiTiet = (from ct in listChiTiet.Models
                                    where ct.MaPhieuXuat == phieu.MaPhieuXuat
                                    join ts in listTaiSan.Models on ct.MaTaiSan equals ts.MaTaiSan
@@ -86,12 +92,13 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                                    {
                                        MaChiTiet = ct.MaChiTietXK,
                                        TenTaiSan = ts.TenTaiSan,
-                                       SoLuong = ct.SoLuong,
+                                       SoLuong = thongTinPhieu.SoLuong, // Gán số lượng từ phiếu xuất
                                        TenKhoXuat = khoXuat,
                                        TenKhoNhan = khoNhan,
                                        GhiChu = ts.GhiChu ?? ""
                                    }).ToList();
 
+                // Hiển thị dữ liệu lên UI
                 dgChiTietPhieuXuat.ItemsSource = danhSachChiTiet;
                 txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
             }
@@ -104,6 +111,8 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 LoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
+
+
 
         private void btnDong_Click(object sender, RoutedEventArgs e) => Close();
 
@@ -166,7 +175,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                     table.AddCell(new Paragraph((i + 1).ToString()).SetFont(font));
                     table.AddCell(new Paragraph(ct.MaChiTiet.ToString()).SetFont(font));
                     table.AddCell(new Paragraph(ct.TenTaiSan).SetFont(font));
-                    table.AddCell(new Paragraph(ct.SoLuong.ToString()).SetFont(font));
+                    table.AddCell(new Paragraph(ct.SoLuong.ToString()).SetFont(font)); // Hiển thị số lượng
                     table.AddCell(new Paragraph(ct.TenKhoXuat).SetFont(font));
                     table.AddCell(new Paragraph(ct.TenKhoNhan).SetFont(font));
                     table.AddCell(new Paragraph(ct.GhiChu).SetFont(font));
@@ -184,6 +193,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                     .SetTextAlignment(iTextTextAlignment.RIGHT));
             }
         }
+
 
         private Cell Cell(string text, PdfFont font, bool bold = false)
         {
@@ -207,6 +217,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             public int MaChiTiet { get; set; }
             public string TenTaiSan { get; set; }
             public int SoLuong { get; set; }
+
             public string TenKhoXuat { get; set; }
             public string TenKhoNhan { get; set; }
             public string GhiChu { get; set; }
@@ -215,6 +226,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
         private class ChiTietPhieuXuatDTO
         {
             public long MaPhieu { get; set; }
+            public int SoLuong { get; set; }
             public string TenKhoXuat { get; set; }
             public string TenKhoNhan { get; set; }
             public string TenNV { get; set; }

@@ -1,6 +1,8 @@
 ﻿using System;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using System.Text.Json.Serialization;
+
 
 namespace Project_QLTS_DNC.Models.PhieuNhapKho
 {
@@ -41,6 +43,9 @@ namespace Project_QLTS_DNC.Models.PhieuNhapKho
         [Column("trang_thai")]
         public bool? TrangThai { get; set; }
 
-       
+
+        
+
+
     }
 }

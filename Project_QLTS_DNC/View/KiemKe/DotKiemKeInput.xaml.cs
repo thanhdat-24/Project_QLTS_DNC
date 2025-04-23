@@ -107,9 +107,9 @@ namespace Project_QLTS_DNC.View.KiemKe
                     {
                         MessageBox.Show("Thêm đợt kiểm kê thành công!");
 
-                        int maDotKiemKeMoi = response.Models.First().MaDotKiemKe;
-                        var formKiemKe = new KiemKeTaiSan(maDotKiemKeMoi);
-                        formKiemKe.Show(); // Mở form KiemKeTaiSan
+                       // int maDotKiemKeMoi = response.Models.First().MaDotKiemKe;
+                       // var formKiemKe = new KiemKeTaiSan(maDotKiemKeMoi);
+                      //  formKiemKe.Show(); // Mở form KiemKeTaiSan
 
                         this.Close();
                     }
