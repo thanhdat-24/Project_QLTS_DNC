@@ -28,17 +28,7 @@ namespace Project_QLTS_DNC.Models.ThongBao
         [Column("ma_tai_khoan")]
         public int MaTaiKhoan { get; set; }
 
-        [JsonProperty("loai_phieu")]
-        [Column("loai_phieu")]
-        public string? LoaiPhieu { get; set; }
-
-        [JsonProperty("trang_thai")]
-        [Column("trang_thai")]
-        public string? TrangThai { get; set; }
-
-        [JsonProperty("ma_phieu")]
-        [Column("ma_phieu")]
-        public int? MaPhieu { get; set; }
+        
 
     }
 }

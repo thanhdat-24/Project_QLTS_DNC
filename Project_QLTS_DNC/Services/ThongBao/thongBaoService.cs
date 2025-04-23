@@ -1,4 +1,6 @@
-﻿using Project_QLTS_DNC.Models.ThongBao;
+﻿using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.ThongBao;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -42,7 +44,17 @@ namespace Project_QLTS_DNC.Services.ThongBao
                 }
 
                 var response = await builder.Get();
-                return response.Models;
+                var thongBaos = response.Models;
+
+                // 🔍 Nếu là admin, ẩn các dòng "📥 Bạn đã tạo..."
+                if (tenLoaiTk == "admin")
+                {
+                    thongBaos = thongBaos
+                        .Where(tb => tb.NoiDung == null || !tb.NoiDung.StartsWith("📥 Bạn đã tạo"))
+                        .ToList();
+                }
+
+                return thongBaos;
             }
             catch (Exception ex)
             {
@@ -50,6 +62,90 @@ namespace Project_QLTS_DNC.Services.ThongBao
                 return new List<ThongBaoModel>();
             }
         }
+
+
+        public async Task<List<TaiKhoanModel>> LayDanhSachTaiKhoanTheoLoaiAsync(int loaiTk)
+        {
+            try
+            {
+                var client = await GetClientAsync();
+                var result = await client
+                    .From<TaiKhoanModel>()
+                    .Where(x => x.MaLoaiTk == loaiTk)
+                    .Get();
+
+                return result.Models;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi lấy danh sách tài khoản theo loại] {ex.Message}");
+                return new List<TaiKhoanModel>();
+            }
+        }
+        public async Task ThongBaoTaoPhieuAsync(int maPhieu, string loaiPhieu, int maTaiKhoanNguoiTao)
+        {
+            try
+            {
+                var client = await GetClientAsync();
+
+                // Lấy tài khoản người tạo
+                var taiKhoan = await client.From<TaiKhoanModel>()
+                                           .Where(x => x.MaTk == maTaiKhoanNguoiTao)
+                                           .Single();
+
+                var nhanVien = await client.From<NhanVienModel>()
+                                           .Where(x => x.MaNV == taiKhoan.MaNv)
+                                           .Single();
+
+                string tenNguoiTao = nhanVien?.TenNV ?? "Không rõ";
+
+                // 🔍 Lấy toàn bộ tài khoản admin
+                var dsAdmin = await client.From<TaiKhoanModel>()
+                                          .Where(x => x.MaLoaiTk == 1)
+                                          .Get();
+
+
+                var maAdminList = dsAdmin.Models.Select(a => a.MaTk).ToList();
+                bool laAdmin = maAdminList.Contains(maTaiKhoanNguoiTao);
+
+                Console.WriteLine($"✅ laAdmin = {laAdmin}, người tạo: {maTaiKhoanNguoiTao}");
+
+                // 📨 Gửi thông báo cho chính người tạo nếu không phải admin
+                if (!laAdmin)
+                {
+                    await client.From<ThongBaoModel>().Insert(new ThongBaoModel
+                    {
+                        NoiDung = $"📥 Bạn đã tạo {loaiPhieu} #{maPhieu}",
+                        MaTaiKhoan = maTaiKhoanNguoiTao,
+                        ThoiGian = DateTime.Now,
+                        DaDoc = false
+                    });
+                }
+
+                // 📢 Gửi thông báo cho admin khác
+                foreach (var admin in dsAdmin.Models)
+                {
+                    if (admin.MaTk == maTaiKhoanNguoiTao)
+                        continue;
+
+                    await client.From<ThongBaoModel>().Insert(new ThongBaoModel
+                    {
+                        NoiDung = $"📢 Nhân viên {tenNguoiTao} đã tạo {loaiPhieu} #{maPhieu}",
+                        MaTaiKhoan = admin.MaTk,
+                        ThoiGian = DateTime.Now,
+                        DaDoc = false
+                    });
+                    Console.WriteLine($"✅ laAdmin = {laAdmin}, người tạo: {maTaiKhoanNguoiTao}");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi gửi thông báo tạo phiếu] {ex.Message}");
+            }
+        }
+
+
 
 
 

@@ -89,17 +89,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             if (result != null && result.Models != null)
             {
-                var maPhieu = model.MaPhieuDeNghi; 
-
-                await new ThongBaoService().ThemThongBaoAsync(new ThongBaoModel
-                {
-                    NoiDung = $"📥 Bạn đã tạo phiếu đề nghị mua #{maPhieu} thành công",
-                    MaTaiKhoan = ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
-                    ThoiGian = DateTime.Now,
-                    LoaiPhieu = "Phiếu đề nghị mua",
-                    TrangThai = "Chờ duyệt",
-                    MaPhieu = maPhieu
-                });
+               
 
                 MessageBox.Show("Lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 this.Close(); // đóng form
