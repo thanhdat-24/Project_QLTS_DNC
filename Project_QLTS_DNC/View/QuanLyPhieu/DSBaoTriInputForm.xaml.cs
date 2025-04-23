@@ -275,7 +275,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Thiết lập dữ liệu cho form
         private async void SetupFormData()
         {
             if (_isUpdateMode)
@@ -283,7 +282,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 // Chế độ cập nhật - Đặt tiêu đề và giá trị từ đối tượng hiện tại
                 Title = "Cập nhật Phiếu Bảo Trì";
                 txtMaKiemKe.Text = KiemKeTaiSan.MaKiemKeTS.ToString();
-
                 // Tìm và chọn đợt kiểm kê tương ứng
                 if (KiemKeTaiSan.MaDotKiemKe.HasValue)
                 {
@@ -291,7 +289,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     if (dotKiemKe != null)
                         cboDotKiemKe.SelectedItem = dotKiemKe;
                 }
-
                 // Tìm tài sản tương ứng và hiển thị
                 if (KiemKeTaiSan.MaTaiSan.HasValue)
                 {
@@ -307,15 +304,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                             HanBH = taiSan.HanBH,
                             MaPhong = taiSan.MaPhong
                         };
-
                         // Hiển thị thông tin tài sản đã chọn
                         ShowSelectedTaiSan(SelectedTaiSan);
-
                         // Cập nhật thông tin phòng
                         UpdatePhongInfo(taiSan.MaPhong);
                     }
                 }
-
                 // Đặt giá trị cho tình trạng
                 if (!string.IsNullOrEmpty(KiemKeTaiSan.TinhTrang))
                 {
@@ -328,8 +322,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         }
                     }
                 }
-
-                txtViTriThucTe.Text = KiemKeTaiSan.ViTriThucTe;
+                // Sửa lỗi: Chuyển đổi int thành string
+                txtViTriThucTe.Text = KiemKeTaiSan.ViTriThucTe.ToString();
                 txtGhiChu.Text = KiemKeTaiSan.GhiChu;
             }
             else
@@ -337,7 +331,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 // Chế độ thêm mới - Tạo mã kiểm kê mới
                 Title = "Thêm Phiếu Bảo Trì";
                 await GenerateNewId();
-
                 // Thiết lập giá trị mặc định cho ComboBox TinhTrang (chọn item đầu tiên)
                 if (cboTinhTrang.Items.Count > 0)
                     cboTinhTrang.SelectedIndex = 0;
@@ -607,32 +600,37 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private void GetDataFromForm()
         {
             KiemKeTaiSan.MaKiemKeTS = int.Parse(txtMaKiemKe.Text);
-
             // Lấy mã đợt kiểm kê từ ComboBox
             if (cboDotKiemKe.SelectedItem is KiemKeDotKiemKe dotKiemKe)
             {
                 KiemKeTaiSan.MaDotKiemKe = dotKiemKe.MaDotKiemKe;
             }
-
             // Lấy mã tài sản từ tài sản đã chọn
             if (SelectedTaiSan != null)
             {
                 KiemKeTaiSan.MaTaiSan = SelectedTaiSan.MaTaiSan;
                 KiemKeTaiSan.MaPhong = SelectedTaiSan.MaPhong;
             }
-
             // Lấy giá trị tình trạng
             if (cboTinhTrang.SelectedItem is ComboBoxItem tinhTrang)
             {
                 KiemKeTaiSan.TinhTrang = tinhTrang.Content.ToString();
             }
-
             // Lấy các giá trị khác
-            KiemKeTaiSan.ViTriThucTe = txtViTriThucTe.Text;
+            // Sửa lỗi: Chuyển đổi string thành int, với xử lý lỗi
+            if (int.TryParse(txtViTriThucTe.Text, out int viTriThucTe))
+            {
+                KiemKeTaiSan.ViTriThucTe = viTriThucTe;
+            }
+            else
+            {
+                // Xử lý trường hợp không thể chuyển đổi, có thể hiển thị thông báo lỗi
+                // hoặc đặt giá trị mặc định
+                KiemKeTaiSan.ViTriThucTe = 0; // Giá trị mặc định
+                MessageBox.Show("Vị trí thực tế phải là số nguyên!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             KiemKeTaiSan.GhiChu = txtGhiChu.Text;
-           
         }
-
         // Xử lý sự kiện khi nội dung TextBox thay đổi
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
