@@ -5,7 +5,7 @@ using System;
 
 namespace Project_QLTS_DNC.Models.ThongBao
 {
-    [Table("thongbao")]
+    [Table("thongbao_app")]
     public class ThongBaoModel : BaseModel
     {
         [PrimaryKey("id", false)]

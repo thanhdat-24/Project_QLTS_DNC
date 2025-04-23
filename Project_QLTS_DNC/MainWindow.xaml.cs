@@ -120,7 +120,7 @@ namespace Project_QLTS_DNC
                     imgMainLogo.Source = new BitmapImage(new Uri(savedPath));
                 }
             }
-            //HienThiTreeViewTheoPhanQuyen(); 
+            HienThiTreeViewTheoPhanQuyen(); 
         }
         #endregion
         private void HienThiTreeViewTheoPhanQuyen()
