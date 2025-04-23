@@ -24,6 +24,8 @@ using System.IO;
 using Border = iText.Layout.Borders.Border;
 using TextAlignment = iText.Layout.Properties.TextAlignment;
 using VerticalAlignment = iText.Layout.Properties.VerticalAlignment;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Services.ThongBao;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -153,6 +155,8 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 if (updateResponse.Models.Count > 0)
                 {
                     MessageBox.Show("Cập nhật thông tin người tiếp nhận thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+
                     // Cập nhật lại thông tin phiếu sau khi lưu
                     await LoadData();
                 }

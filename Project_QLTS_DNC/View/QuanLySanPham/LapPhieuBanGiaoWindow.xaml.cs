@@ -21,6 +21,8 @@ using Project_QLTS_DNC.Services.BanGiaoTaiSanService;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.View.QuanLyToanNha;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Services.ThongBao;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -417,8 +419,18 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     });
                 }
                 var dsChiTietResult = await BanGiaoTaiSanService.ThemChiTietBanGiaoAsync(dsChiTietBanGiao);
+
+                // 🔔 Gửi thông báo cập nhật phiếu
+                await new ThongBaoService().ThongBaoTaoPhieuAsync(
+                    phieuBanGiaoResult.MaBanGiaoTS,
+                    "phiếu bàn giao",
+                    ThongTinDangNhap.TaiKhoanDangNhap.MaTk
+                );
+
+
                 MessageBox.Show($"Lập phiếu bàn giao thành công! Mã phiếu: {phieuBanGiaoResult.MaBanGiaoTS}",
                     "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
                 this.DialogResult = true;
                 this.Close();
             }

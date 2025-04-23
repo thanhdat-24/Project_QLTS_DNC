@@ -25,6 +25,7 @@ using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.BanGiaoTaiSanService;
 using System.Windows.Media;
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -81,6 +82,11 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnBanGiaoTaiSan", "xem"))
+                {
+                    MessageBox.Show("Bạn không có xem bàn giao tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 // Lấy danh sách phiếu bàn giao từ database
                 _dsBanGiao = await BanGiaoTaiSanService.LayDanhSachPhieuBanGiaoAsync();
 
@@ -204,6 +210,11 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
         private void btnThemBanGiao_click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnBanGiaoTaiSan", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm bàn giao tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var lapPhieuBanGiaoWindow = new LapPhieuBanGiaoWindow();
             lapPhieuBanGiaoWindow.ShowDialog();
 
@@ -213,6 +224,11 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
         private void btnChiTiet_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnBanGiaoTaiSan", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa bàn giao tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maBanGiao))
             {
                 var chiTietBanGiaoWindow = new ChiTietBanGiaoWindow(maBanGiao);
@@ -293,6 +309,11 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
 
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnBanGiaoTaiSan", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa bàn giao tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (sender is Button button && int.TryParse(button.Tag?.ToString(), out int maBanGiao))
             {
                 MessageBoxResult result = MessageBox.Show(
