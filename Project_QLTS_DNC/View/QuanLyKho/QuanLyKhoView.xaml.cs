@@ -1,6 +1,8 @@
 ﻿using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models;
+using Project_QLTS_DNC.Models.Kho;
+using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services;
 using Supabase;
 using System;
@@ -29,7 +31,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         private Supabase.Client _client;
         private Kho _selectedKho;
         private ObservableCollection<Kho> _listKho;
-        private ObservableCollection<Kho> _allKho = new();
+        private ObservableCollection<KhoViewModel> _allKho = new();
+
 
 
 
@@ -69,24 +72,31 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                     MessageBox.Show("Bạn không có quyền xem danh sách kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                var result = await _client.From<Kho>().Get();
 
-                if (result.Models.Any())
+                var result = await _client.From<Kho>().Get();
+                var toaNhaResult = await _client.From<ToaNha>().Get();
+
+                var toaNhaDict = toaNhaResult.Models.ToDictionary(t => t.MaToaNha, t => t.TenToaNha);
+
+                // Chuyển sang ViewModel để hiển thị tên tòa nhà
+                var viewModels = result.Models.Select(k => new KhoViewModel
                 {
-                    _allKho = new ObservableCollection<Kho>(result.Models);
-                    dgKho.ItemsSource = _allKho;
-                }
-                else
-                {
-                    dgKho.ItemsSource = null;
-                    MessageBox.Show("Không có dữ liệu kho.");
-                }
+                    MaKho = k.MaKho,
+                    TenKho = k.TenKho,
+                    MoTa = k.MoTa,
+                    MaToaNha = k.MaToaNha,
+                    TenToaNha = toaNhaDict.TryGetValue(k.MaToaNha, out var tenToaNha) ? tenToaNha : "---"
+                }).ToList();
+
+                _allKho = new ObservableCollection<KhoViewModel>(viewModels);
+                dgKho.ItemsSource = _allKho;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu kho: {ex.Message}");
             }
         }
+
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
@@ -105,7 +115,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             dgKho.ItemsSource = filteredList;
         }
 
-        private void btnViewDetail_Click(object sender, RoutedEventArgs e)
+        private async void btnViewDetail_Click(object sender, RoutedEventArgs e)
         {
             if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "them"))
             {
@@ -113,7 +123,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 return;
             }
             ThemKho themKhoForm = new ThemKho();
-            themKhoForm.ShowDialog(); // Mở form Thêm Kho
+            themKhoForm.ShowDialog(); 
+            await LoadKhoDataAsync();
         }
         // Phương thức để mở form chỉnh sửa kho
         private void BtnEdit_Click(object sender, RoutedEventArgs e)
@@ -123,17 +134,33 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Bạn không có quyền sửa danh sách kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            // Lấy kho được chọn từ DataContext
-            Button button = sender as Button;
-            Kho selectedKho = button.DataContext as Kho;
 
-            if (selectedKho != null)
+            Button button = sender as Button;
+            KhoViewModel selectedKhoVM = button?.DataContext as KhoViewModel;
+
+            if (selectedKhoVM != null)
             {
-                // Mở form chỉnh sửa kho và truyền dữ liệu cần chỉnh sửa
-                ThemKho editKhoForm = new ThemKho(selectedKho);  // Giả sử EditKho là form để chỉnh sửa kho
-                editKhoForm.ShowDialog();  // Hiển thị form chỉnh sửa
+             
+                Kho khoToEdit = new Kho
+                {
+                    MaKho = selectedKhoVM.MaKho,
+                    TenKho = selectedKhoVM.TenKho,
+                    MoTa = selectedKhoVM.MoTa,
+                    MaToaNha = selectedKhoVM.MaToaNha
+                };
+
+                ThemKho editKhoForm = new ThemKho(khoToEdit);  // Form chỉnh sửa kho
+                editKhoForm.ShowDialog();
+
+                
+                _ = LoadKhoDataAsync(); 
+            }
+            else
+            {
+                MessageBox.Show("Không có kho được chọn để chỉnh sửa.");
             }
         }
+
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (!QuyenNguoiDungHelper.HasPermission("btnDanhSachKho", "xoa"))
@@ -141,13 +168,12 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Bạn không có quyền xóa danh sách kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            // Lấy kho được chọn từ DataContext của nút
+
             Button button = sender as Button;
-            Kho selectedKho = button.DataContext as Kho;
+            KhoViewModel selectedKho = button?.DataContext as KhoViewModel;
 
             if (selectedKho != null)
             {
-                // Xác nhận trước khi xóa
                 MessageBoxResult result = MessageBox.Show(
                     $"Bạn có chắc chắn muốn xóa kho '{selectedKho.TenKho}'?",
                     "Xác nhận xóa",
@@ -158,29 +184,27 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 {
                     try
                     {
-                        var client = await SupabaseService.GetClientAsync();
+                        var client = await SupabaseService.GetClientAsync(); // 🔧 khai báo đúng client
 
-                        // Lấy tất cả danh sách kho từ Supabase
-                        var resultKho = await client.From<Kho>().Get();
-
-                        // Tìm kho cần xóa trong danh sách kho
-                        var khoToDelete = resultKho.Models.FirstOrDefault(k => k.MaKho == selectedKho.MaKho);
+                        // Lấy lại kho theo mã từ Supabase để thực hiện xóa
+                        var khoResult = await client.From<Kho>().Get();
+                        var khoToDelete = khoResult.Models.FirstOrDefault(k => k.MaKho == selectedKho.MaKho); // 🔧 khai báo khoToDelete
 
                         if (khoToDelete != null)
                         {
-                            // Xóa kho khỏi Supabase, không sử dụng `Where`, `Eq`, `Match`, `Filter`
-                            var deleteResponse = await client.From<Kho>().Delete(khoToDelete);
+                            await client.From<Kho>().Delete(khoToDelete); // ✅ xóa
+                            await LoadKhoDataAsync(); // 🔄 tải lại sau khi xóa
 
-                            
+                            MessageBox.Show("Đã xóa kho thành công.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                         else
                         {
-                            MessageBox.Show("Kho không tồn tại.");
+                            MessageBox.Show("Không tìm thấy kho cần xóa.");
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Lỗi khi xóa kho: {ex.Message}");
+                        MessageBox.Show($"Lỗi khi xóa kho: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }

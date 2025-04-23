@@ -62,14 +62,14 @@
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                      HorizontalAlignment="Stretch"/>
             <!-- Dòng 2: Mô Tả và Tòa Nhà -->
-            <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
+            <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,2,8"
                      x:Name="txtMoTa"
                      materialDesign:HintAssist.Hint="Mô tả"
+                     
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
             <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"
                       x:Name="cboToaNha"
-                      materialDesign:HintAssist.Hint="Chọn tòa nhà"
-                      Foreground="Black"
+                      materialDesign:HintAssist.Hint="Chọn tòa nhà"                     
                       Style="{StaticResource MaterialDesignOutlinedComboBox}"
                       DisplayMemberPath="TenToaNha"
                       SelectedValuePath="MaToaNha"/>    
