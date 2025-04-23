@@ -26,6 +26,8 @@ using System.IO;
 using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Models.TaiKhoan;
 using Project_QLTS_DNC.Services.TaiKhoan;
+using Project_QLTS_DNC.Services.ThongBao;
+using Project_QLTS_DNC.Models.ThongBao;
 
 namespace Project_QLTS_DNC
 {
@@ -549,6 +551,31 @@ namespace Project_QLTS_DNC
 
 
         }
+
+        private async void btnBell_Click(object sender, RoutedEventArgs e)
+        {
+            var thongBaoService = new ThongBaoService();
+            var danhSach = await thongBaoService.LayThongBaoTheoNguoiDungAsync();
+
+            if (danhSach == null || danhSach.Count == 0)
+            {
+                danhSach = new List<ThongBaoModel>
+        {
+            new ThongBaoModel
+            {
+                NoiDung = "🫥 Không có thông báo nào.",
+                ThoiGian = DateTime.Now
+            }
+        };
+            }
+
+            dsThongBao.ItemsSource = danhSach.Take(10).ToList();
+            popupThongBao.IsOpen = true;
+        }
+
+
+
+
     }
     public static class MainWindowExtensions
     {

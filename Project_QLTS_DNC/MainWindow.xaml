@@ -4,9 +4,20 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:Project_QLTS_DNC"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:helpers="clr-namespace:Project_QLTS_DNC.Helpers"
         Title="Trang Chủ - Quản Lý Tài Sản"
         Loaded="Window_Loaded"
         Height="640" Width="900" WindowState="Maximized" WindowStartupLocation="CenterScreen" Icon="/Resources/Logo/dnc.png">
+
+    <Window.Resources>
+        <helpers:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
+        <helpers:BoolToBrushConverter x:Key="BoolToBrushConverter"
+                                  ReadBrush="White"
+                                  UnreadBrush="#FFFBE7" />
+    </Window.Resources>
+
+
 
     <DockPanel>
         <!-- Thanh menu trái -->
@@ -92,9 +103,90 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Center">
-                    <Button Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Thông báo" Foreground="White">
-                        <materialDesign:PackIcon Kind="Bell" />
-                    </Button>
+                    <Grid>
+                        <!-- Nút chuông -->
+                        <Button x:Name="btnBell"
+                                Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                ToolTip="Thông báo"
+                                Foreground="White"
+                                Click="btnBell_Click">
+                            <materialDesign:PackIcon Kind="Bell" />
+                        </Button>
+
+                        <!-- Popup -->
+                        <Popup Name="popupThongBao"
+                               PlacementTarget="{Binding ElementName=btnBell}"
+                               Placement="Bottom"
+                               StaysOpen="False"
+                               AllowsTransparency="True"
+                               PopupAnimation="Fade">
+                            <Border Background="White"
+                                    CornerRadius="8"
+                                    BorderBrush="#DDDDDD"
+                                    BorderThickness="1"
+                                    Padding="10"
+                                    Width="320"
+                                    Effect="{DynamicResource MaterialDesignElevation2}">
+                                <StackPanel>
+                                    <!-- Tiêu đề -->
+                                    <TextBlock Text="🔔 Thông báo"
+                                               FontWeight="SemiBold"
+                                               FontSize="15"
+                                               Foreground="#333"
+                                               Margin="0 0 0 10" />
+
+                                    <!-- Danh sách thông báo -->
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300">
+                                        <ItemsControl Name="dsThongBao">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Padding="8" CornerRadius="4" Margin="0 4"
+                                                            Background="{Binding DaDoc, Converter={StaticResource BoolToBrushConverter}}"
+                                                            BorderBrush="#E0E0E0" BorderThickness="1">
+                                                        <StackPanel>
+                                                            <!-- Nội dung -->
+                                                            <TextBlock Text="{Binding NoiDung}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="13"
+                                                                       FontWeight="{Binding DaDoc, Converter={StaticResource BoolToFontWeightConverter}}"
+                                                                       Foreground="#222" />
+
+                                                            <!-- Thời gian -->
+                                                            <TextBlock Text="{Binding ThoiGian, StringFormat='🕒 {0:HH:mm dd/MM/yyyy}'}"
+                                                                       FontSize="10"
+                                                                       Foreground="#888"
+                                                                       Margin="0 2 0 0" />
+
+                                                            <!-- Loại phiếu + mã phiếu (tuỳ chọn nếu cần mở chi tiết) -->
+                                                            <TextBlock Text="{Binding LoaiPhieu}"
+                                                                       FontSize="11"
+                                                                       FontStyle="Italic"
+                                                                       Foreground="#666"
+                                                                       Margin="0 2 0 0" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+
+
+
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                    <Button Content="🧹 Xóa thông báo đã đọc"
+                                            HorizontalAlignment="Right"
+                                            Margin="0 10 0 0"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            />
+
+                                    <!-- Nếu cần nút xem tất cả -->
+                                    <!--<Button Content="Xem tất cả" Style="{StaticResource MaterialDesignFlatButton}" 
+                        HorizontalAlignment="Right" Margin="0 10 0 0"/>-->
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+
                     <Button x:Name="btnUserProfile" Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Tài khoản" Foreground="White" Click="btnUserProfile_Click">
                         <materialDesign:PackIcon Kind="Account" />
                     </Button>
