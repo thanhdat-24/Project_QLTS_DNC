@@ -1,20 +1,20 @@
 ﻿<UserControl x:Class="Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu.frmXemChiTietLichSuDiChuyen"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             TextOptions.TextFormattingMode="Ideal"
-             TextOptions.TextRenderingMode="Auto"
-             mc:Ignorable="d"
-             Height="Auto" 
-             Width="Auto"
-             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-             Background="{DynamicResource MaterialDesignPaper}"
-             TextElement.FontWeight="Regular"
-             TextElement.FontSize="13"
-             FontFamily="{materialDesign:MaterialDesignFont}">
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:local="clr-namespace:Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu"
+                 xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                 TextOptions.TextFormattingMode="Ideal"
+                 TextOptions.TextRenderingMode="Auto"
+                 mc:Ignorable="d"
+                 Height="Auto" 
+                 Width="Auto"
+                 TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                 Background="{DynamicResource MaterialDesignPaper}"
+                 TextElement.FontWeight="Regular"
+                 TextElement.FontSize="13"
+                 FontFamily="{materialDesign:MaterialDesignFont}">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -110,8 +110,8 @@
 
     <!-- Bọc toàn bộ nội dung trong DialogHost -->
     <materialDesign:DialogHost x:Name="MainDialogHost" 
-                               CloseOnClickAway="False"
-                               DialogTheme="Inherit">
+                                   CloseOnClickAway="False"
+                                   DialogTheme="Inherit">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <Grid Margin="24">
                 <Grid.RowDefinitions>
@@ -131,16 +131,16 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="ReceiptText" 
-                                              Foreground="{DynamicResource PrimaryHueMidBrush}" 
-                                              Margin="0,0,16,0"
-                                              Width="36"
-                                              Height="36"
-                                              VerticalAlignment="Center"/>
+                                                  Foreground="{DynamicResource PrimaryHueMidBrush}" 
+                                                  Margin="0,0,16,0"
+                                                  Width="36"
+                                                  Height="36"
+                                                  VerticalAlignment="Center"/>
                         <TextBlock Text="CHI TIẾT PHIẾU LỊCH SỬ DI CHUYỂN TÀI SẢN" 
-                                 FontSize="28" 
-                                 FontWeight="Bold" 
-                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                 VerticalAlignment="Center"/>
+                                     FontSize="28" 
+                                     FontWeight="Bold" 
+                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                     VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
 
@@ -155,13 +155,13 @@
                         <!-- Tiêu đề phần -->
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
                             <materialDesign:PackIcon Kind="Information" 
-                                                 Width="24" 
-                                                 Height="24" 
-                                                 VerticalAlignment="Center"
-                                                 Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                     Width="24" 
+                                                     Height="24" 
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
                             <TextBlock Text="THÔNG TIN PHIẾU" 
-                                     Margin="8,0,0,0" 
-                                     Style="{StaticResource SectionTitle}"/>
+                                         Margin="8,0,0,0" 
+                                         Style="{StaticResource SectionTitle}"/>
                         </StackPanel>
 
                         <!-- Nội dung phần -->
@@ -225,31 +225,31 @@
                         <!-- Tiêu đề phần -->
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
                             <materialDesign:PackIcon Kind="Package" 
-                                                 Width="24" 
-                                                 Height="24" 
-                                                 VerticalAlignment="Center"
-                                                 Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                     Width="24" 
+                                                     Height="24" 
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
                             <TextBlock Text="CHI TIẾT TÀI SẢN" 
-                                     Margin="8,0,0,0" 
-                                     Style="{StaticResource SectionTitle}"/>
+                                         Margin="8,0,0,0" 
+                                         Style="{StaticResource SectionTitle}"/>
                         </StackPanel>
 
                         <!-- DataGrid chi tiết -->
                         <DataGrid x:Name="dgChiTietBaoHong" 
-                              Grid.Row="1"
-                              AutoGenerateColumns="False" 
-                              IsReadOnly="True" 
-                              CanUserAddRows="False"
-                              materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
-                              materialDesign:DataGridAssist.ColumnHeaderPadding="8"
-                              BorderThickness="0" 
-                              GridLinesVisibility="All" 
-                              VerticalScrollBarVisibility="Auto"
-                              SelectionMode="Single"
-                              SelectionUnit="FullRow"
-                              CanUserResizeColumns="True"
-                              MaxHeight="400"
-                              ColumnWidth="Auto">
+                                  Grid.Row="1"
+                                  AutoGenerateColumns="False" 
+                                  IsReadOnly="True" 
+                                  CanUserAddRows="False"
+                                  materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+                                  BorderThickness="0" 
+                                  GridLinesVisibility="All" 
+                                  VerticalScrollBarVisibility="Auto"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  CanUserResizeColumns="True"
+                                  MaxHeight="400"
+                                  ColumnWidth="Auto">
 
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
@@ -275,9 +275,15 @@
                                         <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource CellCenteredWrap}"/>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                                          
+
 
                                 <DataGridTextColumn Header="Tên tài sản" Binding="{Binding TenTaiSan}" Width="180">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource CellCenteredWrap}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <DataGridTextColumn Header="Số Seri" Binding="{Binding SoSeri}" Width="180">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource CellCenteredWrap}"/>
                                     </DataGridTextColumn.ElementStyle>
@@ -311,21 +317,21 @@
                         <!-- Tiêu đề phần -->
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
                             <materialDesign:PackIcon Kind="FileDocumentEditOutline" 
-                                                 Width="24" 
-                                                 Height="24" 
-                                                 VerticalAlignment="Center"
-                                                 Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                     Width="24" 
+                                                     Height="24" 
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
                             <TextBlock Text="THÔNG TIN PHÊ DUYỆT" 
-                                     Margin="8,0,0,0" 
-                                     Style="{StaticResource SectionTitle}"/>
+                                         Margin="8,0,0,0" 
+                                         Style="{StaticResource SectionTitle}"/>
                         </StackPanel>
 
                         <!-- Nội dung phần -->
                         <Grid Grid.Row="1">
                             <TextBlock x:Name="txtStatus" 
-                                   Text="Tổng số dòng chi tiết: 0" 
-                                   FontWeight="Medium" 
-                                   Margin="0,0,0,8"/>
+                                       Text="Tổng số dòng chi tiết: 0" 
+                                       FontWeight="Medium" 
+                                       Margin="0,0,0,8"/>
                         </Grid>
                     </Grid>
                 </materialDesign:Card>
@@ -335,13 +341,13 @@
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                               x:Name="btnDuyet"
-                               materialDesign:ButtonAssist.CornerRadius="8" 
-                               Background="{DynamicResource SecondaryAccentForegroundBrush}" 
-                               Foreground="{DynamicResource SecondaryBack}" 
-                               Margin="0 0 8 0" 
-                               Click="btnDuyet_Click"
-                               Width="120">
+                                   x:Name="btnDuyet"
+                                   materialDesign:ButtonAssist.CornerRadius="8" 
+                                   Background="{DynamicResource SecondaryAccentForegroundBrush}" 
+                                   Foreground="{DynamicResource SecondaryBack}" 
+                                   Margin="0 0 8 0" 
+                                   Click="btnDuyet_Click"
+                                   Width="120">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="CheckBold" Margin="0 0 8 0"/>
                                     <TextBlock Text="DUYỆT"/>
@@ -349,13 +355,13 @@
                             </Button>
 
                             <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                             materialDesign:ButtonAssist.CornerRadius="8" 
-                             Background="{DynamicResource SecondaryFileExcel}" 
-                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                             Margin="0 0 8 0" 
-                             Click="btnTuChoi_Click"
-                             x:Name="btnTuChoi"
-                             Width="120">
+                                 materialDesign:ButtonAssist.CornerRadius="8" 
+                                 Background="{DynamicResource SecondaryFileExcel}" 
+                                 Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+                                 Margin="0 0 8 0" 
+                                 Click="btnTuChoi_Click"
+                                 x:Name="btnTuChoi"
+                                 Width="120">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Close" Margin="0 0 8 0"/>
                                     <TextBlock Text="TỪ CHỐI"/>
@@ -363,12 +369,12 @@
                             </Button>
 
                             <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                             materialDesign:ButtonAssist.CornerRadius="8" 
-                             Background="{DynamicResource SecondaryFileFDP}" 
-                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                             x:Name="btnHuyBo" 
-                             Click="btnHuyBo_Click"
-                             Width="120">
+                                 materialDesign:ButtonAssist.CornerRadius="8" 
+                                 Background="{DynamicResource SecondaryFileFDP}" 
+                                 Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+                                 x:Name="btnHuyBo" 
+                                 Click="btnHuyBo_Click"
+                                 Width="120">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Backspace" Margin="0 0 8 0"/>
                                     <TextBlock Text="HỦY BỎ"/>

@@ -49,6 +49,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
             var filtered = _dsLichSu.Where(p =>
                 (string.IsNullOrEmpty(_keyword) ||
                  p.TenTaiSan.Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
+                 p.SoSeri.Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
                  p.TenPhongCu.Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
                  p.TenPhongMoi.Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
                  p.TenNhanVien.Contains(_keyword, StringComparison.OrdinalIgnoreCase))
@@ -74,7 +75,8 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
             var suggestions = _dsLichSu.Where(p =>
                 p.TenTaiSan.Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
-                p.TenNhanVien.Contains(_keyword, StringComparison.OrdinalIgnoreCase))
+                p.TenNhanVien.Contains(_keyword, StringComparison.OrdinalIgnoreCase) ||
+                p.SoSeri.Contains(_keyword, StringComparison.OrdinalIgnoreCase))
                 .Select(p => p.TenTaiSan)
                 .Distinct()
                 .Take(10)
@@ -127,7 +129,6 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            
             _keyword = txtSearch.Text.Trim();
             _ = LoadLichSuAsync();
         }
@@ -145,11 +146,13 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
         {
             if (dgDiChuyen.SelectedItem is LichSuDTO selected)
             {
-                var frm = new frmChiTietDiChuyenTS(selected.MaLichSu);
-                frm.Title = $"Chi tiết phiếu lịch sử - LS{selected.MaLichSu}";
-                frm.Width = 1000;
-                frm.Height = 720;
-                frm.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                var frm = new frmChiTietDiChuyenTS(selected.MaLichSu)
+                {
+                    Title = $"Chi tiết phiếu lịch sử - LS{selected.MaLichSu}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
                 frm.ShowDialog();
             }
             else
@@ -158,15 +161,12 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
             }
         }
 
-
         private void btnThemDiChuyen_click(object sender, RoutedEventArgs e)
         {
             var frm = new frmThemPhieuDiChuyen();
             frm.ShowDialog();
             _ = LoadLichSuAsync();
         }
-
-
 
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
@@ -187,7 +187,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                 if (success)
                 {
                     MessageBox.Show("🗑Đã xoá phiếu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    await LoadLichSuAsync(); // Cập nhật lại danh sách
+                    await LoadLichSuAsync();
                 }
                 else
                 {
@@ -195,6 +195,5 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                 }
             }
         }
-
     }
 }

@@ -140,7 +140,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                     MaPhongCu = phongCu.MaPhong,
                     MaPhongMoi = phongMoi.MaPhong,
                     MaNhanVien = nv.MaNV,
-                    NgayBanGiao = dateBanGiao.SelectedDate,
+                    NgayBanGiao = dateBanGiao.SelectedDate.Value.Date + DateTime.Now.TimeOfDay,
                     GhiChu = txtGhiChu.Text,
                     TrangThai = null
                 };

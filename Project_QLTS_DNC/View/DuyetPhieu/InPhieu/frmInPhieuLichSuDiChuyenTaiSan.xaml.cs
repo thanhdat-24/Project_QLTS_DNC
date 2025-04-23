@@ -43,6 +43,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             public long MaLichSu { get; set; }
             public string TenNhanVien { get; set; }
             public string TenTaiSan { get; set; }
+            public string SoSeri { get; set; }
             public string TenPhongCu { get; set; }
             public string TenPhongMoi { get; set; }
             public string GhiChu { get; set; }
@@ -78,6 +79,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                         MaLichSu = p.MaLichSu,
                         TenNhanVien = nv?.TenNV ?? "(Không rõ)",
                         TenTaiSan = ts?.TenTaiSan ?? "(Không rõ)",
+                        SoSeri = ts?.SoSeri ?? "(Không rõ)",
                         TenPhongCu = phongCu?.TenPhong ?? "(Không rõ)",
                         TenPhongMoi = phongMoi?.TenPhong ?? "(Không rõ)",
                         GhiChu = p.GhiChu,
@@ -110,10 +112,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             }
         }
 
-        private void btnDong_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        private void btnDong_Click(object sender, RoutedEventArgs e) => Close();
 
         private void btnLuuPDF_Click(object sender, RoutedEventArgs e)
         {
@@ -160,8 +159,8 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 
             doc.Add(new Paragraph("DANH SÁCH TÀI SẢN").SetFont(font).SetBold().SetMarginBottom(5));
 
-            Table table = new Table(new float[] { 100, 150, 150, 150 }).UseAllAvailableWidth();
-            string[] headers = { "Mã phiếu", "Tên tài sản", "Ghi chú", "Ngày bàn giao" };
+            Table table = new Table(new float[] { 100, 150, 150, 150, 150 }).UseAllAvailableWidth();
+            string[] headers = { "Mã phiếu", "Tên tài sản", "Số Seri", "Ghi chú", "Ngày bàn giao" };
             foreach (var header in headers)
             {
                 table.AddHeaderCell(new Cell()
@@ -176,6 +175,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             {
                 table.AddCell(new Cell().Add(new Paragraph("LS" + ct.MaLichSu).SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
                 table.AddCell(new Cell().Add(new Paragraph(ct.TenTaiSan).SetFont(font)));
+                table.AddCell(new Cell().Add(new Paragraph(ct.SoSeri).SetFont(font)));
                 table.AddCell(new Cell().Add(new Paragraph(ct.GhiChu).SetFont(font)));
                 table.AddCell(new Cell().Add(new Paragraph(ct.NgayBanGiao.ToString("dd/MM/yyyy")).SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
             }
