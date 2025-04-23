@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using static Supabase.Postgrest.Constants;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Services.ThongBao;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
 {
@@ -193,6 +196,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 {
                     var p = phieu.Models.First();
                     p.TrangThai = true;
+
+                    // 🔔 Gửi thông báo đã duyệt cho người tạo phiếu
+
+                    await new ThongBaoService().GuiThongBaoPhieuNhapKho_DaDuyetAsync(
+                            (int)maPhieuNhapHienTai,
+                           (int) p.MaNV
+                        );
+
+                    await new ThongBaoService().GuiThongBao_AdminDaDuyetPhieuNhapKhoAsync(
+                        (int)maPhieuNhapHienTai,
+                        ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
+                        ThongTinDangNhap.TaiKhoanDangNhap.TenTaiKhoan
+                    );
+
                     await client
                         .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)
@@ -245,6 +262,20 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 {
                     var p = phieu.Models.First();
                     p.TrangThai = false; // ❌ cập nhật thành "Từ chối duyệt"
+
+                    // 🔔 Gửi thông báo đã từ chối cho người tạo phiếu
+                    await new ThongBaoService().GuiThongBaoPhieuNhapKho_TuChoiAsync(
+                        (int)p.MaPhieuNhap,
+                        (int)p.MaNV
+                    );
+
+                    await new ThongBaoService().GuiThongBao_AdminTuChoiPhieuNhapKhoAsync(
+                        (int)p.MaPhieuNhap,
+                        (int)ThongTinDangNhap.TaiKhoanDangNhap.MaTk,
+                        ThongTinDangNhap.TaiKhoanDangNhap.TenTaiKhoan
+                    );
+
+
                     await client
                         .From<PhieuNhapKho>()
                         .Where(x => x.MaPhieuNhap == maPhieuNhapHienTai)

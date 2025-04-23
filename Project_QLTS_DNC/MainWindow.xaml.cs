@@ -131,6 +131,7 @@ namespace Project_QLTS_DNC
 
                 { "btnNhaCungCap", btnNhaCungCap },
                 { "btnTraCuuTaiSan", btnTraCuuTaiSan },
+                {"btnDiChuyenTaiSan",btnDiChuyenTaiSan },
 
                 { "btnQuanLyBaoTri", btnQuanLyBaotri },
                 { "btnBaoTri", btnBaoTri },
@@ -523,6 +524,11 @@ namespace Project_QLTS_DNC
 
         private void btnDuyetPhieu_Selected(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDuyetPhieu", "xem"))
+            {
+                MessageBox.Show("Bạn không có quyền truy cập chức năng này!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             MainContentPanel.Content = new View.DuyetPhieu.frmDuyetPhieu();
 
         }
@@ -582,7 +588,11 @@ namespace Project_QLTS_DNC
         };
             }
 
-            dsThongBao.ItemsSource = danhSach.Take(10).ToList();
+            dsThongBao.ItemsSource = danhSach
+                .OrderByDescending(tb => tb.ThoiGian) // Sắp xếp mới nhất trước
+                .Take(10)                             // Rồi lấy 10 cái đầu
+                .ToList();
+
             popupThongBao.IsOpen = true;
             SoThongBaoChuaDoc = danhSach.Count(tb => !tb.DaDoc);
 

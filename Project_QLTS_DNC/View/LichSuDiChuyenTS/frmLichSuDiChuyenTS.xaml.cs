@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models.LichSu;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.LichSu;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu;
 using System;
@@ -45,6 +46,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private async Task LoadLichSuAsync()
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDiChuyenTaiSan", "xem"))
+            {
+                MessageBox.Show("Bạn không có quyền xem lịch sử di chuyển tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             _dsLichSu = await LichSuDiChuyenService.LayDanhSachLichSuAsync();
             var filtered = _dsLichSu.Where(p =>
                 (string.IsNullOrEmpty(_keyword) ||
@@ -143,6 +149,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void btnChiTiet_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDiChuyenTaiSan", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sữa lịch sử di chuyển tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (dgDiChuyen.SelectedItem is LichSuDTO selected)
             {
                 var frm = new frmChiTietDiChuyenTS(selected.MaLichSu);
@@ -161,6 +172,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void btnThemDiChuyen_click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDiChuyenTaiSan", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm di chuyển tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var frm = new frmThemPhieuDiChuyen();
             frm.ShowDialog();
             _ = LoadLichSuAsync();
@@ -170,6 +186,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnDiChuyenTaiSan", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa lịch sử di chuyển tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (dgDiChuyen.SelectedItem is not LichSuDTO selected)
             {
                 MessageBox.Show("Vui lòng chọn một phiếu để xóa!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
