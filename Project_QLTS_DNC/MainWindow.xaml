@@ -207,10 +207,26 @@
                         </Popup>
                     </Grid>
 
+                    <Button x:Name="btnUserProfile"
+                            Style="{StaticResource MaterialDesignIconForegroundButton}"
+                            ToolTip="Tài khoản"
+                            Foreground="White"
+                            Click="btnUserProfile_Click">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Account" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding TenHienThi}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        </StackPanel>
 
-                    <Button x:Name="btnUserProfile" Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Tài khoản" Foreground="White" Click="btnUserProfile_Click">
-                        <materialDesign:PackIcon Kind="Account" />
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="👤 Thông tin tài khoản" Click="ThongTinTaiKhoan_Click"/>
+                                <MenuItem Header="🚪 Đăng xuất" Click="DangXuat_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
                     </Button>
+
+
+
                     <Button x:Name="btnThoat" Style="{StaticResource MaterialDesignIconForegroundButton}" ToolTip="Đăng xuất" Foreground="White" Click="btnThoat_Click">
                         <materialDesign:PackIcon Kind="Power" />
                     </Button>

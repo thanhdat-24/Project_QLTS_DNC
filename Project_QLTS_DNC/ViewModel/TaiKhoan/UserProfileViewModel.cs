@@ -27,10 +27,22 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
             {
                 _userProfile = value;
                 OnPropertyChanged(nameof(UserProfile));
+                OnPropertyChanged(nameof(TenHienThi));
+            }
+        }
+        public string TenHienThi
+        {
+            get
+            {
+                if (UserProfile != null)
+                {
+                    return !string.IsNullOrEmpty(UserProfile.ten_nv) ? UserProfile.ten_nv : UserProfile.ten_tai_khoan;
+                }
+                return "Chưa đăng nhập";
             }
         }
 
-        
+
         public UserProfileViewModel(
             UserProfileService profileService,
             AuthService authService = null,
