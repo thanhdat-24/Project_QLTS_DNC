@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models.ToaNha;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.QLToanNha;
 using System;
@@ -25,6 +26,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnToaNha", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 var client = await SupabaseService.GetClientAsync();
                 var result = await client.From<ToaNha>().Get();
 
@@ -48,6 +54,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnToaNha", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var form = new frmThemToaNha(); // tạo form thêm toà nhà
             if (form.ShowDialog() == true && form.ToaNhaMoi != null)
             {
@@ -85,6 +96,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnToaNha", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var toaNhaChon = dgToaNha.SelectedItem as ToaNha;
             if (toaNhaChon == null)
             {
@@ -132,6 +148,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnToaNha", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa tòa nhà!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var toaNhaChon = dgToaNha.SelectedItem as ToaNha;
 
             if (toaNhaChon == null)

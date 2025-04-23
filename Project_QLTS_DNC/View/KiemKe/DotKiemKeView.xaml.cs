@@ -6,6 +6,7 @@ using Supabase;
 using Supabase.Postgrest;
 using Project_QLTS_DNC.Models.KiemKe;
 using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC.View.KiemKe
 {
@@ -47,6 +48,11 @@ namespace Project_QLTS_DNC.View.KiemKe
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnBaoCaoKiemKe", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem kiểm kê!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 // Sử dụng phương thức From<T>() để truy xuất dữ liệu từ bảng "dotkiemke"
                 var response = await _client.From<DotKiemKe>().Get();
 
@@ -68,6 +74,11 @@ namespace Project_QLTS_DNC.View.KiemKe
         }
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnBaoCaoKiemKe", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm kiểm kê!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var inputWindow = new DotKiemKeInput();
             inputWindow.ShowDialog();
 
@@ -77,6 +88,11 @@ namespace Project_QLTS_DNC.View.KiemKe
 
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnBaoCaoKiemKe", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa kiểm kê!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Lấy đợt kiểm kê được chọn từ DataContext
             Button button = sender as Button;
             DotKiemKe selectedDot = button?.DataContext as DotKiemKe;
@@ -95,6 +111,11 @@ namespace Project_QLTS_DNC.View.KiemKe
 
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnBaoCaoKiemKe", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa kiểm kê!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Lấy đợt kiểm kê được chọn từ DataContext của nút
             Button button = sender as Button;
             DotKiemKe selectedDot = button?.DataContext as DotKiemKe;

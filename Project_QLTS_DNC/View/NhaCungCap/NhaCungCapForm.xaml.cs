@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Models.NhaCungCap;
 using Project_QLTS_DNC.Models.PhieuNhapKho;
 using System;
@@ -30,6 +31,11 @@ namespace Project_QLTS_DNC.View.NhaCungCap
 
         private async Task LoadDataFromSupabase()
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhaCungCap", "xem"))
+            {
+                MessageBox.Show("Bạn không có quyền xem danh sách nhà cung cấp!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var response = await SupabaseConfig.SupabaseClient
                 .From<NhaCungCapClass>()
                 .Get();
@@ -44,6 +50,11 @@ namespace Project_QLTS_DNC.View.NhaCungCap
 
         private async void btnThemMoi_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhaCungCap", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm danh sách nhà cung cấp!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var themForm = new ThemNhaCungCapForm(DanhSachNCC);
             if (themForm.ShowDialog() == true && themForm.NhaCungCapMoi != null)
             {
@@ -75,6 +86,11 @@ namespace Project_QLTS_DNC.View.NhaCungCap
 
         private async void btnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhaCungCap", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa danh sách nhà cung cấp!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if ((sender as Button)?.DataContext is NhaCungCapClass ncc)
             {
                 var form = new ThemNhaCungCapForm(DanhSachNCC, ncc);
@@ -109,6 +125,11 @@ namespace Project_QLTS_DNC.View.NhaCungCap
 
         private async void btnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnNhaCungCap", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa danh sách nhà cung cấp!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if ((sender as Button)?.DataContext is NhaCungCapClass ncc)
             {
                 var confirm = MessageBox.Show($"Bạn có chắc muốn xóa '{ncc.TenNCC}' không?", "Xác nhận", MessageBoxButton.YesNo);

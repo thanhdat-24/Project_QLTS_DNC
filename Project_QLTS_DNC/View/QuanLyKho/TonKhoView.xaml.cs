@@ -19,6 +19,7 @@ using Project_QLTS_DNC.Models.QLTaiSan;
 using Project_QLTS_DNC.Models.PhieuXuatKho;
 using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -56,6 +57,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
         private async Task LoadTonKhoAsync()
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnTonKho", "xem"))
+            {
+                MessageBox.Show("Bạn không có quyền xem tồn kho!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var tonKhoResult = await _client.From<TonKho>().Get();
             var khoResult = await _client.From<Kho>().Get();
             var nhomResult = await _client.From<NhomTaiSan>().Get();

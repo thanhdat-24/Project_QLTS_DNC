@@ -1,4 +1,5 @@
-﻿using Project_QLTS_DNC.Models.ToaNha;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services.QLToanNha;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
         {
             try
             {
+                if (!QuyenNguoiDungHelper.HasPermission("btnPhongBan", "xem"))
+                {
+                    MessageBox.Show("Bạn không có quyền xem phòng ban!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
                 DanhSachPhongBan.Clear();
                 DanhSachGoc.Clear();
 
@@ -46,6 +52,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnPhongBan", "them"))
+            {
+                MessageBox.Show("Bạn không có quyền thêm phòng ban!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             var themForm = new frmThemPB();
             if (themForm.ShowDialog() == true && themForm.PhongBanMoi != null)
             {
@@ -90,6 +101,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnEdit_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnPhongBan", "sua"))
+            {
+                MessageBox.Show("Bạn không có quyền sửa phòng ban!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if ((sender as Button)?.DataContext is PhongBan pbCanSua)
             {
                 var form = new frmSuaPB(pbCanSua);
@@ -120,6 +136,11 @@ namespace Project_QLTS_DNC.View.QuanLyToanNha
 
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
+            if (!QuyenNguoiDungHelper.HasPermission("btnPhongBan", "xoa"))
+            {
+                MessageBox.Show("Bạn không có quyền xóa phòng ban!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if ((sender as Button)?.DataContext is PhongBan pbCanXoa)
             {
                 var xacNhan = MessageBox.Show($"Bạn có chắc muốn xoá phòng ban: {pbCanXoa.TenPhongBan}?",
