@@ -170,6 +170,7 @@ namespace Project_QLTS_DNC
                 { "btnQuanLyCaiDat", btnQuanLyCaiDat },
                 { "btnThongTinCongTy", btnThongTinCongTy },
                 { "btnPhieuIn", btnPhieuIn },
+               
             };
 
                     var parentItems = new List<TreeViewItem>
@@ -578,9 +579,11 @@ namespace Project_QLTS_DNC
             popupThongBao.IsOpen = true;
         }
 
+        private void btnDiChuyenTaiSan_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.LichSuDiChuyenTS.frmLichSuDiChuyenTS();
 
-
-
+        }
     }
     public static class MainWindowExtensions
     {

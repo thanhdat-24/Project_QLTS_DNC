@@ -1,0 +1,229 @@
+﻿<Window x:Class="Project_QLTS_DNC.View.LichSuDiChuyenTS.frmThemPhieuDiChuyen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Project_QLTS_DNC.View.QuanLyTaiSan"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Lập Phiếu DI CHUYỂN TÀI SẢN" 
+        Width="800" Height="700"
+        WindowStartupLocation="CenterScreen"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    <materialDesign:DialogHost x:Name="DialogHost" CloseOnClickAway="False">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ArrangeSendToBack" VerticalAlignment="Center" Width="24" Height="24" Margin="0,0,8,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="20" FontWeight="Bold">LẬP PHIẾU BÀN GIAO TÀI SẢN</TextBlock>
+                </StackPanel>
+            </materialDesign:ColorZone>
+
+            <!-- Nội dung form -->
+            <Grid Grid.Row="1" Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Thông tin phiếu bàn giao -->
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- PHÒNG DI CHUYỂN ĐẾN -->
+                    <ComboBox Grid.Row="0" Grid.Column="0" 
+          x:Name="cboPhongDiChuyenTaiSanDen" 
+          materialDesign:HintAssist.Hint="Phòng di chuyển đến"
+          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+          Margin="8"
+          DisplayMemberPath="TenPhong"
+          SelectedValuePath="MaPhong"
+          SelectionChanged="cboPhongDiChuyenTaiSanDen_SelectionChanged" />
+
+                    <!-- PHÒNG CŨ CẦN DI CHUYỂN -->
+                    <ComboBox Grid.Row="0" Grid.Column="1"
+          x:Name="cboPhongCuCanDiChuyen"
+          materialDesign:HintAssist.Hint="Phòng cũ tài sản cần di chuyển"
+          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+          Margin="8"
+          DisplayMemberPath="TenPhong"
+          SelectedValuePath="MaPhong"
+          SelectionChanged="cboPhongCuCanDiChuyen_SelectionChanged" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+             x:Name="txtThongBaoToaNha"
+             Text="⚠️ LƯU Ý: Phòng mới và phòng cũ phải thuộc cùng một tòa nhà!"
+             Foreground="Red"
+             Visibility="Collapsed"
+             TextWrapping="Wrap"
+             Margin="8"
+             FontWeight="Bold"/>
+                    <!-- NHÂN VIÊN LẬP PHIẾU -->
+                    <ComboBox Grid.Row="2" Grid.Column="0" 
+          x:Name="cboNhanVien" 
+          materialDesign:HintAssist.Hint="Người lập phiếu *"
+          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+          Margin="8"
+          DisplayMemberPath="TenNV"
+          SelectedValuePath="MaNV" />
+
+                    <!-- Ngày bàn giao -->
+                    <DatePicker Grid.Row="2" Grid.Column="1" 
+                                x:Name="dateBanGiao" 
+                                materialDesign:HintAssist.Hint="Ngày bàn giao"
+                                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                Margin="8"/>
+              
+                  
+
+                    <!-- Nội dung -->
+                    <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
+                             x:Name="txtGhiChu" 
+                             materialDesign:HintAssist.Hint="Ghi chú"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Margin="8"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             Height="80"/>
+                </Grid>
+
+                <!-- Danh sách tài sản để chọn -->
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="DANH SÁCH TÀI SẢN TRONG PHÒNG CẦN DI CHUYỂN" 
+                               FontWeight="Bold" 
+                               Margin="8,0,0,8"
+                               Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+                    <DataGrid Grid.Row="1" 
+          x:Name="dgTaiSanKho" 
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          materialDesign:DataGridAssist.CellPadding="8"
+          BorderThickness="1"
+          SelectionMode="Extended"
+          SelectionUnit="FullRow"
+          IsReadOnly="False"
+          SelectionChanged="dgTaiSanKho_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="Chọn" 
+                                                    Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Width="60"
+                                                    ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                                    EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"/>
+
+                            <DataGridTextColumn Header="Mã tài sản" 
+                                                Binding="{Binding MaTaiSan}" 
+                                                IsReadOnly="True"
+                                                Width="100"/>
+
+                            <DataGridTextColumn Header="Tên tài sản" 
+                                                Binding="{Binding TenTaiSan}" 
+                                                IsReadOnly="True"
+                                                Width="*"/>
+
+                            <DataGridTextColumn Header="Số Seri" 
+                                                Binding="{Binding SoSeri}" 
+                                                IsReadOnly="True"
+                                                Width="120"/>
+
+                            <DataGridTextColumn Header="Nhóm tài sản" 
+                                                Binding="{Binding TenNhomTS}" 
+                                                IsReadOnly="True"
+                                                Width="150"/>
+
+                            <DataGridTemplateColumn Header="Vị trí" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox x:Name="cboViTri"
+          ItemsSource="{Binding ViTriList}"
+          SelectedIndex="0"
+          Width="100"
+          Loaded="cboViTri_Loaded"
+          SelectionChanged="cboViTri_SelectionChanged">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding HienThi}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Ghi chú" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding GhiChu, UpdateSourceTrigger=PropertyChanged}" 
+                                                 VerticalAlignment="Center"
+                                                 materialDesign:HintAssist.Hint="Ghi chú"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Grid>
+
+            <!-- Footer -->
+            <Grid Grid.Row="2" Background="#F5F5F5" Margin="16">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="btnHuy" 
+                            Content="HỦY BỎ" 
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,16,0"
+                            Click="btnHuy_Click"/>
+
+                    <Button x:Name="btnLapPhieu" 
+                            Content="LẬP PHIẾU DI CHUYỂN" 
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Background="{DynamicResource PrimaryHueMidBrush}" 
+                            Click="btnLapPhieu_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Loading Overlay -->
+            <Grid x:Name="LoadingOverlay" Grid.Row="0" Grid.RowSpan="3" Background="#80000000" Visibility="Collapsed">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" 
+                                 Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                                 Value="0" 
+                                 Width="60" 
+                                 Height="60"/>
+                    <TextBlock Text="Đang xử lý..." 
+                               Foreground="White" 
+                               FontSize="16" 
+                               FontWeight="Bold" 
+                               Margin="0,16,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </materialDesign:DialogHost>
+</Window>
