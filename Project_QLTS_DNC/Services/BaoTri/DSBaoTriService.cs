@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.BaoTri;
+using Project_QLTS_DNC.Models.KiemKe;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using Supabase;
 
@@ -34,7 +35,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
 
                 // Thực hiện truy vấn để lấy dữ liệu kiểm kê
                 var response = await query
-                    .Order("ma_tai_san", Supabase.Postgrest.Constants.Ordering.Ascending)
+                    .Order("ma_kiem_ke_ts", Supabase.Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
                 Console.WriteLine($"Số lượng tài sản kiểm kê: {response.Models.Count}");
@@ -424,6 +425,32 @@ namespace Project_QLTS_DNC.Services.BaoTri
             {
                 Console.WriteLine($"Lỗi nghiêm trọng khi xóa nhiều tài sản: {ex.Message}");
                 return false;
+            }
+        }
+        public class DotKiemKeService
+        {
+            public async Task<List<DotKiemKe>> GetDanhSachDotKiemKeAsync()
+            {
+                try
+                {
+                    var client = await SupabaseService.GetClientAsync();
+                    if (client == null)
+                        throw new Exception("Không thể kết nối Supabase Client");
+
+                    var response = await client
+                        .From<DotKiemKe>()
+                        .Select("*")
+                        .Order("ngay_bat_dau", Supabase.Postgrest.Constants.Ordering.Descending)
+                        .Get();
+
+                    return response.Models;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Lỗi khi truy vấn dữ liệu đợt kiểm kê: {ex.Message}", "Lỗi",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                    return new List<DotKiemKe>();
+                }
             }
         }
     }
