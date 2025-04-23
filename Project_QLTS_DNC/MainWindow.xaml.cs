@@ -97,7 +97,7 @@ namespace Project_QLTS_DNC
                 }
             }
             HienThiTreeViewTheoPhanQuyen();
-             CapNhatSoThongBaoChuaDocAsync();
+             await CapNhatSoThongBaoChuaDocAsync();
         }
         #endregion
         private void HienThiTreeViewTheoPhanQuyen()
