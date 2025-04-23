@@ -384,6 +384,14 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
                 window = new Window { Title = $"Chi tiết phiếu bàn giao - {selected.MaPhieu}", Content = frm, Width = 1100, Height = 750 };
             }
+            else if (selected.MaPhieu.StartsWith("LS") && long.TryParse(selected.MaPhieu.Substring(2), out long maLichSu))
+            {
+                var frm = new frmXemChiTietLichSuDiChuyen();
+                frm.LoadTheoMaPhieu(maLichSu);
+                frm.OnPhieuDuyetThanhCong += () => daDuyetHoacTuChoi = true;
+
+                window = new Window { Title = $"Chi tiết phiếu lịch sử di chuyển tài sản - {selected.MaPhieu}", Content = frm, Width = 1000, Height = 700 };
+            }
             else
             {
                 MessageBox.Show($"Chức năng xem chi tiết đang được phát triển cho loại phiếu: {selected.LoaiPhieu}",
@@ -539,6 +547,18 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 };
                 formIn.ShowDialog();
             }
+            else if (selected.MaPhieu.StartsWith("LS") && long.TryParse(selected.MaPhieu.Substring(2), out long maLichSu))
+            {
+                var formIn = new frmInPhieuLichSuDiChuyenTaiSan(maLichSu)
+                {
+                    Title = $"In phiếu lịch sử di chuyển - LS{maLichSu}",
+                    Width = 1000,
+                    Height = 720,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+                formIn.ShowDialog();
+            }
+
             else
             {
                 MessageBox.Show("Chức năng in cho loại phiếu này hiện chưa được hỗ trợ.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);

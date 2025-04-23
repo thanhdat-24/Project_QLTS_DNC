@@ -115,7 +115,7 @@
                         Style="{StaticResource PrimaryButton}" 
                         Background="{StaticResource SecondaryCreate}" 
                         Command="{Binding ThemMoiCommand}"
-                        Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}" Click="btnThem_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Margin="0,0,8,0"/>
                         <TextBlock Text="THÊM MỚI" FontWeight="SemiBold"/>

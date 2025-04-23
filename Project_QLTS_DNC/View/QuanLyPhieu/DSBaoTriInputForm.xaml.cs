@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.BaoTri;
@@ -17,9 +18,9 @@ using Project_QLTS_DNC.View.BaoTri;
 using Supabase;
 using Supabase.Gotrue;
 using Supabase.Postgrest;
-// Bỏ dòng này vì đã có trước đó: using Supabase.Postgrest.Models;
 using KiemKeDotKiemKe = Project_QLTS_DNC.Models.KiemKe.DotKiemKe;
 using static Supabase.Postgrest.Constants;
+using Project_QLTS_DNC.Models.KiemKe;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -29,14 +30,35 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private ObservableCollection<KiemKeDotKiemKe> _danhSachDotKiemKe;
         private ObservableCollection<TaiSanModel> _danhSachTaiSan;
         private ObservableCollection<Phong> _danhSachPhong;
+
+        // Collection tìm kiếm tài sản
+        private ObservableCollection<TaiSanViewModel> _taiSanSuggestions;
+
+        // Tài sản đã chọn
+        private TaiSanViewModel _selectedTaiSan;
+
         // Client để kết nối với Supabase
         private readonly Supabase.Client _supabaseClient;
+
         // Đối tượng kiểm kê hiện tại
-        private KiemKeTaiSan _kiemKeTaiSan;
+        private BaoTriKiemKeTaiSan _kiemKeTaiSan;
+
         // Chế độ (thêm mới hay cập nhật)
         private bool _isUpdateMode;
+
         // Properties với INotifyPropertyChanged để binding
         public event PropertyChangedEventHandler PropertyChanged;
+
+        // ViewModel cho tài sản hiển thị trong tìm kiếm
+        public class TaiSanViewModel
+        {
+            public int MaTaiSan { get; set; }
+            public string TenTaiSan { get; set; }
+            public string SoSeri { get; set; }
+            public string TinhTrangSP { get; set; }
+            public DateTime? HanBH { get; set; }
+            public int? MaPhong { get; set; }
+        }
 
         public ObservableCollection<KiemKeDotKiemKe> DanhSachDotKiemKe
         {
@@ -68,7 +90,31 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        public KiemKeTaiSan KiemKeTaiSan
+        public ObservableCollection<TaiSanViewModel> TaiSanSuggestions
+        {
+            get => _taiSanSuggestions;
+            set
+            {
+                _taiSanSuggestions = value;
+                OnPropertyChanged(nameof(TaiSanSuggestions));
+            }
+        }
+
+        public TaiSanViewModel SelectedTaiSan
+        {
+            get => _selectedTaiSan;
+            set
+            {
+                _selectedTaiSan = value;
+                OnPropertyChanged(nameof(SelectedTaiSan));
+                if (_selectedTaiSan != null)
+                {
+                    UpdatePhongInfo(_selectedTaiSan.MaPhong);
+                }
+            }
+        }
+
+        public BaoTriKiemKeTaiSan KiemKeTaiSan
         {
             get => _kiemKeTaiSan;
             set
@@ -78,56 +124,80 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Constructor cho trường hợp tạo mới phiếu bảo trì (không có tài sản nào được chọn)
+        // Constructor cho trường hợp tạo mới phiếu bảo trì
         public DSBaoTriInputForm(Supabase.Client supabaseClient)
         {
             InitializeComponent();
+
             _supabaseClient = supabaseClient;
             _isUpdateMode = false;
+
             // Khởi tạo collections
             DanhSachDotKiemKe = new ObservableCollection<KiemKeDotKiemKe>();
             DanhSachTaiSan = new ObservableCollection<TaiSanModel>();
             DanhSachPhong = new ObservableCollection<Phong>();
+            TaiSanSuggestions = new ObservableCollection<TaiSanViewModel>();
+
             // Khởi tạo đối tượng kiểm kê tài sản mới
-            KiemKeTaiSan = new KiemKeTaiSan();
+            KiemKeTaiSan = new BaoTriKiemKeTaiSan();
+
             // Set DataContext cho binding
             DataContext = this;
+
             // Load dữ liệu khi khởi tạo form
             Loaded += DSBaoTriInputForm_Loaded;
+
             // Đăng ký sự kiện cho các nút
             btnLuu.Click += BtnLuu_Click;
             btnHuy.Click += BtnHuy_Click;
+
             // Đăng ký sự kiện validation cho các trường nhập liệu
             txtGhiChu.TextChanged += TextBox_TextChanged;
             txtViTriThucTe.TextChanged += TextBox_TextChanged;
+
             // Chỉ cho phép nhập số cho các trường số
             txtMaKiemKe.PreviewTextInput += NumericOnly_PreviewTextInput;
+
+            // Thiết lập ListView tài sản suggestions
+            lvTaiSanSuggestions.ItemsSource = TaiSanSuggestions;
         }
 
         // Constructor cho trường hợp cập nhật
-        public DSBaoTriInputForm(Supabase.Client supabaseClient, KiemKeTaiSan kiemKeTaiSan)
+        public DSBaoTriInputForm(Supabase.Client supabaseClient, BaoTriKiemKeTaiSan kiemKeTaiSan)
         {
             InitializeComponent();
+
             _supabaseClient = supabaseClient;
             _isUpdateMode = true;
+
             // Khởi tạo collections
             DanhSachDotKiemKe = new ObservableCollection<KiemKeDotKiemKe>();
             DanhSachTaiSan = new ObservableCollection<TaiSanModel>();
             DanhSachPhong = new ObservableCollection<Phong>();
+            TaiSanSuggestions = new ObservableCollection<TaiSanViewModel>();
+
             // Sử dụng đối tượng kiểm kê tài sản đã có
             KiemKeTaiSan = kiemKeTaiSan;
+
             // Set DataContext cho binding
             DataContext = this;
+
             // Load dữ liệu khi khởi tạo form
             Loaded += DSBaoTriInputForm_Loaded;
+
             // Đăng ký sự kiện cho các nút
             btnLuu.Click += BtnLuu_Click;
             btnHuy.Click += BtnHuy_Click;
+
             // Đăng ký sự kiện validation cho các trường nhập liệu
             txtGhiChu.TextChanged += TextBox_TextChanged;
             txtViTriThucTe.TextChanged += TextBox_TextChanged;
+
             // Chỉ cho phép nhập số cho các trường số
             txtMaKiemKe.PreviewTextInput += NumericOnly_PreviewTextInput;
+
+            // Thiết lập ListView tài sản suggestions
+            lvTaiSanSuggestions.ItemsSource = TaiSanSuggestions;
         }
 
         // Xử lý sự kiện khi form được load
@@ -137,10 +207,13 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 // Hiển thị thông báo loading
                 ShowLoadingMessage(true);
+
                 // Load dữ liệu cho các ComboBox
                 await LoadDataForComboBoxes();
+
                 // Cài đặt các giá trị mặc định hoặc giá trị từ đối tượng hiện tại nếu ở chế độ cập nhật
                 SetupFormData();
+
                 // Ẩn thông báo loading
                 ShowLoadingMessage(false);
             }
@@ -157,48 +230,32 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             try
             {
                 // Tải dữ liệu đợt kiểm kê
-                var dotkiemkeTable = _supabaseClient.Postgrest.Table<KiemKeDotKiemKe>();
+                var dotkiemkeTable = _supabaseClient.Postgrest.Table<DotKiemKe>();
                 var dotkiemkeResponse = await dotkiemkeTable.Get();
-                var dsDotKiemKe = dotkiemkeResponse.Models;
-                // Tạo danh sách đối tượng hiển thị đơn giản
-                var dsDotKiemKeBinding = dsDotKiemKe.Select(d => new ComboBoxItem
+                DanhSachDotKiemKe = new ObservableCollection<DotKiemKe>(dotkiemkeResponse.Models);
+
+                // Tạo một class ViewModel để đại diện cho đợt kiểm kê trong ComboBox
+                var dotKiemKeItems = DanhSachDotKiemKe.Select(d => new DotKiemKeViewModel
                 {
-                    ID = d.MaDotKiemKe,
-                    DisplayText = d.TenDot ?? $"Đợt kiểm kê {d.MaDotKiemKe}"
+                    MaDotKiemKe = d.MaDotKiemKe,
+                    DisplayText = d.TenDot ?? $"Đợt {d.MaDotKiemKe}"
                 }).ToList();
-                // Gán danh sách cho ComboBox
-                cboDotKiemKe.ItemsSource = dsDotKiemKeBinding;
-                cboDotKiemKe.DisplayMemberPath = "DisplayText"; // Chỉ hiển thị tên
-                cboDotKiemKe.SelectedValuePath = "ID";          // Lấy giá trị ID
-                // Tương tự với tài sản
-                var taisanTable = _supabaseClient.Postgrest.Table<TaiSanModel>();
-                var taisanResponse = await taisanTable.Get();
-                var dsTaiSan = taisanResponse.Models;
-                var dsTaiSanBinding = dsTaiSan.Select(t => new ComboBoxItem
-                {
-                    ID = t.MaTaiSan,
-                    DisplayText = t.TenTaiSan ?? $"Tài sản {t.MaTaiSan}"
-                }).ToList();
-                cboTaiSan.ItemsSource = dsTaiSanBinding;
-                cboTaiSan.DisplayMemberPath = "DisplayText";
-                cboTaiSan.SelectedValuePath = "ID";
-                // Tương tự với phòng
+
+                // Thiết lập ItemsSource và binding paths
+                cboDotKiemKe.ItemsSource = dotKiemKeItems;
+                cboDotKiemKe.DisplayMemberPath = "DisplayText";
+                cboDotKiemKe.SelectedValuePath = "MaDotKiemKe";
+
+                // Tải tất cả phòng
                 var phongTable = _supabaseClient.Postgrest.Table<Phong>();
                 var phongResponse = await phongTable.Get();
-                var dsPhong = phongResponse.Models;
-                var dsPhongBinding = dsPhong.Select(p => new ComboBoxItem
-                {
-                    ID = p.MaPhong,
-                    DisplayText = p.TenPhong ?? $"Phòng {p.MaPhong}"
-                }).ToList();
-                cboPhong.ItemsSource = dsPhongBinding;
-                cboPhong.DisplayMemberPath = "DisplayText";
-                cboPhong.SelectedValuePath = "ID";
+                DanhSachPhong = new ObservableCollection<Phong>(phongResponse.Models);
 
-                // Lưu lại danh sách gốc để sử dụng sau này
-                DanhSachDotKiemKe = new ObservableCollection<KiemKeDotKiemKe>(dsDotKiemKe);
-                DanhSachTaiSan = new ObservableCollection<TaiSanModel>(dsTaiSan);
-                DanhSachPhong = new ObservableCollection<Phong>(dsPhong);
+                // Tải danh sách tài sản với tình trạng "Cần kiểm tra"
+                var taisanTable = _supabaseClient.Postgrest.Table<TaiSanModel>();
+                var taisanFilter = taisanTable.Filter("tinh_trang_sp", Operator.Equals, "Cần kiểm tra");
+                var taisanResponse = await taisanFilter.Get();
+                DanhSachTaiSan = new ObservableCollection<TaiSanModel>(taisanResponse.Models);
             }
             catch (Exception ex)
             {
@@ -206,11 +263,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Lớp hỗ trợ hiển thị trong ComboBox
-        public class ComboBoxItem
+        // Thêm lớp ViewModel này vào class của bạn
+        public class DotKiemKeViewModel
         {
-            public int ID { get; set; }
+            public int MaDotKiemKe { get; set; }
             public string DisplayText { get; set; }
+
             public override string ToString()
             {
                 return DisplayText;
@@ -218,44 +276,59 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         }
 
         // Thiết lập dữ liệu cho form
-        private void SetupFormData()
+        private async void SetupFormData()
         {
             if (_isUpdateMode)
             {
                 // Chế độ cập nhật - Đặt tiêu đề và giá trị từ đối tượng hiện tại
                 Title = "Cập nhật Phiếu Bảo Trì";
                 txtMaKiemKe.Text = KiemKeTaiSan.MaKiemKeTS.ToString();
-                // Tìm và chọn các giá trị tương ứng trong ComboBox
-                if (KiemKeTaiSan.MaDotKiemKe.HasValue && cboDotKiemKe.Items.Count > 0)
+
+                // Tìm và chọn đợt kiểm kê tương ứng
+                if (KiemKeTaiSan.MaDotKiemKe.HasValue)
                 {
-                    var dotKiemKeItem = cboDotKiemKe.Items.Cast<ComboBoxItem>()
-                        .FirstOrDefault(x => x.ID == KiemKeTaiSan.MaDotKiemKe.Value);
-                    if (dotKiemKeItem != null)
-                        cboDotKiemKe.SelectedItem = dotKiemKeItem;
+                    var dotKiemKe = DanhSachDotKiemKe.FirstOrDefault(d => d.MaDotKiemKe == KiemKeTaiSan.MaDotKiemKe.Value);
+                    if (dotKiemKe != null)
+                        cboDotKiemKe.SelectedItem = dotKiemKe;
                 }
-                if (KiemKeTaiSan.MaTaiSan.HasValue && cboTaiSan.Items.Count > 0)
+
+                // Tìm tài sản tương ứng và hiển thị
+                if (KiemKeTaiSan.MaTaiSan.HasValue)
                 {
-                    var taiSanItem = cboTaiSan.Items.Cast<ComboBoxItem>()
-                        .FirstOrDefault(x => x.ID == KiemKeTaiSan.MaTaiSan.Value);
-                    if (taiSanItem != null)
-                        cboTaiSan.SelectedItem = taiSanItem;
-                }
-                if (KiemKeTaiSan.MaPhong.HasValue && cboPhong.Items.Count > 0)
-                {
-                    var phongItem = cboPhong.Items.Cast<ComboBoxItem>()
-                        .FirstOrDefault(x => x.ID == KiemKeTaiSan.MaPhong.Value);
-                    if (phongItem != null)
-                        cboPhong.SelectedItem = phongItem;
-                }
-                // Đặt giá trị cho tình trạng
-                foreach (System.Windows.Controls.ComboBoxItem item in cboTinhTrang.Items)
-                {
-                    if (item.Content.ToString() == KiemKeTaiSan.TinhTrang)
+                    var taiSan = DanhSachTaiSan.FirstOrDefault(t => t.MaTaiSan == KiemKeTaiSan.MaTaiSan.Value);
+                    if (taiSan != null)
                     {
-                        cboTinhTrang.SelectedItem = item;
-                        break;
+                        SelectedTaiSan = new TaiSanViewModel
+                        {
+                            MaTaiSan = taiSan.MaTaiSan,
+                            TenTaiSan = taiSan.TenTaiSan,
+                            SoSeri = taiSan.SoSeri,
+                            TinhTrangSP = taiSan.TinhTrangSP,
+                            HanBH = taiSan.HanBH,
+                            MaPhong = taiSan.MaPhong
+                        };
+
+                        // Hiển thị thông tin tài sản đã chọn
+                        ShowSelectedTaiSan(SelectedTaiSan);
+
+                        // Cập nhật thông tin phòng
+                        UpdatePhongInfo(taiSan.MaPhong);
                     }
                 }
+
+                // Đặt giá trị cho tình trạng
+                if (!string.IsNullOrEmpty(KiemKeTaiSan.TinhTrang))
+                {
+                    foreach (ComboBoxItem item in cboTinhTrang.Items)
+                    {
+                        if (item.Content.ToString() == KiemKeTaiSan.TinhTrang)
+                        {
+                            cboTinhTrang.SelectedItem = item;
+                            break;
+                        }
+                    }
+                }
+
                 txtViTriThucTe.Text = KiemKeTaiSan.ViTriThucTe;
                 txtGhiChu.Text = KiemKeTaiSan.GhiChu;
             }
@@ -263,7 +336,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             {
                 // Chế độ thêm mới - Tạo mã kiểm kê mới
                 Title = "Thêm Phiếu Bảo Trì";
-                GenerateNewId();
+                await GenerateNewId();
+
                 // Thiết lập giá trị mặc định cho ComboBox TinhTrang (chọn item đầu tiên)
                 if (cboTinhTrang.Items.Count > 0)
                     cboTinhTrang.SelectedIndex = 0;
@@ -271,17 +345,17 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         }
 
         // Tạo mã kiểm kê mới
-        private async void GenerateNewId()
+        private async Task GenerateNewId()
         {
             try
             {
                 // Lấy mã kiểm kê lớn nhất hiện tại và tăng lên 1
-                var table = _supabaseClient.Postgrest.Table<KiemKeTaiSan>();
-                // Tạo query
+                var table = _supabaseClient.Postgrest.Table<BaoTriKiemKeTaiSan>();
                 table.Select("ma_kiem_ke_ts");
                 table.Order("ma_kiem_ke_ts", Ordering.Descending);
                 table.Limit(1);
                 var response = await table.Get();
+
                 if (response.Models.Count > 0)
                 {
                     int maxId = response.Models[0].MaKiemKeTS;
@@ -291,12 +365,162 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 {
                     KiemKeTaiSan.MaKiemKeTS = 1;
                 }
+
                 txtMaKiemKe.Text = KiemKeTaiSan.MaKiemKeTS.ToString();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tạo mã bảo trì: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // Xử lý sự kiện tìm kiếm tài sản
+        private void txtSearchTaiSan_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = txtSearchTaiSan.Text.Trim().ToLower();
+
+            // Nếu ô tìm kiếm trống, ẩn danh sách gợi ý
+            if (string.IsNullOrEmpty(searchText))
+            {
+                lvTaiSanSuggestions.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            // Lọc danh sách tài sản theo từ khóa tìm kiếm
+            var filteredItems = DanhSachTaiSan
+                .Where(ts =>
+                    (ts.TenTaiSan != null && ts.TenTaiSan.ToLower().Contains(searchText)) ||
+                    (ts.SoSeri != null && ts.SoSeri.ToLower().Contains(searchText)) ||
+                    (ts.TinhTrangSP != null && ts.TinhTrangSP.ToLower().Contains(searchText)))
+                .Take(10) // Giới hạn số lượng kết quả
+                .Select(ts => new TaiSanViewModel
+                {
+                    MaTaiSan = ts.MaTaiSan,
+                    TenTaiSan = ts.TenTaiSan,
+                    SoSeri = ts.SoSeri,
+                    TinhTrangSP = ts.TinhTrangSP,
+                    HanBH = ts.HanBH,
+                    MaPhong = ts.MaPhong
+                })
+                .ToList();
+
+            // Cập nhật danh sách gợi ý
+            TaiSanSuggestions.Clear();
+            foreach (var item in filteredItems)
+            {
+                TaiSanSuggestions.Add(item);
+            }
+
+            // Hiển thị danh sách gợi ý nếu có kết quả
+            lvTaiSanSuggestions.Visibility = TaiSanSuggestions.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // Xử lý khi nhấn phím trong ô tìm kiếm
+        private void txtSearchTaiSan_KeyUp(object sender, KeyEventArgs e)
+        {
+            // Xử lý phím mũi tên lên/xuống để điều hướng trong danh sách gợi ý
+            if (lvTaiSanSuggestions.Visibility == Visibility.Visible)
+            {
+                if (e.Key == Key.Down)
+                {
+                    if (lvTaiSanSuggestions.SelectedIndex < lvTaiSanSuggestions.Items.Count - 1)
+                    {
+                        lvTaiSanSuggestions.SelectedIndex++;
+                    }
+                    else
+                    {
+                        lvTaiSanSuggestions.SelectedIndex = 0;
+                    }
+                    lvTaiSanSuggestions.ScrollIntoView(lvTaiSanSuggestions.SelectedItem);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Up)
+                {
+                    if (lvTaiSanSuggestions.SelectedIndex > 0)
+                    {
+                        lvTaiSanSuggestions.SelectedIndex--;
+                    }
+                    else
+                    {
+                        lvTaiSanSuggestions.SelectedIndex = lvTaiSanSuggestions.Items.Count - 1;
+                    }
+                    lvTaiSanSuggestions.ScrollIntoView(lvTaiSanSuggestions.SelectedItem);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Enter && lvTaiSanSuggestions.SelectedItem != null)
+                {
+                    // Chọn tài sản khi nhấn Enter
+                    SelectedTaiSan = (TaiSanViewModel)lvTaiSanSuggestions.SelectedItem;
+                    ShowSelectedTaiSan(SelectedTaiSan);
+                    lvTaiSanSuggestions.Visibility = Visibility.Collapsed;
+                    txtSearchTaiSan.Text = string.Empty;
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Escape)
+                {
+                    // Ẩn danh sách gợi ý khi nhấn Escape
+                    lvTaiSanSuggestions.Visibility = Visibility.Collapsed;
+                    e.Handled = true;
+                }
+            }
+        }
+
+        // Xử lý khi chọn một tài sản từ danh sách gợi ý
+        private void lvTaiSanSuggestions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lvTaiSanSuggestions.SelectedItem is TaiSanViewModel selectedTaiSan)
+            {
+                SelectedTaiSan = selectedTaiSan;
+                ShowSelectedTaiSan(SelectedTaiSan);
+                lvTaiSanSuggestions.Visibility = Visibility.Collapsed;
+                txtSearchTaiSan.Text = string.Empty;
+            }
+        }
+
+        // Hiển thị thông tin tài sản đã chọn
+        private void ShowSelectedTaiSan(TaiSanViewModel taiSan)
+        {
+            if (taiSan != null)
+            {
+                txtSelectedTaiSanName.Text = taiSan.TenTaiSan;
+                txtSelectedTaiSanSeri.Text = taiSan.SoSeri;
+                txtSelectedTaiSanStatus.Text = taiSan.TinhTrangSP;
+                txtSelectedTaiSanWarranty.Text = taiSan.HanBH.HasValue
+                    ? taiSan.HanBH.Value.ToString("dd/MM/yyyy")
+                    : "Không có";
+
+                selectedTaiSanInfo.Visibility = Visibility.Visible;
+                UpdatePhongInfo(taiSan.MaPhong);
+            }
+        }
+
+        // Cập nhật thông tin phòng dựa trên mã phòng của tài sản đã chọn
+        private void UpdatePhongInfo(int? maPhong)
+        {
+            if (maPhong.HasValue)
+            {
+                var phong = DanhSachPhong.FirstOrDefault(p => p.MaPhong == maPhong.Value);
+                if (phong != null)
+                {
+                    txtPhong.Text = phong.TenPhong;
+                }
+                else
+                {
+                    txtPhong.Text = $"Phòng (Mã: {maPhong.Value})";
+                }
+            }
+            else
+            {
+                txtPhong.Text = "Chưa xác định";
+            }
+        }
+
+        // Xóa tài sản đã chọn
+        private void btnClearTaiSan_Click(object sender, RoutedEventArgs e)
+        {
+            SelectedTaiSan = null;
+            selectedTaiSanInfo.Visibility = Visibility.Collapsed;
+            txtPhong.Text = string.Empty;
         }
 
         // Xử lý sự kiện khi nhấn nút Lưu
@@ -309,12 +533,16 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 {
                     return;
                 }
+
                 // Lấy dữ liệu từ form
                 GetDataFromForm();
+
                 // Hiển thị thông báo đang xử lý
                 ShowLoadingMessage(true);
+
                 // Lấy tham chiếu đến bảng
-                var table = _supabaseClient.Postgrest.Table<KiemKeTaiSan>();
+                var table = _supabaseClient.Postgrest.Table<BaoTriKiemKeTaiSan>();
+
                 if (_isUpdateMode)
                 {
                     // Cập nhật dữ liệu
@@ -327,7 +555,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     await table.Insert(KiemKeTaiSan);
                     MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+
                 ShowLoadingMessage(false);
+
                 // Đóng form
                 DialogResult = true;
                 Close();
@@ -355,24 +585,21 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 cboDotKiemKe.Focus();
                 return false;
             }
-            if (cboTaiSan.SelectedItem == null)
+
+            if (SelectedTaiSan == null)
             {
                 MessageBox.Show("Vui lòng chọn tài sản!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
-                cboTaiSan.Focus();
+                txtSearchTaiSan.Focus();
                 return false;
             }
-            if (cboPhong.SelectedItem == null)
-            {
-                MessageBox.Show("Vui lòng chọn phòng!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
-                cboPhong.Focus();
-                return false;
-            }
+
             if (cboTinhTrang.SelectedItem == null)
             {
                 MessageBox.Show("Vui lòng chọn tình trạng tài sản!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Warning);
                 cboTinhTrang.Focus();
                 return false;
             }
+
             return true;
         }
 
@@ -380,27 +607,30 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private void GetDataFromForm()
         {
             KiemKeTaiSan.MaKiemKeTS = int.Parse(txtMaKiemKe.Text);
-            // Lấy giá trị từ các ComboBox
-            if (cboDotKiemKe.SelectedItem is ComboBoxItem dotKiemKe)
+
+            // Lấy mã đợt kiểm kê từ ComboBox
+            if (cboDotKiemKe.SelectedItem is KiemKeDotKiemKe dotKiemKe)
             {
-                KiemKeTaiSan.MaDotKiemKe = dotKiemKe.ID;
+                KiemKeTaiSan.MaDotKiemKe = dotKiemKe.MaDotKiemKe;
             }
-            if (cboTaiSan.SelectedItem is ComboBoxItem taiSan)
+
+            // Lấy mã tài sản từ tài sản đã chọn
+            if (SelectedTaiSan != null)
             {
-                KiemKeTaiSan.MaTaiSan = taiSan.ID;
+                KiemKeTaiSan.MaTaiSan = SelectedTaiSan.MaTaiSan;
+                KiemKeTaiSan.MaPhong = SelectedTaiSan.MaPhong;
             }
-            if (cboPhong.SelectedItem is ComboBoxItem phong)
-            {
-                KiemKeTaiSan.MaPhong = phong.ID;
-            }
+
             // Lấy giá trị tình trạng
-            if (cboTinhTrang.SelectedItem is System.Windows.Controls.ComboBoxItem tinhTrang)
+            if (cboTinhTrang.SelectedItem is ComboBoxItem tinhTrang)
             {
                 KiemKeTaiSan.TinhTrang = tinhTrang.Content.ToString();
             }
+
             // Lấy các giá trị khác
             KiemKeTaiSan.ViTriThucTe = txtViTriThucTe.Text;
             KiemKeTaiSan.GhiChu = txtGhiChu.Text;
+           
         }
 
         // Xử lý sự kiện khi nội dung TextBox thay đổi

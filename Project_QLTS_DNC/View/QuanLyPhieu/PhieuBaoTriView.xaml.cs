@@ -588,23 +588,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Tạo section cho phiếu
             System.Windows.Documents.Section section = new System.Windows.Documents.Section();
 
-            // Tạo header - logo và tiêu đề công ty
-            System.Windows.Documents.Paragraph headerPara = new System.Windows.Documents.Paragraph();
-            headerPara.Margin = new System.Windows.Thickness(0, 0, 0, 10);
-
-            // Thêm dòng Công ty
-            System.Windows.Documents.Run companyRun = new System.Windows.Documents.Run("CÔNG TY CỔ PHẦN XYZ");
-            companyRun.FontWeight = System.Windows.FontWeights.Bold;
-            companyRun.FontSize = 14;
-            headerPara.Inlines.Add(companyRun);
-            headerPara.Inlines.Add(new System.Windows.Documents.LineBreak());
-
-            // Thêm dòng địa chỉ
-            System.Windows.Documents.Run addressRun = new System.Windows.Documents.Run("Địa chỉ: 123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh");
-            addressRun.FontSize = 11;
-            headerPara.Inlines.Add(addressRun);
-            section.Blocks.Add(headerPara);
-
             // Tạo tiêu đề phiếu bảo trì
             System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
             titlePara.TextAlignment = System.Windows.TextAlignment.Center;

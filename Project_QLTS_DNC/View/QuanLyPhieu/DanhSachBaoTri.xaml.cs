@@ -8,7 +8,6 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using System.IO;
 using System.Windows.Data;
-using System.Windows.Data;
 using Project_QLTS_DNC.Models;
 using Project_QLTS_DNC.Models.BaoTri;
 using Project_QLTS_DNC.ViewModel.Baotri;
@@ -149,11 +148,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             if (string.IsNullOrEmpty(keyword))
                 return true;
 
-            // Kiểm tra theo từng trường, sử dụng ToLower() thay vì StringComparison.OrdinalIgnoreCase
+            // Kiểm tra theo từng trường
             bool matchesSearchText = false;
 
             // Kiểm tra mã kiểm kê
-            if (item.MaKiemKeTS != null && item.MaKiemKeTS.ToString().ToLower().Contains(keyword))
+            if (item.MaKiemKeTS.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
             // Kiểm tra mã tài sản
             else if (item.MaTaiSan.HasValue && item.MaTaiSan.ToString().ToLower().Contains(keyword))
@@ -161,7 +160,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Kiểm tra mã đợt kiểm kê
             else if (item.MaDotKiemKe.HasValue && item.MaDotKiemKe.ToString().ToLower().Contains(keyword))
                 matchesSearchText = true;
-            // Kiểm tra tên tài sản
+            // Kiểm tra tên tài sản (bao gồm cả số seri)
             else if (item.TenTaiSan != null && item.TenTaiSan.ToLower().Contains(keyword))
                 matchesSearchText = true;
             // Kiểm tra tên phòng
@@ -179,10 +178,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Kiểm tra ghi chú
             else if (item.GhiChu != null && item.GhiChu.ToLower().Contains(keyword))
                 matchesSearchText = true;
+            // Kiểm tra tên nhóm tài sản
+            else if (item.TenNhomTS != null && item.TenNhomTS.ToLower().Contains(keyword))
+                matchesSearchText = true;
 
             return matchesSearchText;
         }
-
         private void UpdatePaginationUI()
         {
             // Cập nhật thông tin trang hiện tại và tổng số trang
@@ -397,100 +398,101 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         }
 
 
-        private void XuatDanhSachTaiSanRaExcel(string filePath)
+       private void XuatDanhSachTaiSanRaExcel(string filePath)
+{
+    try
+    {
+        // Sử dụng thư viện ClosedXML để xuất Excel
+        using (var workbook = new XLWorkbook())
         {
-            try
+            // Tạo worksheet
+            var worksheet = workbook.Worksheets.Add("Danh sách bảo trì");
+
+            // Định dạng tiêu đề
+            worksheet.Cell("A1").Value = "DANH SÁCH TÀI SẢN CẦN BẢO TRÌ";
+            worksheet.Cell("A1").Style.Font.Bold = true;
+            worksheet.Cell("A1").Style.Font.FontSize = 16;
+            worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet.Range("A1:I1").Merge();
+
+            // Thêm ngày xuất báo cáo
+            worksheet.Cell("A2").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            worksheet.Range("A2:I2").Merge();
+            worksheet.Cell("A2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+            worksheet.Cell("A2").Style.Font.Italic = true;
+
+            // Thêm header dựa trên DataGrid
+            var headerRow = 4;
+            worksheet.Cell(headerRow, 1).Value = "STT";
+            worksheet.Cell(headerRow, 2).Value = "Mã kiểm kê";
+            worksheet.Cell(headerRow, 3).Value = "Đợt kiểm kê";
+            worksheet.Cell(headerRow, 4).Value = "Tên tài sản";
+            worksheet.Cell(headerRow, 5).Value = "Phòng";
+            worksheet.Cell(headerRow, 6).Value = "Nhóm tài sản";
+            worksheet.Cell(headerRow, 7).Value = "Tình trạng";
+            worksheet.Cell(headerRow, 8).Value = "Vị trí";
+            worksheet.Cell(headerRow, 9).Value = "Ghi chú";
+
+            // Định dạng header
+            var headerRange = worksheet.Range(headerRow, 1, headerRow, 9);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Lấy dữ liệu đã lọc
+            var filteredData = _viewModel.DsKiemKe.ToList();
+
+            // Điền dữ liệu
+            int row = headerRow + 1;
+            for (int i = 0; i < filteredData.Count; i++)
             {
-                // Sử dụng thư viện ClosedXML để xuất Excel
-                using (var workbook = new XLWorkbook())
-                {
-                    // Tạo worksheet
-                    var worksheet = workbook.Worksheets.Add("Danh sách bảo trì");
-
-                    // Định dạng tiêu đề
-                    worksheet.Cell("A1").Value = "DANH SÁCH TÀI SẢN CẦN BẢO TRÌ";
-                    worksheet.Cell("A1").Style.Font.Bold = true;
-                    worksheet.Cell("A1").Style.Font.FontSize = 16;
-                    worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    worksheet.Range("A1:H1").Merge();
-
-                    // Thêm ngày xuất báo cáo
-                    worksheet.Cell("A2").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
-                    worksheet.Range("A2:H2").Merge();
-                    worksheet.Cell("A2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-                    worksheet.Cell("A2").Style.Font.Italic = true;
-
-                    // Thêm header dựa trên DataGrid
-                    var headerRow = 4;
-                    worksheet.Cell(headerRow, 1).Value = "STT";
-                    worksheet.Cell(headerRow, 2).Value = "Mã kiểm kê";
-                    worksheet.Cell(headerRow, 3).Value = "Đợt kiểm kê";
-                    worksheet.Cell(headerRow, 4).Value = "Tên tài sản";
-                    worksheet.Cell(headerRow, 5).Value = "Phòng";
-                    worksheet.Cell(headerRow, 6).Value = "Tình trạng";
-                    worksheet.Cell(headerRow, 7).Value = "Vị trí";
-                    worksheet.Cell(headerRow, 8).Value = "Ghi chú";
-
-                    // Định dạng header
-                    var headerRange = worksheet.Range(headerRow, 1, headerRow, 8);
-                    headerRange.Style.Font.Bold = true;
-                    headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
-                    headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-                    // Lấy dữ liệu đã lọc
-                    var filteredData = _viewModel.DsKiemKe.ToList();
-
-                    // Điền dữ liệu
-                    int row = headerRow + 1;
-                    for (int i = 0; i < filteredData.Count; i++)
-                    {
-                        var item = filteredData[i];
-
-                        worksheet.Cell(row, 1).Value = i + 1; // STT
-                        worksheet.Cell(row, 2).Value = item.MaKiemKeTS;
-                        worksheet.Cell(row, 3).Value = item.MaDotKiemKe?.ToString() ?? "Chưa xác định";
-                        worksheet.Cell(row, 4).Value = item.TenTaiSan ?? $"Tài sản {item.MaTaiSan}"; // Hiển thị tên thay vì mã
-                        worksheet.Cell(row, 5).Value = item.TenPhong ?? $"Phòng {item.MaPhong}"; // Hiển thị tên thay vì mã
-                        worksheet.Cell(row, 6).Value = item.TinhTrang ?? "Chưa xác định";
-                        worksheet.Cell(row, 7).Value = item.ViTriThucTe ?? "";
-                        worksheet.Cell(row, 8).Value = item.GhiChu ?? "";
-
-                        row++;
-                    }
-
-                    // Canh lề và định dạng dữ liệu
-                    var dataRange = worksheet.Range(headerRow + 1, 1, row - 1, 8);
-                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-                    // Căn giữa cho một số cột
-                    worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
-                    worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã kiểm kê
-                    worksheet.Column(3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Đợt kiểm kê
-                    worksheet.Column(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
-
-                    // Tự động điều chỉnh độ rộng cột
-                    worksheet.Columns().AdjustToContents();
-
-                    // Thêm chân trang
-                    int footerRow = row + 2;
-                    worksheet.Cell(footerRow, 1).Value = "Tổng số tài sản:";
-                    worksheet.Cell(footerRow, 2).Value = filteredData.Count.ToString();
-                    worksheet.Cell(footerRow, 1).Style.Font.Bold = true;
-
-                    // Lưu file
-                    workbook.SaveAs(filePath);
-                }
+                var item = filteredData[i];
+                worksheet.Cell(row, 1).Value = i + 1; // STT
+                worksheet.Cell(row, 2).Value = item.MaKiemKeTS;
+                worksheet.Cell(row, 3).Value = item.TenDotKiemKe ?? $"Đợt {item.MaDotKiemKe?.ToString() ?? "N/A"}";
+                worksheet.Cell(row, 4).Value = item.TenTaiSan ?? $"Tài sản {item.MaTaiSan}"; // Tên tài sản kèm số seri
+                worksheet.Cell(row, 5).Value = item.TenPhong ?? $"Phòng {item.MaPhong}"; // Tên phòng
+                worksheet.Cell(row, 6).Value = item.TenNhomTS ?? "Chưa xác định"; // Tên nhóm tài sản
+                worksheet.Cell(row, 7).Value = item.TinhTrang ?? "Chưa xác định";
+                worksheet.Cell(row, 8).Value = item.ViTriThucTe ?? "";
+                worksheet.Cell(row, 9).Value = item.GhiChu ?? "";
+                row++;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                throw; // Rethrow để caller biết lỗi
-            }
+
+            // Canh lề và định dạng dữ liệu
+            var dataRange = worksheet.Range(headerRow + 1, 1, row - 1, 9);
+            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Căn giữa cho một số cột
+            worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
+            worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã kiểm kê
+            worksheet.Column(3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Đợt kiểm kê
+            worksheet.Column(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
+
+            // Tự động điều chỉnh độ rộng cột
+            worksheet.Columns().AdjustToContents();
+
+            // Thêm chân trang
+            int footerRow = row + 2;
+            worksheet.Cell(footerRow, 1).Value = "Tổng số tài sản:";
+            worksheet.Cell(footerRow, 2).Value = filteredData.Count.ToString();
+            worksheet.Cell(footerRow, 1).Style.Font.Bold = true;
+
+            // Lưu file
+            workbook.SaveAs(filePath);
         }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
+            MessageBoxButton.OK, MessageBoxImage.Error);
+        throw; // Rethrow để caller biết lỗi
+    }
+}
+   
         private async void BtnTaoPhieuBaoTri_Click(object sender, RoutedEventArgs e)
         {
             try

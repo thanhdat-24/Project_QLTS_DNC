@@ -1,4 +1,7 @@
-﻿using Project_QLTS_DNC.Models.NhanVien;
+﻿using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.ThongBao;
+using Project_QLTS_DNC.Services.ThongBao;
 using Supabase;
 using System;
 using System.Collections.Generic;
@@ -86,13 +89,16 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             if (result != null && result.Models != null)
             {
+               
+
                 MessageBox.Show("Lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                this.Close(); // đóng form nếu muốn
+                this.Close(); // đóng form
             }
             else
             {
                 MessageBox.Show("Lưu thất bại!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
         }
     }
 }
