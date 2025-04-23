@@ -544,7 +544,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             taskHeaderPara.Inlines.Add(taskHeaderRun);
             section.Blocks.Add(taskHeaderPara);
 
-            // Tạo bảng cho nội dung công việc
+            // Tạo bảng cho nội dung công việc - một ô lớn
             System.Windows.Documents.Table taskTable = new System.Windows.Documents.Table();
             taskTable.CellSpacing = 0;
             taskTable.BorderBrush = System.Windows.Media.Brushes.Black;
@@ -552,24 +552,25 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             taskTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(570) });
             taskTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
 
-            // Tạo 10 dòng trống để điền thông tin
-            for (int i = 0; i < 10; i++)
+            // Tạo một ô lớn duy nhất
+            System.Windows.Documents.TableRow taskRow = new System.Windows.Documents.TableRow();
+            System.Windows.Documents.TableCell taskCell = new System.Windows.Documents.TableCell();
+            taskCell.BorderBrush = System.Windows.Media.Brushes.Black;
+            taskCell.BorderThickness = new System.Windows.Thickness(1);
+            taskCell.Padding = new System.Windows.Thickness(5);
+
+            // Tạo paragraph với nhiều dòng trống để tạo khoảng trống
+            System.Windows.Documents.Paragraph taskPara = new System.Windows.Documents.Paragraph();
+            taskPara.Margin = new System.Windows.Thickness(0);
+            // Thêm nhiều dòng trống bằng cách sử dụng LineBreak
+            for (int i = 0; i < 15; i++)
             {
-                System.Windows.Documents.TableRow taskRow = new System.Windows.Documents.TableRow();
-                System.Windows.Documents.TableCell taskCell = new System.Windows.Documents.TableCell();
-                taskCell.BorderBrush = System.Windows.Media.Brushes.Black;
-                taskCell.BorderThickness = new System.Windows.Thickness(1);
-                taskCell.Padding = new System.Windows.Thickness(5);
-
-                // Tạo paragraph trống với chiều cao cố định
-                System.Windows.Documents.Paragraph taskPara = new System.Windows.Documents.Paragraph();
-                taskPara.Margin = new System.Windows.Thickness(0, 5, 0, 5);
                 taskPara.Inlines.Add(new System.Windows.Documents.Run(" "));
-                taskCell.Blocks.Add(taskPara);
-
-                taskRow.Cells.Add(taskCell);
-                taskTable.RowGroups[0].Rows.Add(taskRow);
+                taskPara.Inlines.Add(new System.Windows.Documents.LineBreak());
             }
+            taskCell.Blocks.Add(taskPara);
+            taskRow.Cells.Add(taskCell);
+            taskTable.RowGroups[0].Rows.Add(taskRow);
             section.Blocks.Add(taskTable);
 
             // Tạo khu vực ghi chú với định dạng đẹp hơn
@@ -581,7 +582,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             noteHeaderPara.Inlines.Add(noteHeaderRun);
             section.Blocks.Add(noteHeaderPara);
 
-            // Tạo bảng cho ghi chú
+            // Tạo bảng cho ghi chú - cũng tạo một ô lớn duy nhất
             System.Windows.Documents.Table noteTable = new System.Windows.Documents.Table();
             noteTable.CellSpacing = 0;
             noteTable.BorderBrush = System.Windows.Media.Brushes.Black;
@@ -589,24 +590,25 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             noteTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(570) });
             noteTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
 
-            // Tạo 5 dòng trống cho ghi chú
-            for (int i = 0; i < 5; i++)
+            // Tạo một ô lớn cho ghi chú
+            System.Windows.Documents.TableRow noteRow = new System.Windows.Documents.TableRow();
+            System.Windows.Documents.TableCell noteCell = new System.Windows.Documents.TableCell();
+            noteCell.BorderBrush = System.Windows.Media.Brushes.Black;
+            noteCell.BorderThickness = new System.Windows.Thickness(1);
+            noteCell.Padding = new System.Windows.Thickness(5);
+
+            // Tạo paragraph với nhiều dòng trống
+            System.Windows.Documents.Paragraph notePara = new System.Windows.Documents.Paragraph();
+            notePara.Margin = new System.Windows.Thickness(0);
+            // Thêm nhiều dòng trống bằng cách sử dụng LineBreak
+            for (int i = 0; i < 8; i++)
             {
-                System.Windows.Documents.TableRow noteRow = new System.Windows.Documents.TableRow();
-                System.Windows.Documents.TableCell noteCell = new System.Windows.Documents.TableCell();
-                noteCell.BorderBrush = System.Windows.Media.Brushes.Black;
-                noteCell.BorderThickness = new System.Windows.Thickness(1);
-                noteCell.Padding = new System.Windows.Thickness(5);
-
-                // Tạo paragraph trống với chiều cao cố định
-                System.Windows.Documents.Paragraph notePara = new System.Windows.Documents.Paragraph();
-                notePara.Margin = new System.Windows.Thickness(0, 5, 0, 5);
                 notePara.Inlines.Add(new System.Windows.Documents.Run(" "));
-                noteCell.Blocks.Add(notePara);
-
-                noteRow.Cells.Add(noteCell);
-                noteTable.RowGroups[0].Rows.Add(noteRow);
+                notePara.Inlines.Add(new System.Windows.Documents.LineBreak());
             }
+            noteCell.Blocks.Add(notePara);
+            noteRow.Cells.Add(noteCell);
+            noteTable.RowGroups[0].Rows.Add(noteRow);
             section.Blocks.Add(noteTable);
 
             // Tạo bảng chữ ký - ĐÃ LOẠI BỎ NGƯỜI KIỂM TRA, chỉ còn 2 cột
@@ -630,16 +632,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             signatureTable.RowGroups[0].Rows.Add(signatureRow);
             section.Blocks.Add(signatureTable);
 
-            // Tạo footer đẹp hơn
-            System.Windows.Documents.Paragraph footerPara = new System.Windows.Documents.Paragraph();
-            footerPara.TextAlignment = System.Windows.TextAlignment.Right;
-            footerPara.Margin = new System.Windows.Thickness(0, 20, 0, 0);
-            System.Windows.Documents.Run footerRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            footerRun.FontStyle = System.Windows.FontStyles.Italic;
-            footerRun.FontSize = 10;
-            footerPara.Inlines.Add(footerRun);
-            section.Blocks.Add(footerPara);
-
+           
             // Thêm section vào document
             document.Blocks.Add(section);
         }
