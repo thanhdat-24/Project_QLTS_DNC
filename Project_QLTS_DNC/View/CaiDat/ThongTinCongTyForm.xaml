@@ -51,13 +51,16 @@
                     <TextBox x:Name="txtTen" 
                              materialDesign:HintAssist.Hint="Tên công ty"/>
                     <TextBox x:Name="txtMaSoThue" 
-                             materialDesign:HintAssist.Hint="Mã số thuế"/>
+                             materialDesign:HintAssist.Hint="Mã số thuế"
+                             PreviewTextInput="NumberOnly_PreviewTextInput"/>
                     <TextBox x:Name="txtDiaChi" 
                              materialDesign:HintAssist.Hint="Địa chỉ"/>
                     <TextBox x:Name="txtSoDienThoai" 
-                             materialDesign:HintAssist.Hint="Số điện thoại"/>
+                            materialDesign:HintAssist.Hint="Số điện thoại"
+                            PreviewTextInput="NumberOnly_PreviewTextInput"/>
                     <TextBox x:Name="txtEmail" 
-                             materialDesign:HintAssist.Hint="Email"/>
+                             materialDesign:HintAssist.Hint="Email"
+                             LostFocus="TxtEmail_LostFocus"/>
                     <TextBox x:Name="txtNguoiDaiDien" 
                              materialDesign:HintAssist.Hint="Người đại diện"/>
                 </UniformGrid>

@@ -167,7 +167,7 @@ namespace Project_QLTS_DNC
 
                 { "btnQuanLyCaiDat", btnQuanLyCaiDat },
                 { "btnThongTinCongTy", btnThongTinCongTy },
-                { "btnPhieuIn", btnPhieuIn },
+           //     { "btnPhieuIn", btnPhieuIn },
             };
 
                     var parentItems = new List<TreeViewItem>
@@ -505,11 +505,11 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.ChucVu.ChucVuForm();
         }
 
-        private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.CaiDat.CaiDatPhieuInForm();
+        //private void btnPhieuIn_Selected(object sender, RoutedEventArgs e)
+        //{
+        //    MainContentPanel.Content = new View.CaiDat.CaiDatPhieuInForm();
 
-        }
+        //}
 
         private void btnDuyetPhieu_Selected(object sender, RoutedEventArgs e)
         {
