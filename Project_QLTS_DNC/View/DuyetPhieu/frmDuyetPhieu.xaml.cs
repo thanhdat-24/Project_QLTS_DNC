@@ -99,8 +99,12 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                     }
                 }
 
-                var sortedList = new ObservableCollection<PhieuCanDuyet>(DanhSachTatCaPhieu.OrderByDescending(p => p.NgayTaoPhieu));
-                DanhSachTatCaPhieu = sortedList;
+                DanhSachTatCaPhieu = new ObservableCollection<PhieuCanDuyet>(
+                DanhSachTatCaPhieu
+                .Where(p => p.NgayTaoPhieu != null)
+                .OrderByDescending(p => p.NgayTaoPhieu)
+  );
+
                 dgPhieuCanDuyet.ItemsSource = DanhSachTatCaPhieu;
                 UpdateItemCount();
             }
@@ -417,12 +421,11 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                // Tổng cộng
                 int tongCanDuyet = 0;
                 int tongDaDuyet = 0;
                 int tongTuChoi = 0;
 
-                // Phiếu nhập
+                // Phiếu nhập kho
                 var listPN = (await client.From<PhieuNhapKho>().Get()).Models;
                 tongCanDuyet += listPN.Count(p => p.TrangThai == null);
                 tongDaDuyet += listPN.Count(p => p.TrangThai == true);
@@ -440,21 +443,35 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
                 tongDaDuyet += listPDN.Count(p => p.TrangThai == true);
                 tongTuChoi += listPDN.Count(p => p.TrangThai == false);
 
-                // Gán thống kê ra TextBlock nếu có
-                if (txtTongPhieuCanDuyet != null)
-                    txtTongPhieuCanDuyet.Text = tongCanDuyet.ToString();
+                // Phiếu xuất kho
+                var listPX = (await client.From<PhieuXuat>().Get()).Models;
+                tongCanDuyet += listPX.Count(p => p.TrangThai == null);
+                tongDaDuyet += listPX.Count(p => p.TrangThai == true);
+                tongTuChoi += listPX.Count(p => p.TrangThai == false);
 
-                if (txtTongPhieuDaDuyet != null)
-                    txtTongPhieuDaDuyet.Text = tongDaDuyet.ToString();
+                // Phiếu bàn giao
+                var listBG = (await client.From<BanGiaoTaiSanModel>().Get()).Models;
+                tongCanDuyet += listBG.Count(p => p.TrangThai == null);
+                tongDaDuyet += listBG.Count(p => p.TrangThai == true);
+                tongTuChoi += listBG.Count(p => p.TrangThai == false);
 
-                if (txtTongPhieuTuChoi != null)
-                    txtTongPhieuTuChoi.Text = tongTuChoi.ToString();
+                // Phiếu lịch sử di chuyển
+                var listLS = (await client.From<LichSuDiChuyenTaiSan>().Get()).Models;
+                tongCanDuyet += listLS.Count(p => p.TrangThai == null);
+                tongDaDuyet += listLS.Count(p => p.TrangThai == true);
+                tongTuChoi += listLS.Count(p => p.TrangThai == false);
+
+                // Gán ra TextBlock
+                txtTongPhieuCanDuyet.Text = tongCanDuyet.ToString();
+                txtTongPhieuDaDuyet.Text = tongDaDuyet.ToString();
+                txtTongPhieuTuChoi.Text = tongTuChoi.ToString();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi load thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
 
         private async void cboLoaiPhieu_SelectionChanged(object sender, SelectionChangedEventArgs e)
