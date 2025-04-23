@@ -38,8 +38,5 @@ namespace Project_QLTS_DNC.Models.QLTaiSan
         [Column("ma_phong")]
         public int? MaPhong { get; set; }
 
-      
-       
-
     }
 }

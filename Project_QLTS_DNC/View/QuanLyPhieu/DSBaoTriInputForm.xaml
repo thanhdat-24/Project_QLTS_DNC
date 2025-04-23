@@ -298,31 +298,144 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Đợt kiểm kê:" Style="{StaticResource LabelStyle}"/>
                         <ComboBox Grid.Column="1" x:Name="cboDotKiemKe" IsEditable="False" StaysOpenOnEdit="True" 
-                          DisplayMemberPath="ten_dot" SelectedValuePath="ma_dot_kiem_ke"/>
+        DisplayMemberPath="TenDot" SelectedValuePath="MaDotKiemKe"/>
                     </Grid>
 
-                    <!-- Tài sản -->
+                    <!-- Tài sản (Thay đổi từ ComboBox sang thanh tìm kiếm) -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Tài sản:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Column="1" x:Name="cboTaiSan" IsEditable="False" StaysOpenOnEdit="True"
-                                  DisplayMemberPath="TenTaiSan" SelectedValuePath="MaTaiSan"/>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <!-- Thanh tìm kiếm -->
+                            <TextBox Grid.Row="0" x:Name="txtSearchTaiSan" Margin="0,5,0,0" 
+                KeyUp="txtSearchTaiSan_KeyUp"
+                TextChanged="txtSearchTaiSan_TextChanged">
+                                <TextBox.Resources>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type TextBox}">
+                                                    <Border x:Name="border" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="5">
+                                                        <Grid>
+                                                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" 
+                                            HorizontalScrollBarVisibility="Hidden" 
+                                            VerticalScrollBarVisibility="Hidden"
+                                            Margin="{TemplateBinding Padding}"/>
+                                                            <TextBlock Text="Nhập tên, số seri hoặc tình trạng tài sản..." 
+                                            Foreground="Gray" Margin="12,0,0,0"
+                                            VerticalAlignment="Center" 
+                                            Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="true">
+                                                            <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsFocused" Value="true">
+                                                            <Setter Property="BorderBrush" TargetName="border" Value="#0066b1"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Resources>
+                            </TextBox>
+                            <!-- Danh sách gợi ý -->
+                            <ListView Grid.Row="1" x:Name="lvTaiSanSuggestions" 
+                Visibility="Collapsed"
+                BorderThickness="1" BorderBrush="#CCCCCC"
+                MaxHeight="200" Margin="0,0,0,5"
+                SelectionChanged="lvTaiSanSuggestions_SelectionChanged">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="5">
+                                            <TextBlock>
+                            <Run Text="{Binding TenTaiSan}" FontWeight="SemiBold"/>
+                            <Run Text=" | "/>
+                            <Run Text="{Binding SoSeri}" FontStyle="Italic"/>
+                            <Run Text=" | "/>
+                            <Run Text="{Binding TinhTrangSP}" Foreground="Gray"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <!-- Thông tin tài sản đã chọn -->
+                            <Border Grid.Row="1" x:Name="selectedTaiSanInfo" 
+                BorderThickness="1" BorderBrush="#CCCCCC" 
+                Padding="10" CornerRadius="5" Margin="0,0,0,15"
+                Background="#F0F8FF" Visibility="Collapsed">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Tên tài sản: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanName"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Số Sê-ri: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanSeri"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Tình trạng: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanStatus"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                            <TextBlock Text="Hạn bảo hành: " FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="txtSelectedTaiSanWarranty"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" x:Name="btnClearTaiSan" Content="Xóa" 
+                        Click="btnClearTaiSan_Click"
+                        Width="60" Height="30"
+                        Background="#e74c3c" Foreground="White"
+                        BorderThickness="0"
+                        VerticalAlignment="Top" HorizontalAlignment="Right">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" 
+                                   CornerRadius="3">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#c0392b"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </Grid>
 
                     <!-- Phòng -->
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="109*"/>
+                            <ColumnDefinition Width="471*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Phòng:" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox Grid.Column="1" x:Name="cboPhong" IsEditable="False" StaysOpenOnEdit="True"
-                                  DisplayMemberPath="TenPhong" SelectedValuePath="MaPhong"/>
+                        <TextBlock Grid.Column="0" Text="Phòng:" Style="{StaticResource LabelStyle}" Margin="0,0,10,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtPhong" IsReadOnly="True" Background="#F8F8F8" Grid.ColumnSpan="2"/>
                     </Grid>
-
                     <!-- Tình trạng -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -336,7 +449,7 @@
                         </ComboBox>
                     </Grid>
 
-                   
+
 
                     <!-- Vị trí thực tế -->
                     <Grid>

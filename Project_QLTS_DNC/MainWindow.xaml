@@ -71,6 +71,7 @@
 
                     <TreeViewItem x:Name="btnNhaCungCap" Header="🏭 Quản lý nhà cung cấp" Selected="btnNhaCungCap_Selected" />
                     <TreeViewItem x:Name="btnTraCuuTaiSan" Header="🔍 Tra cứu tài sản" Selected="btnTraCuuTaiSan_Selected" />
+                    <TreeViewItem x:Name="btnDiChuyenTaiSan" Header="↔️ Di Chuyển tài sản" Selected="btnDiChuyenTaiSan_Selected" />
 
                     <TreeViewItem x:Name="btnQuanLyBaotri" Header="🛠️ Bảo trì">
                         <TreeViewItem x:Name="btnBaoTri" Header="🛠️ Loại bảo trì" Selected="btnBaoTri_Selected_1" />

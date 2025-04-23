@@ -69,7 +69,7 @@ namespace Project_QLTS_DNC.Views
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        // Tải toàn bộ danh sách tài sản từ cơ sở dữ liệu
+        // Tải toàn bộ danh sách tài sản từ cơ sở dữ liệu với tình trạng "Cần kiểm tra"
         private async Task LoadAllTaiSanAsync()
         {
             try
@@ -79,11 +79,13 @@ namespace Project_QLTS_DNC.Views
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
-                // Lấy danh sách tài sản từ Supabase
-                var response = await client.From<TaiSanModel>().Get();
+                // Lấy danh sách tài sản từ Supabase với điều kiện TinhTrangSP là "Cần kiểm tra"
+                var response = await client.From<TaiSanModel>()
+                    .Where(t => t.TinhTrangSP == "Cần kiểm tra")
+                    .Get();
                 _allTaiSan = response.Models;
                 // Log thông tin để debug
-                Console.WriteLine($"Đã tải {_allTaiSan.Count} tài sản");
+                Console.WriteLine($"Đã tải {_allTaiSan.Count} tài sản cần kiểm tra");
             }
             catch (Exception ex)
             {
@@ -109,6 +111,14 @@ namespace Project_QLTS_DNC.Views
                     DisplaySelectedTaiSan();
                     // Hiển thị thông tin tài sản
                     txtSearchTaiSan.Text = taiSan.TenTaiSan;
+
+                    // Nếu tài sản không có tình trạng "Cần kiểm tra", hiển thị thông báo
+                    if (taiSan.TinhTrangSP != "Cần kiểm tra")
+                    {
+                        Console.WriteLine("Lưu ý: Tài sản này không có tình trạng 'Cần kiểm tra'");
+                        // Có thể thêm hiển thị thông báo cho người dùng nếu cần
+                        // MessageBox.Show("Lưu ý: Tài sản này không có tình trạng 'Cần kiểm tra'", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
             }
             catch (Exception ex)
@@ -150,14 +160,12 @@ namespace Project_QLTS_DNC.Views
             try
             {
                 string keyword = txtSearchTaiSan.Text.Trim().ToLower();
-
                 if (string.IsNullOrEmpty(keyword))
                 {
                     lvTaiSanSuggestions.Visibility = Visibility.Collapsed;
                     return;
                 }
-
-                // Tìm kiếm tài sản dựa trên nhiều thuộc tính
+                // Tìm kiếm tài sản dựa trên nhiều thuộc tính (chỉ trong danh sách đã lọc)
                 var filteredTaiSan = _allTaiSan.Where(t =>
                     (t.TenTaiSan?.ToLower().Contains(keyword) ?? false) ||
                     (t.SoSeri?.ToLower().Contains(keyword) ?? false) ||
@@ -173,7 +181,6 @@ namespace Project_QLTS_DNC.Views
                 {
                     lvTaiSanSuggestions.ItemsSource = filteredTaiSan;
                     lvTaiSanSuggestions.Visibility = Visibility.Visible;
-
                     // Ẩn thông tin chi tiết tài sản nếu đang tìm kiếm và từ khóa khác với tên tài sản đang chọn
                     if (_selectedTaiSan != null &&
                         !_selectedTaiSan.TenTaiSan.ToLower().Contains(keyword) &&
