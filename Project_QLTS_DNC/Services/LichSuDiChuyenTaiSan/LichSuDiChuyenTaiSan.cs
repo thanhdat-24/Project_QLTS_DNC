@@ -33,6 +33,7 @@ namespace Project_QLTS_DNC.Services
                 {
                     MaLichSu = p.MaLichSu,
                     TenTaiSan = ts?.TenTaiSan ?? "",
+                    SoSeri = ts?.SoSeri ?? "",
                     TenPhongCu = phongCu?.TenPhong ?? "",
                     TenPhongMoi = phongMoi?.TenPhong ?? "",
                     TenNhanVien = nv?.TenNV ?? "",
@@ -83,6 +84,8 @@ namespace Project_QLTS_DNC.Services
     {
         public long MaLichSu { get; set; }
         public string TenTaiSan { get; set; }
+        public string SoSeri { get; set; }
+
         public string TenPhongCu { get; set; }
         public string TenPhongMoi { get; set; }
         public string TenNhanVien { get; set; }

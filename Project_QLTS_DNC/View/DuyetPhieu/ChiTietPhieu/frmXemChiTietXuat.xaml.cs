@@ -57,9 +57,8 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                     return;
                 }
 
-                // Gán thông tin chung
                 txtMaPhieu.Text = "PX" + phieu.MaPhieuXuat;
-                txtNgayXuat.Text = phieu.NgayXuat.ToString("dd/MM/yyyy");
+                txtNgayXuat.Text = phieu.NgayXuat.ToString("dd/MM/yyyy HH:mm");
                 txtTrangThai.Text = phieu.TrangThai == true ? "Đã duyệt"
                                       : phieu.TrangThai == false ? "Từ chối duyệt"
                                       : "Chưa duyệt";
@@ -67,7 +66,9 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 txtTenKhoNhan.Text = dsKho.Models.FirstOrDefault(k => k.MaKho == phieu.MaKhoNhan)?.TenKho ?? "(Không rõ)";
                 txtTenNV.Text = dsNV.Models.FirstOrDefault(n => n.MaNV == phieu.MaNV)?.TenNV ?? "(Không rõ)";
 
-                // Load chi tiết
+                int soLuongPhieu = 0;
+                int.TryParse(phieu.SoLuong, out soLuongPhieu);
+
                 var chiTiet = (from ct in dsChiTiet.Models
                                where ct.MaPhieuXuat == maPhieuXuat
                                let ts = dsTaiSan.Models.FirstOrDefault(t => t.MaTaiSan == ct.MaTaiSan)
@@ -77,7 +78,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                                    MaChiTiet = ct.MaChiTietXK,
                                    MaTaiSan = ct.MaTaiSan,
                                    TenTaiSan = ts?.TenTaiSan ?? "(Không rõ)",
-                                   SoLuong = ct.SoLuong,
+                                   SoLuong = soLuongPhieu,
                                    TenKhoXuat = txtTenKhoXuat.Text,
                                    TenKhoNhan = txtTenKhoNhan.Text,
                                    GhiChu = phieu.GhiChu,
@@ -95,7 +96,6 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 btnTuChoi.IsEnabled = chuaDuyet && coChiTiet;
                 btnHuyBo.IsEnabled = true;
 
-                // Nếu không có chi tiết, cảnh báo
                 if (!coChiTiet)
                 {
                     MessageBox.Show("Phiếu này không có thông tin chi tiết để duyệt!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -107,82 +107,35 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             }
         }
 
-
         private async void btnDuyet_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                // ✅ Kiểm tra tồn kho trước
-                foreach (var ct in danhSachChiTiet)
-                {
-                    var ton = await client
-                        .From<TonKho>()
-                        .Filter("ma_kho", Operator.Equals, ct.MaKhoXuat)
-                        .Filter("ma_nhom_ts", Operator.Equals, ct.MaTaiSan)
-                        .Get();
-
-                    var tonKho = ton.Models.FirstOrDefault();
-
-                    if (tonKho == null)
-                    {
-                        MessageBox.Show($"❌ Khu vực \"{ct.TenKhoXuat}\" không có tài sản \"{ct.TenTaiSan}\".", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
-                    // ✅ Tính tồn kho bằng cách lấy nhập - xuất
-                    int soLuongTon = tonKho.SoLuongNhap - tonKho.SoLuongXuat;
-
-                    if (ct.SoLuong > soLuongTon)
-                    {
-                        MessageBox.Show(
-                            $"❌ Tài sản \"{ct.TenTaiSan}\" tại kho \"{ct.TenKhoXuat}\" không đủ tồn kho.\n" +
-                            $"✔️ Hiện còn: {soLuongTon} | ❌ Cần xuất: {ct.SoLuong}",
-                            "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                }
-
-                // ✅ Tiến hành cập nhật tồn kho
-                foreach (var ct in danhSachChiTiet)
-                {
-                    var ton = await client
-                        .From<TonKho>()
-                        .Filter("ma_kho", Operator.Equals, ct.MaKhoXuat)
-                        .Filter("ma_nhom_ts", Operator.Equals, ct.MaTaiSan)
-                        .Get();
-
-                    var tonKho = ton.Models.First();
-
-                    tonKho.SoLuongXuat += ct.SoLuong;
-                    tonKho.NgayCapNhat = DateTime.Now;
-
-                    await client.From<TonKho>().Update(tonKho);
-                }
-
-                // ✅ Cập nhật trạng thái phiếu xuất
+                // Lấy phiếu xuất hiện tại từ Supabase
                 var res = await client
                     .From<PhieuXuat>()
                     .Filter("ma_phieu_xuat", Operator.Equals, maPhieuXuatHienTai)
                     .Get();
 
                 var phieu = res.Models.First();
-                phieu.TrangThai = true;
 
+                // Đổi trạng thái phiếu xuất thành đã duyệt
+                phieu.TrangThai = true;
                 await client.From<PhieuXuat>().Update(phieu);
 
-                MessageBox.Show("✅ Duyệt phiếu xuất thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Duyệt phiếu xuất thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Gọi sự kiện để thông báo cho phần khác
                 OnPhieuDuyetThanhCong?.Invoke();
                 Window.GetWindow(this)?.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("❌ Lỗi khi duyệt phiếu: " + ex.Message);
+                MessageBox.Show("Lỗi khi duyệt phiếu: " + ex.Message);
             }
         }
-
-
 
 
         private async void btnTuChoi_Click(object sender, RoutedEventArgs e)

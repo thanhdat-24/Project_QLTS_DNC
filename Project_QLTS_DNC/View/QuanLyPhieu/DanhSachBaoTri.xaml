@@ -138,17 +138,7 @@
                              Foreground="{DynamicResource PrimaryHueMidBrush}"
                              VerticalAlignment="Center"/>
                 </StackPanel>
-                <Button Grid.Column="1" 
-                       x:Name="btnTaoPhieuBaoTri" 
-                       Style="{StaticResource PrimaryButton}" 
-                       Background="{StaticResource SecondaryCreate}" 
-                       Foreground="White" 
-                       ToolTip="Tạo phiếu bảo trì từ các mục đã chọn">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="NoteAdd" Margin="1 0 8 0"/>
-                        <TextBlock Text="TẠO PHIẾU"/>
-                    </StackPanel>
-                </Button>
+                
             </Grid>
 
             <!-- Thanh tìm kiếm và lọc -->
@@ -501,7 +491,13 @@ HorizontalScrollBarVisibility="Auto">
                         </ComboBox>
                     </StackPanel>
                 </Grid>
-
+    <!-- Nút bên phải -->
+    <StackPanel Grid.Column="2" Orientation="Horizontal">
+        <Button x:Name="btnInPhieu" 
+Content="In phiếu" 
+Style="{StaticResource PrimaryButton}"
+Click="btnInPhieu_Click"/>
+    </StackPanel>
             </Grid>
         </Grid>
     </Border>

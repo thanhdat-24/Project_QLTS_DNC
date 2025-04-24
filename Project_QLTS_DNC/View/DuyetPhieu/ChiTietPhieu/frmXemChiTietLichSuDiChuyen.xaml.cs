@@ -45,6 +45,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             public string MaLichSu { get; set; }
             public string TenNhanVien { get; set; }
             public string TenTaiSan { get; set; }
+            public string SoSeri { get; set; }
             public string GhiChu { get; set; }
             public string NgayBanGiao { get; set; }
         }
@@ -97,6 +98,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                         MaLichSu = "LS" + record.MaLichSu,
                         TenNhanVien = nv?.TenNV ?? "(Không rõ)",
                         TenTaiSan = ts?.TenTaiSan ?? "(Không rõ)",
+                        SoSeri = ts?.SoSeri ?? "(Không rõ)",
                         GhiChu = record.GhiChu,
                         NgayBanGiao = record.NgayBanGiao?.ToString("dd/MM/yyyy")
                     }

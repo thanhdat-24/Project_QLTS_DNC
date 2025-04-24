@@ -26,4 +26,8 @@ public class PhieuXuat : BaseModel
 
     [Column("ghi_chu")]
     public string? GhiChu { get; set; }
+
+    [Column("so_luong")]
+    public string? SoLuong { get; set; }
+
 }

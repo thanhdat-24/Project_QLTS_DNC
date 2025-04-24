@@ -29,6 +29,8 @@ using Project_QLTS_DNC.Services.TaiKhoan;
 using Project_QLTS_DNC.Services.ThongBao;
 using Project_QLTS_DNC.Models.ThongBao;
 using System.ComponentModel;
+using Project_QLTS_DNC.View.DangNhap;
+using Project_QLTS_DNC.ViewModel.TaiKhoan;
 
 namespace Project_QLTS_DNC
 {
@@ -41,6 +43,7 @@ namespace Project_QLTS_DNC
 
         private TaiKhoanModel _taiKhoan;
         private List<TaiKhoanModel> _danhSachTaiKhoan;
+        public UserProfileViewModel UserProfileVM { get; set; }
 
         private int _soThongBaoChuaDoc;
         public int SoThongBaoChuaDoc
@@ -550,13 +553,27 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.QuanLyTaiSan.DanhSachBanGiaoView();
 
         }
-
-
         private void btnUserProfile_Click(object sender, RoutedEventArgs e)
+        {
+            btnUserProfile.ContextMenu.PlacementTarget = btnUserProfile;
+            btnUserProfile.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            btnUserProfile.ContextMenu.IsOpen = true;
+        }
+
+        private void ThongTinTaiKhoan_Click(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new UserProfileForm();
         }
+        
+        private void DangXuat_Click(object sender, RoutedEventArgs e)
+        {
+            var loginWindow = new DangNhapForm();
+            loginWindow.Show();
 
+            this.Close();
+
+
+        }
         private void btnPhieuMuaMoi_Selected(object sender, RoutedEventArgs e)
         {
             MainContentPanel.Content = new View.QuanLyPhieu.PhieuMuaMoiTSView();
