@@ -38,6 +38,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         {
             InitializeComponent();
             Loaded += TonKhoView_Loaded;
+
+            this.IsVisibleChanged += TonKhoView_IsVisibleChanged;
         }
 
         private async Task InitializeSupabaseAsync()
@@ -54,6 +56,20 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             _client = new Supabase.Client(supabaseUrl, supabaseKey, options);
             await _client.InitializeAsync();
         }
+
+        private async void TonKhoView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (this.IsVisible)
+            {
+                if (_client == null)
+                    await InitializeSupabaseAsync(); // ✅ đảm bảo khởi tạo Supabase
+
+                await CapNhatSoLuongXuatTonKhoAsync();
+                await LoadTonKhoAsync();
+            }
+        }
+
+
 
         private async Task LoadTonKhoAsync()
         {
@@ -128,64 +144,64 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             try
             {
                 string sql = @"
-               WITH 
-                    bg AS (
-                        -- Tổng số lượng bàn giao theo nhóm tài sản (dựa theo trạng thái phiếu bàn giao)
-                        SELECT 
-                            ctpn.ma_nhom_ts,
-                            COUNT(*) AS tong_so_luong_ban_giao
-                        FROM 
-                            chitietbangiao ctbg
-                        INNER JOIN 
-                            bangiaotaisan bgt ON ctbg.ma_bang_giao_ts = bgt.ma_bang_giao_ts
-                        INNER JOIN 
-                            taisan ts ON ctbg.ma_tai_san = ts.ma_tai_san
-                        INNER JOIN 
-                            chitietphieunhap ctpn ON ts.ma_chi_tiet_pn = ctpn.ma_chi_tiet_pn
-                        WHERE 
-                            (bgt.trang_thai = TRUE OR bgt.trang_thai IS NULL) -- ✅ chỉ tính khi phiếu bàn giao được duyệt hoặc chưa duyệt
-                        GROUP BY 
-                            ctpn.ma_nhom_ts
-                    ),
-                    xk AS (
-                        -- Tổng số lượng xuất kho theo nhóm tài sản (dựa theo trạng thái phiếu xuất kho)
-                        SELECT 
-                            ctpn.ma_nhom_ts,
-                            COUNT(*) AS tong_so_luong_xuat
-                        FROM 
-                            chitietxuatkho ctxk
-                        INNER JOIN 
-                            xuatkho xk ON ctxk.ma_phieu_xuat = xk.ma_phieu_xuat
-                        INNER JOIN 
-                            taisan ts ON ctxk.ma_tai_san = ts.ma_tai_san
-                        INNER JOIN 
-                            chitietphieunhap ctpn ON ts.ma_chi_tiet_pn = ctpn.ma_chi_tiet_pn
-                        WHERE 
-                            (xk.trang_thai = TRUE OR xk.trang_thai IS NULL) -- ✅ chỉ tính khi phiếu xuất kho được duyệt hoặc chưa duyệt
-                        GROUP BY 
-                            ctpn.ma_nhom_ts
-                    ),
-                    gop AS (
-                        SELECT 
-                            COALESCE(bg.ma_nhom_ts, xk.ma_nhom_ts) AS ma_nhom_ts,
-                            COALESCE(bg.tong_so_luong_ban_giao, 0) + COALESCE(xk.tong_so_luong_xuat, 0) AS tong_so_luong_xuat_gop
-                        FROM 
-                            bg
-                        FULL JOIN 
-                            xk ON bg.ma_nhom_ts = xk.ma_nhom_ts
-                    )
+           WITH ton_bg AS (
+    SELECT 
+        ctpn.ma_nhom_ts,
+        COUNT(DISTINCT ts.ma_tai_san) AS so_luong
+    FROM 
+        chitietbangiao ctbg
+    JOIN 
+        bangiaotaisan bgt ON ctbg.ma_bang_giao_ts = bgt.ma_bang_giao_ts
+    JOIN 
+        taisan ts ON ctbg.ma_tai_san = ts.ma_tai_san
+    JOIN 
+        chitietphieunhap ctpn ON ts.ma_chi_tiet_pn = ctpn.ma_chi_tiet_pn
+    WHERE 
+        bgt.trang_thai IS NULL OR bgt.trang_thai = TRUE
+    GROUP BY 
+        ctpn.ma_nhom_ts
+),
+ton_xk AS (
+    SELECT 
+        ctpn.ma_nhom_ts,
+        COUNT(DISTINCT ts.ma_tai_san) AS so_luong
+    FROM 
+        chitietxuatkho ctxk
+    JOIN 
+        xuatkho xk ON ctxk.ma_phieu_xuat = xk.ma_phieu_xuat
+    JOIN 
+        taisan ts ON ctxk.ma_tai_san = ts.ma_tai_san
+    JOIN 
+        chitietphieunhap ctpn ON ts.ma_chi_tiet_pn = ctpn.ma_chi_tiet_pn
+    WHERE 
+        xk.trang_thai IS NULL OR xk.trang_thai = TRUE
+    GROUP BY 
+        ctpn.ma_nhom_ts
+),
+tong_xuat AS (
+    SELECT 
+        COALESCE(bg.ma_nhom_ts, xk.ma_nhom_ts) AS ma_nhom_ts,
+        COALESCE(bg.so_luong, 0) + COALESCE(xk.so_luong, 0) AS tong
+    FROM 
+        ton_bg bg
+    FULL JOIN 
+        ton_xk xk ON bg.ma_nhom_ts = xk.ma_nhom_ts
+)
 
-                    UPDATE tonkho tk
-                    SET 
-                        so_luong_xuat = gop.tong_so_luong_xuat_gop,
-                        ngay_cap_nhat = CURRENT_TIMESTAMP
-                    FROM gop
-                    WHERE tk.ma_nhom_ts = gop.ma_nhom_ts;
+UPDATE tonkho tk
+SET 
+    so_luong_xuat = tong_xuat.tong,
+    ngay_cap_nhat = CURRENT_TIMESTAMP
+FROM tong_xuat
+WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
+
+
                         ";
 
                 var parameters = new Dictionary<string, object> { { "query", sql } };
-                var response = await _client.Rpc("rpc_execute_sql", parameters);
-                
+                var response = await _client.Rpc("cap_nhat_so_luong_xuat_tonkho", new Dictionary<string, object>());
+
+
 
                 // Sau đó tự xử lý kết quả `response`
                 // rồi update từng dòng TonKho (MaNhomTS) theo SoLuongXuat mới
