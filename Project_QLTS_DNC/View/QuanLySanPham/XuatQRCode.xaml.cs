@@ -538,6 +538,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         }
 
         // Nội dung phương thức ExportQRCodeToPDF
+        // Nội dung phương thức ExportQRCodeToPDF
         private void ExportQRCodeToPDF(string filePath, List<TaiSanQRDTO> selectedItems)
         {
             // Cấu hình PDF writer
@@ -553,12 +554,12 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
                     int cellCount = 0;
 
-                    // Lấy địa chỉ IP động cho URL
+                    // Lấy địa chỉ IP tĩnh
                     string baseUrl = NetworkHelper.GetLocalIPv4Address(8080);
 
                     foreach (var item in selectedItems)
                     {
-                        // Tạo mã QR từ thông tin tài sản với địa chỉ IP động
+                        // Tạo mã QR từ thông tin tài sản với địa chỉ IP tĩnh
                         string qrContent = $"{baseUrl}/qr?id={item.MaTaiSan}&seri={item.SoSeri}";
 
                         // Tạo QR code sử dụng ZXing
