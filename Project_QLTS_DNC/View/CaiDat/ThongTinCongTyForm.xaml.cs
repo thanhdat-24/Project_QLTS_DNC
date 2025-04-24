@@ -87,6 +87,30 @@ namespace Project_QLTS_DNC.View.CaiDat
 
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
         {
+            // Kiểm tra số điện thoại và mã số thuế có phải toàn số không
+            if (!txtMaSoThue.Text.All(char.IsDigit))
+            {
+                MessageBox.Show("Mã số thuế chỉ được nhập số!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtMaSoThue.Focus();
+                return;
+            }
+
+            if (!txtSoDienThoai.Text.All(char.IsDigit))
+            {
+                MessageBox.Show("Số điện thoại chỉ được nhập số!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtSoDienThoai.Focus();
+                return;
+            }
+
+            // Kiểm tra email hợp lệ
+            if (!IsValidEmail(txtEmail.Text))
+            {
+                MessageBox.Show("Email không đúng định dạng!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtEmail.Focus();
+                return;
+            }
+
+            // Nếu mọi thứ hợp lệ, tiếp tục lưu
             congTy.Ten = txtTen.Text;
             congTy.MaSoThue = txtMaSoThue.Text;
             congTy.DiaChi = txtDiaChi.Text;
@@ -103,18 +127,18 @@ namespace Project_QLTS_DNC.View.CaiDat
 
                 string fileName = Path.GetFileName(selectedImagePath);
                 string newImagePath = Path.Combine(logoDirectory, fileName);
-
                 congTy.LogoPath = newImagePath;
-
                 imgLogo.Source = new BitmapImage(new Uri(newImagePath));
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                mainWindow?.UpdateLogo(congTy.LogoPath); // congTy.LogoPath là đường dẫn ảnh đã lưu
 
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                mainWindow?.UpdateLogo(congTy.LogoPath);
             }
+
             File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
             File.WriteAllText("logo_path.txt", congTy.LogoPath);
             MessageBox.Show("Thông tin công ty đã được lưu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
 
         private void InPDF_Click(object sender, RoutedEventArgs e)
         {
@@ -203,5 +227,46 @@ namespace Project_QLTS_DNC.View.CaiDat
 
             File.WriteAllText(filePath, JsonConvert.SerializeObject(congTy, Formatting.Indented));
         }
+
+        // Chỉ cho phép nhập số
+        private void NumberOnly_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            var textBox = sender as TextBox;
+
+            // Chỉ cho nhập số và tổng độ dài không vượt quá 11
+            e.Handled = !e.Text.All(char.IsDigit) || textBox.Text.Length >= 11;
+        }
+
+
+        // Kiểm tra email khi người dùng rời khỏi ô
+        private void TxtEmail_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var email = txtEmail.Text;
+            if (!IsValidEmail(email))
+            {
+                MessageBox.Show("Email không hợp lệ!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Delay focus để tránh bị lặp lại LostFocus
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    txtEmail.Focus();
+                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }
+        }
+
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
     }
 }

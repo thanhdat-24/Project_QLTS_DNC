@@ -137,78 +137,14 @@ namespace Project_QLTS_DNC.Services.BaoTri
             }
         }
 
-        /// <summary>
-        /// Tạo phiếu bảo trì mới
-        /// </summary>
-        public async Task<bool> TaoPhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                    throw new Exception("Không thể kết nối Supabase Client");
-
-                // Thêm phiếu bảo trì mới
-                var response = await client.From<PhieuBaoTri>().Insert(phieuBaoTri);
-
-                // Kiểm tra kết quả
-                if (response.ResponseMessage.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Đã tạo phiếu bảo trì: {phieuBaoTri.MaBaoTri}");
-                    return true;
-                }
-                else
-                {
-                    throw new Exception($"Lỗi khi tạo phiếu bảo trì: {response.ResponseMessage.ReasonPhrase}");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tạo phiếu bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Tạo nhiều phiếu bảo trì cùng lúc
-        /// </summary>
-        public async Task<bool> TaoNhieuPhieuBaoTriAsync(List<PhieuBaoTri> danhSachPhieu)
-        {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                    throw new Exception("Không thể kết nối Supabase Client");
-
-                // Thêm nhiều phiếu bảo trì
-                var response = await client.From<PhieuBaoTri>().Insert(danhSachPhieu);
-
-                // Kiểm tra kết quả
-                if (response.ResponseMessage.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Đã tạo {danhSachPhieu.Count} phiếu bảo trì");
-                    return true;
-                }
-                else
-                {
-                    throw new Exception($"Lỗi khi tạo phiếu bảo trì: {response.ResponseMessage.ReasonPhrase}");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tạo nhiều phiếu bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-        }
+      
 
         public async Task<bool> CapNhatTaiSanSauBaoTriAsync(KiemKeTaiSan taiSan)
         {
             try
             {
-                // Lưu giá trị hiện tại để đề phòng mất dữ liệu
-                string viTriThucTeBanDau = taiSan.ViTriThucTe;
+                // Lưu giá trị hiện tại để đề phòng mất dữ liệu - sửa kiểu dữ liệu thành int
+                int viTriThucTeBanDau = taiSan.ViTriThucTe;
 
                 var client = await SupabaseService.GetClientAsync();
                 if (client == null)
@@ -225,7 +161,7 @@ namespace Project_QLTS_DNC.Services.BaoTri
             { "p_ma_tai_san", taiSanDb.MaTaiSan },
             { "p_ma_phong", taiSanDb.MaPhong },
             { "p_tinh_trang", taiSanDb.TinhTrang },
-            { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe },
+            { "p_vi_tri_thuc_te", taiSanDb.ViTriThucTe }, // Không cần chuyển đổi, đã đúng kiểu
             { "p_ghi_chu", taiSanDb.GhiChu }
         };
 
@@ -235,8 +171,10 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 {
                     Console.WriteLine($"Đã cập nhật tài sản sau bảo trì: {taiSan.MaTaiSan}");
 
-                    // Đảm bảo giá trị không bị mất nếu có lỗi
-                    if (string.IsNullOrEmpty(taiSan.ViTriThucTe) && !string.IsNullOrEmpty(viTriThucTeBanDau))
+                    // Sửa lại điều kiện kiểm tra cho kiểu int
+                    // Tuy nhiên, với kiểu int, việc kiểm tra IsNullOrEmpty không còn phù hợp nữa
+                    // Thay vào đó, chúng ta có thể kiểm tra giá trị không hợp lệ (ví dụ: 0 hoặc số âm)
+                    if (taiSan.ViTriThucTe <= 0 && viTriThucTeBanDau > 0)
                     {
                         taiSan.ViTriThucTe = viTriThucTeBanDau;
                     }
@@ -255,7 +193,6 @@ namespace Project_QLTS_DNC.Services.BaoTri
                 return false;
             }
         }
-
         /// <summary>
         /// Lấy danh sách lịch sử bảo trì của một tài sản
         /// </summary>

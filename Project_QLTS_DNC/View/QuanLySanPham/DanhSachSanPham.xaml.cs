@@ -12,6 +12,7 @@ using Project_QLTS_DNC.Services.QLTaiSanService;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using System.Windows.Media;
 using Project_QLTS_DNC.Services.QLToanNha;
+using ClosedXML.Excel;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -34,13 +35,18 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             LoadDataAsync();
             InitializeFilters();
 
-            // Đăng ký các event
+            // Đăng ký các event (giữ nguyên các đăng ký hiện có)
             btnSearch.Click += BtnSearch_Click;
             txtSearch.KeyDown += TxtSearch_KeyDown;
             cboPhong.SelectionChanged += Filter_SelectionChanged;
             cboNhomTS.SelectionChanged += Filter_SelectionChanged;
+            // Thêm đăng ký sự kiện cho combobox tình trạng
+            cboTinhTrang.SelectionChanged += Filter_SelectionChanged;
             btnRefresh.Click += BtnRefresh_Click;
             btnExportQRCode.Click += BtnExportQRCode_Click;
+
+            // Thêm đăng ký sự kiện cho nút xuất Excel
+            btnExportExcel.Click += BtnExportExcel_Click;
 
             // Đăng ký sự kiện phân trang
             btnPreviousPage.Click += BtnPreviousPage_Click;
@@ -51,6 +57,8 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         }
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
+            // Hiển thị loading trước khi làm mới dữ liệu
+            LoadingGrid.Visibility = Visibility.Visible;
             RefreshData();
         }
 
@@ -166,6 +174,12 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             // Reset phân trang về trang đầu tiên khi làm mới dữ liệu
             _currentPage = 1;
 
+            // Reset các bộ lọc về giá trị mặc định
+            cboPhong.SelectedIndex = 0;
+            cboNhomTS.SelectedIndex = 0;
+            cboTinhTrang.SelectedIndex = 0;
+            txtSearch.Text = string.Empty;
+
             // Gọi lại phương thức LoadDataAsync để làm mới dữ liệu
             LoadDataAsync();
         }
@@ -174,7 +188,8 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         {
             try
             {
-                // Hiển thị indicator loading (nếu có)
+                // Hiển thị indicator loading
+                LoadingGrid.Visibility = Visibility.Visible;
 
                 // Lấy danh sách phòng để điền vào ComboBox lọc
                 _phongList = await GetPhongListAsync();
@@ -184,9 +199,14 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 _nhomTSList = await GetNhomTSListAsync();
                 cboNhomTS.ItemsSource = _nhomTSList;
 
+                // Thiết lập giá trị mặc định cho ComboBox tình trạng (nếu chưa được chọn)
+                if (cboTinhTrang.SelectedIndex < 0)
+                {
+                    cboTinhTrang.SelectedIndex = 0; // "Tất cả"
+                }
+
                 // Lấy danh sách tài sản từ service
                 var taiSanModels = await TaiSanService.LayDanhSachTaiSanAsync();
-
                 // Chuyển đổi từ TaiSanModel sang TaiSanDTO
                 _listTaiSan = new ObservableCollection<TaiSanDTO>(
                     taiSanModels.Select(model => TaiSanDTO.FromModel(model)));
@@ -281,6 +301,11 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Ẩn indicator loading khi đã xong (hoặc có lỗi)
+                LoadingGrid.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -396,7 +421,15 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                                 ((NhomTaiSanFilter)cboNhomTS.SelectedItem).MaNhomTS == null ||
                                 (taiSan.MaNhomTS.HasValue && taiSan.MaNhomTS.Value == ((NhomTaiSanFilter)cboNhomTS.SelectedItem).MaNhomTS.Value);
 
-            e.Accepted = matchesSearch && matchesPhong && matchesNhomTS;
+            // Lọc theo tình trạng tài sản
+            bool matchesTinhTrang = true;
+            if (cboTinhTrang.SelectedIndex > 0) // Nếu không phải "Tất cả"
+            {
+                string selectedTinhTrang = ((ComboBoxItem)cboTinhTrang.SelectedItem).Content.ToString();
+                matchesTinhTrang = taiSan.TinhTrangSP == selectedTinhTrang;
+            }
+
+            e.Accepted = matchesSearch && matchesPhong && matchesNhomTS && matchesTinhTrang;
         }
 
         private void UpdateStatusBar()
@@ -449,6 +482,9 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             {
                 try
                 {
+                    // Hiển thị loading khi đang xóa
+                    LoadingGrid.Visibility = Visibility.Visible;
+
                     // Gọi phương thức xóa tài sản từ TaiSanService
                     bool success = await TaiSanService.XoaTaiSanAsync(selectedTaiSan.MaTaiSan);
 
@@ -479,6 +515,11 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Lỗi khi xóa tài sản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    // Ẩn loading khi đã xong
+                    LoadingGrid.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -652,6 +693,135 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                     // Nếu nhập không phải số, đặt lại giá trị cũ
                     txtCurrentPage.Text = _currentPage.ToString();
                 }
+            }
+        }
+        private void BtnExportExcel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Hiển thị loading khi đang xuất Excel
+                LoadingGrid.Visibility = Visibility.Visible;
+
+                // Kiểm tra nếu không có dữ liệu
+                if (_listTaiSan == null || _listTaiSan.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu tài sản để xuất Excel.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadingGrid.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                // Hiển thị SaveFileDialog để chọn vị trí lưu file
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Excel Files (*.xlsx)|*.xlsx",
+                    DefaultExt = "xlsx",
+                    FileName = $"DanhSachTaiSan_{DateTime.Now:yyyyMMdd_HHmmss}"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string filePath = saveFileDialog.FileName;
+
+                    // Gọi hàm xuất Excel và truyền đường dẫn file
+                    ExportExcel(filePath);
+
+                    // Hiển thị thông báo khi xuất file thành công
+                    MessageBox.Show($"Xuất file Excel thành công. File được lưu tại:\n{filePath}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Ẩn loading khi đã xong
+                LoadingGrid.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ExportExcel(string filePath)
+        {
+            // Tạo workbook mới
+            using (var workbook = new XLWorkbook())
+            {
+                // Tạo worksheet
+                var worksheet = workbook.Worksheets.Add("Danh sách tài sản");
+
+                // Định dạng tiêu đề
+                var headerRow = worksheet.Row(1);
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
+                headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Thêm tiêu đề cho các cột
+                worksheet.Cell(1, 1).Value = "STT";
+                worksheet.Cell(1, 2).Value = "Mã TS";
+                worksheet.Cell(1, 3).Value = "Tên tài sản";
+                worksheet.Cell(1, 4).Value = "Số Seri";
+                worksheet.Cell(1, 5).Value = "Ngày sử dụng";
+                worksheet.Cell(1, 6).Value = "Hạn BH";
+                worksheet.Cell(1, 7).Value = "Tình trạng";
+                worksheet.Cell(1, 8).Value = "Ghi chú";
+                worksheet.Cell(1, 9).Value = "Phòng";
+                worksheet.Cell(1, 10).Value = "Nhóm tài sản";
+
+                // Đặt style cho tất cả các ô trong header
+                var headerRange = worksheet.Range(1, 1, 1, 10);
+                headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                // Lấy danh sách tài sản (áp dụng bộ lọc nếu có)
+                var filteredItems = _viewSource != null && _viewSource.View != null
+                    ? _viewSource.View.Cast<TaiSanDTO>().ToList()
+                    : _listTaiSan.ToList();
+
+                // Thêm dữ liệu vào worksheet
+                for (int i = 0; i < filteredItems.Count; i++)
+                {
+                    var taiSan = filteredItems[i];
+                    int row = i + 2; // Dòng 1 là header
+
+                    worksheet.Cell(row, 1).Value = i + 1; // STT
+                    worksheet.Cell(row, 2).Value = taiSan.MaTaiSan;
+                    worksheet.Cell(row, 3).Value = taiSan.TenTaiSan;
+                    worksheet.Cell(row, 4).Value = taiSan.SoSeri;
+
+                    // Xử lý các giá trị DateTime
+                    if (taiSan.NgaySuDung.HasValue)
+                        worksheet.Cell(row, 5).Value = taiSan.NgaySuDung.Value.ToString("dd/MM/yyyy");
+                    else
+                        worksheet.Cell(row, 5).Value = "";
+
+                    if (taiSan.HanBH.HasValue)
+                        worksheet.Cell(row, 6).Value = taiSan.HanBH.Value.ToString("dd/MM/yyyy");
+                    else
+                        worksheet.Cell(row, 6).Value = "";
+
+                    worksheet.Cell(row, 7).Value = taiSan.TinhTrangSP;
+                    worksheet.Cell(row, 8).Value = taiSan.GhiChu;
+                    worksheet.Cell(row, 9).Value = taiSan.TenPhong;
+                    worksheet.Cell(row, 10).Value = taiSan.TenNhomTS;
+
+                    // Đặt style cho dòng dữ liệu
+                    var dataRange = worksheet.Range(row, 1, row, 10);
+                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                }
+
+                // Căn giữa một số cột
+                worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
+                worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã TS
+                worksheet.Column(4).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Số Seri
+                worksheet.Column(5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Ngày sử dụng
+                worksheet.Column(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Hạn BH
+                worksheet.Column(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
+
+                // Tự động điều chỉnh độ rộng các cột
+                worksheet.Columns().AdjustToContents();
+
+                // Lưu workbook
+                workbook.SaveAs(filePath);
             }
         }
 

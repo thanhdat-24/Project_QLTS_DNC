@@ -49,6 +49,28 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Thêm LoadingGrid đúng vị trí -->
+            <Grid x:Name="LoadingGrid" Visibility="Collapsed" Panel.ZIndex="999" Grid.RowSpan="6">
+                <Grid.Background>
+                    <SolidColorBrush Color="Black" Opacity="0.3"/>
+                </Grid.Background>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <materialDesign:Card Padding="24" UniformCornerRadius="12" Background="{DynamicResource MaterialDesignBackground}">
+                        <StackPanel>
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                                    Value="0" 
+                                    IsIndeterminate="True" 
+                                    HorizontalAlignment="Center"
+                                    Width="48" Height="48" Margin="8"/>
+                            <TextBlock Text="Đang tải dữ liệu..." 
+                                 Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                 HorizontalAlignment="Center" 
+                                 Margin="0,16,0,0"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </StackPanel>
+            </Grid>
+
             <!-- Tiêu đề và Nút Thêm -->
             <Grid Grid.Row="0" Margin="15,15,15,5" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
@@ -75,6 +97,7 @@
             <Grid Grid.Row="1" Margin="16" Background="{DynamicResource MaterialDesignBackground}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -139,8 +162,22 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
+                <!-- Lọc theo tình trạng tài sản -->
+                <ComboBox Grid.Column="3" 
+                        x:Name="cboTinhTrang" 
+                        materialDesign:HintAssist.Hint="Tình trạng" 
+                        Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                        Width="140" 
+                        Margin="0 0 16 0">
+                    <ComboBoxItem Content="Tất cả"/>
+                    <ComboBoxItem Content="Mới"/>
+                    <ComboBoxItem Content="Đang hoạt động"/>
+                    <ComboBoxItem Content="Cần kiểm tra"/>
+                    <ComboBoxItem Content="Hư hỏng"/>
+                </ComboBox>
+
                 <!-- Nút Refresh -->
-                <Button Grid.Column="3" 
+                <Button Grid.Column="4" 
       x:Name="btnRefresh"
       Style="{StaticResource MaterialDesignIconButton}" 
       ToolTip="Làm mới dữ liệu" 
@@ -241,14 +278,56 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="Tình Trạng" Binding="{Binding TinhTrangSP}" MaxWidth="115" MinWidth="115">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="{x:Type TextBlock}">
-                                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                        <!-- Cột Tình Trạng đã được thay đổi để sử dụng DataTemplate -->
+                        <DataGridTemplateColumn Header="Tình Trạng" Width="115" MinWidth="115">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="2,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#757575"/>
+                                                <!-- Mặc định màu xám -->
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TinhTrangSP}" Value="Mới">
+                                                        <Setter Property="Background" Value="#4CAF50"/>
+                                                        <!-- Xanh lá -->
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TinhTrangSP}" Value="Đang hoạt động">
+                                                        <Setter Property="Background" Value="#2196F3"/>
+                                                        <!-- Xanh dương -->
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TinhTrangSP}" Value="Cần kiểm tra">
+                                                        <Setter Property="Background" Value="#FFC107"/>
+                                                        <!-- Vàng -->
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TinhTrangSP}" Value="Hư hỏng">
+                                                        <Setter Property="Background" Value="#F44336"/>
+                                                        <!-- Đỏ -->
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding TinhTrangSP}" 
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center" 
+                                                  TextAlignment="Center"
+                                                  FontWeight="Medium">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding TinhTrangSP}" Value="Cần kiểm tra">
+                                                            <Setter Property="Foreground" Value="Black"/>
+                                                            <!-- Màu chữ đen cho nền vàng -->
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
                         <DataGridTextColumn Header="Ghi Chú" Binding="{Binding GhiChu}" Width="215" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
@@ -298,7 +377,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        
+
                     </DataGrid.Columns>
                 </DataGrid>
             </materialDesign:Card>
@@ -351,7 +430,7 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            
+
             <!-- Footer/Status Bar -->
             <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" Name="StatusBar">
                 <DockPanel>
@@ -359,6 +438,7 @@
                              Text="Tổng số sản phẩm: 0" 
                              VerticalAlignment="Center" 
                              FontWeight="Medium"/>
+                    <!-- Thay đổi StackPanel trong ColorZone -->
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Style="{StaticResource MaterialDesignRaisedButton}" 
         x:Name="btnExportQRCode"
@@ -372,22 +452,14 @@
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                              materialDesign:ButtonAssist.CornerRadius="8" 
-                              Background="{DynamicResource SecondaryFileExcel}" 
-                              Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                              Margin="0 0 8 0">
+        x:Name="btnExportExcel"
+        materialDesign:ButtonAssist.CornerRadius="8" 
+        Background="{DynamicResource SecondaryFileExcel}" 
+        Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+        Margin="0 0 8 0">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
                                 <TextBlock Text="XUẤT EXCEL"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                              materialDesign:ButtonAssist.CornerRadius="8" 
-                              Background="{DynamicResource SecondaryFileFDP}" 
-                              Foreground="{DynamicResource SecondaryHueMidForegroundBrush}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="FilePdfBox" Margin="0 0 8 0"/>
-                                <TextBlock Text="XUẤT PDF"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
