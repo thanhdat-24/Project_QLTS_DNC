@@ -13,7 +13,7 @@ namespace Project_QLTS_DNC.DTOs
         public string MatKhau { get; set; }
         public string Uid { get; set; }
         public int MaLoaiTk { get; set; }
-        public int? MaNv { get; set; }
+        public int MaNv { get; set; }
         public bool TrangThai { get; set; } = true; 
 
         // Các thuộc tính mở rộng cho UI
@@ -26,10 +26,11 @@ namespace Project_QLTS_DNC.DTOs
             MaTk = taiKhoan.MaTk;
             TenTaiKhoan = taiKhoan.TenTaiKhoan;
             MatKhau = taiKhoan.MatKhau;
-            Uid = taiKhoan.Uid;
+            
             MaLoaiTk = taiKhoan.MaLoaiTk;
             MaNv = taiKhoan.MaNv;
             TenLoaiTk = tenLoaiTaiKhoan;
+            Uid = taiKhoan.Uid;
             TenNV = tenNhanVien;
             TrangThai = taiKhoan.TrangThai; // Copy trạng thái từ model
         }

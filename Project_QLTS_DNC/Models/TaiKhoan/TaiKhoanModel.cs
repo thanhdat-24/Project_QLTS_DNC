@@ -14,7 +14,7 @@ namespace Project_QLTS_DNC.Models
         public int MaLoaiTk { get; set; }
 
         [Column("ma_nv")]
-        public int? MaNv { get; set; }
+        public int MaNv { get; set; }
 
         [Column("ten_tai_khoan")]
         public string TenTaiKhoan { get; set; }

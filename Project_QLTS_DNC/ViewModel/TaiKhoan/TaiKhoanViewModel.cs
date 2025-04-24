@@ -19,7 +19,7 @@ namespace Project_QLTS_DNC.ViewModel.TaiKhoan
         }
 
         
-        public async Task<TaiKhoanModel> CreateTaiKhoanAsync(string tenTaiKhoan, string matKhau, int maLoaiTk, int? maNv)
+        public async Task<TaiKhoanModel> CreateTaiKhoanAsync(string tenTaiKhoan, string matKhau, int maLoaiTk, int maNv)
         {
             try
             {

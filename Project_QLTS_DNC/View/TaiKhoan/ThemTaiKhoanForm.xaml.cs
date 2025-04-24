@@ -107,40 +107,44 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                 var matKhau = txtMatKhau.Password.Trim();
                 var maLoaiTk = (cboLoaiTaiKhoan.SelectedItem as LoaiTaiKhoanModel)?.MaLoaiTk ?? 0;
 
-                // Lấy MaNv hoặc MaNV từ SelectedValue trực tiếp
-                int? maNv = null;
-
-                if (cboNhanVien.SelectedValue != null)
-                {
-                    maNv = Convert.ToInt32(cboNhanVien.SelectedValue);
-                }
-                // Nếu không lấy được từ SelectedValue, thử lấy thông qua reflection
-                else if (cboNhanVien.SelectedItem != null)
-                {
-                    var selectedItem = cboNhanVien.SelectedItem;
-                    Type itemType = selectedItem.GetType();
-
-                    var propMaNV = itemType.GetProperty("MaNV");
-                    var propMaNv = itemType.GetProperty("MaNv");
-
-                    if (propMaNV != null)
-                    {
-                        maNv = (int?)propMaNV.GetValue(selectedItem);
-                    }
-                    else if (propMaNv != null)
-                    {
-                        maNv = (int?)propMaNv.GetValue(selectedItem);
-                    }
-                }
-
-                if (string.IsNullOrEmpty(tenTaiKhoan) || string.IsNullOrEmpty(matKhau))
+                // Kiểm tra tài khoản và mật khẩu
+                if (string.IsNullOrWhiteSpace(tenTaiKhoan) || string.IsNullOrWhiteSpace(matKhau))
                 {
                     MessageBox.Show("Tên tài khoản và mật khẩu không thể để trống.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Kiểm tra nếu nhân viên vẫn là null
-                if (maNv == null)
+                // Lấy mã nhân viên (bắt buộc)
+                int maNv;
+
+                if (cboNhanVien.SelectedValue != null && int.TryParse(cboNhanVien.SelectedValue.ToString(), out maNv))
+                {
+                    // thành công, dùng maNv
+                }
+                else if (cboNhanVien.SelectedItem != null)
+                {
+                    var selectedItem = cboNhanVien.SelectedItem;
+                    Type itemType = selectedItem.GetType();
+
+                    var propMaNV = itemType.GetProperty("MaNV") ?? itemType.GetProperty("MaNv");
+                    if (propMaNV != null)
+                    {
+                        var value = propMaNV.GetValue(selectedItem);
+                        if (value is int intValue)
+                            maNv = intValue;
+                        else
+                        {
+                            MessageBox.Show("Không thể xác định mã nhân viên.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Không tìm thấy thuộc tính mã nhân viên.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else
                 {
                     MessageBox.Show("Vui lòng chọn nhân viên cho tài khoản này.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -148,9 +152,8 @@ namespace Project_QLTS_DNC.View.TaiKhoan
 
                 if (_isEditMode)
                 {
-                    // Cập nhật tài khoản hiện có
+                    // Cập nhật tài khoản
                     var result = await _taiKhoanService.CapNhatTaiKhoanAsync(_editingTaiKhoanId, matKhau, maLoaiTk, maNv);
-
                     if (result)
                     {
                         MessageBox.Show("Cập nhật tài khoản thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -164,7 +167,7 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                 }
                 else
                 {
-                    // Tạo tài khoản mới - code hiện tại
+                    // Tạo mới tài khoản
                     var newTaiKhoan = new TaiKhoanModel
                     {
                         TenTaiKhoan = tenTaiKhoan,
@@ -173,7 +176,8 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                         MaNv = maNv
                     };
 
-                    var result = await _taiKhoanService.ThemTaiKhoanAsync(newTaiKhoan.TenTaiKhoan, newTaiKhoan.MatKhau, newTaiKhoan.MaLoaiTk, newTaiKhoan.MaNv);
+                    var result = await _taiKhoanService.ThemTaiKhoanAsync(
+                        newTaiKhoan.TenTaiKhoan, newTaiKhoan.MatKhau, newTaiKhoan.MaLoaiTk, newTaiKhoan.MaNv);
 
                     if (result != null)
                     {
@@ -193,56 +197,44 @@ namespace Project_QLTS_DNC.View.TaiKhoan
             }
         }
 
+
         // Thêm vào lớp ThemTaiKhoanForm
         public async void LoadTaiKhoanData(TaiKhoanDTO taiKhoan)
         {
             try
             {
-                // Lưu thông tin tài khoản đang chỉnh sửa để sử dụng sau này
                 _editingTaiKhoanId = taiKhoan.MaTk;
-
-                // Thiết lập chế độ chỉnh sửa
                 _isEditMode = true;
 
-                // Load dữ liệu vào các controls
                 txtTenTaiKhoan.Text = taiKhoan.TenTaiKhoan;
                 txtMatKhau.Password = taiKhoan.MatKhau;
 
-                // Load ComboBox dữ liệu nếu chưa được load
                 if (cboLoaiTaiKhoan.ItemsSource == null)
                     await LoadComboBoxLoaiTaiKhoanAsync();
 
                 if (cboNhanVien.ItemsSource == null)
                     await LoadComboBoxNhanVienAsync();
 
-                // Chọn loại tài khoản hiện tại
+                // Chọn loại tài khoản
                 foreach (var item in cboLoaiTaiKhoan.Items)
                 {
-                    var loaiTK = item as LoaiTaiKhoanModel;
-                    if (loaiTK != null && loaiTK.MaLoaiTk == taiKhoan.MaLoaiTk)
+                    if (item is LoaiTaiKhoanModel loaiTK && loaiTK.MaLoaiTk == taiKhoan.MaLoaiTk)
                     {
                         cboLoaiTaiKhoan.SelectedItem = item;
                         break;
                     }
                 }
 
-                // Chọn nhân viên hiện tại
-                if (taiKhoan.MaNv.HasValue)
+                // Chọn nhân viên
+                foreach (var item in cboNhanVien.Items)
                 {
-                    foreach (var item in cboNhanVien.Items)
+                    var itemType = item.GetType();
+                    var propMaNV = itemType.GetProperty("MaNV") ?? itemType.GetProperty("MaNv");
+
+                    if (propMaNV != null)
                     {
-                        // Kiểm tra đúng kiểu dữ liệu của item
-                        Type itemType = item.GetType();
-                        var propMaNV = itemType.GetProperty("MaNV");
-                        var propMaNv = itemType.GetProperty("MaNv");
-
-                        int? maNv = null;
-                        if (propMaNV != null)
-                            maNv = (int?)propMaNV.GetValue(item);
-                        else if (propMaNv != null)
-                            maNv = (int?)propMaNv.GetValue(item);
-
-                        if (maNv.HasValue && maNv.Value == taiKhoan.MaNv.Value)
+                        var value = propMaNV.GetValue(item);
+                        if (value is int maNv && maNv == taiKhoan.MaNv)
                         {
                             cboNhanVien.SelectedItem = item;
                             break;
@@ -250,19 +242,16 @@ namespace Project_QLTS_DNC.View.TaiKhoan
                     }
                 }
 
-                // Đổi nút "Lưu" thành "Cập nhật"
                 this.Title = "Chỉnh sửa tài khoản";
                 txtTieude.Text = "Chỉnh sửa tài khoản";
                 btnLuu.Content = "Cập nhật";
-
-                // Sửa sự kiện btnLuu_Click để hỗ trợ cả thêm mới và cập nhật
-                // (điều này sẽ được thực hiện trong phần tiếp theo)
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu tài khoản: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         // Thêm các biến thành viên vào đầu lớp ThemTaiKhoanForm
         private int _editingTaiKhoanId;
