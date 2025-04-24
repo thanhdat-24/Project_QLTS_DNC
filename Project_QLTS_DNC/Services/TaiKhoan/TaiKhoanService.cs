@@ -21,19 +21,15 @@ namespace Project_QLTS_DNC.Services
             var danhSachLoaiTk = await client.From<LoaiTaiKhoanModel>().Get();
             var danhSachNhanVien = await client.From<NhanVienModel>().Get();
 
-            // Tạo dictionary để tra nhanh
             var loaiTaiKhoanDict = danhSachLoaiTk.Models.ToDictionary(x => x.MaLoaiTk, x => x.TenLoaiTk);
             var nhanVienDict = danhSachNhanVien.Models.ToDictionary(x => x.MaNV, x => x.TenNV);
 
-            
             var taiKhoanDTOs = new List<TaiKhoanDTO>();
 
             foreach (var taiKhoan in danhSachTaiKhoan.Models)
             {
                 var tenLoaiTk = loaiTaiKhoanDict.GetValueOrDefault(taiKhoan.MaLoaiTk, "Không xác định");
-                var tenNhanVien = taiKhoan.MaNv.HasValue
-                    ? nhanVienDict.GetValueOrDefault(taiKhoan.MaNv.Value, "Không xác định")
-                    : "Không có";
+                var tenNhanVien = nhanVienDict.GetValueOrDefault(taiKhoan.MaNv, "Không xác định");
 
                 var dto = new TaiKhoanDTO(taiKhoan, tenLoaiTk, tenNhanVien);
                 taiKhoanDTOs.Add(dto);
@@ -42,35 +38,37 @@ namespace Project_QLTS_DNC.Services
             return taiKhoanDTOs;
         }
 
-        public async Task<TaiKhoanModel> ThemTaiKhoanAsync(string tenTaiKhoan, string matKhau, int maLoaiTk, int? maNv)
+
+        public async Task<TaiKhoanModel> ThemTaiKhoanAsync(string tenTaiKhoan, string matKhau, int maLoaiTk, int maNv)
         {
-            var client = await SupabaseService.GetClientAsync();
-
-            
-            var taiKhoan = new TaiKhoanModel
-            {
-                TenTaiKhoan = tenTaiKhoan,
-                MatKhau = matKhau,
-                MaLoaiTk = maLoaiTk,
-                MaNv = maNv
-            };
-
             try
             {
-                
-                var result = await client.From<TaiKhoanModel>().Order(x => x.MaTk, Ordering.Ascending)
-                    .Insert(taiKhoan);
-                return result.Models.FirstOrDefault(); 
+                var client = await SupabaseService.GetClientAsync();
+
+                var taiKhoan = new TaiKhoanModel
+                {
+                    TenTaiKhoan = tenTaiKhoan,
+                    MatKhau = matKhau,
+                    MaLoaiTk = maLoaiTk,
+                    MaNv = maNv
+                };
+
+                var result = await client.From<TaiKhoanModel>().Insert(taiKhoan);
+                return result.Models.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                
-                Console.WriteLine($"Error while creating account: {ex.Message}");
-                return null; 
+                Console.WriteLine("❌ Lỗi tạo tài khoản:");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                if (ex.InnerException != null)
+                    Console.WriteLine("🧨 Inner: " + ex.InnerException.Message);
+                return null;
             }
         }
 
-        public async Task<bool> CapNhatTaiKhoanAsync(int maTk, string matKhau, int maLoaiTk, int? maNv)
+
+        public async Task<bool> CapNhatTaiKhoanAsync(int maTk, string matKhau, int maLoaiTk, int maNv)
         {
             try
             {
@@ -171,55 +169,44 @@ namespace Project_QLTS_DNC.Services
             {
                 var client = await SupabaseService.GetClientAsync();
 
-                
                 var danhSachTaiKhoan = await client.From<TaiKhoanModel>().Get();
                 var danhSachLoaiTk = await client.From<LoaiTaiKhoanModel>().Get();
                 var danhSachNhanVien = await client.From<NhanVienModel>().Get();
 
-                
                 var loaiTaiKhoanDict = danhSachLoaiTk.Models.ToDictionary(x => x.MaLoaiTk, x => x.TenLoaiTk);
                 var nhanVienDict = danhSachNhanVien.Models.ToDictionary(x => x.MaNV, x => x.TenNV);
 
-                
                 Console.WriteLine($"Từ khóa tìm kiếm: {tuKhoa}");
                 Console.WriteLine($"Mã loại tài khoản: {maLoaiTk}");
 
-                
                 var query = danhSachTaiKhoan.Models.AsEnumerable();
 
-               
                 if (!string.IsNullOrWhiteSpace(tuKhoa))
                 {
                     tuKhoa = tuKhoa.ToLower().Trim();
                     query = query.Where(tk =>
                         tk.MaTk.ToString().Contains(tuKhoa) ||
                         tk.TenTaiKhoan.ToLower().Contains(tuKhoa) ||
-                        (tk.MaNv.HasValue &&
-                            nhanVienDict.ContainsKey(tk.MaNv.Value) &&
-                            nhanVienDict[tk.MaNv.Value].ToLower().Contains(tuKhoa))
+                        (nhanVienDict.ContainsKey(tk.MaNv) &&
+                         nhanVienDict[tk.MaNv].ToLower().Contains(tuKhoa))
                     );
                 }
 
-                
                 if (maLoaiTk.HasValue && maLoaiTk.Value != 0)
                 {
                     query = query.Where(tk => tk.MaLoaiTk == maLoaiTk.Value);
                 }
 
-               
                 var taiKhoanDTOs = new List<TaiKhoanDTO>();
                 foreach (var taiKhoan in query)
                 {
                     var tenLoaiTk = loaiTaiKhoanDict.GetValueOrDefault(taiKhoan.MaLoaiTk, "Không xác định");
-                    var tenNhanVien = taiKhoan.MaNv.HasValue
-                        ? nhanVienDict.GetValueOrDefault(taiKhoan.MaNv.Value, "Không xác định")
-                        : "Không có";
+                    var tenNhanVien = nhanVienDict.GetValueOrDefault(taiKhoan.MaNv, "Không xác định");
 
                     var dto = new TaiKhoanDTO(taiKhoan, tenLoaiTk, tenNhanVien);
                     taiKhoanDTOs.Add(dto);
                 }
 
-                
                 Console.WriteLine($"Số lượng tài khoản tìm được: {taiKhoanDTOs.Count}");
 
                 return taiKhoanDTOs;
@@ -230,6 +217,7 @@ namespace Project_QLTS_DNC.Services
                 return new List<TaiKhoanDTO>();
             }
         }
+
 
         public async Task<bool> DoiMatKhauAsync(string tenTaiKhoan, string matKhauCu, string matKhauMoi)
         {
@@ -278,7 +266,7 @@ namespace Project_QLTS_DNC.Services
                         TenTaiKhoan = tenTaiKhoan,
                         MaLoaiTk = taiKhoan.MaLoaiTk,
                         MaNv = taiKhoan.MaNv,
-                        Uid = taiKhoan.Uid,
+                        
                         TrangThai = taiKhoan.TrangThai
                     });
 

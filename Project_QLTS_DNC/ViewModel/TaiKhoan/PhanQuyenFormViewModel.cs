@@ -171,6 +171,9 @@ public class PhanQuyenFormViewModel : INotifyPropertyChanged
             // Tra cứu tài sản
             "btntracuutaisan" => "Tra cứu tài sản",
 
+            //Di chuyển tài sản
+            "btndichuyentaisan" => "Di chuyển tài tài sản",
+
             // Bảo trì
             "btnquanlybaotri" or "btnbaotri" or "btnphieubaotri" or "btndsbaotri" => "Bảo trì",
 
