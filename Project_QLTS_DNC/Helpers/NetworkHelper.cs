@@ -8,24 +8,17 @@ namespace Project_QLTS_DNC.Helpers
     public static class NetworkHelper
     {
         /// <summary>
-        /// Lấy địa chỉ IPv4 của máy tính hiện tại đang được sử dụng để kết nối internet
+        /// Trả về địa chỉ IP tĩnh đã được cấu hình
         /// </summary>
         /// <param name="port">Cổng dịch vụ (mặc định: 8080)</param>
-        /// <returns>URL đầy đủ với địa chỉ IP và port</returns>
+        /// <returns>URL đầy đủ với địa chỉ IP tĩnh và port</returns>
         public static string GetLocalIPv4Address(int port = 8080)
         {
             try
             {
-                // Ưu tiên tìm IPv4 đang được sử dụng cho kết nối Internet
-                string ip = GetActiveIPv4();
-
-                if (!string.IsNullOrEmpty(ip))
-                {
-                    return $"http://{ip}:{port}";
-                }
-
-                // Fallback: nếu không tìm thấy IP chính, sử dụng localhost
-                return $"http://localhost:{port}";
+                // Sử dụng IP tĩnh đã cấu hình
+                string staticIp = "14.225.206.70";
+                return $"http://{staticIp}:{port}";
             }
             catch (Exception ex)
             {
@@ -37,7 +30,8 @@ namespace Project_QLTS_DNC.Helpers
         }
 
         /// <summary>
-        /// Phương thức tìm IPv4 đang được sử dụng cho kết nối mạng
+        /// Phương thức dự phòng để tìm IPv4 đang được sử dụng cho kết nối mạng
+        /// (Giữ lại để tham khảo hoặc sử dụng trong trường hợp cần)
         /// </summary>
         /// <returns>Địa chỉ IPv4 hoạt động</returns>
         private static string GetActiveIPv4()
