@@ -81,7 +81,7 @@
 
                     <TreeViewItem x:Name="btnQuanlymuaMoi" Header="🛒 Mua mới">
                         <TreeViewItem x:Name="btnPhieuMuaMoi" Header="🧾 Phiếu mua mới" Selected="btnPhieuMuaMoi_Selected"/>
-                        <TreeViewItem x:Name="btnChiTietPhieuMuaMoi" Header="📋 Chi tiết phiếu mua mới" Selected="btnChiTietPhieuMuaMoi_Selected"/>
+                       
                     </TreeViewItem>
 
                     <TreeViewItem x:Name="btnBaoCaoKiemKe" Header="📊 Báo cáo kiểm kê" Selected="btnBaoCaoKiemKe_Selected"/>

@@ -143,7 +143,6 @@ namespace Project_QLTS_DNC
 
                 { "btnQuanLyMuaMoi", btnQuanlymuaMoi },
                 { "btnPhieuMuaMoi", btnPhieuMuaMoi },
-                { "btnChiTietPhieuMuaMoi", btnChiTietPhieuMuaMoi },
 
                 { "btnBaoCaoKiemKe", btnBaoCaoKiemKe },
                 { "btnDuyetPhieu", btnDuyetPhieu },
@@ -580,12 +579,7 @@ namespace Project_QLTS_DNC
 
         }
 
-        private void btnChiTietPhieuMuaMoi_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.QuanLyPhieu.ChiTietMuaMoiView();
-
-
-        }
+       
 
         private async void btnBell_Click(object sender, RoutedEventArgs e)
         {

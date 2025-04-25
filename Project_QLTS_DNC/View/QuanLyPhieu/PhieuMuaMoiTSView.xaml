@@ -43,7 +43,10 @@
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Thêm cột cho nút xuất Excel -->
             </Grid.ColumnDefinitions>
+
             <!-- Search Card -->
             <materialDesign:Card Grid.Column="0" Padding="8" Margin="0,0,16,0" UniformCornerRadius="8">
                 <Grid>
@@ -67,44 +70,53 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                         <!-- Nút tìm kiếm -->
                         <Button Style="{StaticResource MaterialDesignIconButton}" 
-            x:Name="btnSearch" 
-            ToolTip="Tìm kiếm" 
-            Click="btnSearch_Click">
+                                x:Name="btnSearch" 
+                                ToolTip="Tìm kiếm" 
+                                Click="btnSearch_Click">
                             <materialDesign:PackIcon Kind="ArrowRight" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                         </Button>
 
                         <!-- Nút làm mới -->
                         <Button Style="{StaticResource MaterialDesignIconButton}" 
-            x:Name="btnRefresh" 
-            ToolTip="Làm mới" 
-            Click="btnRefresh_Click"
-            Margin="8,0,0,0">
+                                x:Name="btnRefresh" 
+                                ToolTip="Làm mới" 
+                                Click="btnRefresh_Click"
+                                Margin="8,0,0,0">
                             <materialDesign:PackIcon Kind="Refresh" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                         </Button>
                     </StackPanel>
-
                 </Grid>
             </materialDesign:Card>
 
-            <!-- Filter: Mã nhân viên -->
-            <!-- Filter: Đơn vị -->
+            <!-- Nút xuất Excel -->
+            <Button Grid.Column="3" 
+                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                    materialDesign:ButtonAssist.CornerRadius="8" 
+                    Background="{DynamicResource SecondaryFileExcel}" 
+                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+                    Margin="8,0,0,0" Click="Button_Click">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
+                    <TextBlock Text="XUẤT EXCEL"/>
+                </StackPanel>
+            </Button>
         </Grid>
 
         <!-- DataGrid in Card -->
         <materialDesign:Card Grid.Row="2" Margin="16" UniformCornerRadius="8">
             <DataGrid x:Name="dgPhieuXuatKho" 
-         AutoGenerateColumns="False" 
-IsReadOnly="True" 
-CanUserAddRows="False"
-materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
-materialDesign:DataGridAssist.ColumnHeaderPadding="8"
-BorderThickness="0" 
-GridLinesVisibility="All" 
-VerticalScrollBarVisibility="Auto"
-SelectionMode="Single"
-SelectionUnit="FullRow"
-CanUserResizeColumns="True"
-ColumnWidth="Auto">
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True" 
+                      CanUserAddRows="False"
+                      materialDesign:DataGridAssist.CellPadding="13 8 8 8" 
+                      materialDesign:DataGridAssist.ColumnHeaderPadding="8"
+                      BorderThickness="0" 
+                      GridLinesVisibility="All" 
+                      VerticalScrollBarVisibility="Auto"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      CanUserResizeColumns="True"
+                      ColumnWidth="Auto">
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
@@ -132,94 +144,25 @@ ColumnWidth="Auto">
                 </DataGrid.RowStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã Phiếu Đề Nghị" Binding="{Binding MaPhieuDeNghi}"   Width="60" MinWidth="140">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-
-
-
-
-
-
-                    <DataGridTextColumn Header="Mã Nhân Viên" Binding="{Binding TenNhanVien}"   Width="120" MinWidth="150">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Ngày Đề Nghị" Binding="{Binding NgayDeNghi, StringFormat=d}"  Width="*" MinWidth="110">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-
-                    <DataGridTextColumn Header="Đơn Vị Đề Nghị" Binding="{Binding DonViDeNghi}"
-                                   
-                  Width="120" 
-                  MinWidth="100">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding TrangThai}"   Width="60" MinWidth="140">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Ghi Chú" Binding="{Binding GhiChu}"   Width="120" MinWidth="150">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Lý Do" Binding="{Binding LyDo}"
-                                    
-                  Width="120" 
-                  MinWidth="110">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                   
-
+                    <DataGridTextColumn Header="Mã Phiếu Đề Nghị" Binding="{Binding MaPhieuDeNghi}" Width="60" MinWidth="140"/>
+                    <DataGridTextColumn Header="Mã Nhân Viên" Binding="{Binding TenNhanVien}" Width="120" MinWidth="150"/>
+                    <DataGridTextColumn Header="Ngày Đề Nghị" Binding="{Binding NgayDeNghi, StringFormat=d}" Width="*" MinWidth="110"/>
+                    <DataGridTextColumn Header="Đơn Vị Đề Nghị" Binding="{Binding DonViDeNghi}" Width="120" MinWidth="100"/>
+                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding TrangThai}" Width="60" MinWidth="140"/>
+                    <DataGridTextColumn Header="Ghi Chú" Binding="{Binding GhiChu}" Width="120" MinWidth="150"/>
+                    <DataGridTextColumn Header="Lý Do" Binding="{Binding LyDo}" Width="120" MinWidth="110"/>
                     <DataGridTemplateColumn Width="110" MinWidth="110" Header="Tùy chọn">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Button Style="{StaticResource MaterialDesignIconButton}"
-                                    ToolTip="Sửa" Click="btnSua_Click"
-                                    Background="{DynamicResource PrimaryHueLightBrush}" 
-                                    Width="32" Height="32" Padding="2" Margin="0,1">
-                                        <materialDesign:PackIcon Kind="Edit" Width="18" Height="18" Foreground="White"/>
+                                        ToolTip="Xem chi tiết"
+                                        Click="btnChiTiet_Click"
+                                        Tag="{Binding MaPhieuDeNghi}">
+                                        <materialDesign:PackIcon Kind="ViewList" Foreground="{StaticResource PrimaryHueLightBrush}"/>
                                     </Button>
-                                    <Button Style="{StaticResource MaterialDesignIconButton}"
-                      ToolTip="Xóa" Click="btnDelete_Click" Margin="8,1,0,1"
-                      Background="{DynamicResource SecondaryDelete}" 
-                      Width="32" Height="32" 
-                      Padding="2">
+                                    <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Xóa" Click="btnDelete_Click" Margin="8,1,0,1"
+                                            Background="{DynamicResource SecondaryDelete}" Width="32" Height="32" Padding="2">
                                         <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="White"/>
                                     </Button>
                                 </StackPanel>
@@ -231,21 +174,6 @@ ColumnWidth="Auto">
         </materialDesign:Card>
 
         <!-- StatusBar -->
-        <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" Name="StatusBar">
-            <DockPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}" 
-                        materialDesign:ButtonAssist.CornerRadius="8" 
-                        Background="{DynamicResource SecondaryFileExcel}" 
-                        Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                        Margin="0 0 8 0" Click="Button_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
-                            <TextBlock Text="XUẤT EXCEL"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </DockPanel>
-        </materialDesign:ColorZone>
+       
     </Grid>
 </UserControl>

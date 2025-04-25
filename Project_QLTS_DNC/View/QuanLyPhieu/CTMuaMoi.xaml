@@ -1,9 +1,9 @@
 ﻿<Window x:Class="Project_QLTS_DNC.View.QuanLyPhieu.CTMuaMoi"
-          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Phiếu Mua Mới Tài Sản"
-        Width="460" Height="400"
+        Width="700" Height="600"
         ResizeMode="NoResize"
         Background="White"
         WindowStartupLocation="CenterScreen">
@@ -13,19 +13,20 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Tiêu đề -->
-        <TextBlock Grid.Row="0" Text=" PHIẾU CHI TIẾT MUA MỚI TÀI SẢN" 
+        <TextBlock Grid.Row="0" Text="PHIẾU CHI TIẾT MUA MỚI TÀI SẢN"
                    Foreground="{DynamicResource PrimaryHueMidBrush}"
                    FontSize="17" FontWeight="Bold" Margin="0,0,0,8"
                    HorizontalAlignment="Center" TextAlignment="Center"/>
 
         <!-- Thông tin phiếu -->
-        <Grid Grid.Row="3" Margin="0,0,0,16">
+        <Grid Grid.Row="1" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
+                <!-- Both columns will take equal width -->
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -34,36 +35,80 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ComboBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,8"
-                      x:Name="cboMaPhieuDeNghi"
-                      materialDesign:HintAssist.Hint="Mã phiếu đề nghị"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+            <!-- Mã phiếu -->
+            <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,8"
+             x:Name="txtMaPhieu"
+             materialDesign:HintAssist.Hint="Mã Phiếu"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+             IsReadOnly="True"/>
+
+            <!-- Tên tài sản -->
             <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8"
-                     x:Name="txtTenTS"
-                     materialDesign:HintAssist.Hint="Tên tài sản"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+             x:Name="txtTenTS"
+             materialDesign:HintAssist.Hint="Tên Tài Sản"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <!-- Số lượng -->
             <TextBox Grid.Row="2" Grid.Column="0" Margin="0,0,8,8"
-          x:Name="txtSoLuong"
-          materialDesign:HintAssist.Hint="Số lượng"
-          Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+             x:Name="txtSoLuong"
+             materialDesign:HintAssist.Hint="Số Lượng"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <!-- Đơn vị tính -->
             <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8"
-                     x:Name="txtDonViTinh"
-                     materialDesign:HintAssist.Hint="Đơn vị tính"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+             x:Name="txtDonViTinh"
+             materialDesign:HintAssist.Hint="Đơn Vị Tính"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <!-- Dự kiến giá -->
             <TextBox Grid.Row="3" Grid.Column="0" Margin="0,0,8,8"
              x:Name="txtGia"
-             materialDesign:HintAssist.Hint="Dự kiến giá"
+             materialDesign:HintAssist.Hint="Dự Kiến Giá"
              Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
-            <TextBox Grid.Row="3" Grid.Column="2" Margin="0,0,8,8"
-                     x:Name="txtMoTa"
-                     materialDesign:HintAssist.Hint="Mô tả"
-                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <!-- Mô tả -->
+            <TextBox Grid.Row="3" Grid.Column="1" Margin="0,0,8,8"
+             x:Name="txtMoTa"
+             materialDesign:HintAssist.Hint="Mô Tả"
+             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
         </Grid>
 
-        <!-- Nút -->
+        <!-- Nút Thêm vào danh sách -->
+        <Button Grid.Row="2" x:Name="btnThem"
+                Content="➕ Thêm vào danh sách"
+                Click="btnThem_Click"
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                HorizontalAlignment="Left" Width="190" Margin="0,0,0,8"/>
+
+        <!-- DataGrid hiển thị danh sách tài sản -->
+        <!-- DataGrid hiển thị danh sách tài sản -->
+        <Grid Grid.Row="3" Margin="0,0,0,8">
+            <DataGrid x:Name="gridTaiSan" Height="220" AutoGenerateColumns="False"
+              CanUserAddRows="False" Margin="0,0,0,8"
+              SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tên Tài Sản" Binding="{Binding TenTaiSan}" Width="*"/>
+                    <DataGridTextColumn Header="Số Lượng" Binding="{Binding SoLuong}" Width="*"/>
+                    <DataGridTextColumn Header="Đơn Vị Tính" Binding="{Binding DonViTinh}" Width="*"/>
+                    <DataGridTextColumn Header="Dự Kiến Giá" Binding="{Binding DuKienGia, StringFormat='{}{0:N0} VND'}" Width="*"/>
+                    <DataGridTextColumn Header="Mô Tả" Binding="{Binding MoTa}" Width="*"/>
+                    <DataGridTemplateColumn Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="btnXoa" Style="{StaticResource MaterialDesignFlatButton}" 
+                                Click="btnXoa_Click" ToolTip="Xóa">
+                                    <materialDesign:PackIcon Kind="Delete" Foreground="Red"/>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Nút Cập nhật và Hủy -->
         <Grid Grid.Row="4" Margin="0,0,0,6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

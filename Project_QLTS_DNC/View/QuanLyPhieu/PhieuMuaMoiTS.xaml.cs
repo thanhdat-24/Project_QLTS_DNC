@@ -40,7 +40,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         {
             await InitializeSupabaseAsync();
             await LoadNhanVienAsync();
-            await LoadPhongBanAsync();
+            await LoadKhoAsync();
         }
 
         private async Task InitializeSupabaseAsync()
@@ -98,15 +98,15 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 MessageBox.Show($"Lỗi khi tải thông tin phiếu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        private async Task LoadPhongBanAsync()
+        private async Task LoadKhoAsync()
         {
-            var result = await _client.From<PhongBan>().Get();
+            var result = await _client.From<Kho>().Get();
 
             if (result.Models != null)
             {
                 cboDonViDeNghi.ItemsSource = result.Models;
-                cboDonViDeNghi.DisplayMemberPath = "TenPhongBan";
-                cboDonViDeNghi.SelectedValuePath = "MaPhongBan";
+                cboDonViDeNghi.DisplayMemberPath = "TenKho";
+                cboDonViDeNghi.SelectedValuePath = "MaKho";
             }
             else
             {
@@ -175,40 +175,70 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     return;
                 }
 
-                // Nếu đang ở chế độ chỉnh sửa
+                if (dpNgayDeNghi.SelectedDate == null)
+                {
+                    MessageBox.Show("Vui lòng chọn ngày đề nghị.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (cboLoaiPhieu.SelectedItem == null)
+                {
+                    MessageBox.Show("Vui lòng chọn loại phiếu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Lấy loại phiếu đã chọn
+                string loaiPhieu = "";
+                if (cboLoaiPhieu.SelectedItem is ComboBoxItem selectedLoaiPhieuItem)
+                {
+                    loaiPhieu = selectedLoaiPhieuItem.Content.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Vui lòng chọn loại phiếu hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Khai báo biến để lưu mã phiếu
+                int maPhieuMoi;
+
                 if (_isEditMode && _existingPhieu != null)
                 {
+                    // Cập nhật phiếu hiện có
+                    maPhieuMoi = _existingPhieu.MaPhieuDeNghi;
+
                     var updatedPhieu = new MuaMoiTS
                     {
-                        MaPhieuDeNghi = _existingPhieu.MaPhieuDeNghi,
-                        NgayDeNghi = dpNgayDeNghi.SelectedDate ?? DateTime.Now,
-                        MaNV = (int)Convert.ToInt64(cboMaNhanVien.SelectedValue),
+                        MaPhieuDeNghi = maPhieuMoi,
+                        NgayDeNghi = dpNgayDeNghi.SelectedDate.Value,
+                        MaNV = Convert.ToInt32(cboMaNhanVien.SelectedValue),
                         DonViDeNghi = cboDonViDeNghi.Text,
                         LyDo = txtLyDo.Text,
-                        GhiChu = txtGhiChu.Text,
-                        TrangThai = _existingPhieu.TrangThai // Giữ nguyên trạng thái
+                        GhiChu = txtGhiChu.Text ?? string.Empty,
+                        TrangThai = _existingPhieu.TrangThai
                     };
 
                     await _client
                         .From<MuaMoiTS>()
-                        .Where(p => p.MaPhieuDeNghi == _existingPhieu.MaPhieuDeNghi)
+                        .Where(p => p.MaPhieuDeNghi == maPhieuMoi)
                         .Update(updatedPhieu);
 
                     MessageBox.Show("Đã cập nhật phiếu đề nghị thành công", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else // Nếu đang ở chế độ thêm mới
+                else
                 {
-                    // Truyền _client vào SinhMaPhieuMuaAsync
-                    var maPhieuMoi = await SinhMaPhieuMuaAsync(_client);
+                    // Tạo mới phiếu
+                    maPhieuMoi = await SinhMaPhieuMuaAsync(_client);
+
                     var newPhieu = new MuaMoiTS
                     {
                         MaPhieuDeNghi = maPhieuMoi,
-                        NgayDeNghi = dpNgayDeNghi.SelectedDate ?? DateTime.Now,
-                        MaNV = (int)Convert.ToInt64(cboMaNhanVien.SelectedValue),
+                        NgayDeNghi = dpNgayDeNghi.SelectedDate.Value,
+                        MaNV = Convert.ToInt32(cboMaNhanVien.SelectedValue),
                         DonViDeNghi = cboDonViDeNghi.Text,
                         LyDo = txtLyDo.Text,
-                        GhiChu = txtGhiChu.Text,
-                        TrangThai = false // Mặc định là chưa duyệt
+                        GhiChu = txtGhiChu.Text ?? string.Empty,
+                        TrangThai = false // Mặc định trạng thái là false cho phiếu mới
                     };
 
                     await _client
@@ -218,8 +248,25 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     MessageBox.Show("Đã lưu phiếu đề nghị mới thành công", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
-                DialogResult = true; // Đánh dấu là đã xử lý thành công
-                this.Close();
+                // Mở form chi tiết tương ứng
+                if (loaiPhieu == "Phiếu mua mới")
+                {
+                    var ctForm = new CTMuaMoi(maPhieuMoi);
+                    ctForm.ShowDialog();
+                }
+                else if (loaiPhieu == "Phiếu mua bổ sung")
+                {
+                    var ctForm = new CTMuaBoSung(maPhieuMoi);
+                    ctForm.ShowDialog();
+                }
+                try
+                {
+                    this.DialogResult = true;
+                }
+                catch
+                {
+                    this.Close();
+                }
             }
             catch (Exception ex)
             {

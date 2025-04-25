@@ -10,6 +10,8 @@ using ClosedXML.Excel;
 using Microsoft.Win32;
 using System.Data;
 using System.Windows.Data;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.View.QuanLyKho;
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
     public partial class PhieuMuaMoiTSView : UserControl
@@ -322,6 +324,22 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             ExportDataGridToExcel(dgPhieuXuatKho);
+        }
+
+        private void btnChiTiet_Click(object sender, RoutedEventArgs e)
+        {
+            {
+
+                if (sender is Button btn && btn.Tag is int maPhieuMoi)
+                {
+                    var form = new ChiTietMuaMoiView(maPhieuMoi);
+                    form.ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show("Không thể lấy thông tin phiếu mua mới.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

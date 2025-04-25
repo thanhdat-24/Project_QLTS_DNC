@@ -1,11 +1,16 @@
-﻿using ClosedXML.Excel;
-using Microsoft.Win32;
+﻿using iText.IO.Font;
+using iText.IO.Font.Constants;
+using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using iText.Layout.Properties;
+using Project_QLTS_DNC.Models.NhaCungCap;
 using Project_QLTS_DNC.Models.NhanVien;
-using Project_QLTS_DNC.View.QuanLyKho;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Models.QLNhomTS;
 using Supabase;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,23 +21,38 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Kernel.Font;
+using iText.IO.Font.Constants;
+using iText.IO.Font;
+using iText.Layout.Properties;
+using iText.Kernel.Colors;
+using iText.Layout.Borders;
+using iText.Kernel.Geom;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
     /// <summary>
-    /// Interaction logic for ChiTietMuaMoi.xaml
+    /// Interaction logic for ChiTietMuaMoiView.xaml
     /// </summary>
-    public partial class ChiTietMuaMoiView : UserControl
+    public partial class ChiTietMuaMoiView : Window
     {
+        private readonly int _maPhieu;
         private Supabase.Client _client;
-        private Dictionary<int, string> _phieumuaMoiLookup = new Dictionary<int, string>();
-        public ChiTietMuaMoiView()
+        public ChiTietMuaMoiView( int maPhieuMoi)
         {
             InitializeComponent();
-            InitializeSupabaseAsync();
-            LoadData();
+            _maPhieu = maPhieuMoi;
+            Loaded += ChiTietPhieuMuaMoiView_Loaded;
+        }
+        private async void ChiTietPhieuMuaMoiView_Loaded(object sender, RoutedEventArgs e)
+        {
+            await InitializeSupabaseAsync();
+            await LoadPhieuMuaMoiAsync();
+            await LoadChiTietPhieuMuaMoiAsync();
         }
         private async Task InitializeSupabaseAsync()
         {
@@ -48,189 +68,77 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             _client = new Supabase.Client(supabaseUrl, supabaseKey, options);
             await _client.InitializeAsync();
         }
-        private async Task LoadData()
+        private async Task LoadPhieuMuaMoiAsync()
         {
             try
             {
-
                 var result = await _client
-                    .From<ChiTietDeNghiMua>()
+                    .From<MuaMoiTS>()
+                    .Where(x => x.MaPhieuDeNghi == _maPhieu)
                     .Get();
 
-                var danhSachPhieu = result.Models
-                    .Select(p => new
-                    {   
-                        p.MaChiTietDeNghi,
-                        p.MaPhieuDeNghi,
-                        p.TenTaiSan,
-                        p.SoLuong, 
-                        p.DonViTinh,
-                        p.MoTa,
-                        p.DuKienGia,
-                        // Thay vì dùng MaNV, tra ra tên
-
-                    })
-                .ToList();
-
-                dgPhieuCTMuaMoi.ItemsSource = danhSachPhieu;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            var optionWindow = new MuaMoiOption(); // Tên class của window mới
-            optionWindow.ShowDialog(); // Hiển thị cửa sổ dưới dạng modal
-        }
-
-        private async void btnSearch_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                var keyword = txtSearch.Text.Trim().ToLowerInvariant();
-
-                var result = await _client
-                    .From<ChiTietDeNghiMua>()
-                    .Get();
-
-                var filteredList = result.Models
-                    .Where(p => string.IsNullOrEmpty(keyword) ||
-                                p.MaChiTietDeNghi.ToString().ToLowerInvariant().Contains(keyword))
-                    .Select(p => new
-                    {
-                        p.MaChiTietDeNghi,
-                        p.MaPhieuDeNghi,
-                        p.TenTaiSan,
-                        p.SoLuong,
-                        p.DonViTinh,
-                        p.MoTa,
-                        p.DuKienGia,
-                    })
-                    .ToList();
-
-                dgPhieuCTMuaMoi.ItemsSource = filteredList;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tìm kiếm: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-
-        private async void btnRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            await LoadData(); // Giả sử bạn có hàm LoadData() để load lại danh sách
-            txtSearch.Clear(); // Xóa ô tìm kiếm nếu cần
-        }
-        private void ExportDataGridToExcel(DataGrid dataGrid)
-        {
-            // Tạo DataTable từ DataGrid
-            DataTable dt = new DataTable();
-
-            foreach (DataGridColumn column in dataGrid.Columns)
-            {
-                // Header là tên cột
-                dt.Columns.Add(column.Header.ToString());
-            }
-
-            foreach (var item in dataGrid.Items)
-            {
-                if (item == CollectionView.NewItemPlaceholder) continue;
-
-                DataRow row = dt.NewRow();
-
-                for (int i = 0; i < dataGrid.Columns.Count; i++)
+                var phieu = result.Models.FirstOrDefault();
+                if (phieu == null)
                 {
-                    var column = dataGrid.Columns[i];
-
-                    var cellContent = column.GetCellContent(item);
-                    if (cellContent is TextBlock tb)
-                        row[i] = tb.Text;
-                }
-
-                dt.Rows.Add(row);
-            }
-
-            // Mở hộp thoại lưu
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-                FileName = "DanhSachCTPhieuMuaMoi.xlsx"
-            };
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                using (var workbook = new XLWorkbook())
-                {
-                    var worksheet = workbook.Worksheets.Add(dt, "DanhSachPhieu");
-
-                    // Format sheet (optional)
-                    worksheet.Columns().AdjustToContents();
-
-                    workbook.SaveAs(saveFileDialog.FileName);
-                    MessageBox.Show("Xuất Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-        }
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            ExportDataGridToExcel(dgPhieuCTMuaMoi);
-        }
-
-        private void btnSua_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private async void btnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Check if a row is selected
-                var selectedItem = dgPhieuCTMuaMoi.SelectedItem;
-                if (selectedItem == null)
-                {
-                    MessageBox.Show("Vui lòng chọn phiếu để xóa", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Không tìm thấy phiếu nhập!", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.Close();
                     return;
                 }
 
-                // Get the MaPhieuDeNghi from the selected item using reflection
-                var prop = selectedItem.GetType().GetProperty("MaChiTietDeNghi");
-                if (prop == null)
+                txtMaPhieuMuaMoi.Text = phieu.MaPhieuDeNghi.ToString();
+                txtNgayDeNghi.Text = phieu.NgayDeNghi.ToString("dd/MM/yyyy");
+                txtDonViDeNghi.Text = phieu.DonViDeNghi.ToString();
+                txtLyDo.Text = phieu.LyDo.ToString();
+                txtGhiChu.Text = phieu.GhiChu.ToString();
+                var nvResult = await _client.From<NhanVienModel>().Where(x => x.MaNV == phieu.MaNV).Get();
+                txtNhanVienDeNghi.Text = nvResult.Models.FirstOrDefault()?.TenNV ?? "---";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi load phiếu nhập: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+        private async Task LoadChiTietPhieuMuaMoiAsync()
+        {
+            try
+            {
+                // Đảm bảo _maPhieu có cùng kiểu dữ liệu với trường trong DB
+                long maPhieuNumber;
+                if (long.TryParse(_maPhieu.ToString(), out maPhieuNumber))
                 {
-                    MessageBox.Show("Không thể xác định mã phiếu", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                int maPhieu = (int)prop.GetValue(selectedItem);
-
-                // Confirm deletion
-                var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa phiếu {maPhieu}?",
-                                            "Xác nhận xóa",
-                                            MessageBoxButton.YesNo,
-                                            MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    // Delete from database
-                    await _client
+                    var result = await _client
                         .From<ChiTietDeNghiMua>()
-                        .Where(p => p.MaChiTietDeNghi == maPhieu)
-                        .Delete();
+                        .Where(x => x.MaPhieuDeNghi == maPhieuNumber)
+                        .Get();
 
-                    MessageBox.Show("Xóa phiếu thành công", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    // Reload data to refresh the view
-                    await LoadData();
+                    if (result.Models != null && result.Models.Any())
+                    {
+                        var danhSachChiTiet = result.Models.ToList();
+                        Console.WriteLine($"Đã tìm thấy {danhSachChiTiet.Count} chi tiết phiếu");
+                        gridChiTiet.ItemsSource = danhSachChiTiet;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Không tìm thấy chi tiết phiếu với mã {_maPhieu}");
+                        // Tạo một danh sách rỗng để tránh lỗi binding
+                        gridChiTiet.ItemsSource = new List<ChiTietDeNghiMua>();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Mã phiếu không phải là số: {_maPhieu}");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi xóa phiếu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"Chi tiết lỗi: {ex}");
+                MessageBox.Show("Lỗi khi load chi tiết phiếu nhập: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }
