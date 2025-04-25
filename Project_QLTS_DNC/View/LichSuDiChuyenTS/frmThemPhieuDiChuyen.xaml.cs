@@ -49,7 +49,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
             cboPhongCuCanDiChuyen.DisplayMemberPath = "TenPhong";
             cboPhongCuCanDiChuyen.SelectedValuePath = "MaPhong";
 
-            cboPhongDiChuyenTaiSanDen.ItemsSource = new List<Phong>();
+            cboPhongDiChuyenTaiSanDen.ItemsSource = danhSachPhong;
             cboPhongDiChuyenTaiSanDen.DisplayMemberPath = "TenPhong";
             cboPhongDiChuyenTaiSanDen.SelectedValuePath = "MaPhong";
 
@@ -83,16 +83,9 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
         {
             if (cboPhongCuCanDiChuyen.SelectedItem is not Phong phongCu) return;
 
-            var tangCu = danhSachTang.FirstOrDefault(t => t.MaTang == phongCu.MaTang);
-            if (tangCu == null) return;
-
-            int maToaCuaPhongCu = tangCu.MaToa;
-
-            var phongMoiList = danhSachPhong.Where(p =>
-            {
-                var tang = danhSachTang.FirstOrDefault(t => t.MaTang == p.MaTang);
-                return tang != null && tang.MaToa == maToaCuaPhongCu && p.MaPhong != phongCu.MaPhong;
-            }).ToList();
+            var phongMoiList = danhSachPhong
+                .Where(p => p.MaPhong != phongCu.MaPhong)
+                .ToList();
 
             cboPhongDiChuyenTaiSanDen.ItemsSource = phongMoiList;
 
@@ -101,14 +94,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void cboPhongDiChuyenTaiSanDen_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cboPhongCuCanDiChuyen.SelectedItem is not Phong phongCu ||
-                cboPhongDiChuyenTaiSanDen.SelectedItem is not Phong phongMoi)
-                return;
-
-            var toaCu = danhSachTang.FirstOrDefault(t => t.MaTang == phongCu.MaTang)?.MaToa;
-            var toaMoi = danhSachTang.FirstOrDefault(t => t.MaTang == phongMoi.MaTang)?.MaToa;
-
-            txtThongBaoToaNha.Visibility = (toaCu != toaMoi) ? Visibility.Visible : Visibility.Collapsed;
+            // Không cần kiểm tra tòa nhà nữa → để trống
         }
 
         private async void btnLapPhieu_Click(object sender, RoutedEventArgs e)
@@ -124,6 +110,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
             var taiSans = dgTaiSanKho.ItemsSource as IEnumerable<TaiSanHienThi>;
             var taiSanChon = taiSans?.Where(t => t.IsSelected).ToList();
+
             if (taiSanChon == null || taiSanChon.Count == 0)
             {
                 MessageBox.Show("Vui lòng chọn ít nhất một tài sản để di chuyển.");
@@ -141,8 +128,9 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                     MaPhongMoi = phongMoi.MaPhong,
                     MaNhanVien = nv.MaNV,
                     NgayBanGiao = dateBanGiao.SelectedDate.Value.Date + DateTime.Now.TimeOfDay,
-                    GhiChu = txtGhiChu.Text,
-                    TrangThai = null
+                    GhiChu = txtGhiChu.Text?.Trim(),
+                    TrangThai = null,
+                    NV_tiep_nhan = txtNVTiepNhan.Text?.Trim()  // ✅ thêm dòng này
                 };
 
                 await client.From<LichSuDiChuyenTaiSan>().Insert(phieu);

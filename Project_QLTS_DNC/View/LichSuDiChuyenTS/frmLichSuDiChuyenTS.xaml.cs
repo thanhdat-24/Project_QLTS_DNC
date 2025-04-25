@@ -150,11 +150,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
 
         private void btnChiTiet_Click(object sender, RoutedEventArgs e)
         {
-            if (!QuyenNguoiDungHelper.HasPermission("btnDiChuyenTaiSan", "sua"))
-            {
-                MessageBox.Show("Bạn không có quyền sữa lịch sử di chuyển tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+        //    if (!QuyenNguoiDungHelper.HasPermission("btnDiChuyenTaiSan", "sua"))
+        //    {
+       //         MessageBox.Show("Bạn không có quyền sữa lịch sử di chuyển tài sản!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+      //          return;
+     //       }
             if (dgDiChuyen.SelectedItem is LichSuDTO selected)
             {
                 var frm = new frmChiTietDiChuyenTS(selected.MaLichSu)

@@ -40,7 +40,8 @@ namespace Project_QLTS_DNC.Services
                     NgayBanGiao = p.NgayBanGiao,
                     GhiChu = p.GhiChu,
                     TrangThai = p.TrangThai,
-                    MaPhongCu = phongCu?.MaPhong
+                    MaPhongCu = phongCu?.MaPhong,
+                    NV_tiep_nhan = p.NV_tiep_nhan
                 };
             }).OrderByDescending(p => p.NgayBanGiao).ToList();
 
@@ -93,6 +94,7 @@ namespace Project_QLTS_DNC.Services
         public string GhiChu { get; set; }
         public bool? TrangThai { get; set; }
         public int? MaPhongCu { get; set; }
+        public string NV_tiep_nhan { get; set; }
 
         public string TrangThaiText => TrangThai == true ? "Đã duyệt" : TrangThai == false ? "Từ chối duyệt" : "Chờ duyệt";
     }

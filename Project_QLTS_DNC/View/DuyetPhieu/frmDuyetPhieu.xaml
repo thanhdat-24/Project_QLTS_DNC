@@ -518,8 +518,9 @@
                                    VerticalAlignment="Center" 
                                    Foreground="#FF9800" 
                                    Margin="0,0,8,0"/>
-                                                <TextBlock Text="{Binding NgayTaoPhieu, StringFormat={}{0:dd/MM/yyyy}}" 
-                     VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding NgayTaoPhieu, StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}" 
+           VerticalAlignment="Center"/>
+
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
