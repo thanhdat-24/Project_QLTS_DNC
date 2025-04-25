@@ -356,17 +356,24 @@
                                              Style="{StaticResource LabelStyle}"/>
 
                                     <Grid Grid.Row="1">
+                                        <!-- PasswordBox để nhập mật khẩu -->
                                         <PasswordBox x:Name="txtNewPassword" 
-                                                   Style="{StaticResource PasswordBoxStyle}"/>
-                                        <Button HorizontalAlignment="Right" 
+                                                    Style="{StaticResource PasswordBoxStyle}"/>
+
+                                        <!-- Button để bấm hiện/ẩn mật khẩu -->
+                                        <Button x:Name="btnToggleNewPassword" 
+                                                HorizontalAlignment="Right" 
                                                 VerticalAlignment="Center" 
                                                 Margin="0,0,10,15"
                                                 Background="Transparent" 
-                                                BorderThickness="0">
-                                            <materialDesign:PackIcon Kind="Eye" Foreground="#757575" Width="18" Height="18"/>
+                                                BorderThickness="0"
+                                                >
+                                            
                                         </Button>
                                     </Grid>
+
                                 </Grid>
+                                
 
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -384,8 +391,8 @@
                                                 VerticalAlignment="Center" 
                                                 Margin="0,0,10,15"
                                                 Background="Transparent" 
-                                                BorderThickness="0">
-                                            <materialDesign:PackIcon Kind="Eye" Foreground="#757575" Width="18" Height="18"/>
+                                                BorderThickness="0" >
+                                            
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -435,7 +442,7 @@
                                          TextAlignment="Center"
                                          Foreground="#424242"/>
 
-                                <Button Content="Đăng nhập" 
+                                <Button x:Name="btnDangNhap" Click="btnBackLogin_Click" Content="Đăng nhập" 
                                       Style="{StaticResource ButtonStyle}"/>
                             </StackPanel>
                         </Grid>

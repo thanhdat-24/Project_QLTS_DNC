@@ -457,10 +457,16 @@
 
                         <!-- Username Field (Read-only) -->
                         <TextBlock Text="Tên tài khoản" Margin="0,0,0,5" Foreground="#555555"/>
-                        <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="2" Margin="0,0,0,15">
-                            <TextBlock x:Name="txtTenTK" Text="{Binding UserProfile.ten_tai_khoan}" Height="40" Padding="10,0" 
-                           VerticalAlignment="Center" Foreground="#333333" Background="#F5F5F5"/>
+                        <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="2" Margin="0,0,0,15" Height="40" Background="#F5F5F5">
+                            <Grid>
+                                <TextBlock x:Name="txtTenTK"
+                                           Text="{Binding UserProfile.ten_tai_khoan}"
+                                           VerticalAlignment="Center"
+                                           Padding="10,0"
+                                           Foreground="#333333"/>
+                            </Grid>
                         </Border>
+
 
                         <!-- Current Password -->
                         <TextBlock Text=" Nhập mật khẩu hiện tại" Margin="0,0,0,5" Foreground="#555555"/>

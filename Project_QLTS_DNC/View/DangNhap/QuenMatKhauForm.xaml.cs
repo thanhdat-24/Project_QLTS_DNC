@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
 using System.Windows.Threading;
+using System.Windows.Controls;
 
 namespace Project_QLTS_DNC.View.DangNhap
 {
@@ -121,7 +122,7 @@ namespace Project_QLTS_DNC.View.DangNhap
             bool hopLe = await otpService.VerifyOtpAsync(email, otp);
             if (hopLe)
             {
-                MessageBox.Show("Mã xác thực hợp lệ.", "Thành công");
+                
                 tabResetPassword.SelectedIndex = 2;
             }
             else
@@ -152,7 +153,9 @@ namespace Project_QLTS_DNC.View.DangNhap
 
             if (taiKhoan == null)
             {
-                MessageBox.Show("Không tìm thấy tài khoản liên kết.", "Lỗi");
+                txtPasswordError.Visibility = Visibility.Visible;
+                txtPasswordError.Text = "Không tìm thấy tài khoản liên kết với email này.";
+                
                 return;
             }
 
@@ -162,12 +165,12 @@ namespace Project_QLTS_DNC.View.DangNhap
 
             if (doiThanhCong)
             {
-                MessageBox.Show("Đổi mật khẩu thành công!", "Thành công");
+               
                 tabResetPassword.SelectedIndex = 3;
             }
             else
             {
-                MessageBox.Show("Đổi mật khẩu thất bại!", "Lỗi");
+                //MessageBox.Show("Đổi mật khẩu thất bại!", "Lỗi");
             }
         }
 
@@ -177,5 +180,7 @@ namespace Project_QLTS_DNC.View.DangNhap
             loginForm.Show();
             this.Close();
         }
+        
+
     }
 }
