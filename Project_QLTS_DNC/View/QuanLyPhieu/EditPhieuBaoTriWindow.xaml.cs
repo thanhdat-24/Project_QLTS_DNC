@@ -69,7 +69,8 @@ namespace Project_QLTS_DNC.Views
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        // Tải toàn bộ danh sách tài sản từ cơ sở dữ liệu với tình trạng "Cần kiểm tra"
+
+        // Tải toàn bộ danh sách tài sản từ cơ sở dữ liệu không lọc theo tình trạng
         private async Task LoadAllTaiSanAsync()
         {
             try
@@ -79,13 +80,18 @@ namespace Project_QLTS_DNC.Views
                 {
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
-                // Lấy danh sách tài sản từ Supabase với điều kiện TinhTrangSP là "Cần kiểm tra"
+
+                // Lấy tất cả tài sản từ Supabase không lọc theo tình trạng
                 var response = await client.From<TaiSanModel>()
-                    .Where(t => t.TinhTrangSP == "Cần kiểm tra")
                     .Get();
+
                 _allTaiSan = response.Models;
+
                 // Log thông tin để debug
-                Console.WriteLine($"Đã tải {_allTaiSan.Count} tài sản cần kiểm tra");
+                Console.WriteLine($"Đã tải {_allTaiSan.Count} tài sản");
+
+                // Cập nhật hiển thị cho danh sách tài sản (nếu cần)
+                // Bạn có thể thêm code ở đây nếu muốn hiển thị danh sách ngay lập tức
             }
             catch (Exception ex)
             {
@@ -283,6 +289,75 @@ namespace Project_QLTS_DNC.Views
             catch (Exception ex)
             {
                 Console.WriteLine($"Lỗi trong sự kiện KeyUp: {ex.Message}");
+            }
+        }
+        // Kiểm tra chỉ cho phép nhập số vào trường Chi phí
+        private void txtChiPhi_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Chỉ chấp nhận các ký tự số
+            e.Handled = !System.Text.RegularExpressions.Regex.IsMatch(e.Text, "[0-9]");
+        }
+
+        // Định dạng giá trị chi phí theo chuẩn phân cách hàng nghìn với dấu chấm
+        private void txtChiPhi_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+
+            if (textBox != null)
+            {
+                // Lưu vị trí con trỏ trước khi thay đổi
+                int cursorPosition = textBox.SelectionStart;
+
+                // Loại bỏ tất cả dấu phân cách hiện có để lấy số nguyên
+                string value = string.Concat(textBox.Text.Where(c => char.IsDigit(c)));
+
+                // Đếm số dấu phân cách trước vị trí con trỏ để điều chỉnh sau này
+                int separatorCountBeforeCursor = textBox.Text.Substring(0, cursorPosition)
+                    .Count(c => c == '.');
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    // Chuyển đổi thành số và định dạng lại với dấu chấm làm dấu phân cách hàng nghìn
+                    decimal number;
+                    if (decimal.TryParse(value, out number))
+                    {
+                        // Tạm ngừng xử lý sự kiện TextChanged để tránh đệ quy
+                        textBox.TextChanged -= txtChiPhi_TextChanged;
+
+                        // Định dạng số với dấu chấm làm dấu phân cách hàng nghìn
+                        textBox.Text = string.Format("{0:N0}", number).Replace(",", ".");
+
+                        // Điều chỉnh vị trí con trỏ sau khi định dạng lại
+                        int separatorCountAfterCursor = textBox.Text.Substring(0, Math.Min(cursorPosition, textBox.Text.Length))
+                            .Count(c => c == '.');
+                        int newPosition = cursorPosition + (separatorCountAfterCursor - separatorCountBeforeCursor);
+
+                        textBox.SelectionStart = Math.Min(newPosition, textBox.Text.Length);
+
+                        // Cập nhật giá trị trong model (loại bỏ dấu phân cách trước khi lưu)
+                        if (DataContext is PhieuBaoTri phieuBaoTri)
+                        {
+                            decimal.TryParse(value, out decimal result);
+                            phieuBaoTri.ChiPhi = result;
+                        }
+
+                        // Kích hoạt lại sự kiện TextChanged
+                        textBox.TextChanged += txtChiPhi_TextChanged;
+                    }
+                }
+                else
+                {
+                    // Nếu trường rỗng, đặt giá trị chi phí về 0 và không định dạng
+                    textBox.TextChanged -= txtChiPhi_TextChanged;
+                    textBox.Text = string.Empty;
+
+                    if (DataContext is PhieuBaoTri phieuBaoTri)
+                    {
+                        phieuBaoTri.ChiPhi = 0;
+                    }
+
+                    textBox.TextChanged += txtChiPhi_TextChanged;
+                }
             }
         }
         // Sự kiện khi chọn một tài sản từ danh sách gợi ý

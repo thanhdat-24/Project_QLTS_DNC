@@ -450,7 +450,8 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Chi phí (VNĐ):" Style="{StaticResource LabelStyle}"/>
-                        <TextBox Grid.Column="1" x:Name="txtChiPhi" Text="{Binding ChiPhi}"/>
+                        <TextBox Grid.Column="1" x:Name="txtChiPhi" Text="{Binding ChiPhi, UpdateSourceTrigger=PropertyChanged}" 
+             TextChanged="txtChiPhi_TextChanged" PreviewTextInput="txtChiPhi_PreviewTextInput"/>
                     </Grid>
                     <!-- Ghi chú -->
                     <Grid>

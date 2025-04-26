@@ -228,9 +228,9 @@
                 </materialDesign:Card>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <ComboBox x:Name="cboTrangThai" Width="120" Height="42" Margin="15,0" 
-                  VerticalContentAlignment="Center"
-                  SelectionChanged="FilterComboBox_SelectionChanged"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
+               HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+               SelectionChanged="FilterComboBox_SelectionChanged"
+               Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
                         <ComboBoxItem Content="Tất cả trạng thái" IsSelected="True"/>
                         <ComboBoxItem Content="Hỏng nhẹ"/>
                         <ComboBoxItem Content="Hỏng nặng"/>
@@ -238,9 +238,9 @@
                         <ComboBoxItem Content="Thay mới"/>
                     </ComboBox>
                     <ComboBox x:Name="cboLoaiBaoTri" Width="120" Height="42" Margin="5,0" 
-                  VerticalContentAlignment="Center"
-                  SelectionChanged="FilterComboBox_SelectionChanged"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
+               HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+               SelectionChanged="FilterComboBox_SelectionChanged"
+               Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
                         <ComboBoxItem Content="Tất cả loại" IsSelected="True"/>
                         <ComboBoxItem Content="Định kỳ"/>
                         <ComboBoxItem Content="Đột xuất"/>
@@ -505,15 +505,18 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- Nút bên trái -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <!-- Nút Xuất Excel -->
                     <Button x:Name="btnIn" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
-
-                    <!-- Nút Xem danh sách cần bảo trì -->
-                    
+                    <!-- Nút Xem lịch sử -->
+                    <Button x:Name="btnXemLichSu" 
+                Content="Xem lịch sử" 
+                Style="{StaticResource PrimaryButton}"
+                Margin="10,0,0,0" 
+                Click="btnXemLichSu_Click"/>
                 </StackPanel>
+
 
                 <!-- Phân trang -->
                 <Grid Grid.Column="1" HorizontalAlignment="Center">

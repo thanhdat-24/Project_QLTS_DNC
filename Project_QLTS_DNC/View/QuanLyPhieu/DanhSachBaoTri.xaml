@@ -177,26 +177,28 @@
                     </Grid>
                 </materialDesign:Card>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    
+
                     <ComboBox x:Name="cboNhomTaiSan" Width="150" Height="42" Margin="15,0,5,0" 
-                        VerticalContentAlignment="Center"
-                        Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
-                        materialDesign:HintAssist.Hint="Nhóm tài sản">
+              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+              Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+              materialDesign:HintAssist.Hint="Nhóm tài sản">
                         <ComboBoxItem Content="Tất cả nhóm" IsSelected="True"/>
                         <ComboBoxItem Content="Máy tính"/>
                         <ComboBoxItem Content="Máy in"/>
                         <ComboBoxItem Content="Bàn ghế"/>
                         <ComboBoxItem Content="Thiết bị mạng"/>
                     </ComboBox>
+
                     <ComboBox x:Name="cboTinhTrang" Width="150" Height="42" Margin="10,0,5,0" 
-    VerticalContentAlignment="Center"
-    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
-    SelectedValue="{Binding TinhTrangDuocChon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-    materialDesign:HintAssist.Hint="Tình trạng">
+              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+              Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+              SelectedValue="{Binding TinhTrangDuocChon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+              materialDesign:HintAssist.Hint="Tình trạng">
                         <ComboBoxItem Content="Tất cả tình trạng" IsSelected="True"/>
                         <ComboBoxItem Content="Cần kiểm tra"/>
                         <ComboBoxItem Content="Cần bảo trì"/>
                     </ComboBox>
+
                 </StackPanel>
             </Grid>
 
