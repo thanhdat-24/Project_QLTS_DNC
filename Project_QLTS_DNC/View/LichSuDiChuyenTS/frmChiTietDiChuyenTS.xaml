@@ -71,6 +71,9 @@
                             <TextBlock Text="Nhân viên:" FontWeight="SemiBold"/>
                             <TextBlock x:Name="txtTenNhanVien" Margin="0,0,0,12"/>
 
+                            <TextBlock Text="Nhân viên tiếp nhận:" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="txtNVTiepNhan" Margin="0,0,0,12"/>
+
                             <TextBlock Text="Trạng thái:" FontWeight="SemiBold"/>
                             <TextBlock x:Name="txtTrangThai" />
                         </StackPanel>

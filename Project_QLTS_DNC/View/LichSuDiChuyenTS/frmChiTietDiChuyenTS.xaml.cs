@@ -19,7 +19,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using static Supabase.Postgrest.Constants;
-
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using iTextVerticalAlignment = iText.Layout.Properties.VerticalAlignment;
 
@@ -42,6 +41,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
         {
             public long MaLichSu { get; set; }
             public string TenNhanVien { get; set; }
+            public string NVTiepNhan { get; set; } // ✅ thêm người tiếp nhận
             public string TenTaiSan { get; set; }
             public string SoSeri { get; set; }
             public string TenPhongCu { get; set; }
@@ -78,6 +78,7 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                     {
                         MaLichSu = p.MaLichSu,
                         TenNhanVien = nv?.TenNV ?? "(Không rõ)",
+                        NVTiepNhan = p.NV_tiep_nhan ?? "(Không rõ)", // ✅ lấy người tiếp nhận
                         TenTaiSan = ts?.TenTaiSan ?? "(Không rõ)",
                         SoSeri = ts?.SoSeri ?? "(Không rõ)",
                         TenPhongCu = phongCu?.TenPhong ?? "(Không rõ)",
@@ -98,6 +99,9 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                     txtTenPhongMoi.Text = thongTinPhieu.TenPhongMoi;
                     txtNgayBanGiao.Text = thongTinPhieu.NgayBanGiao.ToString("dd/MM/yyyy");
                     txtTrangThai.Text = "Đã duyệt";
+
+                    txtNVTiepNhan.Text = thongTinPhieu.NVTiepNhan; // ✅ Gán người tiếp nhận
+
                     txtStatus.Text = $"Tổng số dòng chi tiết: {danhSachChiTiet.Count}";
                     dgChiTietLichSu.ItemsSource = danhSachChiTiet;
                 }
@@ -147,9 +151,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
             doc.SetMargins(36, 36, 36, 36);
             var font = PdfFontFactory.CreateFont("C:\\Windows\\Fonts\\arial.ttf", PdfEncodings.IDENTITY_H);
 
+            // Tiêu đề
             doc.Add(new Paragraph("PHIẾU LỊCH SỬ DI CHUYỂN TÀI SẢN")
                 .SetFont(font).SetFontSize(16).SetBold().SetTextAlignment(iTextTextAlignment.CENTER));
 
+            // Thông tin chung
             doc.Add(new Paragraph($"Số phiếu: LS{maLichSu}     Ngày bàn giao: {thongTinPhieu.NgayBanGiao:dd/MM/yyyy}")
                 .SetFont(font).SetMarginBottom(10));
 
@@ -157,9 +163,11 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
             info.SetMarginBottom(10);
             info.AddCell(Cell("Phòng cũ:", font, true)); info.AddCell(Cell(thongTinPhieu.TenPhongCu, font));
             info.AddCell(Cell("Phòng mới:", font, true)); info.AddCell(Cell(thongTinPhieu.TenPhongMoi, font));
-            info.AddCell(Cell("Nhân viên:", font, true)); info.AddCell(Cell(thongTinPhieu.TenNhanVien, font));
+            info.AddCell(Cell("Người bàn giao:", font, true)); info.AddCell(Cell(thongTinPhieu.TenNhanVien, font));
+            info.AddCell(Cell("Người tiếp nhận:", font, true)); info.AddCell(Cell(thongTinPhieu.NVTiepNhan, font));
             doc.Add(info);
 
+            // Danh sách tài sản
             doc.Add(new Paragraph("DANH SÁCH TÀI SẢN").SetFont(font).SetBold().SetMarginBottom(5));
 
             Table table = new Table(new float[] { 100, 150, 150, 100, 150 }).UseAllAvailableWidth();
@@ -181,15 +189,19 @@ namespace Project_QLTS_DNC.View.LichSuDiChuyenTS
                 table.AddCell(new Cell().Add(new Paragraph(ct.GhiChu).SetFont(font)));
                 table.AddCell(new Cell().Add(new Paragraph(ct.NgayBanGiao.ToString("dd/MM/yyyy")).SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
             }
-
             doc.Add(table);
 
+            // Ký tên
             doc.Add(new Paragraph("\n\n"));
-            Table sign = new Table(UnitValue.CreatePercentArray(2)).UseAllAvailableWidth();
+            Table sign = new Table(UnitValue.CreatePercentArray(3)).UseAllAvailableWidth(); // 3 cột
+
             sign.AddCell(SignatureCell("NGƯỜI BÀN GIAO", thongTinPhieu.TenNhanVien, font));
-            sign.AddCell(SignatureCell("NGƯỜI DUYỆT", "", font));
+            sign.AddCell(SignatureCell("NGƯỜI TIẾP NHẬN", thongTinPhieu.NVTiepNhan, font));
+            sign.AddCell(SignatureCell("NGƯỜI DUYỆT", "", font)); // Để trống người duyệt
+
             doc.Add(sign);
 
+            // Ngày in
             doc.Add(new Paragraph($"Ngày in: {DateTime.Now:dd/MM/yyyy HH:mm:ss}")
                 .SetFont(font).SetFontSize(8).SetItalic().SetTextAlignment(iTextTextAlignment.RIGHT));
         }

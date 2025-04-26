@@ -29,15 +29,15 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
         {
             public long MaLichSu { get; set; }
             public string TenNhanVien { get; set; }
+            public string NVTiepNhan { get; set; }
             public string TenPhongCu { get; set; }
             public string TenPhongMoi { get; set; }
             public DateTime? NgayBanGiao { get; set; }
             public string GhiChu { get; set; }
             public bool? TrangThai { get; set; }
-
             public string TrangThaiText => TrangThai == true ? "Đã duyệt"
-                                            : TrangThai == false ? "Từ chối duyệt"
-                                            : "Chưa duyệt";
+                                                : TrangThai == false ? "Từ chối duyệt"
+                                                : "Chưa duyệt";
         }
 
         public class ChiTietLichSuHienThi
@@ -81,6 +81,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 {
                     MaLichSu = record.MaLichSu,
                     TenNhanVien = nv?.TenNV ?? "(Không rõ)",
+                    NVTiepNhan = record.NV_tiep_nhan ?? "(Không rõ)",
                     TenPhongCu = phongCu?.TenPhong ?? "(Không rõ)",
                     TenPhongMoi = phongMoi?.TenPhong ?? "(Không rõ)",
                     NgayBanGiao = record.NgayBanGiao,
@@ -124,6 +125,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
             txtTenPhongCu.Text = phieu.TenPhongCu;
             txtTenPhongMoi.Text = phieu.TenPhongMoi;
             txtNgayBanGiao.Text = phieu.NgayBanGiao?.ToString("dd/MM/yyyy");
+            txtNVTiepNhan.Text = phieu.NVTiepNhan;
             txtTrangThai.Text = phieu.TrangThaiText;
         }
 
@@ -150,11 +152,15 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu
                 if (ds.Models.Any())
                 {
                     var p = ds.Models.First();
+
+                    var ngayBanGiaoCu = p.NgayBanGiao; // ✅ giữ lại
                     p.TrangThai = trangThai;
+                    p.NgayBanGiao = ngayBanGiaoCu;     // ✅ gán lại để không mất
 
                     await client.From<LichSuDiChuyenTaiSan>()
                                 .Where(x => x.MaLichSu == maLichSuHienTai)
                                 .Update(p);
+
 
                     if (trangThai == true && p.MaTaiSan.HasValue && p.MaPhongMoi.HasValue)
                     {

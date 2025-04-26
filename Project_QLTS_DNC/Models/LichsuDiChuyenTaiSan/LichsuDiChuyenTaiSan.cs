@@ -30,5 +30,9 @@ namespace Project_QLTS_DNC.Models.LichSu
 
         [Column("ghi_chu")]
         public string GhiChu { get; set; }
+
+        [Column("nv_tiep_nhan")]
+        public string NV_tiep_nhan { get; set; }
+
     }
 }

@@ -201,6 +201,11 @@
                                     <TextBlock x:Name="txtTenNhanVien" Text="{Binding TenNhanVien}" Style="{StaticResource InfoValue}"/>
                                 </StackPanel>
 
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="Nhân viên tiếp nhận:" Style="{StaticResource InfoLabel}" MinWidth="100"/>
+                                    <TextBlock x:Name="txtNVTiepNhan" Text="{Binding TenNhanVien}" Style="{StaticResource InfoValue}"/>
+                                </StackPanel>
+
 
 
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">

@@ -198,7 +198,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Tên nhân viên" Binding="{Binding TenNhanVien}" Width="130" MinWidth="150">
+                    <DataGridTextColumn Header="Nhân viên" Binding="{Binding TenNhanVien}" Width="130" MinWidth="120">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -206,7 +206,14 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-
+                    <DataGridTextColumn Header="Người tiếp nhận" Binding="{Binding NV_tiep_nhan}" Width="100" MinWidth="130">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Tên tài sản" Binding="{Binding TenTaiSan}" Width="100" MinWidth="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
@@ -215,6 +222,8 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
+
+                   
 
                     <DataGridTextColumn Header="Số Seri" Binding="{Binding SoSeri}" Width="100" MinWidth="140">
                         <DataGridTextColumn.ElementStyle>
@@ -225,7 +234,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Tên phòng cũ" Binding="{Binding TenPhongCu}" Width="100" MinWidth="110">
+                    <DataGridTextColumn Header="Phòng cũ" Binding="{Binding TenPhongCu}" Width="100" MinWidth="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -234,7 +243,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Tên phòng mới" Binding="{Binding TenPhongMoi}" Width="100" MinWidth="115">
+                    <DataGridTextColumn Header="Phòng mới" Binding="{Binding TenPhongMoi}" Width="100" MinWidth="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -243,7 +252,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Ghi chú" Binding="{Binding GhiChu}" Width="100" MinWidth="130">
+                    <DataGridTextColumn Header="Ghi chú" Binding="{Binding GhiChu}" Width="100" MinWidth="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -252,7 +261,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Ngày bàn giao" Binding="{Binding NgayBanGiao, StringFormat='dd/MM/yyyy HH:mm'}" Width="100" MinWidth="120">
+                    <DataGridTextColumn Header="Ngày bàn giao" Binding="{Binding NgayBanGiao, StringFormat='dd/MM/yyyy HH:mm:ss'}" Width="100" MinWidth="120">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -260,6 +269,7 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
+
                     <DataGridTextColumn Header="Trạng thái" Binding="{Binding TrangThaiText}" Width="100" MinWidth="120">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
