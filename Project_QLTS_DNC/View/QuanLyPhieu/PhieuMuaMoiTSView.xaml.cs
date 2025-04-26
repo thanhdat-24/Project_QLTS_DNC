@@ -18,11 +18,15 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
     {
         private Supabase.Client _client;
         private Dictionary<int, string> _nvLookup = new Dictionary<int, string>();
+        private List<MuaMoiTS> _danhSachPhieuGoc = new();  // Khai báo ở đầu class
+
         public PhieuMuaMoiTSView()
         {
             InitializeComponent();
             InitializeSupabaseAsync();
             LoadData();
+            cbNgayDeNghiFilter.ItemsSource = new List<string> { "Tất cả ngày" };
+            cbNgayDeNghiFilter.SelectedIndex = 0;
         }
         private async Task LoadNhanVienLookupAsync()
         {
@@ -63,11 +67,16 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     await LoadNhanVienLookupAsync();
                 }
 
+                // Lấy dữ liệu phiếu
                 var result = await _client
                     .From<MuaMoiTS>()
                     .Get();
 
+                _danhSachPhieuGoc = result.Models;
+
+                // Chuyển đổi dữ liệu thành một danh sách có thể hiển thị
                 var danhSachPhieu = result.Models
+                    .OrderByDescending(p => p.MaPhieuDeNghi)
                     .Select(p => new
                     {
                         p.MaPhieuDeNghi,
@@ -75,19 +84,28 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         p.DonViDeNghi,
                         p.LyDo,
                         p.GhiChu,
-                        TrangThai = p.TrangThai.HasValue && p.TrangThai.Value ? "Đã Duyệt" : "Chờ Duyệt",
-                        // Thay vì dùng MaNV, tra ra tên
+                        TrangThai = p.TrangThai switch
+                        {
+                            true => "Đã Duyệt",
+                            false => "Từ Chối Duyệt",
+                            null => "Chưa Duyệt"
+                        },
                         TenNhanVien = _nvLookup.TryGetValue((int)p.MaNV, out var tenNV) ? tenNV : $"#{p.MaNV}"
                     })
                     .ToList();
 
+                // Gán danh sách phiếu vào DataGrid
                 dgPhieuXuatKho.ItemsSource = danhSachPhieu;
+
+                // Cập nhật ComboBox với các ngày duy nhất từ NgayDeNghi
+                await LoadNgayDeNghiFilter();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void btnAdd_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -341,5 +359,128 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 }
             }
         }
+        private async Task LoadNgayDeNghiFilter()
+        {
+            try
+            {
+                // Kiểm tra xem có dữ liệu không
+                if (_danhSachPhieuGoc == null || !_danhSachPhieuGoc.Any())
+                {
+                    // Nếu không có dữ liệu, chỉ hiển thị tùy chọn "Tất cả ngày"
+                    cbNgayDeNghiFilter.ItemsSource = new List<string> { "Tất cả ngày" };
+                    cbNgayDeNghiFilter.SelectedIndex = 0;
+                    return;
+                }
+
+                // Lấy các ngày duy nhất
+                var ngayDuyNhat = _danhSachPhieuGoc
+                    .Where(p => p.NgayDeNghi != default) // Đảm bảo không lấy ngày mặc định
+                    .Select(p => p.NgayDeNghi.Date)
+                    .Distinct()
+                    .OrderByDescending(d => d)  // Sắp xếp ngày theo thứ tự giảm dần (mới nhất lên đầu)
+                    .ToList();
+
+                // Kiểm tra xem có ngày nào không
+                if (!ngayDuyNhat.Any())
+                {
+                    cbNgayDeNghiFilter.ItemsSource = new List<string> { "Tất cả ngày" };
+                    cbNgayDeNghiFilter.SelectedIndex = 0;
+                    return;
+                }
+
+                // Tạo danh sách bao gồm mục "Tất cả ngày"
+                var tuyChonLoc = new List<object> { "Tất cả ngày" };
+                tuyChonLoc.AddRange(ngayDuyNhat.Cast<object>());
+
+                // In log để debug
+                Console.WriteLine($"Số lượng ngày: {ngayDuyNhat.Count}");
+                foreach (var ngay in ngayDuyNhat)
+                {
+                    Console.WriteLine($"Ngày: {ngay:dd/MM/yyyy}");
+                }
+
+                // Thiết lập ItemsSource cho ComboBox
+                cbNgayDeNghiFilter.ItemsSource = tuyChonLoc;
+                cbNgayDeNghiFilter.SelectedIndex = 0; // Chọn "Tất cả ngày" mặc định
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải ngày: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void cbNgayDeNghiFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbNgayDeNghiFilter.SelectedItem != null)
+            {
+                if (cbNgayDeNghiFilter.SelectedItem is string &&
+                    (string)cbNgayDeNghiFilter.SelectedItem == "Tất cả ngày")
+                {
+                    // Hiển thị tất cả bản ghi
+                    HienThiTatCaBanGhi();
+                }
+                else if (cbNgayDeNghiFilter.SelectedItem is DateTime ngayDuocChon)
+                {
+                    // Lọc theo ngày được chọn
+                    FilterDataByDate(ngayDuocChon);
+                }
+            }
+        }
+
+        private void HienThiTatCaBanGhi()
+        {
+            // Định dạng và hiển thị tất cả bản ghi
+            var tatCaBanGhi = _danhSachPhieuGoc
+                .Select(p => new
+                {
+                    p.MaPhieuDeNghi,
+                    p.NgayDeNghi,
+                    p.DonViDeNghi,
+                    p.LyDo,
+                    p.GhiChu,
+                    TrangThai = p.TrangThai switch
+                    {
+                        true => "Đã Duyệt",
+                        false => "Từ Chối Duyệt",
+                        null => "Chưa Duyệt"
+                    },
+                    TenNhanVien = _nvLookup.TryGetValue((int)p.MaNV, out var tenNV) ? tenNV : $"#{p.MaNV}"
+                })
+                .ToList();
+
+            dgPhieuXuatKho.ItemsSource = tatCaBanGhi;
+        }
+
+        private void FilterDataByDate(DateTime selectedDate)
+        {
+            // Lọc dữ liệu theo ngày được chọn
+            var ketQuaLoc = _danhSachPhieuGoc
+                .Where(p => p.NgayDeNghi.Date == selectedDate.Date)
+                .Select(p => new
+                {
+                    p.MaPhieuDeNghi,
+                    p.NgayDeNghi,
+                    p.DonViDeNghi,
+                    p.LyDo,
+                    p.GhiChu,
+                    TrangThai = p.TrangThai switch
+                    {
+                        true => "Đã Duyệt",
+                        false => "Từ Chối Duyệt",
+                        null => "Chưa Duyệt"
+                    },
+                    TenNhanVien = _nvLookup.TryGetValue((int)p.MaNV, out var tenNV) ? tenNV : $"#{p.MaNV}"
+                })
+                .ToList();
+
+            dgPhieuXuatKho.ItemsSource = ketQuaLoc;
+        }
+
+
+
+
+
+
+
     }
 }
