@@ -18,10 +18,26 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 {
     public partial class DanhSachSanPham : UserControl
     {
+        public class ThongKeTaiSanTheoNhomDTO
+        {
+            public int? MaNhomTS { get; set; }
+            public string TenNhomTS { get; set; }
+            public int TongSoLuong { get; set; }
+            public int SoLuongTonKho { get; set; }
+            public int SoLuongDaSuDung { get; set; }
+        }
+
+        private enum ViewMode
+        {
+            DanhSach,
+            ThongKe
+        }
+
         private ObservableCollection<TaiSanDTO> _listTaiSan;
         private CollectionViewSource _viewSource;
         private List<PhongFilter> _phongList;
         private List<NhomTaiSanFilter> _nhomTSList;
+        private ViewMode _currentViewMode = ViewMode.DanhSach;
 
         // Biến quản lý phân trang
         private int _pageSize = 10; // Số lượng tài sản hiển thị trên mỗi trang
@@ -33,6 +49,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         {
             InitializeComponent();
             LoadDataAsync();
+            InitializeViewToggle();
             InitializeFilters();
 
             // Đăng ký các event (giữ nguyên các đăng ký hiện có)
@@ -40,20 +57,117 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             txtSearch.KeyDown += TxtSearch_KeyDown;
             cboPhong.SelectionChanged += Filter_SelectionChanged;
             cboNhomTS.SelectionChanged += Filter_SelectionChanged;
-            // Thêm đăng ký sự kiện cho combobox tình trạng
             cboTinhTrang.SelectionChanged += Filter_SelectionChanged;
             btnRefresh.Click += BtnRefresh_Click;
             btnExportQRCode.Click += BtnExportQRCode_Click;
-
-            // Thêm đăng ký sự kiện cho nút xuất Excel
             btnExportExcel.Click += BtnExportExcel_Click;
-
-            // Đăng ký sự kiện phân trang
             btnPreviousPage.Click += BtnPreviousPage_Click;
             btnNextPage.Click += BtnNextPage_Click;
             txtCurrentPage.KeyDown += TxtCurrentPage_KeyDown;
-
             this.Loaded += DanhSachSanPham_Loaded;
+        }
+        private void InitializeViewToggle()
+        {
+            // Đăng ký sự kiện cho nút chuyển đổi chế độ xem
+            btnToggleView.Checked += BtnToggleView_Checked;
+            btnToggleView.Unchecked += BtnToggleView_Unchecked;
+        }
+
+        private void BtnToggleView_Checked(object sender, RoutedEventArgs e)
+        {
+            SwitchToThongKeView();
+        }
+
+        private void BtnToggleView_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SwitchToDanhSachView();
+        }
+        private void SwitchToThongKeView()
+        {
+            _currentViewMode = ViewMode.ThongKe;
+
+            // Ẩn các điều khiển lọc
+            cboPhong.Visibility = Visibility.Collapsed;
+            cboNhomTS.Visibility = Visibility.Collapsed;
+            cboTinhTrang.Visibility = Visibility.Collapsed;
+            txtSearch.Visibility = Visibility.Collapsed;
+            btnSearch.Visibility = Visibility.Collapsed;
+
+            // Thay đổi tiêu đề
+            txtTieuDe.Text = "THỐNG KÊ TÀI SẢN THEO NHÓM";
+
+            // Ẩn/hiện DataGrid
+            cardDanhSachTaiSan.Visibility = Visibility.Collapsed;
+            cardThongKeTaiSan.Visibility = Visibility.Visible;
+
+            // Tải dữ liệu thống kê
+            LoadThongKeTaiSanTheoNhom();
+        }
+        private void SwitchToDanhSachView()
+        {
+            _currentViewMode = ViewMode.DanhSach;
+
+            // Hiện các điều khiển lọc
+            cboPhong.Visibility = Visibility.Visible;
+            cboNhomTS.Visibility = Visibility.Visible;
+            cboTinhTrang.Visibility = Visibility.Visible;
+            txtSearch.Visibility = Visibility.Visible;
+            btnSearch.Visibility = Visibility.Visible;
+
+            // Thay đổi tiêu đề
+            txtTieuDe.Text = "DANH SÁCH TÀI SẢN";
+
+            // Ẩn/hiện DataGrid
+            cardDanhSachTaiSan.Visibility = Visibility.Visible;
+            cardThongKeTaiSan.Visibility = Visibility.Collapsed;
+
+            // Tải lại danh sách tài sản
+            LoadDataAsync();
+        }
+        private void LoadThongKeTaiSanTheoNhom()
+        {
+            try
+            {
+                // Tạo danh sách để thống kê
+                var thongKeTaiSan = _listTaiSan
+                    .GroupBy(ts =>
+                    {
+                        // Xác định nhóm tài sản
+                        return new
+                        {
+                            MaNhomTS = ts.MaNhomTS ?? -1,
+                            TenNhomTS = string.IsNullOrEmpty(ts.TenNhomTS) ? "Chưa xác định" : ts.TenNhomTS
+                        };
+                    })
+                    .Select(g =>
+                    {
+                        // Nhóm tài sản theo nhóm
+                        var nhomTaiSan = g.ToList();
+
+                        return new ThongKeTaiSanTheoNhomDTO
+                        {
+                            MaNhomTS = g.Key.MaNhomTS == -1 ? null : g.Key.MaNhomTS,
+                            TenNhomTS = g.Key.TenNhomTS,
+                            TongSoLuong = nhomTaiSan.Count,
+                            // Đếm số lượng tồn kho (MaPhong == null)
+                            SoLuongTonKho = nhomTaiSan.Count(ts => !ts.MaPhong.HasValue),
+                            // Đếm số lượng đã sử dụng (MaPhong != null)
+                            SoLuongDaSuDung = nhomTaiSan.Count(ts => ts.MaPhong.HasValue)
+                        };
+                    })
+                    .OrderByDescending(tk => tk.TongSoLuong)
+                    .ToList();
+
+                // Gán nguồn dữ liệu cho DataGrid
+                dgThongKeTaiSan.ItemsSource = thongKeTaiSan;
+
+                // Cập nhật trạng thái
+                txtStatus.Text = $"Tổng số nhóm tài sản: {thongKeTaiSan.Count}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu thống kê: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
@@ -207,6 +321,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
                 // Lấy danh sách tài sản từ service
                 var taiSanModels = await TaiSanService.LayDanhSachTaiSanAsync();
+
                 // Chuyển đổi từ TaiSanModel sang TaiSanDTO
                 _listTaiSan = new ObservableCollection<TaiSanDTO>(
                     taiSanModels.Select(model => TaiSanDTO.FromModel(model)));
@@ -216,6 +331,10 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
 
                 // Lấy thông tin nhóm tài sản
                 var nhomTSCollection = await NhomTaiSanService.LayDanhSachNhomTaiSanAsync();
+
+                // Lấy thông tin chi tiết phiếu nhập để truy vấn MaNhomTS
+                // Thêm biến tạm để lưu trữ chi tiết phiếu nhập đã truy vấn
+                Dictionary<int, int> chiTietPNCache = new Dictionary<int, int>();
 
                 // Cập nhật tên phòng và nhóm tài sản cho mỗi tài sản
                 foreach (var taiSan in _listTaiSan)
@@ -239,16 +358,31 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                     {
                         try
                         {
-                            // Sử dụng service có sẵn để lấy thông tin chi tiết phiếu nhập
-                            var chiTietPN = await ChiTietPhieuNhapService.LayChiTietPhieuNhapTheoMaAsync(taiSan.MaChiTietPN.Value);
-
-                            if (chiTietPN != null)
+                            int maNhomTS = -1;
+                            // Kiểm tra xem đã truy vấn chi tiết phiếu nhập này chưa
+                            if (chiTietPNCache.TryGetValue(taiSan.MaChiTietPN.Value, out maNhomTS))
                             {
-                                // Lưu mã nhóm tài sản vào DTO
-                                taiSan.MaNhomTS = chiTietPN.MaNhomTS;
+                                taiSan.MaNhomTS = maNhomTS;
+                            }
+                            else
+                            {
+                                // Sử dụng service có sẵn để lấy thông tin chi tiết phiếu nhập
+                                var chiTietPN = await ChiTietPhieuNhapService.LayChiTietPhieuNhapTheoMaAsync(taiSan.MaChiTietPN.Value);
 
-                                // Tìm tên nhóm tài sản
-                                var nhomTS = nhomTSCollection.FirstOrDefault(n => n.MaNhomTS == chiTietPN.MaNhomTS);
+                                if (chiTietPN != null)
+                                {
+                                    // Lưu vào cache để dùng lại
+                                    chiTietPNCache[chiTietPN.MaChiTietPN] = chiTietPN.MaNhomTS;
+
+                                    // Lưu mã nhóm tài sản vào DTO
+                                    taiSan.MaNhomTS = chiTietPN.MaNhomTS;
+                                }
+                            }
+
+                            // Tìm tên nhóm tài sản
+                            if (taiSan.MaNhomTS.HasValue)
+                            {
+                                var nhomTS = nhomTSCollection.FirstOrDefault(n => n.MaNhomTS == taiSan.MaNhomTS.Value);
                                 if (nhomTS != null)
                                 {
                                     taiSan.TenNhomTS = nhomTS.TenNhom;
@@ -291,16 +425,24 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 _viewSource.Source = _listTaiSan;
                 _viewSource.Filter += ApplyFilter;
 
+                // Hiển thị DataGrid
+                dgSanPham.Visibility = Visibility.Visible;
+
                 // Cập nhật số trang và hiển thị dữ liệu trang đầu tiên
                 UpdatePagingInfo();
 
+                // Áp dụng phân trang
+                ApplyPaging();
+
                 // Cập nhật UI phân trang và trạng thái
                 UpdatePagingUI();
+
                 UpdateStatusBar();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Chi tiết lỗi: {ex.StackTrace}");
             }
             finally
             {
