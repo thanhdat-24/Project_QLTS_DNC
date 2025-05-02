@@ -867,8 +867,13 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                     // Gọi hàm xuất Excel và truyền đường dẫn file
                     ExportExcel(filePath);
 
-                    // Hiển thị thông báo khi xuất file thành công
-                    MessageBox.Show($"Xuất file Excel thành công. File được lưu tại:\n{filePath}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Thay thế MessageBox bằng SuccessNotificationDialog
+                    var notificationDialog = new View.Common.SuccessNotificationDialog(
+                        "Xuất Excel thành công!",
+                        $"File danh sách tài sản đã được xuất thành công và lưu tại:\n{filePath}",
+                        filePath);
+
+                    notificationDialog.Show();
                 }
             }
             catch (Exception ex)

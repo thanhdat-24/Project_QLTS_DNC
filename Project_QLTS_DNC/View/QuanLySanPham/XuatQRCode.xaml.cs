@@ -12,10 +12,8 @@ using ZXing.Common;
 using ZXing.QrCode;
 using ZXing.QrCode.Internal;
 using ZXing.Rendering;
-// Thêm các using cần thiết
 using System.Drawing;
 using System.Drawing.Imaging;
-// Tránh xung đột namespace với iText
 using iTextImage = iText.Layout.Element.Image;
 using iText.IO.Image;
 using iText.Kernel.Pdf;
@@ -27,12 +25,15 @@ using ZXingErrorCorrectionLevel = ZXing.QrCode.Internal.ErrorCorrectionLevel;
 using Project_QLTS_DNC.DTOs;
 using Project_QLTS_DNC.Services.QLTaiSanService;
 using System.Windows.Input;
-// Add explicit import for iText TextAlignment to avoid ambiguity
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using System.ComponentModel;
 using System.Diagnostics;
 using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Services.QLToanNha;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Services;
+using Supabase.Postgrest.Interfaces;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -77,6 +78,10 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         private int _totalPages = 1; // Tổng số trang
         private List<TaiSanQRDTO> _currentPageItems; // Các item trên trang hiện tại
 
+        // Thêm một cache để lưu thông tin liên quan
+        private Dictionary<int, int> _chiTietPNCache = new Dictionary<int, int>();
+        private Dictionary<int, string> _nhomTSCache = new Dictionary<int, string>();
+
         public XuatQRCode(ObservableCollection<TaiSanDTO> dsTaiSan = null)
         {
             InitializeComponent();
@@ -107,37 +112,18 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         {
             try
             {
-                // Tải danh sách nhóm tài sản cho ComboBox filter
-                await LoadNhomTaiSanAsync();
+                // Hiển thị con trỏ đang tải
+                Mouse.OverrideCursor = Cursors.Wait;
 
-                // Tải danh sách phòng cho ComboBox filter
-                await LoadPhongAsync();
+                // Tải song song danh sách nhóm tài sản và phòng để tăng tốc
+                var nhomTSTask = LoadNhomTaiSanAsync();
+                var phongTask = LoadPhongAsync();
 
-                if (dsTaiSan == null || dsTaiSan.Count == 0)
-                {
-                    // Nếu không có dữ liệu được truyền vào, tải từ service
-                    var taiSanModels = await TaiSanService.LayDanhSachTaiSanAsync();
-                    _listTaiSan = new ObservableCollection<TaiSanQRDTO>(
-                        taiSanModels.Select(model => {
-                            var dto = TaiSanDTO.FromModel(model);
-                            return TaiSanQRDTO.FromTaiSanDTO(dto);
-                        }));
-                }
-                else
-                {
-                    // Sử dụng dữ liệu đã truyền vào
-                    _listTaiSan = new ObservableCollection<TaiSanQRDTO>(
-                        dsTaiSan.Select(dto => TaiSanQRDTO.FromTaiSanDTO(dto)));
-                }
+                // Chờ cả hai tác vụ hoàn thành
+                await Task.WhenAll(nhomTSTask, phongTask);
 
-                // Tải thông tin nhóm tài sản cho mỗi tài sản
-                foreach (var taiSan in _listTaiSan)
-                {
-                    await taiSan.LoadNhomTaiSanInfoAsync();
-                }
-
-                // Khởi tạo danh sách đã lọc với tất cả các tài sản
-                _filteredTaiSan = new ObservableCollection<TaiSanQRDTO>(_listTaiSan);
+                // Khởi tạo dữ liệu tài sản
+                await InitializeAssetDataAsync(dsTaiSan);
 
                 // Cập nhật thông tin phân trang
                 UpdatePagingInfo();
@@ -153,6 +139,99 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Trả lại con trỏ bình thường
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        // Tối ưu hóa hàm khởi tạo dữ liệu tài sản
+        private async Task InitializeAssetDataAsync(ObservableCollection<TaiSanDTO> dsTaiSan)
+        {
+            // Nếu không có dữ liệu được truyền vào, tải từ service
+            if (dsTaiSan == null || dsTaiSan.Count == 0)
+            {
+                // Tải toàn bộ danh sách tài sản - giữ lại phương pháp cũ
+                var taiSanModels = await TaiSanService.LayDanhSachTaiSanAsync();
+                _listTaiSan = new ObservableCollection<TaiSanQRDTO>(
+                    taiSanModels.Select(model => TaiSanQRDTO.FromTaiSanDTO(TaiSanDTO.FromModel(model))));
+
+                // Tải thông tin nhóm tài sản theo batch
+                await LoadAssetGroupInfoBatchAsync(_listTaiSan);
+            }
+            else
+            {
+                // Sử dụng dữ liệu đã truyền vào
+                _listTaiSan = new ObservableCollection<TaiSanQRDTO>(
+                    dsTaiSan.Select(dto => TaiSanQRDTO.FromTaiSanDTO(dto)));
+
+                // Tải thông tin nhóm tài sản theo batch
+                await LoadAssetGroupInfoBatchAsync(_listTaiSan);
+            }
+
+            // Khởi tạo danh sách đã lọc với tất cả các tài sản
+            _filteredTaiSan = new ObservableCollection<TaiSanQRDTO>(_listTaiSan);
+        }
+
+        // Tải thông tin nhóm tài sản theo batch thay vì từng tài sản một
+        private async Task LoadAssetGroupInfoBatchAsync(ObservableCollection<TaiSanQRDTO> assets)
+        {
+            try
+            {
+                // Lấy tất cả các MaChiTietPN duy nhất
+                var chiTietPNIds = assets
+                    .Where(a => a.MaChiTietPN.HasValue)
+                    .Select(a => a.MaChiTietPN.Value)
+                    .Distinct()
+                    .ToList();
+
+                if (chiTietPNIds.Count == 0)
+                    return;
+
+                // Tải tất cả ChiTietPhieuNhap trong một truy vấn
+                var client = await SupabaseService.GetClientAsync();
+
+                // Xây dựng filter cho nhiều ID
+                var chiTietPNs = await client.From<ChiTietPhieuNhap>()
+                    .Where(c => chiTietPNIds.Contains(c.MaChiTietPN))
+                    .Get();
+
+                // Tạo lookup dictionary cho ChiTietPhieuNhap
+                var chiTietPNDict = chiTietPNs.Models.ToDictionary(c => c.MaChiTietPN);
+
+                // Lấy tất cả các MaNhomTS duy nhất
+                var nhomTSIds = chiTietPNs.Models.Select(c => c.MaNhomTS).Distinct().ToList();
+
+                if (nhomTSIds.Count == 0)
+                    return;
+
+                // Tải tất cả NhomTaiSan trong một truy vấn
+                var nhomTSs = await client.From<NhomTaiSan>()
+                    .Where(n => nhomTSIds.Contains(n.MaNhomTS))
+                    .Get();
+
+                // Tạo lookup dictionary cho NhomTaiSan
+                var nhomTSDict = nhomTSs.Models.ToDictionary(n => n.MaNhomTS);
+
+                // Cập nhật thông tin nhóm cho tất cả tài sản
+                foreach (var asset in assets)
+                {
+                    if (asset.MaChiTietPN.HasValue && chiTietPNDict.TryGetValue(asset.MaChiTietPN.Value, out var chiTietPN))
+                    {
+                        asset.MaNhomTS = chiTietPN.MaNhomTS;
+
+                        if (nhomTSDict.TryGetValue(chiTietPN.MaNhomTS, out var nhomTS))
+                        {
+                            asset.TenNhomTS = nhomTS.TenNhom;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi tải thông tin nhóm tài sản: {ex.Message}");
             }
         }
 
@@ -203,6 +282,62 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
         }
 
+        // Tối ưu hóa ApplyFilters để áp dụng bộ lọc hiệu quả hơn
+        private void ApplyFilters()
+        {
+            try
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                string searchText = txtSearchSeri.Text.ToLower().Trim();
+                int? selectedNhomTS = cboNhomTS.SelectedIndex > 0 ? ((NhomTaiSanFilter)cboNhomTS.SelectedItem).MaNhomTS : null;
+                int? selectedPhong = cboPhong.SelectedIndex > 0 ? ((PhongFilter)cboPhong.SelectedItem).MaPhong : null;
+
+                // Lọc dữ liệu ở phía client
+                ApplyClientSideFilters(searchText, selectedNhomTS, selectedPhong);
+
+                // Cập nhật thông tin phân trang
+                _currentPage = 1; // Reset về trang đầu tiên khi lọc
+                UpdatePagingInfo();
+
+                // Áp dụng phân trang và cập nhật giao diện
+                ApplyPaging();
+                UpdatePagingUI();
+
+                // Cập nhật trạng thái
+                _totalItems = _filteredTaiSan.Count;
+                _selectedItems = _currentPageItems.Count(item => item.IsSelected);
+                UpdateStatusText();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi áp dụng bộ lọc: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        // Lọc dữ liệu ở phía client - hiệu quả với dữ liệu nhỏ
+        private void ApplyClientSideFilters(string searchText, int? nhomTSId, int? phongId)
+        {
+            var filteredItems = _listTaiSan.AsParallel().Where(ts =>
+                (string.IsNullOrEmpty(searchText) ||
+                (ts.SoSeri != null && ts.SoSeri.ToLower().Contains(searchText)) ||
+                (ts.TenTaiSan != null && ts.TenTaiSan.ToLower().Contains(searchText))) &&
+                (!nhomTSId.HasValue || ts.MaNhomTS == nhomTSId) &&
+                (!phongId.HasValue || ts.MaPhong == phongId)
+            ).ToList();
+
+            // Cập nhật danh sách đã lọc
+            _filteredTaiSan.Clear();
+            foreach (var item in filteredItems)
+            {
+                _filteredTaiSan.Add(item);
+            }
+        }
+
         private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Áp dụng filter khi thay đổi combobox
@@ -230,59 +365,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             // Reset về trang đầu tiên khi áp dụng bộ lọc
             _currentPage = 1;
             ApplyFilters();
-        }
-
-        private void ApplyFilters()
-        {
-            string searchText = txtSearchSeri.Text.ToLower().Trim();
-
-            // Lọc theo số seri hoặc tên tài sản
-            var filteredItems = _listTaiSan.Where(ts =>
-                string.IsNullOrEmpty(searchText) ||
-                (ts.SoSeri != null && ts.SoSeri.ToLower().Contains(searchText)) ||
-                (ts.TenTaiSan != null && ts.TenTaiSan.ToLower().Contains(searchText))
-            ).ToList();
-
-            // Lọc theo nhóm tài sản (nếu đã chọn)
-            if (cboNhomTS.SelectedItem != null && cboNhomTS.SelectedIndex > 0) // Bỏ qua item "Tất cả"
-            {
-                // Lấy mã nhóm tài sản đã chọn
-                var selectedNhomTS = (NhomTaiSanFilter)cboNhomTS.SelectedItem;
-                if (selectedNhomTS.MaNhomTS.HasValue)
-                {
-                    filteredItems = filteredItems.Where(ts => ts.MaNhomTS == selectedNhomTS.MaNhomTS).ToList();
-                }
-            }
-
-            // Lọc theo phòng (nếu đã chọn)
-            if (cboPhong.SelectedItem != null && cboPhong.SelectedIndex > 0) // Bỏ qua item "Tất cả"
-            {
-                // Lấy mã phòng đã chọn
-                var selectedPhong = (PhongFilter)cboPhong.SelectedItem;
-                if (selectedPhong.MaPhong.HasValue)
-                {
-                    filteredItems = filteredItems.Where(ts => ts.MaPhong == selectedPhong.MaPhong).ToList();
-                }
-            }
-
-            // Cập nhật danh sách đã lọc
-            _filteredTaiSan.Clear();
-            foreach (var item in filteredItems)
-            {
-                _filteredTaiSan.Add(item);
-            }
-
-            // Cập nhật thông tin phân trang
-            UpdatePagingInfo();
-
-            // Áp dụng phân trang và cập nhật giao diện
-            ApplyPaging();
-            UpdatePagingUI();
-
-            // Cập nhật trạng thái
-            _totalItems = _filteredTaiSan.Count;
-            _selectedItems = _currentPageItems.Count(item => item.IsSelected);
-            UpdateStatusText();
         }
 
         private void BtnSelectAll_Click(object sender, RoutedEventArgs e)
@@ -343,33 +425,50 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                 try
                 {
                     Mouse.OverrideCursor = Cursors.Wait;
-                    ExportQRCodeToPDF(saveFileDialog.FileName, selectedItems);
+
+                    string filePath = saveFileDialog.FileName;
+
+                    // Đảm bảo thư mục đích tồn tại
+                    string directoryPath = Path.GetDirectoryName(filePath);
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    // Xuất file PDF
+                    ExportQRCodeToPDF(filePath, selectedItems);
+
                     Mouse.OverrideCursor = null;
 
-                    MessageBox.Show("Xuất mã QR thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Tạo và hiển thị thông báo thành công với SuccessNotificationDialog
+                    var notificationDialog = new View.Common.SuccessNotificationDialog(
+                        "Xuất mã QR thành công!",
+                        $"File mã QR đã được xuất thành công và lưu tại:\n{filePath}",
+                        filePath);
 
-                    // Hỏi người dùng có muốn mở file PDF không
-                    var result = MessageBox.Show("Bạn có muốn mở file PDF vừa tạo không?", "Thông báo", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        OpenPdfFile(saveFileDialog.FileName);
-                    }
+                    // SuccessNotificationDialog đã có sẵn sự kiện BtnOpenFile.Click 
+                    // trong class của nó, ta không cần gán thêm event handler
+                    notificationDialog.Show();
                 }
                 catch (Exception ex)
                 {
                     Mouse.OverrideCursor = null;
+
                     // Ghi log lỗi
                     LogError(ex);
-                    MessageBox.Show($"Lỗi khi xuất mã QR: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Hiển thị thông báo lỗi chi tiết
+                    MessageBox.Show(
+                        $"Lỗi khi xuất mã QR: {ex.Message}\n\nChi tiết lỗi: {ex.StackTrace}",
+                        "Lỗi",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                 }
             }
         }
 
         #region Phân trang
 
-        /// <summary>
-        /// Cập nhật thông tin phân trang dựa trên dữ liệu hiện tại sau khi lọc
-        /// </summary>
         private void UpdatePagingInfo()
         {
             // Tính tổng số trang
@@ -383,9 +482,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
         }
 
-        /// <summary>
-        /// Áp dụng phân trang vào DataGrid
-        /// </summary>
         private void ApplyPaging()
         {
             // Tính chỉ số bắt đầu và kết thúc cho trang hiện tại
@@ -401,9 +497,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             dgSanPham.ItemsSource = _currentPageItems;
         }
 
-        /// <summary>
-        /// Cập nhật giao diện phân trang
-        /// </summary>
         private void UpdatePagingUI()
         {
             // Cập nhật số trang hiện tại và tổng số trang trong UI
@@ -415,9 +508,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             btnNextPage.IsEnabled = _currentPage < _totalPages;
         }
 
-        /// <summary>
-        /// Xử lý sự kiện khi nhấn nút trang trước
-        /// </summary>
         private void BtnPreviousPage_Click(object sender, RoutedEventArgs e)
         {
             if (_currentPage > 1)
@@ -432,9 +522,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
         }
 
-        /// <summary>
-        /// Xử lý sự kiện khi nhấn nút trang sau
-        /// </summary>
         private void BtnNextPage_Click(object sender, RoutedEventArgs e)
         {
             if (_currentPage < _totalPages)
@@ -449,9 +536,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
         }
 
-        /// <summary>
-        /// Xử lý sự kiện khi nhập số trang và nhấn Enter
-        /// </summary>
         private void TxtCurrentPage_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -484,35 +568,69 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         }
 
         #endregion
+
         // Phương thức mở file PDF với xử lý ngoại lệ chi tiết
+        // Phương thức mở file PDF với xử lý ngoại lệ và phương pháp thay thế
         private void OpenPdfFile(string filePath)
         {
             try
             {
                 // Kiểm tra file tồn tại trước
-                if (File.Exists(filePath))
+                if (!File.Exists(filePath))
                 {
-                    // Sử dụng phương thức mở file mặc định của hệ điều hành
-                    ProcessStartInfo startInfo = new ProcessStartInfo(filePath)
+                    MessageBox.Show("File không tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                try
+                {
+                    // Phương pháp 1: Sử dụng Process.Start với ProcessStartInfo
+                    ProcessStartInfo startInfo = new ProcessStartInfo
                     {
+                        FileName = filePath,
                         UseShellExecute = true
                     };
                     System.Diagnostics.Process.Start(startInfo);
                 }
-                else
+                catch (Win32Exception ex)
                 {
-                    MessageBox.Show("File không tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // Ghi log lỗi từ phương pháp 1
+                    LogError(new Exception($"Lỗi phương pháp 1: {ex.Message}", ex));
+
+                    try
+                    {
+                        // Phương pháp 2: Sử dụng shell execute
+                        System.Diagnostics.Process.Start("explorer.exe", $"\"{filePath}\"");
+                    }
+                    catch (Exception explorerEx)
+                    {
+                        // Ghi log lỗi từ phương pháp 2
+                        LogError(new Exception($"Lỗi phương pháp 2: {explorerEx.Message}", explorerEx));
+
+                        try
+                        {
+                            // Phương pháp 3: Sử dụng rundll32
+                            System.Diagnostics.Process.Start("rundll32.exe", $"shell32.dll,ShellExec_RunDLL \"{filePath}\"");
+                        }
+                        catch (Exception rundllEx)
+                        {
+                            // Ghi log lỗi từ phương pháp 3
+                            LogError(new Exception($"Lỗi phương pháp 3: {rundllEx.Message}", rundllEx));
+
+                            // Nếu tất cả các phương pháp đều thất bại, thông báo cho người dùng
+                            MessageBox.Show(
+                                $"Không thể mở file. Vui lòng thử mở file thủ công tại đường dẫn:\n{filePath}",
+                                "Lỗi",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                        }
+                    }
                 }
-            }
-            catch (Win32Exception ex)
-            {
-                MessageBox.Show($"Lỗi hệ thống khi mở file: {ex.Message}\nMã lỗi: {ex.ErrorCode}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                LogError(ex);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi không xác định khi mở file: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 LogError(ex);
+                MessageBox.Show($"Lỗi không xác định khi mở file: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -537,7 +655,6 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
         }
 
-        // Nội dung phương thức ExportQRCodeToPDF
         // Nội dung phương thức ExportQRCodeToPDF
         private void ExportQRCodeToPDF(string filePath, List<TaiSanQRDTO> selectedItems)
         {
@@ -634,7 +751,7 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
                                 {
                                     document.Add(table);
 
-                                    // Fix: Use simplified AreaBreak constructor (creates a page break)
+                                    // Create a page break
                                     document.Add(new AreaBreak());
 
                                     table = new iText.Layout.Element.Table(2);
