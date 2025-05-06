@@ -423,11 +423,7 @@ HorizontalScrollBarVisibility="Auto">
                 <!-- Nút bên trái -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button x:Name="btnXuatExcel" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
-                    <!-- Nút Xem lịch sử -->
-                    <Button x:Name="btnXemLichSu" 
-                    Content="Xem lịch sử" 
-                    Style="{StaticResource PrimaryButton}"
-                    Margin="10,0,0,0" />
+                    
                 </StackPanel>
                 <!-- Phân trang -->
                 <Grid Grid.Column="1" HorizontalAlignment="Center">
@@ -498,13 +494,7 @@ HorizontalScrollBarVisibility="Auto">
                         </ComboBox>
                     </StackPanel>
                 </Grid>
-    <!-- Nút bên phải -->
-    <StackPanel Grid.Column="2" Orientation="Horizontal">
-        <Button x:Name="btnInPhieu" 
-Content="In phiếu" 
-Style="{StaticResource PrimaryButton}"
-Click="btnInPhieu_Click"/>
-    </StackPanel>
+   
             </Grid>
         </Grid>
     </Border>

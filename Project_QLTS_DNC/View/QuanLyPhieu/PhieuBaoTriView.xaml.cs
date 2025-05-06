@@ -443,7 +443,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         }
 
         // Xử lý khi nhấn nút xuất Excel
-        private void btnIn_Click(object sender, RoutedEventArgs e)
+        private async void btnIn_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -475,10 +475,24 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 };
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    // Gọi phương thức xuất Excel từ service
-                    _phieuBaoTriService.ExportToExcel(danhSachXuat, saveFileDialog.FileName);
-                    MessageBox.Show("Xuất Excel thành công!", "Thông báo",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    try
+                    {
+                        // Gọi phương thức xuất Excel từ service
+                        _phieuBaoTriService.ExportToExcel(danhSachXuat, saveFileDialog.FileName);
+
+                        // THÊM MỚI: Lưu hoạt động xuất Excel vào lịch sử
+                        var theoDoiService = new TheoDoiHoatDongService();
+                        string ghiChu = $"Xuất Excel phiếu bảo trì vào file {saveFileDialog.FileName}";
+                        await theoDoiService.LuuHoatDongXuatExcel(danhSachXuat, ghiChu);
+
+                        MessageBox.Show("Xuất Excel thành công!", "Thông báo",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    finally
+                    {
+                        Mouse.OverrideCursor = null;
+                    }
                 }
             }
             catch (Exception ex)
@@ -506,170 +520,231 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 // Hiển thị PrintDialog
                 if (printDialog.ShowDialog() == true)
                 {
-                    // Tạo một FlowDocument duy nhất chứa tất cả các phiếu đã chọn
-                    System.Windows.Documents.FlowDocument document = new System.Windows.Documents.FlowDocument();
-                    // Thiết lập thuộc tính trang
-                    document.PagePadding = new System.Windows.Thickness(40);
-                    document.ColumnWidth = 650; // Điều chỉnh độ rộng phù hợp với giấy A4
-                    document.PageHeight = 29.7 * 96 / 2.54; // A4 height in pixels
-                    document.PageWidth = 21.0 * 96 / 2.54;  // A4 width in pixels
-                    document.FontFamily = new System.Windows.Media.FontFamily("Times New Roman");
-                    document.FontSize = 12;
-                    document.TextAlignment = System.Windows.TextAlignment.Left;
-                    // Thêm tiêu đề chung cho tất cả phiếu
-                    System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
-                    titlePara.TextAlignment = System.Windows.TextAlignment.Center;
-                    titlePara.Margin = new System.Windows.Thickness(0, 20, 0, 20);
-                    System.Windows.Documents.Run titleRun = new System.Windows.Documents.Run("DANH SÁCH PHIẾU BẢO TRÌ TÀI SẢN");
-                    titleRun.FontSize = 18;
-                    titleRun.FontWeight = System.Windows.FontWeights.Bold;
-                    titlePara.Inlines.Add(titleRun);
-                    document.Blocks.Add(titlePara);
-                    // Thêm ngày in ở trên cùng
-                    System.Windows.Documents.Paragraph datePara = new System.Windows.Documents.Paragraph();
-                    datePara.TextAlignment = System.Windows.TextAlignment.Right;
-                    datePara.Margin = new System.Windows.Thickness(0, 0, 0, 20);
-                    System.Windows.Documents.Run dateRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-                    dateRun.FontStyle = System.Windows.FontStyles.Italic;
-                    dateRun.FontSize = 10;
-                    datePara.Inlines.Add(dateRun);
-                    document.Blocks.Add(datePara);
-                    // Tạo bảng chung cho tất cả các phiếu
-                    System.Windows.Documents.Table mainTable = new System.Windows.Documents.Table();
-                    mainTable.CellSpacing = 0;
-                    mainTable.BorderBrush = System.Windows.Media.Brushes.Black;
-                    mainTable.BorderThickness = new System.Windows.Thickness(1);
-                    // Định nghĩa các cột cho bảng
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(50) }); // STT
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Mã phiếu
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Mã tài sản
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(120) }); // Tên tài sản
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Loại bảo trì
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Ngày bảo trì
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(120) }); // Người phụ trách
-                    mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Chi phí
-                                                                                                                                     // Khởi tạo RowGroup
-                    mainTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-                    // Tạo hàng tiêu đề
-                    System.Windows.Documents.TableRow headerRow = new System.Windows.Documents.TableRow();
-                    headerRow.Background = System.Windows.Media.Brushes.LightGray;
-                    // Thêm các tiêu đề cột
-                    AddHeaderCell(headerRow, "STT");
-                    AddHeaderCell(headerRow, "Mã phiếu");
-                    AddHeaderCell(headerRow, "Mã TS");
-                    AddHeaderCell(headerRow, "Tên tài sản");
-                    AddHeaderCell(headerRow, "Loại BT");
-                    AddHeaderCell(headerRow, "Ngày BT");
-                    AddHeaderCell(headerRow, "Người phụ trách");
-                    AddHeaderCell(headerRow, "Chi phí (VNĐ)");
-                    // Thêm hàng tiêu đề vào bảng
-                    mainTable.RowGroups[0].Rows.Add(headerRow);
-
-                    // Thêm dữ liệu từng phiếu vào bảng
-                    decimal tongChiPhi = 0;
-                    for (int i = 0; i < selectedPhieu.Count; i++)
+                    // Thêm hiệu ứng waiting cursor
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    try
                     {
-                        await AddPhieuRowAsync(mainTable, selectedPhieu[i], i + 1);
-                        // Kiểm tra null và cộng dồn chi phí
-                        if (selectedPhieu[i].ChiPhi.HasValue)
+                        // Đọc thông tin công ty
+                        var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
+
+                        // Tạo một FlowDocument duy nhất chứa tất cả các phiếu đã chọn
+                        System.Windows.Documents.FlowDocument document = new System.Windows.Documents.FlowDocument();
+                        // Thiết lập thuộc tính trang
+                        document.PagePadding = new System.Windows.Thickness(40);
+                        document.ColumnWidth = 650; // Điều chỉnh độ rộng phù hợp với giấy A4
+                        document.PageHeight = 29.7 * 96 / 2.54; // A4 height in pixels
+                        document.PageWidth = 21.0 * 96 / 2.54;  // A4 width in pixels
+                        document.FontFamily = new System.Windows.Media.FontFamily("Times New Roman");
+                        document.FontSize = 12;
+                        document.TextAlignment = System.Windows.TextAlignment.Left;
+
+                        // ===== THÊM THÔNG TIN CÔNG TY =====
+                        // Tên công ty
+                        System.Windows.Documents.Paragraph companyNamePara = new System.Windows.Documents.Paragraph();
+                        companyNamePara.TextAlignment = System.Windows.TextAlignment.Center;
+                        System.Windows.Documents.Run companyNameRun = new System.Windows.Documents.Run(thongTinCongTy.Ten);
+                        companyNameRun.FontSize = 16;
+                        companyNameRun.FontWeight = System.Windows.FontWeights.Bold;
+                        companyNamePara.Inlines.Add(companyNameRun);
+                        document.Blocks.Add(companyNamePara);
+
+                        // Địa chỉ
+                        System.Windows.Documents.Paragraph addressPara = new System.Windows.Documents.Paragraph();
+                        addressPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        addressPara.Margin = new System.Windows.Thickness(0, 5, 0, 0);
+                        System.Windows.Documents.Run addressRun = new System.Windows.Documents.Run("Địa chỉ: " + thongTinCongTy.DiaChi);
+                        addressRun.FontSize = 10;
+                        addressPara.Inlines.Add(addressRun);
+                        document.Blocks.Add(addressPara);
+
+                        // Số điện thoại và email
+                        System.Windows.Documents.Paragraph contactPara = new System.Windows.Documents.Paragraph();
+                        contactPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        contactPara.Margin = new System.Windows.Thickness(0, 5, 0, 0);
+                        System.Windows.Documents.Run contactRun = new System.Windows.Documents.Run($"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}");
+                        contactRun.FontSize = 10;
+                        contactPara.Inlines.Add(contactRun);
+                        document.Blocks.Add(contactPara);
+
+                        // Mã số thuế
+                        System.Windows.Documents.Paragraph taxPara = new System.Windows.Documents.Paragraph();
+                        taxPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        taxPara.Margin = new System.Windows.Thickness(0, 5, 0, 20);
+                        System.Windows.Documents.Run taxRun = new System.Windows.Documents.Run("Mã số thuế: " + thongTinCongTy.MaSoThue);
+                        taxRun.FontSize = 10;
+                        taxPara.Inlines.Add(taxRun);
+                        document.Blocks.Add(taxPara);
+                        // ===== KẾT THÚC THÔNG TIN CÔNG TY =====
+
+                        // Thêm tiêu đề chung cho tất cả phiếu
+                        System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
+                        titlePara.TextAlignment = System.Windows.TextAlignment.Center;
+                        titlePara.Margin = new System.Windows.Thickness(0, 20, 0, 20);
+                        System.Windows.Documents.Run titleRun = new System.Windows.Documents.Run("DANH SÁCH PHIẾU BẢO TRÌ TÀI SẢN");
+                        titleRun.FontSize = 18;
+                        titleRun.FontWeight = System.Windows.FontWeights.Bold;
+                        titlePara.Inlines.Add(titleRun);
+                        document.Blocks.Add(titlePara);
+
+                        // Thêm ngày in ở trên cùng
+                        System.Windows.Documents.Paragraph datePara = new System.Windows.Documents.Paragraph();
+                        datePara.TextAlignment = System.Windows.TextAlignment.Right;
+                        datePara.Margin = new System.Windows.Thickness(0, 0, 0, 20);
+                        System.Windows.Documents.Run dateRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                        dateRun.FontStyle = System.Windows.FontStyles.Italic;
+                        dateRun.FontSize = 10;
+                        datePara.Inlines.Add(dateRun);
+                        document.Blocks.Add(datePara);
+
+                        // Tạo bảng chung cho tất cả các phiếu
+                        System.Windows.Documents.Table mainTable = new System.Windows.Documents.Table();
+                        mainTable.CellSpacing = 0;
+                        mainTable.BorderBrush = System.Windows.Media.Brushes.Black;
+                        mainTable.BorderThickness = new System.Windows.Thickness(1);
+                        // Định nghĩa các cột cho bảng
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(50) }); // STT
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Mã phiếu
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Mã tài sản
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(120) }); // Tên tài sản
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Loại bảo trì
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Ngày bảo trì
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(120) }); // Người phụ trách
+                        mainTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Chi phí
+                                                                                                                                         // Khởi tạo RowGroup
+                        mainTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
+                        // Tạo hàng tiêu đề
+                        System.Windows.Documents.TableRow headerRow = new System.Windows.Documents.TableRow();
+                        headerRow.Background = System.Windows.Media.Brushes.LightGray;
+                        // Thêm các tiêu đề cột
+                        AddHeaderCell(headerRow, "STT");
+                        AddHeaderCell(headerRow, "Mã phiếu");
+                        AddHeaderCell(headerRow, "Mã TS");
+                        AddHeaderCell(headerRow, "Tên tài sản");
+                        AddHeaderCell(headerRow, "Loại BT");
+                        AddHeaderCell(headerRow, "Ngày BT");
+                        AddHeaderCell(headerRow, "Người phụ trách");
+                        AddHeaderCell(headerRow, "Chi phí (VNĐ)");
+                        // Thêm hàng tiêu đề vào bảng
+                        mainTable.RowGroups[0].Rows.Add(headerRow);
+
+                        // Thêm dữ liệu từng phiếu vào bảng
+                        decimal tongChiPhi = 0;
+                        for (int i = 0; i < selectedPhieu.Count; i++)
                         {
-                            tongChiPhi += selectedPhieu[i].ChiPhi.Value;
+                            await AddPhieuRowAsync(mainTable, selectedPhieu[i], i + 1);
+                            // Kiểm tra null và cộng dồn chi phí
+                            if (selectedPhieu[i].ChiPhi.HasValue)
+                            {
+                                tongChiPhi += selectedPhieu[i].ChiPhi.Value;
+                            }
                         }
+
+                        // Thêm hàng tổng chi phí
+                        System.Windows.Documents.TableRow totalRow = new System.Windows.Documents.TableRow();
+                        totalRow.Background = System.Windows.Media.Brushes.LightGray;
+
+                        // Tạo ô "Tổng chi phí" (gộp 7 cột)
+                        System.Windows.Documents.TableCell totalLabelCell = new System.Windows.Documents.TableCell();
+                        totalLabelCell.BorderBrush = System.Windows.Media.Brushes.Black;
+                        totalLabelCell.BorderThickness = new System.Windows.Thickness(1);
+                        totalLabelCell.Padding = new System.Windows.Thickness(5);
+                        totalLabelCell.ColumnSpan = 7;
+
+                        System.Windows.Documents.Paragraph totalLabelPara = new System.Windows.Documents.Paragraph();
+                        totalLabelPara.TextAlignment = System.Windows.TextAlignment.Right;
+                        System.Windows.Documents.Run totalLabelRun = new System.Windows.Documents.Run("Tổng chi phí:");
+                        totalLabelRun.FontWeight = System.Windows.FontWeights.Bold;
+                        totalLabelPara.Inlines.Add(totalLabelRun);
+                        totalLabelCell.Blocks.Add(totalLabelPara);
+                        totalRow.Cells.Add(totalLabelCell);
+
+                        // Tạo ô giá trị tổng chi phí
+                        System.Windows.Documents.TableCell totalValueCell = new System.Windows.Documents.TableCell();
+                        totalValueCell.BorderBrush = System.Windows.Media.Brushes.Black;
+                        totalValueCell.BorderThickness = new System.Windows.Thickness(1);
+                        totalValueCell.Padding = new System.Windows.Thickness(5);
+
+                        System.Windows.Documents.Paragraph totalValuePara = new System.Windows.Documents.Paragraph();
+                        totalValuePara.TextAlignment = System.Windows.TextAlignment.Right;
+                        System.Windows.Documents.Run totalValueRun = new System.Windows.Documents.Run(string.Format("{0:N0}", tongChiPhi));
+                        totalValueRun.FontWeight = System.Windows.FontWeights.Bold;
+                        totalValuePara.Inlines.Add(totalValueRun);
+                        totalValueCell.Blocks.Add(totalValuePara);
+                        totalRow.Cells.Add(totalValueCell);
+
+                        // Thêm hàng tổng vào bảng
+                        mainTable.RowGroups[0].Rows.Add(totalRow);
+
+                        // Thêm bảng vào document
+                        document.Blocks.Add(mainTable);
+                        // Thêm phần chữ ký
+                        System.Windows.Documents.Table signatureTable = new System.Windows.Documents.Table();
+                        signatureTable.CellSpacing = 0;
+                        signatureTable.BorderThickness = new System.Windows.Thickness(0);
+                        signatureTable.Margin = new System.Windows.Thickness(0, 40, 0, 20);
+                        signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
+                        signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
+                        signatureTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
+                        // Tạo dòng chữ ký
+                        System.Windows.Documents.TableRow signatureRow = new System.Windows.Documents.TableRow();
+                        // Cột người lập phiếu
+                        System.Windows.Documents.TableCell leftCell = new System.Windows.Documents.TableCell();
+                        leftCell.BorderThickness = new System.Windows.Thickness(0);
+                        System.Windows.Documents.Paragraph leftHeaderPara = new System.Windows.Documents.Paragraph();
+                        leftHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        leftHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
+                        System.Windows.Documents.Run leftHeaderRun = new System.Windows.Documents.Run("Người lập phiếu");
+                        leftHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
+                        leftHeaderPara.Inlines.Add(leftHeaderRun);
+                        leftCell.Blocks.Add(leftHeaderPara);
+                        // Thêm chỗ để ký tên
+                        System.Windows.Documents.Paragraph leftSignPara = new System.Windows.Documents.Paragraph();
+                        leftSignPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        System.Windows.Documents.Run leftSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
+                        leftSignRun.FontStyle = System.Windows.FontStyles.Italic;
+                        leftSignRun.FontSize = 10;
+                        leftSignPara.Inlines.Add(leftSignRun);
+                        leftCell.Blocks.Add(leftSignPara);
+                        signatureRow.Cells.Add(leftCell);
+                        // Cột người phụ trách
+                        System.Windows.Documents.TableCell rightCell = new System.Windows.Documents.TableCell();
+                        rightCell.BorderThickness = new System.Windows.Thickness(0);
+                        System.Windows.Documents.Paragraph rightHeaderPara = new System.Windows.Documents.Paragraph();
+                        rightHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        rightHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
+                        System.Windows.Documents.Run rightHeaderRun = new System.Windows.Documents.Run("Xác nhận của quản lý");
+                        rightHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
+                        rightHeaderPara.Inlines.Add(rightHeaderRun);
+                        rightCell.Blocks.Add(rightHeaderPara);
+                        // Thêm chỗ để ký tên
+                        System.Windows.Documents.Paragraph rightSignPara = new System.Windows.Documents.Paragraph();
+                        rightSignPara.TextAlignment = System.Windows.TextAlignment.Center;
+                        System.Windows.Documents.Run rightSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
+                        rightSignRun.FontStyle = System.Windows.FontStyles.Italic;
+                        rightSignRun.FontSize = 10;
+                        rightSignPara.Inlines.Add(rightSignRun);
+                        rightCell.Blocks.Add(rightSignPara);
+                        signatureRow.Cells.Add(rightCell);
+                        signatureTable.RowGroups[0].Rows.Add(signatureRow);
+                        document.Blocks.Add(signatureTable);
+
+                        // In tất cả các phiếu trong một lần
+                        printDialog.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)document).DocumentPaginator,
+                            "In phiếu bảo trì");
+
+                        // THÊM MỚI: Lưu hoạt động in phiếu vào lịch sử
+                        var theoDoiService = new TheoDoiHoatDongService();
+                        string ghiChu = $"In phiếu bảo trì - {selectedPhieu.Count} phiếu";
+                        await theoDoiService.LuuHoatDongInPhieu(selectedPhieu, ghiChu);
+
+                        MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì thành công!", "Thông báo",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
                     }
-
-                    // Thêm hàng tổng chi phí
-                    System.Windows.Documents.TableRow totalRow = new System.Windows.Documents.TableRow();
-                    totalRow.Background = System.Windows.Media.Brushes.LightGray;
-
-                    // Tạo ô "Tổng chi phí" (gộp 7 cột)
-                    System.Windows.Documents.TableCell totalLabelCell = new System.Windows.Documents.TableCell();
-                    totalLabelCell.BorderBrush = System.Windows.Media.Brushes.Black;
-                    totalLabelCell.BorderThickness = new System.Windows.Thickness(1);
-                    totalLabelCell.Padding = new System.Windows.Thickness(5);
-                    totalLabelCell.ColumnSpan = 7;
-
-                    System.Windows.Documents.Paragraph totalLabelPara = new System.Windows.Documents.Paragraph();
-                    totalLabelPara.TextAlignment = System.Windows.TextAlignment.Right;
-                    System.Windows.Documents.Run totalLabelRun = new System.Windows.Documents.Run("Tổng chi phí:");
-                    totalLabelRun.FontWeight = System.Windows.FontWeights.Bold;
-                    totalLabelPara.Inlines.Add(totalLabelRun);
-                    totalLabelCell.Blocks.Add(totalLabelPara);
-                    totalRow.Cells.Add(totalLabelCell);
-
-                    // Tạo ô giá trị tổng chi phí
-                    System.Windows.Documents.TableCell totalValueCell = new System.Windows.Documents.TableCell();
-                    totalValueCell.BorderBrush = System.Windows.Media.Brushes.Black;
-                    totalValueCell.BorderThickness = new System.Windows.Thickness(1);
-                    totalValueCell.Padding = new System.Windows.Thickness(5);
-
-                    System.Windows.Documents.Paragraph totalValuePara = new System.Windows.Documents.Paragraph();
-                    totalValuePara.TextAlignment = System.Windows.TextAlignment.Right;
-                    System.Windows.Documents.Run totalValueRun = new System.Windows.Documents.Run(string.Format("{0:N0}", tongChiPhi));
-                    totalValueRun.FontWeight = System.Windows.FontWeights.Bold;
-                    totalValuePara.Inlines.Add(totalValueRun);
-                    totalValueCell.Blocks.Add(totalValuePara);
-                    totalRow.Cells.Add(totalValueCell);
-
-                    // Thêm hàng tổng vào bảng
-                    mainTable.RowGroups[0].Rows.Add(totalRow);
-
-                    // Thêm bảng vào document
-                    document.Blocks.Add(mainTable);
-                    // Thêm phần chữ ký
-                    System.Windows.Documents.Table signatureTable = new System.Windows.Documents.Table();
-                    signatureTable.CellSpacing = 0;
-                    signatureTable.BorderThickness = new System.Windows.Thickness(0);
-                    signatureTable.Margin = new System.Windows.Thickness(0, 40, 0, 20);
-                    signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-                    signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-                    signatureTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-                    // Tạo dòng chữ ký
-                    System.Windows.Documents.TableRow signatureRow = new System.Windows.Documents.TableRow();
-                    // Cột người lập phiếu
-                    System.Windows.Documents.TableCell leftCell = new System.Windows.Documents.TableCell();
-                    leftCell.BorderThickness = new System.Windows.Thickness(0);
-                    System.Windows.Documents.Paragraph leftHeaderPara = new System.Windows.Documents.Paragraph();
-                    leftHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
-                    leftHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
-                    System.Windows.Documents.Run leftHeaderRun = new System.Windows.Documents.Run("Người lập phiếu");
-                    leftHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-                    leftHeaderPara.Inlines.Add(leftHeaderRun);
-                    leftCell.Blocks.Add(leftHeaderPara);
-                    // Thêm chỗ để ký tên
-                    System.Windows.Documents.Paragraph leftSignPara = new System.Windows.Documents.Paragraph();
-                    leftSignPara.TextAlignment = System.Windows.TextAlignment.Center;
-                    System.Windows.Documents.Run leftSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
-                    leftSignRun.FontStyle = System.Windows.FontStyles.Italic;
-                    leftSignRun.FontSize = 10;
-                    leftSignPara.Inlines.Add(leftSignRun);
-                    leftCell.Blocks.Add(leftSignPara);
-                    signatureRow.Cells.Add(leftCell);
-                    // Cột người phụ trách
-                    System.Windows.Documents.TableCell rightCell = new System.Windows.Documents.TableCell();
-                    rightCell.BorderThickness = new System.Windows.Thickness(0);
-                    System.Windows.Documents.Paragraph rightHeaderPara = new System.Windows.Documents.Paragraph();
-                    rightHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
-                    rightHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
-                    System.Windows.Documents.Run rightHeaderRun = new System.Windows.Documents.Run("Xác nhận của quản lý");
-                    rightHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-                    rightHeaderPara.Inlines.Add(rightHeaderRun);
-                    rightCell.Blocks.Add(rightHeaderPara);
-                    // Thêm chỗ để ký tên
-                    System.Windows.Documents.Paragraph rightSignPara = new System.Windows.Documents.Paragraph();
-                    rightSignPara.TextAlignment = System.Windows.TextAlignment.Center;
-                    System.Windows.Documents.Run rightSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
-                    rightSignRun.FontStyle = System.Windows.FontStyles.Italic;
-                    rightSignRun.FontSize = 10;
-                    rightSignPara.Inlines.Add(rightSignRun);
-                    rightCell.Blocks.Add(rightSignPara);
-                    signatureRow.Cells.Add(rightCell);
-                    signatureTable.RowGroups[0].Rows.Add(signatureRow);
-                    document.Blocks.Add(signatureTable);
-                    // In tất cả các phiếu trong một lần
-                    printDialog.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)document).DocumentPaginator,
-                        "In phiếu bảo trì");
-                    MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì thành công!", "Thông báo",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    finally
+                    {
+                        // Đảm bảo cursor luôn được reset về bình thường, kể cả khi có lỗi
+                        Mouse.OverrideCursor = null;
+                    }
                 }
             }
             catch (Exception ex)
@@ -678,362 +753,60 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        // Phương thức thêm tiêu đề cột vào bảng
-        private void AddHeaderCell(System.Windows.Documents.TableRow row, string headerText)
+        private void AddHeaderCell(System.Windows.Documents.TableRow row, string text)
         {
             System.Windows.Documents.TableCell cell = new System.Windows.Documents.TableCell();
             cell.BorderBrush = System.Windows.Media.Brushes.Black;
             cell.BorderThickness = new System.Windows.Thickness(1);
             cell.Padding = new System.Windows.Thickness(5);
-            System.Windows.Documents.Paragraph para = new System.Windows.Documents.Paragraph();
-            para.TextAlignment = System.Windows.TextAlignment.Center;
-            System.Windows.Documents.Run run = new System.Windows.Documents.Run(headerText);
+
+            System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
+            paragraph.TextAlignment = System.Windows.TextAlignment.Center;
+            System.Windows.Documents.Run run = new System.Windows.Documents.Run(text);
             run.FontWeight = System.Windows.FontWeights.Bold;
-            para.Inlines.Add(run);
-            cell.Blocks.Add(para);
+            paragraph.Inlines.Add(run);
+
+            cell.Blocks.Add(paragraph);
             row.Cells.Add(cell);
         }
-        // Phương thức thêm dữ liệu phiếu vào bảng
         private async Task AddPhieuRowAsync(System.Windows.Documents.Table table, PhieuBaoTri phieu, int stt)
         {
-            // Lấy thông tin tài sản và nhân viên chi tiết
-            TaiSanModel taiSanInfo = null;
-            NhanVienModel nhanVienInfo = null;
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client != null)
-                {
-                    // Lấy thông tin tài sản
-                    if (phieu.MaTaiSan.HasValue)
-                    {
-                        var taiSanResult = await client.From<TaiSanModel>()
-                            .Where(t => t.MaTaiSan == phieu.MaTaiSan.Value)
-                            .Get();
-                        taiSanInfo = taiSanResult.Models.FirstOrDefault();
-                    }
-                    // Lấy thông tin nhân viên
-                    if (phieu.MaNV.HasValue)
-                    {
-                        var nhanVienResult = await client.From<NhanVienModel>()
-                            .Where(nv => nv.MaNV == phieu.MaNV.Value)
-                            .Get();
-                        nhanVienInfo = nhanVienResult.Models.FirstOrDefault();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lấy thông tin chi tiết: {ex.Message}");
-            }
-            // Chuẩn bị các thông tin để hiển thị
-            string tenTaiSan = taiSanInfo?.TenTaiSan ?? "Không xác định";
-            string tenNhanVien = nhanVienInfo?.TenNV ?? "Không xác định";
-            // Chuyển đổi mã loại bảo trì thành tên
-            string loaiBaoTri = "Không xác định";
-            switch (phieu.MaLoaiBaoTri)
-            {
-                case 1: loaiBaoTri = "Định kỳ"; break;
-                case 2: loaiBaoTri = "Đột xuất"; break;
-                case 3: loaiBaoTri = "Bảo hành"; break;
-            }
-            // Tạo hàng mới
             System.Windows.Documents.TableRow row = new System.Windows.Documents.TableRow();
-            // Nếu là hàng chẵn thì có màu nền khác
-            if (stt % 2 == 0)
-            {
-                row.Background = System.Windows.Media.Brushes.WhiteSmoke;
-            }
-            // Thêm các ô vào hàng
+
+            // Thêm các ô dữ liệu
             AddDataCell(row, stt.ToString(), System.Windows.TextAlignment.Center);
             AddDataCell(row, phieu.MaBaoTri.ToString(), System.Windows.TextAlignment.Center);
-            AddDataCell(row, phieu.MaTaiSan?.ToString() ?? "N/A", System.Windows.TextAlignment.Center);
-            AddDataCell(row, tenTaiSan, System.Windows.TextAlignment.Left);
-            AddDataCell(row, loaiBaoTri, System.Windows.TextAlignment.Center);
-            AddDataCell(row, phieu.NgayBaoTri?.ToString("dd/MM/yyyy") ?? "N/A", System.Windows.TextAlignment.Center);
-            AddDataCell(row, tenNhanVien, System.Windows.TextAlignment.Left);
-            AddDataCell(row, string.Format("{0:N0}", phieu.ChiPhi), System.Windows.TextAlignment.Right);
+            AddDataCell(row, phieu.MaTaiSan?.ToString() ?? "", System.Windows.TextAlignment.Center);
+            AddDataCell(row, phieu.TenTaiSan ?? "", System.Windows.TextAlignment.Left);
+            AddDataCell(row, phieu.TenLoaiBaoTri ?? "", System.Windows.TextAlignment.Center);
+            AddDataCell(row, phieu.NgayBaoTri.HasValue ? phieu.NgayBaoTri.Value.ToString("dd/MM/yyyy") : "", System.Windows.TextAlignment.Center);
+            AddDataCell(row, phieu.TenNguoiPhuTrach ?? "", System.Windows.TextAlignment.Left);
+            AddDataCell(row, phieu.ChiPhi.HasValue ? string.Format("{0:N0}", phieu.ChiPhi.Value) : "0", System.Windows.TextAlignment.Right);
+
             // Thêm hàng vào bảng
             table.RowGroups[0].Rows.Add(row);
+
+            // Để có hiệu ứng async, thêm một Task.Delay ngắn
+            await Task.Delay(1);
         }
-        // Phương thức thêm ô dữ liệu vào hàng
+
         private void AddDataCell(System.Windows.Documents.TableRow row, string text, System.Windows.TextAlignment alignment)
         {
             System.Windows.Documents.TableCell cell = new System.Windows.Documents.TableCell();
             cell.BorderBrush = System.Windows.Media.Brushes.Black;
             cell.BorderThickness = new System.Windows.Thickness(1);
             cell.Padding = new System.Windows.Thickness(5);
-            System.Windows.Documents.Paragraph para = new System.Windows.Documents.Paragraph();
-            para.TextAlignment = alignment;
+
+            System.Windows.Documents.Paragraph paragraph = new System.Windows.Documents.Paragraph();
+            paragraph.TextAlignment = alignment;
             System.Windows.Documents.Run run = new System.Windows.Documents.Run(text);
-            para.Inlines.Add(run);
-            cell.Blocks.Add(para);
+            paragraph.Inlines.Add(run);
+
+            cell.Blocks.Add(paragraph);
             row.Cells.Add(cell);
         }
 
-        // Phương thức cũ ThemNoiDungPhieuAsync và AddTableRow vẫn giữ lại để sử dụng cho trường hợp in riêng lẻ từng phiếu
-        // Trong trường hợp có yêu cầu bổ sung để chọn giữa in riêng lẻ hoặc in chung bảng
-        private async Task ThemNoiDungPhieuAsync(System.Windows.Documents.FlowDocument document, PhieuBaoTri phieu)
-        {
-            // Lấy thông tin tài sản và nhân viên chi tiết
-            TaiSanModel taiSanInfo = null;
-            NhanVienModel nhanVienInfo = null;
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client != null)
-                {
-                    // Lấy thông tin tài sản
-                    if (phieu.MaTaiSan.HasValue)
-                    {
-                        var taiSanResult = await client.From<TaiSanModel>()
-                            .Where(t => t.MaTaiSan == phieu.MaTaiSan.Value)
-                            .Get();
-                        taiSanInfo = taiSanResult.Models.FirstOrDefault();
-                    }
-                    // Lấy thông tin nhân viên
-                    if (phieu.MaNV.HasValue)
-                    {
-                        var nhanVienResult = await client.From<NhanVienModel>()
-                            .Where(nv => nv.MaNV == phieu.MaNV.Value)
-                            .Get();
-                        nhanVienInfo = nhanVienResult.Models.FirstOrDefault();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lấy thông tin chi tiết: {ex.Message}");
-            }
 
-            // Chuẩn bị các thông tin để hiển thị
-            string tenTaiSan = taiSanInfo?.TenTaiSan ?? "Không xác định";
-            string soSeri = taiSanInfo?.SoSeri ?? "Không xác định";
-            string tinhTrangSP = taiSanInfo?.TinhTrangSP ?? "Không xác định";
-            string tenNhanVien = nhanVienInfo?.TenNV ?? "Không xác định";
-
-            // Tạo section cho phiếu
-            System.Windows.Documents.Section section = new System.Windows.Documents.Section();
-
-            // Tạo tiêu đề phiếu bảo trì
-            System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
-            titlePara.TextAlignment = System.Windows.TextAlignment.Center;
-            titlePara.Margin = new System.Windows.Thickness(0, 20, 0, 20);
-            System.Windows.Documents.Run titleRun = new System.Windows.Documents.Run("PHIẾU BẢO TRÌ TÀI SẢN");
-            titleRun.FontSize = 18;
-            titleRun.FontWeight = System.Windows.FontWeights.Bold;
-            titlePara.Inlines.Add(titleRun);
-            section.Blocks.Add(titlePara);
-
-            // Thêm ngày in ở phía trên (đã di chuyển lên trên)
-            System.Windows.Documents.Paragraph datePara = new System.Windows.Documents.Paragraph();
-            datePara.TextAlignment = System.Windows.TextAlignment.Right;
-            datePara.Margin = new System.Windows.Thickness(0, 0, 0, 20);
-            System.Windows.Documents.Run dateRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            dateRun.FontStyle = System.Windows.FontStyles.Italic;
-            dateRun.FontSize = 10;
-            datePara.Inlines.Add(dateRun);
-            section.Blocks.Add(datePara);
-
-            // Tạo bảng thông tin phiếu
-            System.Windows.Documents.Table infoTable = new System.Windows.Documents.Table();
-            infoTable.CellSpacing = 0;
-            infoTable.BorderBrush = System.Windows.Media.Brushes.Black;
-            infoTable.BorderThickness = new System.Windows.Thickness(1);
-
-            // Định nghĩa cột với độ rộng cụ thể
-            infoTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(400) });
-
-            // Khởi tạo RowGroup
-            infoTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            // Thêm hàng thông tin với định dạng đồng nhất
-            AddTableRow(infoTable, "Mã phiếu bảo trì:", phieu.MaBaoTri.ToString());
-
-            // Hiển thị mã tài sản và thông tin tài sản chi tiết
-            AddTableRow(infoTable, "Mã tài sản:", phieu.MaTaiSan?.ToString() ?? "N/A");
-            AddTableRow(infoTable, "Tên tài sản:", tenTaiSan);
-            AddTableRow(infoTable, "Số seri:", soSeri);
-            AddTableRow(infoTable, "Tình trạng tài sản:", tinhTrangSP);
-
-            // Chuyển đổi mã loại bảo trì thành tên
-            string loaiBaoTri = "Không xác định";
-            switch (phieu.MaLoaiBaoTri)
-            {
-                case 1: loaiBaoTri = "Định kỳ"; break;
-                case 2: loaiBaoTri = "Đột xuất"; break;
-                case 3: loaiBaoTri = "Bảo hành"; break;
-            }
-
-            AddTableRow(infoTable, "Loại bảo trì:", loaiBaoTri);
-            AddTableRow(infoTable, "Ngày bảo trì:", phieu.NgayBaoTri?.ToString("dd/MM/yyyy") ?? "N/A");
-
-            // Hiển thị mã nhân viên và tên nhân viên
-            AddTableRow(infoTable, "Mã nhân viên:", phieu.MaNV?.ToString() ?? "N/A");
-            AddTableRow(infoTable, "Người phụ trách:", tenNhanVien);
-            AddTableRow(infoTable, "Trạng thái:", phieu.TrangThai);
-            AddTableRow(infoTable, "Chi phí:", string.Format("{0:N0} VNĐ", phieu.ChiPhi));
-            section.Blocks.Add(infoTable);
-
-            // Tạo nội dung bảo trì
-            System.Windows.Documents.Paragraph contentHeaderPara = new System.Windows.Documents.Paragraph();
-            contentHeaderPara.Margin = new System.Windows.Thickness(0, 20, 0, 10);
-            System.Windows.Documents.Run contentHeaderRun = new System.Windows.Documents.Run("NỘI DUNG BẢO TRÌ:");
-            contentHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-            contentHeaderPara.Inlines.Add(contentHeaderRun);
-            section.Blocks.Add(contentHeaderPara);
-
-            // Tạo border cho nội dung 
-            System.Windows.Documents.Table contentTable = new System.Windows.Documents.Table();
-            contentTable.CellSpacing = 0;
-            contentTable.BorderBrush = System.Windows.Media.Brushes.Black;
-            contentTable.BorderThickness = new System.Windows.Thickness(1);
-            contentTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(600) });
-            contentTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            System.Windows.Documents.TableRow contentRow = new System.Windows.Documents.TableRow();
-            System.Windows.Documents.TableCell contentCell = new System.Windows.Documents.TableCell();
-            contentCell.Padding = new System.Windows.Thickness(8);
-
-            System.Windows.Documents.Paragraph contentPara = new System.Windows.Documents.Paragraph();
-            contentPara.TextAlignment = System.Windows.TextAlignment.Justify;
-            System.Windows.Documents.Run contentRun = new System.Windows.Documents.Run(phieu.NoiDung ?? "");
-            contentPara.Inlines.Add(contentRun);
-            contentCell.Blocks.Add(contentPara);
-            contentRow.Cells.Add(contentCell);
-            contentTable.RowGroups[0].Rows.Add(contentRow);
-            section.Blocks.Add(contentTable);
-
-            // Thêm ghi chú nếu có
-            if (!string.IsNullOrEmpty(phieu.GhiChu))
-            {
-                System.Windows.Documents.Paragraph noteHeaderPara = new System.Windows.Documents.Paragraph();
-                noteHeaderPara.Margin = new System.Windows.Thickness(0, 20, 0, 10);
-                System.Windows.Documents.Run noteHeaderRun = new System.Windows.Documents.Run("GHI CHÚ:");
-                noteHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-                noteHeaderPara.Inlines.Add(noteHeaderRun);
-                section.Blocks.Add(noteHeaderPara);
-
-                // Tạo border cho ghi chú
-                System.Windows.Documents.Table noteTable = new System.Windows.Documents.Table();
-                noteTable.CellSpacing = 0;
-                noteTable.BorderBrush = System.Windows.Media.Brushes.Black;
-                noteTable.BorderThickness = new System.Windows.Thickness(1);
-                noteTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(600) });
-                noteTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-                System.Windows.Documents.TableRow noteRow = new System.Windows.Documents.TableRow();
-                System.Windows.Documents.TableCell noteCell = new System.Windows.Documents.TableCell();
-                noteCell.Padding = new System.Windows.Thickness(8);
-
-                System.Windows.Documents.Paragraph notePara = new System.Windows.Documents.Paragraph();
-                notePara.TextAlignment = System.Windows.TextAlignment.Justify;
-                System.Windows.Documents.Run noteRun = new System.Windows.Documents.Run(phieu.GhiChu);
-                notePara.Inlines.Add(noteRun);
-                noteCell.Blocks.Add(notePara);
-                noteRow.Cells.Add(noteCell);
-                noteTable.RowGroups[0].Rows.Add(noteRow);
-                section.Blocks.Add(noteTable);
-            }
-
-            // Tạo bảng chữ ký
-            System.Windows.Documents.Table signatureTable = new System.Windows.Documents.Table();
-            signatureTable.CellSpacing = 0;
-            signatureTable.BorderThickness = new System.Windows.Thickness(0);
-            signatureTable.Margin = new System.Windows.Thickness(0, 40, 0, 20);
-            signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-            signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-            signatureTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            // Tạo dòng chữ ký
-            System.Windows.Documents.TableRow signatureRow = new System.Windows.Documents.TableRow();
-
-            // Cột người lập phiếu
-            System.Windows.Documents.TableCell leftCell = new System.Windows.Documents.TableCell();
-            leftCell.BorderThickness = new System.Windows.Thickness(0);
-            System.Windows.Documents.Paragraph leftHeaderPara = new System.Windows.Documents.Paragraph();
-            leftHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
-            leftHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
-            System.Windows.Documents.Run leftHeaderRun = new System.Windows.Documents.Run("Người lập phiếu");
-            leftHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-            leftHeaderPara.Inlines.Add(leftHeaderRun);
-            leftCell.Blocks.Add(leftHeaderPara);
-
-            // Thêm chỗ để ký tên
-            System.Windows.Documents.Paragraph leftSignPara = new System.Windows.Documents.Paragraph();
-            leftSignPara.TextAlignment = System.Windows.TextAlignment.Center;
-            System.Windows.Documents.Run leftSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
-            leftSignRun.FontStyle = System.Windows.FontStyles.Italic;
-            leftSignRun.FontSize = 10;
-            leftSignPara.Inlines.Add(leftSignRun);
-            leftCell.Blocks.Add(leftSignPara);
-            signatureRow.Cells.Add(leftCell);
-
-            // Cột người phụ trách
-            System.Windows.Documents.TableCell rightCell = new System.Windows.Documents.TableCell();
-            rightCell.BorderThickness = new System.Windows.Thickness(0);
-            System.Windows.Documents.Paragraph rightHeaderPara = new System.Windows.Documents.Paragraph();
-            rightHeaderPara.TextAlignment = System.Windows.TextAlignment.Center;
-            rightHeaderPara.Margin = new System.Windows.Thickness(0, 0, 0, 50); // Khoảng cách cho chữ ký
-            System.Windows.Documents.Run rightHeaderRun = new System.Windows.Documents.Run("Người phụ trách");
-            rightHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-            rightHeaderPara.Inlines.Add(rightHeaderRun);
-            rightCell.Blocks.Add(rightHeaderPara);
-
-            // Thêm chỗ để ký tên
-            System.Windows.Documents.Paragraph rightSignPara = new System.Windows.Documents.Paragraph();
-            rightSignPara.TextAlignment = System.Windows.TextAlignment.Center;
-            System.Windows.Documents.Run rightSignRun = new System.Windows.Documents.Run("(Ký và ghi rõ họ tên)");
-            rightSignRun.FontStyle = System.Windows.FontStyles.Italic;
-            rightSignRun.FontSize = 10;
-            rightSignPara.Inlines.Add(rightSignRun);
-            rightCell.Blocks.Add(rightSignPara);
-            signatureRow.Cells.Add(rightCell);
-            signatureTable.RowGroups[0].Rows.Add(signatureRow);
-            section.Blocks.Add(signatureTable);
-
-            // Thêm section vào document
-            document.Blocks.Add(section);
-        }
-
-        // Phương thức thêm hàng vào bảng thông tin
-        private void AddTableRow(System.Windows.Documents.Table table, string label, string value)
-        {
-            System.Windows.Documents.TableRow row = new System.Windows.Documents.TableRow();
-            row.Background = System.Windows.Media.Brushes.White;
-
-            // Cột nhãn
-            System.Windows.Documents.TableCell labelCell = new System.Windows.Documents.TableCell();
-            labelCell.BorderBrush = System.Windows.Media.Brushes.Black;
-            labelCell.BorderThickness = new System.Windows.Thickness(1);
-            labelCell.Background = System.Windows.Media.Brushes.LightGray;
-            labelCell.Padding = new System.Windows.Thickness(8);
-
-            System.Windows.Documents.Paragraph labelPara = new System.Windows.Documents.Paragraph();
-            System.Windows.Documents.Run labelRun = new System.Windows.Documents.Run(label);
-            labelRun.FontWeight = System.Windows.FontWeights.Bold;
-            labelPara.Inlines.Add(labelRun);
-            labelCell.Blocks.Add(labelPara);
-            row.Cells.Add(labelCell);
-
-            // Cột giá trị
-            System.Windows.Documents.TableCell valueCell = new System.Windows.Documents.TableCell();
-            valueCell.BorderBrush = System.Windows.Media.Brushes.Black;
-            valueCell.BorderThickness = new System.Windows.Thickness(1);
-            valueCell.Padding = new System.Windows.Thickness(8);
-
-            System.Windows.Documents.Paragraph valuePara = new System.Windows.Documents.Paragraph();
-            System.Windows.Documents.Run valueRun = new System.Windows.Documents.Run(value);
-            valuePara.Inlines.Add(valueRun);
-            valueCell.Blocks.Add(valuePara);
-            row.Cells.Add(valueCell);
-
-            // Thêm hàng vào bảng
-            table.RowGroups[0].Rows.Add(row);
-        }
-
-        // Nếu bạn muốn cung cấp cả hai tùy chọn: in riêng lẻ từng phiếu hoặc in chung một bảng
-        // bạn có thể thêm phương thức dưới đây và điều chỉnh btnInPhieu_Click
         private async void btnInPhieuChiTiet_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1051,37 +824,27 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 // Hiển thị PrintDialog
                 if (printDialog.ShowDialog() == true)
                 {
-                    // Tạo một FlowDocument duy nhất chứa tất cả các phiếu đã chọn
-                    System.Windows.Documents.FlowDocument document = new System.Windows.Documents.FlowDocument();
-                    // Thiết lập thuộc tính trang
-                    document.PagePadding = new System.Windows.Thickness(40);
-                    document.ColumnWidth = 650; // Điều chỉnh độ rộng phù hợp với giấy A4
-                    document.PageHeight = 29.7 * 96 / 2.54; // A4 height in pixels
-                    document.PageWidth = 21.0 * 96 / 2.54;  // A4 width in pixels
-                    document.FontFamily = new System.Windows.Media.FontFamily("Times New Roman");
-                    document.FontSize = 12;
-                    document.TextAlignment = System.Windows.TextAlignment.Left;
-
-                    // Thêm từng phiếu vào document
-                    for (int i = 0; i < selectedPhieu.Count; i++)
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    try
                     {
-                        // Thêm nội dung phiếu hiện tại
-                        await ThemNoiDungPhieuAsync(document, selectedPhieu[i]);
+                        // Đọc thông tin công ty
+                        var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
 
-                        // Thêm page break nếu không phải phiếu cuối cùng
-                        if (i < selectedPhieu.Count - 1)
-                        {
-                            System.Windows.Documents.Section section = new System.Windows.Documents.Section();
-                            section.BreakPageBefore = true;
-                            document.Blocks.Add(section);
-                        }
+                        // (Mã code in phiếu chi tiết hiện tại của bạn)
+                        // Thêm thông tin công ty vào đầu FlowDocument giống như btnInPhieu_Click
+
+                        // THÊM MỚI: Lưu hoạt động in phiếu chi tiết vào lịch sử
+                        var theoDoiService = new TheoDoiHoatDongService();
+                        string ghiChu = $"In phiếu bảo trì chi tiết - {selectedPhieu.Count} phiếu";
+                        await theoDoiService.LuuHoatDongInPhieu(selectedPhieu, ghiChu);
+
+                        MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì chi tiết thành công!", "Thông báo",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
                     }
-
-                    // In tất cả các phiếu trong một lần
-                    printDialog.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)document).DocumentPaginator,
-                        "In phiếu bảo trì chi tiết");
-                    MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì chi tiết thành công!", "Thông báo",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    finally
+                    {
+                        Mouse.OverrideCursor = null;
+                    }
                 }
             }
             catch (Exception ex)

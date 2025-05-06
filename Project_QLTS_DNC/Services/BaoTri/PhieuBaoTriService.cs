@@ -414,121 +414,157 @@ namespace Project_QLTS_DNC.Services
             }
         }
 
-        // Xuất dữ liệu ra Excel với tên thay vì mã
-public async Task<bool> ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
-{
-    try
-    {
-        using (var workbook = new XLWorkbook())
+        // Xuất dữ liệu ra Excel với tên thay vì mã và thêm thông tin công ty
+        public async Task<bool> ExportToExcel(List<PhieuBaoTri> danhSachPhieu, string filePath)
         {
-            var worksheet = workbook.Worksheets.Add("Phiếu Bảo Trì");
-            // Tạo tiêu đề
-            worksheet.Cell("A1").Value = "DANH SÁCH PHIẾU BẢO TRÌ";
-            worksheet.Range("A1:I1").Merge();
-            worksheet.Range("A1:I1").Style.Font.Bold = true;
-            worksheet.Range("A1:I1").Style.Font.FontSize = 16;
-            worksheet.Range("A1:I1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            // Tạo header cho bảng
-            worksheet.Cell("A3").Value = "STT";
-            worksheet.Cell("B3").Value = "Mã bảo trì";
-            worksheet.Cell("C3").Value = "Tên tài sản";
-            worksheet.Cell("D3").Value = "Loại bảo trì";
-            worksheet.Cell("E3").Value = "Ngày bảo trì";
-            worksheet.Cell("F3").Value = "Tên nhân viên";
-            worksheet.Cell("G3").Value = "Nội dung";
-            worksheet.Cell("H3").Value = "Trạng thái";
-            worksheet.Cell("I3").Value = "Chi phí";
-            // Định dạng header
-            var headerRange = worksheet.Range("A3:I3");
-            headerRange.Style.Font.Bold = true;
-            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
-            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            
-            // Điền dữ liệu vào bảng
-            for (int i = 0; i < danhSachPhieu.Count; i++)
+            try
             {
-                var phieu = danhSachPhieu[i];
-                int row = i + 4;
-                
-                // STT và Mã bảo trì
-                worksheet.Cell(row, 1).Value = i + 1;
-                worksheet.Cell(row, 2).Value = phieu.MaBaoTri;
-                
-                // Lấy tên tài sản thay vì mã
-                string tenTaiSan = "N/A";
-                if (phieu.MaTaiSan.HasValue)
+                using (var workbook = new XLWorkbook())
                 {
-                    tenTaiSan = await GetTenTaiSanAsync(phieu.MaTaiSan.Value);
+                    var worksheet = workbook.Worksheets.Add("Phiếu Bảo Trì");
+
+                    // Đọc thông tin công ty từ file JSON
+                    var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
+
+                    // Thêm thông tin công ty vào header
+                    int currentRow = 1;
+
+                    // Tên công ty (in đậm, cỡ lớn)
+                    worksheet.Cell(currentRow, 1).Value = thongTinCongTy.Ten;
+                    worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
+                    worksheet.Cell(currentRow, 1).Style.Font.FontSize = 14;
+                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow++;
+
+                    // Địa chỉ
+                    worksheet.Cell(currentRow, 1).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow++;
+
+                    // Số điện thoại và Email
+                    worksheet.Cell(currentRow, 1).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow++;
+
+                    // Mã số thuế
+                    worksheet.Cell(currentRow, 1).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow += 2; // Thêm khoảng trống
+
+                    // Tạo tiêu đề báo cáo (giữ nguyên phần code của bạn)
+                    worksheet.Cell($"A{currentRow}").Value = "DANH SÁCH PHIẾU BẢO TRÌ";
+                    worksheet.Range($"A{currentRow}:I{currentRow}").Merge();
+                    worksheet.Range($"A{currentRow}:I{currentRow}").Style.Font.Bold = true;
+                    worksheet.Range($"A{currentRow}:I{currentRow}").Style.Font.FontSize = 16;
+                    worksheet.Range($"A{currentRow}:I{currentRow}").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow += 2; // Tăng currentRow để đến dòng header của bảng
+
+                    // Tạo header cho bảng
+                    worksheet.Cell($"A{currentRow}").Value = "STT";
+                    worksheet.Cell($"B{currentRow}").Value = "Mã bảo trì";
+                    worksheet.Cell($"C{currentRow}").Value = "Tên tài sản";
+                    worksheet.Cell($"D{currentRow}").Value = "Loại bảo trì";
+                    worksheet.Cell($"E{currentRow}").Value = "Ngày bảo trì";
+                    worksheet.Cell($"F{currentRow}").Value = "Tên nhân viên";
+                    worksheet.Cell($"G{currentRow}").Value = "Nội dung";
+                    worksheet.Cell($"H{currentRow}").Value = "Trạng thái";
+                    worksheet.Cell($"I{currentRow}").Value = "Chi phí";
+
+                    // Định dạng header
+                    var headerRange = worksheet.Range($"A{currentRow}:I{currentRow}");
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                    headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    // Điền dữ liệu vào bảng
+                    for (int i = 0; i < danhSachPhieu.Count; i++)
+                    {
+                        var phieu = danhSachPhieu[i];
+                        int row = i + currentRow + 1; // Bắt đầu từ dòng sau header
+
+                        // STT và Mã bảo trì
+                        worksheet.Cell(row, 1).Value = i + 1;
+                        worksheet.Cell(row, 2).Value = phieu.MaBaoTri;
+
+                        // Lấy tên tài sản thay vì mã
+                        string tenTaiSan = "N/A";
+                        if (phieu.MaTaiSan.HasValue)
+                        {
+                            tenTaiSan = await GetTenTaiSanAsync(phieu.MaTaiSan.Value);
+                        }
+                        worksheet.Cell(row, 3).Value = tenTaiSan;
+
+                        // Chuyển đổi mã loại bảo trì thành tên
+                        string loaiBaoTri = "Không xác định";
+                        switch (phieu.MaLoaiBaoTri)
+                        {
+                            case 1: loaiBaoTri = "Định kỳ"; break;
+                            case 2: loaiBaoTri = "Đột xuất"; break;
+                            case 3: loaiBaoTri = "Bảo hành"; break;
+                        }
+                        worksheet.Cell(row, 4).Value = loaiBaoTri;
+
+                        // Ngày bảo trì
+                        worksheet.Cell(row, 5).Value = phieu.NgayBaoTri;
+                        worksheet.Cell(row, 5).Style.DateFormat.Format = "dd/MM/yyyy";
+
+                        // Lấy tên nhân viên thay vì mã
+                        string tenNhanVien = "N/A";
+                        if (phieu.MaNV.HasValue)
+                        {
+                            tenNhanVien = await GetTenNhanVienAsync(phieu.MaNV.Value);
+                        }
+                        worksheet.Cell(row, 6).Value = tenNhanVien;
+
+                        // Các thông tin còn lại
+                        worksheet.Cell(row, 7).Value = phieu.NoiDung;
+                        worksheet.Cell(row, 8).Value = phieu.TrangThai;
+                        worksheet.Cell(row, 9).Value = phieu.ChiPhi;
+
+                        // Định dạng ô
+                        var rowRange = worksheet.Range(row, 1, row, 9);
+                        rowRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        rowRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                    }
+
+                    // Định dạng cột
+                    worksheet.Columns().AdjustToContents();
+
+                    // Thêm ngày xuất báo cáo
+                    int lastRow = danhSachPhieu.Count + currentRow + 2;
+                    worksheet.Cell(lastRow, 7).Value = "Ngày xuất báo cáo:";
+                    worksheet.Cell(lastRow, 8).Value = DateTime.Now;
+                    worksheet.Cell(lastRow, 8).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                    worksheet.Range(lastRow, 7, lastRow, 8).Style.Font.Italic = true;
+
+                    // Lưu workbook
+                    workbook.SaveAs(filePath);
+                    MessageBox.Show("Xuất Excel thành công!", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Mở file sau khi xuất
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = filePath,
+                        UseShellExecute = true
+                    });
+
+                    return true;
                 }
-                worksheet.Cell(row, 3).Value = tenTaiSan;
-                
-                // Chuyển đổi mã loại bảo trì thành tên
-                string loaiBaoTri = "Không xác định";
-                switch (phieu.MaLoaiBaoTri)
-                {
-                    case 1: loaiBaoTri = "Định kỳ"; break;
-                    case 2: loaiBaoTri = "Đột xuất"; break;
-                    case 3: loaiBaoTri = "Bảo hành"; break;
-                }
-                worksheet.Cell(row, 4).Value = loaiBaoTri;
-                
-                // Ngày bảo trì
-                worksheet.Cell(row, 5).Value = phieu.NgayBaoTri;
-                worksheet.Cell(row, 5).Style.DateFormat.Format = "dd/MM/yyyy";
-                
-                // Lấy tên nhân viên thay vì mã
-                string tenNhanVien = "N/A";
-                if (phieu.MaNV.HasValue)
-                {
-                    tenNhanVien = await GetTenNhanVienAsync(phieu.MaNV.Value);
-                }
-                worksheet.Cell(row, 6).Value = tenNhanVien;
-                
-                // Các thông tin còn lại
-                worksheet.Cell(row, 7).Value = phieu.NoiDung;
-                worksheet.Cell(row, 8).Value = phieu.TrangThai;
-                worksheet.Cell(row, 9).Value = phieu.ChiPhi;
-                
-                // Định dạng ô
-                var rowRange = worksheet.Range(row, 1, row, 9);
-                rowRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                rowRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             }
-            
-            // Định dạng cột
-            worksheet.Columns().AdjustToContents();
-            
-            // Thêm ngày xuất báo cáo
-            int lastRow = danhSachPhieu.Count + 4 + 2;
-            worksheet.Cell(lastRow, 7).Value = "Ngày xuất báo cáo:";
-            worksheet.Cell(lastRow, 8).Value = DateTime.Now;
-            worksheet.Cell(lastRow, 8).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
-            worksheet.Range(lastRow, 7, lastRow, 8).Style.Font.Italic = true;
-            
-            // Lưu workbook
-            workbook.SaveAs(filePath);
-            MessageBox.Show("Xuất Excel thành công!", "Thông báo",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // Mở file sau khi xuất
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            catch (Exception ex)
             {
-                FileName = filePath,
-                UseShellExecute = true
-            });
-            
-            return true;
+                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
-            MessageBoxButton.OK, MessageBoxImage.Error);
-        return false;
-    }
-}
 
         public async Task<string> GetTenTaiSanAsync(int maTaiSan)
         {

@@ -625,6 +625,11 @@ namespace Project_QLTS_DNC
             MainContentPanel.Content = new View.LichSuDiChuyenTS.frmLichSuDiChuyenTS();
 
         }
+
+        private void btnLichSuBaoTri_Selected(object sender, RoutedEventArgs e)
+        {
+            MainContentPanel.Content = new View.QuanLyPhieu.LichSuSuaChuaUserControl();
+        }
     }
     public static class MainWindowExtensions
     {

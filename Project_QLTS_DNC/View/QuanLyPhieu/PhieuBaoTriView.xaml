@@ -509,11 +509,7 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <!-- Nút Xuất Excel -->
                     <Button x:Name="btnIn" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
-                    <!-- Nút Xem lịch sử -->
-                    <Button x:Name="btnXemLichSu" 
-                Content="Xem lịch sử" 
-                Style="{StaticResource PrimaryButton}"
-                Margin="10,0,0,0" />
+                   
                 </StackPanel>
 
 

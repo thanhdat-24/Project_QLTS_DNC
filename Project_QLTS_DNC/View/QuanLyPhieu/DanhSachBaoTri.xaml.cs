@@ -354,289 +354,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Xử lý khi nhấn nút In phiếu
-        private async void btnInPhieu_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Kiểm tra nếu có tài sản nào được chọn không
-                var selectedItems = _viewModel.DsKiemKe.Where(x => x.IsSelected).ToList();
-                if (selectedItems.Count == 0)
-                {
-                    MessageBox.Show("Vui lòng chọn ít nhất một tài sản để in phiếu!", "Thông báo",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-
-                // Tạo PrintDialog
-                System.Windows.Controls.PrintDialog printDialog = new System.Windows.Controls.PrintDialog();
-                // Hiển thị PrintDialog
-                if (printDialog.ShowDialog() == true)
-                {
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    try
-                    {
-                        // Tạo một FlowDocument cho phiếu
-                        System.Windows.Documents.FlowDocument document = new System.Windows.Documents.FlowDocument();
-                        // Thiết lập thuộc tính trang
-                        document.PagePadding = new System.Windows.Thickness(40);
-                        document.ColumnWidth = 650; // Điều chỉnh độ rộng phù hợp với giấy A4
-                        document.PageHeight = 29.7 * 96 / 2.54; // A4 height in pixels
-                        document.PageWidth = 21.0 * 96 / 2.54;  // A4 width in pixels
-                        document.FontFamily = new System.Windows.Media.FontFamily("Times New Roman");
-                        document.FontSize = 12;
-                        document.TextAlignment = System.Windows.TextAlignment.Left;
-
-                        // Thêm nội dung phiếu với danh sách tài sản được chọn
-                        await ThemNoiDungPhieuHopNhatAsync(document, selectedItems);
-
-                        // In phiếu
-                        printDialog.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)document).DocumentPaginator,
-                            "In phiếu bảo trì tài sản");
-                        MessageBox.Show($"Đã in phiếu bảo trì cho {selectedItems.Count} tài sản thành công!", "Thông báo",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    finally
-                    {
-                        Mouse.OverrideCursor = null;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi in phiếu bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        // Phương thức tạo nội dung phiếu hợp nhất với nhiều tài sản
-        private async Task ThemNoiDungPhieuHopNhatAsync(System.Windows.Documents.FlowDocument document, List<KiemKeTaiSan> danhSachTaiSan)
-        {
-            // Tạo section cho phiếu
-            System.Windows.Documents.Section section = new System.Windows.Documents.Section();
-
-            // Tạo tiêu đề phiếu bảo trì với thiết kế đẹp hơn
-            System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
-            titlePara.TextAlignment = System.Windows.TextAlignment.Center;
-            titlePara.Margin = new System.Windows.Thickness(0, 20, 0, 5);
-            System.Windows.Documents.Run titleRun = new System.Windows.Documents.Run("PHIẾU DANH SÁCH TÀI SẢN CẦN BẢO TRÌ");
-            titleRun.FontSize = 18;
-            titleRun.FontWeight = System.Windows.FontWeights.Bold;
-            titlePara.Inlines.Add(titleRun);
-            section.Blocks.Add(titlePara);
-
-            // Thêm đường kẻ ngang dưới tiêu đề
-            System.Windows.Documents.Paragraph linePara = new System.Windows.Documents.Paragraph();
-            linePara.Margin = new System.Windows.Thickness(0, 0, 0, 15);
-            System.Windows.Documents.Run lineRun = new System.Windows.Documents.Run("_________________________________________________");
-            lineRun.FontWeight = System.Windows.FontWeights.Bold;
-            linePara.TextAlignment = System.Windows.TextAlignment.Center;
-            linePara.Inlines.Add(lineRun);
-            section.Blocks.Add(linePara);
-
-            // Thông tin chung về phiếu với định dạng đẹp hơn
-            System.Windows.Documents.Paragraph infoPara = new System.Windows.Documents.Paragraph();
-            infoPara.Margin = new System.Windows.Thickness(0, 0, 0, 15);
-
-            // Thêm ngày lập phiếu với định dạng in đậm cho nhãn
-            System.Windows.Documents.Run dateLabel = new System.Windows.Documents.Run("Ngày lập phiếu: ");
-            dateLabel.FontWeight = System.Windows.FontWeights.Bold;
-            infoPara.Inlines.Add(dateLabel);
-            infoPara.Inlines.Add(new System.Windows.Documents.Run($"{DateTime.Now:dd/MM/yyyy}"));
-
-            infoPara.Inlines.Add(new System.Windows.Documents.LineBreak());
-
-            // Thêm tổng số tài sản với định dạng in đậm cho nhãn
-            System.Windows.Documents.Run countLabel = new System.Windows.Documents.Run("Tổng số tài sản: ");
-            countLabel.FontWeight = System.Windows.FontWeights.Bold;
-            infoPara.Inlines.Add(countLabel);
-            infoPara.Inlines.Add(new System.Windows.Documents.Run($"{danhSachTaiSan.Count}"));
-
-            section.Blocks.Add(infoPara);
-
-            // Tạo bảng thông tin tài sản với thiết kế đẹp hơn
-            System.Windows.Documents.Table assetTable = new System.Windows.Documents.Table();
-            assetTable.CellSpacing = 0;
-            assetTable.BorderBrush = System.Windows.Media.Brushes.Black;
-            assetTable.BorderThickness = new System.Windows.Thickness(1);
-
-            // Định nghĩa các cột với độ rộng cụ thể - điều chỉnh để cân đối hơn
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(30) }); // STT
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(60) }); // Mã TS
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(140) }); // Tên TS - mở rộng cột này
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(90) }); // Phòng
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Nhóm TS
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(80) }); // Tình trạng
-            assetTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(90) }); // Ghi chú
-
-            // Khởi tạo RowGroup
-            assetTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            // Thêm hàng tiêu đề với màu nền đậm hơn
-            System.Windows.Documents.TableRow headerRow = new System.Windows.Documents.TableRow();
-            headerRow.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(200, 200, 200)); // Màu xám đậm hơn
-            headerRow.FontWeight = System.Windows.FontWeights.Bold;
-
-            // Các ô tiêu đề
-            string[] headers = new string[] { "STT", "Mã TS", "Tên tài sản", "Phòng", "Nhóm TS", "Tình trạng", "Ghi chú" };
-            foreach (string header in headers)
-            {
-                System.Windows.Documents.TableCell cell = new System.Windows.Documents.TableCell();
-                cell.BorderBrush = System.Windows.Media.Brushes.Black;
-                cell.BorderThickness = new System.Windows.Thickness(1);
-                cell.Padding = new System.Windows.Thickness(5);
-                cell.TextAlignment = System.Windows.TextAlignment.Center;
-
-                System.Windows.Documents.Paragraph para = new System.Windows.Documents.Paragraph();
-                para.Inlines.Add(new System.Windows.Documents.Run(header));
-                cell.Blocks.Add(para);
-                headerRow.Cells.Add(cell);
-            }
-            assetTable.RowGroups[0].Rows.Add(headerRow);
-
-            // Lấy thông tin chi tiết cho mỗi tài sản và thêm vào bảng với định dạng xen kẽ
-            var client = await SupabaseService.GetClientAsync();
-            for (int i = 0; i < danhSachTaiSan.Count; i++)
-            {
-                var taiSan = danhSachTaiSan[i];
-
-                // Tạo hàng mới với màu nền xen kẽ để dễ đọc
-                System.Windows.Documents.TableRow row = new System.Windows.Documents.TableRow();
-                if (i % 2 == 1)
-                {
-                    row.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 240, 240)); // Màu xám nhạt
-                }
-
-                // STT
-                AddCellToRow(row, (i + 1).ToString(), System.Windows.TextAlignment.Center);
-
-                // Mã tài sản
-                AddCellToRow(row, taiSan.MaTaiSan?.ToString() ?? "N/A", System.Windows.TextAlignment.Center);
-
-                // Tên tài sản
-                AddCellToRow(row, taiSan.TenTaiSan ?? "Không xác định", System.Windows.TextAlignment.Left);
-
-                // Phòng
-                AddCellToRow(row, taiSan.TenPhong ?? "Không xác định", System.Windows.TextAlignment.Left);
-
-                // Nhóm tài sản
-                AddCellToRow(row, taiSan.TenNhomTS ?? "Không xác định", System.Windows.TextAlignment.Left);
-
-                // Tình trạng
-                AddCellToRow(row, taiSan.TinhTrang ?? "Không xác định", System.Windows.TextAlignment.Center);
-
-                // Ghi chú
-                AddCellToRow(row, taiSan.GhiChu ?? "", System.Windows.TextAlignment.Left);
-
-                // Thêm hàng vào bảng
-                assetTable.RowGroups[0].Rows.Add(row);
-            }
-
-            // Thêm bảng vào section
-            section.Blocks.Add(assetTable);
-
-            // Tạo khu vực nội dung công việc bảo trì với định dạng đẹp hơn
-            System.Windows.Documents.Paragraph taskHeaderPara = new System.Windows.Documents.Paragraph();
-            taskHeaderPara.Margin = new System.Windows.Thickness(0, 25, 0, 10);
-            System.Windows.Documents.Run taskHeaderRun = new System.Windows.Documents.Run("NỘI DUNG CÔNG VIỆC BẢO TRÌ:");
-            taskHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-            taskHeaderRun.FontSize = 14;
-            taskHeaderPara.Inlines.Add(taskHeaderRun);
-            section.Blocks.Add(taskHeaderPara);
-
-            // Tạo bảng cho nội dung công việc - một ô lớn
-            System.Windows.Documents.Table taskTable = new System.Windows.Documents.Table();
-            taskTable.CellSpacing = 0;
-            taskTable.BorderBrush = System.Windows.Media.Brushes.Black;
-            taskTable.BorderThickness = new System.Windows.Thickness(1);
-            taskTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(570) });
-            taskTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            // Tạo một ô lớn duy nhất
-            System.Windows.Documents.TableRow taskRow = new System.Windows.Documents.TableRow();
-            System.Windows.Documents.TableCell taskCell = new System.Windows.Documents.TableCell();
-            taskCell.BorderBrush = System.Windows.Media.Brushes.Black;
-            taskCell.BorderThickness = new System.Windows.Thickness(1);
-            taskCell.Padding = new System.Windows.Thickness(5);
-
-            // Tạo paragraph với nhiều dòng trống để tạo khoảng trống
-            System.Windows.Documents.Paragraph taskPara = new System.Windows.Documents.Paragraph();
-            taskPara.Margin = new System.Windows.Thickness(0);
-            // Thêm nhiều dòng trống bằng cách sử dụng LineBreak
-            for (int i = 0; i < 15; i++)
-            {
-                taskPara.Inlines.Add(new System.Windows.Documents.Run(" "));
-                taskPara.Inlines.Add(new System.Windows.Documents.LineBreak());
-            }
-            taskCell.Blocks.Add(taskPara);
-            taskRow.Cells.Add(taskCell);
-            taskTable.RowGroups[0].Rows.Add(taskRow);
-            section.Blocks.Add(taskTable);
-
-            // Tạo khu vực ghi chú với định dạng đẹp hơn
-            System.Windows.Documents.Paragraph noteHeaderPara = new System.Windows.Documents.Paragraph();
-            noteHeaderPara.Margin = new System.Windows.Thickness(0, 25, 0, 10);
-            System.Windows.Documents.Run noteHeaderRun = new System.Windows.Documents.Run("GHI CHÚ:");
-            noteHeaderRun.FontWeight = System.Windows.FontWeights.Bold;
-            noteHeaderRun.FontSize = 14;
-            noteHeaderPara.Inlines.Add(noteHeaderRun);
-            section.Blocks.Add(noteHeaderPara);
-
-            // Tạo bảng cho ghi chú - cũng tạo một ô lớn duy nhất
-            System.Windows.Documents.Table noteTable = new System.Windows.Documents.Table();
-            noteTable.CellSpacing = 0;
-            noteTable.BorderBrush = System.Windows.Media.Brushes.Black;
-            noteTable.BorderThickness = new System.Windows.Thickness(1);
-            noteTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(570) });
-            noteTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            // Tạo một ô lớn cho ghi chú
-            System.Windows.Documents.TableRow noteRow = new System.Windows.Documents.TableRow();
-            System.Windows.Documents.TableCell noteCell = new System.Windows.Documents.TableCell();
-            noteCell.BorderBrush = System.Windows.Media.Brushes.Black;
-            noteCell.BorderThickness = new System.Windows.Thickness(1);
-            noteCell.Padding = new System.Windows.Thickness(5);
-
-            // Tạo paragraph với nhiều dòng trống
-            System.Windows.Documents.Paragraph notePara = new System.Windows.Documents.Paragraph();
-            notePara.Margin = new System.Windows.Thickness(0);
-            // Thêm nhiều dòng trống bằng cách sử dụng LineBreak
-            for (int i = 0; i < 8; i++)
-            {
-                notePara.Inlines.Add(new System.Windows.Documents.Run(" "));
-                notePara.Inlines.Add(new System.Windows.Documents.LineBreak());
-            }
-            noteCell.Blocks.Add(notePara);
-            noteRow.Cells.Add(noteCell);
-            noteTable.RowGroups[0].Rows.Add(noteRow);
-            section.Blocks.Add(noteTable);
-
-            // Tạo bảng chữ ký - ĐÃ LOẠI BỎ NGƯỜI KIỂM TRA, chỉ còn 2 cột
-            System.Windows.Documents.Table signatureTable = new System.Windows.Documents.Table();
-            signatureTable.CellSpacing = 0;
-            signatureTable.BorderThickness = new System.Windows.Thickness(0);
-            signatureTable.Margin = new System.Windows.Thickness(0, 40, 0, 20);
-            signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-            signatureTable.Columns.Add(new System.Windows.Documents.TableColumn() { Width = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
-            signatureTable.RowGroups.Add(new System.Windows.Documents.TableRowGroup());
-
-            // Tạo dòng chữ ký
-            System.Windows.Documents.TableRow signatureRow = new System.Windows.Documents.TableRow();
-
-            // Người phụ trách
-            AddSignatureCell(signatureRow, "Người phụ trách");
-
-            // Người lập phiếu
-            AddSignatureCell(signatureRow, "Người lập phiếu");
-
-            signatureTable.RowGroups[0].Rows.Add(signatureRow);
-            section.Blocks.Add(signatureTable);
-
-           
-            // Thêm section vào document
-            document.Blocks.Add(section);
-        }
-
+       
         // Phương thức thêm ô vào hàng với căn chỉnh và định dạng đẹp hơn
         private void AddCellToRow(System.Windows.Documents.TableRow row, string text, System.Windows.TextAlignment alignment)
         {
@@ -687,7 +405,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             return _viewModel.DsKiemKe.Where(x => x.IsSelected).ToList();
         }
 
-        private void BtnXuatExcel_Click(object sender, RoutedEventArgs e)
+        private async void BtnXuatExcel_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -698,6 +416,13 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
+                // Lấy danh sách các tài sản được chọn hoặc tất cả nếu không có tài sản nào được chọn
+                var danhSachXuat = _viewModel.DsKiemKe.Where(x => x.IsSelected).ToList();
+                if (danhSachXuat.Count == 0)
+                {
+                    danhSachXuat = _viewModel.DsKiemKe.ToList();
+                }
+
                 // Hiển thị hộp thoại lưu file
                 SaveFileDialog saveDialog = new SaveFileDialog
                 {
@@ -712,6 +437,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     {
                         // Xuất Excel với tất cả dữ liệu đã lọc
                         XuatDanhSachTaiSanRaExcel(saveDialog.FileName);
+
+                        // THÊM MỚI: Lưu hoạt động xuất Excel vào lịch sử
+                        var theoDoiService = new TheoDoiHoatDongService();
+                        string ghiChu = $"Xuất Excel danh sách tài sản cần bảo trì vào file {saveDialog.FileName}";
+                        await theoDoiService.LuuHoatDongXuatExcelDanhSach(danhSachXuat, ghiChu);
+
                         MessageBox.Show("Xuất Excel thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                     }
@@ -729,103 +460,150 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-
-       private void XuatDanhSachTaiSanRaExcel(string filePath)
-{
-    try
-    {
-        // Sử dụng thư viện ClosedXML để xuất Excel
-        using (var workbook = new XLWorkbook())
+        private void XuatDanhSachTaiSanRaExcel(string filePath)
         {
-            // Tạo worksheet
-            var worksheet = workbook.Worksheets.Add("Danh sách bảo trì");
-
-            // Định dạng tiêu đề
-            worksheet.Cell("A1").Value = "DANH SÁCH TÀI SẢN CẦN BẢO TRÌ";
-            worksheet.Cell("A1").Style.Font.Bold = true;
-            worksheet.Cell("A1").Style.Font.FontSize = 16;
-            worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            worksheet.Range("A1:I1").Merge();
-
-            // Thêm ngày xuất báo cáo
-            worksheet.Cell("A2").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
-            worksheet.Range("A2:I2").Merge();
-            worksheet.Cell("A2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-            worksheet.Cell("A2").Style.Font.Italic = true;
-
-            // Thêm header dựa trên DataGrid
-            var headerRow = 4;
-            worksheet.Cell(headerRow, 1).Value = "STT";
-            worksheet.Cell(headerRow, 2).Value = "Mã kiểm kê";
-            worksheet.Cell(headerRow, 3).Value = "Đợt kiểm kê";
-            worksheet.Cell(headerRow, 4).Value = "Tên tài sản";
-            worksheet.Cell(headerRow, 5).Value = "Phòng";
-            worksheet.Cell(headerRow, 6).Value = "Nhóm tài sản";
-            worksheet.Cell(headerRow, 7).Value = "Tình trạng";
-            worksheet.Cell(headerRow, 8).Value = "Vị trí";
-            worksheet.Cell(headerRow, 9).Value = "Ghi chú";
-
-            // Định dạng header
-            var headerRange = worksheet.Range(headerRow, 1, headerRow, 9);
-            headerRange.Style.Font.Bold = true;
-            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
-            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-            // Lấy dữ liệu đã lọc
-            var filteredData = _viewModel.DsKiemKe.ToList();
-
-            // Điền dữ liệu
-            int row = headerRow + 1;
-            for (int i = 0; i < filteredData.Count; i++)
+            try
             {
-                var item = filteredData[i];
-                worksheet.Cell(row, 1).Value = i + 1; // STT
-                worksheet.Cell(row, 2).Value = item.MaKiemKeTS;
-                worksheet.Cell(row, 3).Value = item.TenDotKiemKe ?? $"Đợt {item.MaDotKiemKe?.ToString() ?? "N/A"}";
-                worksheet.Cell(row, 4).Value = item.TenTaiSan ?? $"Tài sản {item.MaTaiSan}"; // Tên tài sản kèm số seri
-                worksheet.Cell(row, 5).Value = item.TenPhong ?? $"Phòng {item.MaPhong}"; // Tên phòng
-                worksheet.Cell(row, 6).Value = item.TenNhomTS ?? "Chưa xác định"; // Tên nhóm tài sản
-                worksheet.Cell(row, 7).Value = item.TinhTrang ?? "Chưa xác định";
-                worksheet.Cell(row, 8).Value = item.ViTriThucTe.ToString();
-                worksheet.Cell(row, 9).Value = item.GhiChu ?? "";
-                row++;
+                // Đọc thông tin công ty
+                var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
+
+                // Sử dụng thư viện ClosedXML để xuất Excel
+                using (var workbook = new XLWorkbook())
+                {
+                    // Tạo worksheet
+                    var worksheet = workbook.Worksheets.Add("Danh sách bảo trì");
+
+                    // Thêm thông tin công ty vào header
+                    int rowIndex = 1;
+
+                    // Tên công ty
+                    worksheet.Cell($"A{rowIndex}").Value = thongTinCongTy.Ten?.ToUpper() ?? "CÔNG TY";
+                    worksheet.Cell($"A{rowIndex}").Style.Font.Bold = true;
+                    worksheet.Cell($"A{rowIndex}").Style.Font.FontSize = 14;
+                    worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
+                    rowIndex++;
+
+                    // Địa chỉ
+                    if (!string.IsNullOrEmpty(thongTinCongTy.DiaChi))
+                    {
+                        worksheet.Cell($"A{rowIndex}").Value = $"Địa chỉ: {thongTinCongTy.DiaChi}";
+                        worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
+                        rowIndex++;
+                    }
+
+                    // Thông tin liên hệ
+                    var thongTinLienHe = new System.Text.StringBuilder();
+                    if (!string.IsNullOrEmpty(thongTinCongTy.SoDienThoai))
+                        thongTinLienHe.Append($"SĐT: {thongTinCongTy.SoDienThoai}  ");
+                    if (!string.IsNullOrEmpty(thongTinCongTy.Email))
+                        thongTinLienHe.Append($"Email: {thongTinCongTy.Email}");
+
+                    if (thongTinLienHe.Length > 0)
+                    {
+                        worksheet.Cell($"A{rowIndex}").Value = thongTinLienHe.ToString();
+                        worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
+                        rowIndex++;
+                    }
+
+                    // Mã số thuế
+                    if (!string.IsNullOrEmpty(thongTinCongTy.MaSoThue))
+                    {
+                        worksheet.Cell($"A{rowIndex}").Value = $"Mã số thuế: {thongTinCongTy.MaSoThue}";
+                        worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
+                        rowIndex++;
+                    }
+
+                    // Thêm dòng trống
+                    rowIndex++;
+
+                    // Định dạng tiêu đề báo cáo
+                    worksheet.Cell($"A{rowIndex}").Value = "DANH SÁCH TÀI SẢN CẦN BẢO TRÌ";
+                    worksheet.Cell($"A{rowIndex}").Style.Font.Bold = true;
+                    worksheet.Cell($"A{rowIndex}").Style.Font.FontSize = 16;
+                    worksheet.Cell($"A{rowIndex}").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
+                    rowIndex++;
+
+                    // Thêm ngày xuất báo cáo
+                    worksheet.Cell($"A{rowIndex}").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                    worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
+                    worksheet.Cell($"A{rowIndex}").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                    worksheet.Cell($"A{rowIndex}").Style.Font.Italic = true;
+                    rowIndex += 2; // Thêm dòng trống
+
+                    // Thêm header dựa trên DataGrid
+                    var headerRow = rowIndex;
+                    worksheet.Cell(headerRow, 1).Value = "STT";
+                    worksheet.Cell(headerRow, 2).Value = "Mã kiểm kê";
+                    worksheet.Cell(headerRow, 3).Value = "Đợt kiểm kê";
+                    worksheet.Cell(headerRow, 4).Value = "Tên tài sản";
+                    worksheet.Cell(headerRow, 5).Value = "Phòng";
+                    worksheet.Cell(headerRow, 6).Value = "Nhóm tài sản";
+                    worksheet.Cell(headerRow, 7).Value = "Tình trạng";
+                    worksheet.Cell(headerRow, 8).Value = "Vị trí";
+                    worksheet.Cell(headerRow, 9).Value = "Ghi chú";
+
+                    // Định dạng header
+                    var headerRange = worksheet.Range(headerRow, 1, headerRow, 9);
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                    // Lấy dữ liệu đã lọc
+                    var filteredData = _viewModel.DsKiemKe.ToList();
+
+                    // Điền dữ liệu
+                    int row = headerRow + 1;
+                    for (int i = 0; i < filteredData.Count; i++)
+                    {
+                        var item = filteredData[i];
+                        worksheet.Cell(row, 1).Value = i + 1; // STT
+                        worksheet.Cell(row, 2).Value = item.MaKiemKeTS;
+                        worksheet.Cell(row, 3).Value = item.TenDotKiemKe ?? $"Đợt {item.MaDotKiemKe?.ToString() ?? "N/A"}";
+                        worksheet.Cell(row, 4).Value = item.TenTaiSan ?? $"Tài sản {item.MaTaiSan}"; // Tên tài sản kèm số seri
+                        worksheet.Cell(row, 5).Value = item.TenPhong ?? $"Phòng {item.MaPhong}"; // Tên phòng
+                        worksheet.Cell(row, 6).Value = item.TenNhomTS ?? "Chưa xác định"; // Tên nhóm tài sản
+                        worksheet.Cell(row, 7).Value = item.TinhTrang ?? "Chưa xác định";
+                        worksheet.Cell(row, 8).Value = item.ViTriThucTe.ToString();
+                        worksheet.Cell(row, 9).Value = item.GhiChu ?? "";
+                        row++;
+                    }
+
+                    // Canh lề và định dạng dữ liệu
+                    var dataRange = worksheet.Range(headerRow + 1, 1, row - 1, 9);
+                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                    // Căn giữa cho một số cột
+                    worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
+                    worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã kiểm kê
+                    worksheet.Column(3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Đợt kiểm kê
+                    worksheet.Column(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
+
+                    // Tự động điều chỉnh độ rộng cột
+                    worksheet.Columns().AdjustToContents();
+
+                    // Thêm chân trang
+                    int footerRow = row + 2;
+                    worksheet.Cell(footerRow, 1).Value = "Tổng số tài sản:";
+                    worksheet.Cell(footerRow, 2).Value = filteredData.Count.ToString();
+                    worksheet.Cell(footerRow, 1).Style.Font.Bold = true;
+
+                    // Lưu file
+                    workbook.SaveAs(filePath);
+                }
             }
-
-            // Canh lề và định dạng dữ liệu
-            var dataRange = worksheet.Range(headerRow + 1, 1, row - 1, 9);
-            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-            // Căn giữa cho một số cột
-            worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
-            worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã kiểm kê
-            worksheet.Column(3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Đợt kiểm kê
-            worksheet.Column(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
-
-            // Tự động điều chỉnh độ rộng cột
-            worksheet.Columns().AdjustToContents();
-
-            // Thêm chân trang
-            int footerRow = row + 2;
-            worksheet.Cell(footerRow, 1).Value = "Tổng số tài sản:";
-            worksheet.Cell(footerRow, 2).Value = filteredData.Count.ToString();
-            worksheet.Cell(footerRow, 1).Style.Font.Bold = true;
-
-            // Lưu file
-            workbook.SaveAs(filePath);
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                throw; // Rethrow để caller biết lỗi
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi",
-            MessageBoxButton.OK, MessageBoxImage.Error);
-        throw; // Rethrow để caller biết lỗi
-    }
-}
-   
-       
+
+
         private async void BtnSua_Click(object sender, RoutedEventArgs e)
         {
             try
