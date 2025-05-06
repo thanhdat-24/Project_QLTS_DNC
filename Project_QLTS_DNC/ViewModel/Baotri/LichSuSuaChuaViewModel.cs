@@ -10,6 +10,7 @@ using Project_QLTS_DNC.Models.BaoTri;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using Project_QLTS_DNC.Models.PhieuXuatKho;
+using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Services;
 
 namespace Project_QLTS_DNC.ViewModel.Baotri
@@ -29,11 +30,15 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
         private NhomTaiSan _nhomTaiSanDuocChon;
         private List<TaiSanModel> _danhSachTaiSan;
         private List<ChiTietPhieuXuatModel> _danhSachChiTietXuat;
+        private List<NhanVienModel> _danhSachNhanVien;
+        private Dictionary<int, string> _cacheTenPhong;
 
         // Biến cho phân trang
         private int _trangHienTai;
         private int _tongSoTrang;
         private int _soItemMoiTrang;
+        private bool _isSearchInProgress = false;
+        private string _loaiThaoTacDuocChon;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -166,6 +171,25 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
+        public string LoaiThaoTacDuocChon
+        {
+            get => _loaiThaoTacDuocChon;
+            set
+            {
+                _loaiThaoTacDuocChon = value;
+                OnPropertyChanged(nameof(LoaiThaoTacDuocChon));
+            }
+        }
+
+        public ObservableCollection<string> DanhSachLoaiThaoTac { get; } = new ObservableCollection<string>
+        {
+            "Tất cả",
+            "Xuất Excel",
+            "In phiếu",
+            "Xuất Excel danh sách",
+            "In phiếu danh sách"
+        };
+
         public ICommand TimKiemCommand { get; private set; }
         public ICommand LamMoiCommand { get; private set; }
         public ICommand LocDanhSachCommand { get; private set; }
@@ -179,17 +203,19 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             DanhSachNhomTaiSan = new ObservableCollection<NhomTaiSan>();
             _danhSachTaiSan = new List<TaiSanModel>();
             _danhSachChiTietXuat = new List<ChiTietPhieuXuatModel>();
+            _danhSachNhanVien = new List<NhanVienModel>();
+            _cacheTenPhong = new Dictionary<int, string>();
 
             // Khởi tạo giá trị mặc định cho phân trang
             _trangHienTai = 1;
             _soItemMoiTrang = 10;
 
             TimKiemCommand = new RelayCommand<object>(async param => await TimKiem());
-            LamMoiCommand = new RelayCommand<object>(async param => await TaiDuLieu());
+            LamMoiCommand = new RelayCommand<object>(async param => await TaiDuLieuDayDu());
             LocDanhSachCommand = new RelayCommand<object>(async param => await LocDanhSach());
 
             // Tải dữ liệu khi khởi tạo ViewModel
-            TaiDuLieu().ConfigureAwait(false);
+            TaiDuLieuDayDu().ConfigureAwait(false);
             TaiDanhSachNhomTaiSan().ConfigureAwait(false);
         }
 
@@ -198,22 +224,28 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public async Task TaiDuLieu()
+        // Phương thức mới: Tải dữ liệu đầy đủ từ nhiều bảng
+        public async Task TaiDuLieuDayDu()
         {
             try
             {
                 DangTaiDuLieu = true;
+
+                // Lấy dữ liệu lịch sử sửa chữa
                 var danhSach = await _lichSuSuaChuaService.LayTatCaLichSuSuaChua();
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     DanhSachLichSu = new ObservableCollection<LichSuSuaChua>(danhSach);
-                    // Tải danh sách tài sản
                     TrangHienTai = 1;
                     CapNhatPhanTrang();
                 });
 
-                // Tải danh sách tài sản riêng biệt, không cần đợi
+                // Tải danh sách tài sản và thông tin liên quan
                 await TaiDanhSachTaiSan();
+
+                // Tải thông tin chi tiết cho mỗi mục lịch sử
+                await TaiThongTinChiTiet();
             }
             catch (Exception ex)
             {
@@ -261,12 +293,29 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             try
             {
                 var client = await SupabaseService.GetClientAsync();
+
+                // Tải danh sách tài sản
                 var response = await client.From<TaiSanModel>().Get();
                 _danhSachTaiSan = response.Models;
 
                 // Tải chi tiết xuất kho để lấy thông tin về nhóm tài sản
                 var responseChiTiet = await client.From<ChiTietPhieuXuatModel>().Get();
                 _danhSachChiTietXuat = responseChiTiet.Models;
+
+                // Tải danh sách nhân viên
+                var responseNhanVien = await client.From<NhanVienModel>().Get();
+                _danhSachNhanVien = responseNhanVien.Models;
+
+                // Tải thông tin phòng (tùy theo cấu trúc của bạn)
+                // Ví dụ: Tạo một dictionary lưu tên phòng theo mã phòng
+                // Bạn cần thay đổi tên lớp và các thuộc tính tùy theo DB của bạn
+                /*
+                var responsePhong = await client.From<PhongModel>().Get();
+                foreach (var phong in responsePhong.Models)
+                {
+                    _cacheTenPhong[phong.MaPhong] = phong.TenPhong;
+                }
+                */
             }
             catch (Exception ex)
             {
@@ -274,10 +323,107 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
             }
         }
 
-        // 1. Trong LichSuSuaChuaViewModel.cs - thêm biến tránh thông báo trùng lặp
-        private bool _isSearchInProgress = false;
+        // Phương thức mới: Tải thông tin chi tiết cho mỗi mục lịch sử
+        private async Task TaiThongTinChiTiet()
+        {
+            try
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var lichSu in DanhSachLichSu)
+                    {
+                        // Cập nhật thông tin tài sản
+                        if (lichSu.MaTaiSan.HasValue)
+                        {
+                            var taiSan = _danhSachTaiSan.FirstOrDefault(ts => ts.MaTaiSan == lichSu.MaTaiSan.Value);
+                            if (taiSan != null)
+                            {
+                                lichSu.TenTaiSan = taiSan.TenTaiSan;
+                                lichSu.SoSeri = taiSan.SoSeri;
+                                lichSu.TinhTrangTaiSan = taiSan.TinhTrangSP;
 
-        // 2. Sửa lại phương thức TimKiem
+                                // Cập nhật thông tin phòng nếu có
+                                if (taiSan.MaPhong.HasValue && _cacheTenPhong.ContainsKey(taiSan.MaPhong.Value))
+                                {
+                                    lichSu.TenPhong = _cacheTenPhong[taiSan.MaPhong.Value];
+                                }
+
+                                // Cập nhật thông tin nhóm tài sản
+                                var chiTietXuat = _danhSachChiTietXuat
+                                    .FirstOrDefault(ct => ct.MaTaiSan == taiSan.MaTaiSan);
+
+                                if (chiTietXuat != null && chiTietXuat.MaNhomTS.HasValue)
+                                {
+                                    var nhomTaiSan = DanhSachNhomTaiSan
+                                        .FirstOrDefault(n => n.MaNhomTS == chiTietXuat.MaNhomTS.Value);
+
+                                    if (nhomTaiSan != null)
+                                    {
+                                        lichSu.TenNhomTaiSan = nhomTaiSan.TenNhom;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Cập nhật thông tin người thực hiện
+                        if (lichSu.MaNV.HasValue)
+                        {
+                            var nhanVien = _danhSachNhanVien
+                                .FirstOrDefault(nv => nv.MaNV == lichSu.MaNV.Value);
+
+                            if (nhanVien != null)
+                            {
+                                lichSu.TenNguoiThucHien = nhanVien.TenNV;
+                            }
+                        }
+                    }
+
+                    // Cập nhật lại danh sách hiển thị
+                    CapNhatDanhSachHienThi();
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải thông tin chi tiết: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Giữ các phương thức hiện có
+        public async Task TaiDuLieu()
+        {
+            try
+            {
+                DangTaiDuLieu = true;
+                var danhSach = await _lichSuSuaChuaService.LayTatCaLichSuSuaChua();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    DanhSachLichSu = new ObservableCollection<LichSuSuaChua>(danhSach);
+                    // Tải danh sách tài sản
+                    TrangHienTai = 1;
+                    CapNhatPhanTrang();
+                });
+
+                // Tải danh sách tài sản riêng biệt, không cần đợi
+                await TaiDanhSachTaiSan();
+            }
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    string errorMessage = $"Lỗi khi tải dữ liệu: {ex.Message}";
+                    if (ex.InnerException != null)
+                        errorMessage += $"\nChi tiết: {ex.InnerException.Message}";
+
+                    MessageBox.Show(errorMessage, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+            }
+            finally
+            {
+                DangTaiDuLieu = false;
+            }
+        }
+
+        // Phương thức tìm kiếm
         public async Task TimKiem()
         {
             // Nếu đang trong quá trình tìm kiếm, không thực hiện thêm
@@ -320,6 +466,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                             MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 });
+
+                // Tải thông tin chi tiết cho kết quả tìm kiếm
+                await TaiThongTinChiTiet();
             }
             catch (Exception ex)
             {
@@ -334,25 +483,8 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 _isSearchInProgress = false;  // Đánh dấu đã hoàn thành tìm kiếm
             }
         }
-        private string _loaiThaoTacDuocChon;
-        public string LoaiThaoTacDuocChon
-        {
-            get => _loaiThaoTacDuocChon;
-            set
-            {
-                _loaiThaoTacDuocChon = value;
-                OnPropertyChanged(nameof(LoaiThaoTacDuocChon));
-            }
-        }
 
-        public ObservableCollection<string> DanhSachLoaiThaoTac { get; } = new ObservableCollection<string>
-{
-    "Tất cả",
-    "Xuất Excel",
-    "In phiếu",
-    "Xuất Excel danh sách",
-    "In phiếu danh sách"
-};
+        // Phương thức lọc danh sách
         public async Task LocDanhSach()
         {
             try
@@ -388,7 +520,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                     }
                 }
 
-                // THÊM MỚI: Lọc theo loại thao tác (nếu có)
+                // Lọc theo loại thao tác (nếu có)
                 if (!string.IsNullOrEmpty(LoaiThaoTacDuocChon) && LoaiThaoTacDuocChon != "Tất cả")
                 {
                     danhSachLichSuLoc = danhSachLichSuLoc.Where(ls => ls.LoaiThaoTac == LoaiThaoTacDuocChon).ToList();
@@ -404,6 +536,9 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 // Cập nhật phân trang và hiển thị
                 TrangHienTai = 1;
                 CapNhatPhanTrang();
+
+                // Tải thông tin chi tiết cho kết quả lọc
+                await TaiThongTinChiTiet();
             }
             catch (Exception ex)
             {

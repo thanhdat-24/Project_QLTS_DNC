@@ -50,40 +50,40 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             _viewModel.DenNgay = datePickerDenNgay.SelectedDate;
         }
 
-        
-       // 3. Trong LichSuSuaChuaUserControl.xaml.cs - Sửa lại sự kiện DatePicker_SelectedDateChanged
-private bool _isDateChanging = false;
 
-private async void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-{
-    if (DataContext == null || _isDateChanging) return;
+        // Trong LichSuSuaChuaUserControl.xaml.cs - Sửa lại sự kiện DatePicker_SelectedDateChanged
+        private bool _isDateChanging = false;
 
-    try
-    {
-        _isDateChanging = true;
-        
-        _viewModel.TuNgay = datePickerTuNgay.SelectedDate;
-        _viewModel.DenNgay = datePickerDenNgay.SelectedDate;
-
-        // Chỉ tự động tìm kiếm khi cả hai ngày đều hợp lệ
-        if (_viewModel.TuNgay.HasValue && _viewModel.DenNgay.HasValue)
+        private async void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_viewModel.TuNgay <= _viewModel.DenNgay)
+            if (DataContext == null || _isDateChanging) return;
+
+            try
             {
-                await _viewModel.TimKiem();
+                _isDateChanging = true;
+
+                _viewModel.TuNgay = datePickerTuNgay.SelectedDate;
+                _viewModel.DenNgay = datePickerDenNgay.SelectedDate;
+
+                // Chỉ tự động tìm kiếm khi cả hai ngày đều hợp lệ
+                if (_viewModel.TuNgay.HasValue && _viewModel.DenNgay.HasValue)
+                {
+                    if (_viewModel.TuNgay <= _viewModel.DenNgay)
+                    {
+                        await _viewModel.TimKiem();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ngày bắt đầu không được lớn hơn ngày kết thúc!", "Cảnh báo",
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
             }
-            else
+            finally
             {
-                MessageBox.Show("Ngày bắt đầu không được lớn hơn ngày kết thúc!", "Cảnh báo",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                _isDateChanging = false;
             }
         }
-    }
-    finally
-    {
-        _isDateChanging = false;
-    }
-}
         private void btnTimKiem_Click(object sender, RoutedEventArgs e)
         {
             // Lấy ngày bắt đầu và kết thúc từ DatePicker
@@ -93,6 +93,7 @@ private async void DatePicker_SelectedDateChanged(object sender, SelectionChange
             // Gọi phương thức tìm kiếm
             _viewModel.TimKiem().ConfigureAwait(false);
         }
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // Thiết lập giá trị mặc định cho bộ lọc ngày
@@ -104,13 +105,15 @@ private async void DatePicker_SelectedDateChanged(object sender, SelectionChange
             _viewModel.TuNgay = datePickerTuNgay.SelectedDate;
             _viewModel.DenNgay = datePickerDenNgay.SelectedDate;
 
-            // Tải dữ liệu ban đầu
-            _viewModel.TaiDuLieu().ConfigureAwait(false);
+            // Tải dữ liệu ban đầu với phương thức mới
+            _viewModel.TaiDuLieuDayDu().ConfigureAwait(false);
         }
+
         private void TimKiem_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.TimKiem().ConfigureAwait(false);
         }
+
         private void LocDanhSach_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cboLocDanhSach.SelectedItem != null)
@@ -119,22 +122,27 @@ private async void DatePicker_SelectedDateChanged(object sender, SelectionChange
                 _viewModel.LocDanhSach().ConfigureAwait(false);
             }
         }
+
         private void FirstPage_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.ChuyenTrangDau();
         }
+
         private void PrevPage_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.ChuyenTrangTruoc();
         }
+
         private void NextPage_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.ChuyenTrangSau();
         }
+
         private void LastPage_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.ChuyenTrangCuoi();
         }
+
         private void PageSize_Changed(object sender, SelectionChangedEventArgs e)
         {
             if (cboPageSize.SelectedItem != null)
@@ -147,7 +155,7 @@ private async void DatePicker_SelectedDateChanged(object sender, SelectionChange
                 }
             }
         }
-       
+
         private void txtTimKiem_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
