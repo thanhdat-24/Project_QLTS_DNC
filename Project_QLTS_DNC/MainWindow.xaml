@@ -90,6 +90,7 @@
 
                     <TreeViewItem x:Name="btnQuanLyCaiDat" Header="⚙️ Cài đặt">
                         <TreeViewItem x:Name="btnThongTinCongTy" Header="🏢 Thông tin công ty" Selected="btnThongTinCongTy_Selected"/>
+                        
                     </TreeViewItem>
 
                 </TreeView>
