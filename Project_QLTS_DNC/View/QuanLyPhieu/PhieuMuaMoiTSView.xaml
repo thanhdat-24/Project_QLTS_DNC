@@ -37,14 +37,16 @@
             </Button>
         </Grid>
 
-        <!-- Search & Filter -->
         <Grid Grid.Row="1" Margin="10,0,10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
+                <!-- Ô tìm kiếm -->
                 <ColumnDefinition Width="Auto"/>
+                <!-- Nút tìm + làm mới -->
                 <ColumnDefinition Width="Auto"/>
+                <!-- ComboBox lọc ngày -->
                 <ColumnDefinition Width="Auto"/>
-                <!-- Thêm cột cho nút xuất Excel -->
+                <!-- Nút xuất Excel -->
             </Grid.ColumnDefinitions>
 
             <!-- Search Card -->
@@ -56,45 +58,54 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <materialDesign:PackIcon Kind="Search" 
-                                             Grid.Column="0" 
-                                             VerticalAlignment="Center" 
-                                             Margin="8,0" 
-                                             Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                     Grid.Column="0" 
+                                     VerticalAlignment="Center" 
+                                     Margin="8,0" 
+                                     Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                     <TextBox Grid.Column="1" 
-                             x:Name="txtSearch" 
-                             materialDesign:HintAssist.Hint="Tìm kiếm" 
-                             BorderThickness="0" 
-                             VerticalAlignment="Center" 
-                             Margin="8,0"
-                             materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
+                     x:Name="txtSearch" 
+                     materialDesign:HintAssist.Hint="Tìm kiếm" 
+                     BorderThickness="0" 
+                     VerticalAlignment="Center" 
+                     Margin="8,0"
+                     materialDesign:TextFieldAssist.UnderlineBrush="{StaticResource PrimaryHueMidBrush}"/>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                         <!-- Nút tìm kiếm -->
                         <Button Style="{StaticResource MaterialDesignIconButton}" 
-                                x:Name="btnSearch" 
-                                ToolTip="Tìm kiếm" 
-                                Click="btnSearch_Click">
+                        x:Name="btnSearch" 
+                        ToolTip="Tìm kiếm" 
+                        Click="btnSearch_Click">
                             <materialDesign:PackIcon Kind="ArrowRight" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                         </Button>
 
                         <!-- Nút làm mới -->
                         <Button Style="{StaticResource MaterialDesignIconButton}" 
-                                x:Name="btnRefresh" 
-                                ToolTip="Làm mới" 
-                                Click="btnRefresh_Click"
-                                Margin="8,0,0,0">
+                        x:Name="btnRefresh" 
+                        ToolTip="Làm mới" 
+                        Click="btnRefresh_Click"
+                        Margin="8,0,0,0">
                             <materialDesign:PackIcon Kind="Refresh" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                         </Button>
                     </StackPanel>
                 </Grid>
             </materialDesign:Card>
 
+            <!-- ComboBox lọc theo ngày -->
+            <materialDesign:Card Grid.Column="2" Margin="0,0,16,0" Padding="8" UniformCornerRadius="8" VerticalAlignment="Center">
+                <ComboBox x:Name="cbNgayDeNghiFilter"
+              Width="200"
+              materialDesign:HintAssist.Hint="Ngày đề nghị"
+              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  SelectionChanged="cbNgayDeNghiFilter_SelectionChanged"/>
+            </materialDesign:Card>
+
             <!-- Nút xuất Excel -->
             <Button Grid.Column="3" 
-                    Style="{StaticResource MaterialDesignRaisedButton}" 
-                    materialDesign:ButtonAssist.CornerRadius="8" 
-                    Background="{DynamicResource SecondaryFileExcel}" 
-                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                    Margin="8,0,0,0" Click="Button_Click">
+            Style="{StaticResource MaterialDesignRaisedButton}" 
+            materialDesign:ButtonAssist.CornerRadius="8" 
+            Background="{DynamicResource SecondaryFileExcel}" 
+            Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
+            Margin="8,0,0,0" Click="Button_Click">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 8 0"/>
                     <TextBlock Text="XUẤT EXCEL"/>

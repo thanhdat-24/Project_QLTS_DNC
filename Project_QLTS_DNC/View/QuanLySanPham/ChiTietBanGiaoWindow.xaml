@@ -111,32 +111,16 @@
                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
 
             <DataGrid Grid.Row="1" 
-                      x:Name="dgChiTietBanGiao" 
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      materialDesign:DataGridAssist.CellPadding="8"
-                      BorderThickness="1"
-                      IsReadOnly="True">
+          x:Name="dgChiTietBanGiao" 
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          materialDesign:DataGridAssist.CellPadding="8"
+          BorderThickness="1"
+          IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã tài sản" 
-                                       Binding="{Binding MaTaiSan}" 
-                                       Width="100"/>
-
-                    <DataGridTextColumn Header="Tên tài sản" 
-                                       Binding="{Binding TenTaiSan}" 
-                                       Width="*"/>
-
-                    <DataGridTextColumn Header="Số Seri" 
-                                       Binding="{Binding SoSeri}" 
-                                       Width="120"/>
-
-                    <DataGridTextColumn Header="Nhóm tài sản" 
-                                       Binding="{Binding TenNhomTS}" 
-                                       Width="150"/>
-
-                    <DataGridTextColumn Header="Vị trí" 
-                                       Binding="{Binding ViTriTS}" 
-                                       Width="80">
+                    <DataGridTextColumn Header="Mã nhóm" 
+                           Binding="{Binding MaNhomTS}" 
+                           Width="100">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -145,9 +129,20 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="Ghi chú" 
-                                       Binding="{Binding GhiChu}" 
-                                       Width="150"/>
+                    <DataGridTextColumn Header="Tên nhóm tài sản" 
+                           Binding="{Binding TenNhomTS}" 
+                           Width="*"/>
+
+                    <DataGridTextColumn Header="Số lượng" 
+                           Binding="{Binding SoLuong}" 
+                           Width="80">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

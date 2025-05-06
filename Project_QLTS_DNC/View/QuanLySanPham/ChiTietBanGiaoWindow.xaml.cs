@@ -26,6 +26,7 @@ using TextAlignment = iText.Layout.Properties.TextAlignment;
 using VerticalAlignment = iText.Layout.Properties.VerticalAlignment;
 using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Services.ThongBao;
+using Project_QLTS_DNC.View.Common;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -56,7 +57,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
             {
                 ShowLoading(true);
 
-                // Lấy thông tin phiếu bàn giao
+                // Lấy thông tin phiếu bàn giao (keep this part unchanged)
                 var dsBanGiao = await BanGiaoTaiSanService.LayDanhSachPhieuBanGiaoAsync();
                 _thongTinBanGiao = dsBanGiao.FirstOrDefault(p => p.MaBanGiaoTS == _maBanGiao);
 
@@ -67,18 +68,16 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     return;
                 }
 
-                // Hiển thị thông tin phiếu
+                // Display phiếu information (keep this part unchanged)
                 txtMaPhieu.Text = _thongTinBanGiao.MaBanGiaoTS.ToString();
                 txtNgayBanGiao.Text = _thongTinBanGiao.NgayBanGiao.ToString("dd/MM/yyyy HH:mm");
                 txtNguoiLap.Text = _thongTinBanGiao.TenNV;
                 txtPhong.Text = _thongTinBanGiao.TenPhong;
                 txtToaNha.Text = _thongTinBanGiao.TenToaNha;
                 txtNoiDung.Text = _thongTinBanGiao.NoiDung;
-
-                // Hiển thị thông tin người tiếp nhận
                 txtNguoiTiepNhan.Text = _thongTinBanGiao.CbTiepNhan;
 
-                // Định dạng trạng thái
+                // Format status (keep this part unchanged)
                 txtTrangThai.Text = _thongTinBanGiao.TrangThaiText;
                 switch (_thongTinBanGiao.TrangThaiText)
                 {
@@ -93,14 +92,28 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                         break;
                 }
 
-                // Lấy chi tiết bàn giao
+                // Get detailed list of assets (keep this part unchanged)
                 _dsChiTiet = await BanGiaoTaiSanService.LayDanhSachChiTietBanGiaoAsync(_maBanGiao);
-                dgChiTietBanGiao.ItemsSource = _dsChiTiet;
 
-                // Cập nhật tiêu đề cửa sổ
+                // Group assets by category
+                var danhSachNhom = _dsChiTiet
+                    .GroupBy(x => new { x.MaNhomTS, x.TenNhomTS })
+                    .Select(g => new ChiTietBanGiaoNhomDTO
+                    {
+                        MaNhomTS = g.Key.MaNhomTS ?? 0,
+                        TenNhomTS = g.Key.TenNhomTS ?? "Chưa phân loại",
+                        SoLuong = g.Count(),
+                        DanhSachTaiSan = g.ToList()
+                    })
+                    .ToList();
+
+                // Display grouped data
+                dgChiTietBanGiao.ItemsSource = danhSachNhom;
+
+                // Update window title (keep this part unchanged)
                 this.Title = $"Chi Tiết Phiếu Bàn Giao - Mã phiếu: {_maBanGiao}";
 
-                // Reset trạng thái thay đổi
+                // Reset change status (keep this part unchanged)
                 _isThongTinChanged = false;
             }
             catch (Exception ex)
@@ -205,71 +218,96 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         {
             try
             {
-                // Hiển thị SaveFileDialog để chọn nơi lưu file PDF
-                SaveFileDialog saveFileDialog = new SaveFileDialog
-                {
-                    Filter = "PDF Files|*.pdf",
-                    Title = "Lưu phiếu bàn giao",
-                    FileName = $"PhieuBanGiaoTaiSan_{_maBanGiao}_{DateTime.Now:yyyyMMdd_HHmmss}" // Add timestamp to filename
-                };
+                // Thêm mới: Hiện dialog để chọn kiểu in (trực tiếp hoặc PDF)
+                var dialog = new PrintOptionsDialog();
+                var result = dialog.ShowDialog();
 
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    ShowLoading(true);
+                if (result != true)
+                    return;
 
-                    // Nếu người tiếp nhận chưa được cập nhật, hỏi người dùng có muốn cập nhật không
-                    if (string.IsNullOrWhiteSpace(_thongTinBanGiao.CbTiepNhan) &&
-                        !string.IsNullOrWhiteSpace(txtNguoiTiepNhan.Text) &&
-                        _isThongTinChanged)
+                // Nếu người tiếp nhận chưa được cập nhật, hỏi người dùng có muốn cập nhật không
+                if (string.IsNullOrWhiteSpace(_thongTinBanGiao.CbTiepNhan) &&
+                    !string.IsNullOrWhiteSpace(txtNguoiTiepNhan.Text) &&
+                    _isThongTinChanged)
+                {
+                    MessageBoxResult confirmResult = MessageBox.Show(
+                        "Thông tin người tiếp nhận đã thay đổi nhưng chưa được lưu. Bạn có muốn lưu trước khi in phiếu không?",
+                        "Xác nhận",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (confirmResult == MessageBoxResult.Yes)
                     {
-                        MessageBoxResult result = MessageBox.Show(
-                            "Thông tin người tiếp nhận đã thay đổi nhưng chưa được lưu. Bạn có muốn lưu trước khi in phiếu không?",
-                            "Xác nhận",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question);
-
-                        if (result == MessageBoxResult.Yes)
-                        {
-                            await LuuNguoiTiepNhan();
-                            await LoadData(); // Tải lại dữ liệu sau khi lưu
-                        }
+                        await LuuNguoiTiepNhan();
+                        await LoadData(); // Tải lại dữ liệu sau khi lưu
                     }
+                }
 
-                    string filePath = saveFileDialog.FileName;
-                    bool success = false;
-                    int retryCount = 0;
+                ShowLoading(true);
 
-                    // Try to create the PDF, with retry logic
-                    while (!success && retryCount < 3)
+                // Xử lý theo lựa chọn của người dùng
+                if (dialog.IsPrintDirectly)
+                {
+                    // In trực tiếp
+                    PrintService.InPhieuBanGiao(_thongTinBanGiao, _dsChiTiet);
+
+                    // Hiển thị thông báo in thành công
+                    var notificationDialog = new SuccessNotificationDialog(
+                        "In phiếu thành công!",
+                        "Phiếu bàn giao đã được gửi đến máy in. Vui lòng kiểm tra máy in của bạn.");
+                    notificationDialog.Show();
+                }
+                else
+                {
+                    // Xuất PDF (giữ nguyên code hiện tại)
+                    // Hiển thị SaveFileDialog để chọn nơi lưu file PDF
+                    SaveFileDialog saveFileDialog = new SaveFileDialog
                     {
-                        try
-                        {
-                            // Tạo file PDF
-                            await Task.Run(() => TaoFilePDF(filePath));
-                            success = true;
-                        }
-                        catch (IOException ioEx) when (ioEx.HResult == unchecked((int)0x80070020))
-                        {
-                            // File is in use, modify filename and try again
-                            retryCount++;
-                            string directory = System.IO.Path.GetDirectoryName(filePath);
-                            string filename = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                            string extension = System.IO.Path.GetExtension(filePath);
+                        Filter = "PDF Files|*.pdf",
+                        Title = "Lưu phiếu bàn giao",
+                        FileName = $"PhieuBanGiaoTaiSan_{_maBanGiao}_{DateTime.Now:yyyyMMdd_HHmmss}" // Add timestamp to filename
+                    };
 
-                            // Add a unique identifier to the filename
-                            filePath = System.IO.Path.Combine(directory, $"{filename}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}");
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        string filePath = saveFileDialog.FileName;
+                        bool success = false;
+                        int retryCount = 0;
 
-                            if (retryCount >= 3)
+                        // Try to create the PDF, with retry logic
+                        while (!success && retryCount < 3)
+                        {
+                            try
                             {
-                                throw; // Give up after 3 retries
+                                // Tạo file PDF
+                                await Task.Run(() => TaoFilePDF(filePath));
+                                success = true;
+                            }
+                            catch (IOException ioEx) when (ioEx.HResult == unchecked((int)0x80070020))
+                            {
+                                // File is in use, modify filename and try again
+                                retryCount++;
+                                string directory = System.IO.Path.GetDirectoryName(filePath);
+                                string filename = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                                string extension = System.IO.Path.GetExtension(filePath);
+
+                                // Add a unique identifier to the filename
+                                filePath = System.IO.Path.Combine(directory, $"{filename}_{Guid.NewGuid().ToString().Substring(0, 8)}{extension}");
+
+                                if (retryCount >= 3)
+                                {
+                                    throw; // Give up after 3 retries
+                                }
                             }
                         }
-                    }
 
-                    MessageBox.Show($"Xuất phiếu bàn giao thành công!\nFile được lưu tại: {filePath}",
-                        "Thông báo",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                        // Thay thế MessageBox bằng SuccessNotificationDialog hiện đại hơn
+                        var notificationDialog = new SuccessNotificationDialog(
+                            "Xuất phiếu thành công!",
+                            $"File được lưu tại: {filePath}",
+                            filePath); // Truyền đường dẫn file để có thể mở file từ dialog
+                        notificationDialog.Show();
+                    }
                 }
             }
             catch (Exception ex)
@@ -281,7 +319,6 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 ShowLoading(false);
             }
         }
-
         private async Task LuuNguoiTiepNhan()
         {
             try
@@ -423,7 +460,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 document.Add(new Paragraph("\n").SetFont(font));
 
                 // Tạo bảng chi tiết tài sản
-                Paragraph tableTitle = new Paragraph("DANH SÁCH TÀI SẢN BÀN GIAO")
+                Paragraph tableTitle = new Paragraph("DANH SÁCH TÀI SẢN BÀN GIAO (THEO NHÓM)")
                     .SetFont(font)
                     .SetTextAlignment(TextAlignment.CENTER)
                     .SetFontSize(14)
@@ -432,61 +469,50 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 document.Add(tableTitle);
 
                 // Tạo bảng chi tiết
-                Table table = new Table(new float[] { 30, 70, 180, 80, 70, 80 });
+                Table table = new Table(new float[] { 50, 250, 80 });
                 table.SetWidth(UnitValue.CreatePercentValue(100));
 
                 // Header của bảng
                 Cell[] headerCells = new Cell[] {
-            new Cell().Add(new Paragraph("STT").SetFont(font).SetBold()),
-            new Cell().Add(new Paragraph("Mã tài sản").SetFont(font).SetBold()),
-            new Cell().Add(new Paragraph("Tên tài sản").SetFont(font).SetBold()),
-            new Cell().Add(new Paragraph("Số Seri").SetFont(font).SetBold()),
-            new Cell().Add(new Paragraph("Vị trí").SetFont(font).SetBold()),
-            new Cell().Add(new Paragraph("Ghi chú").SetFont(font).SetBold())
-        };
+                    new Cell().Add(new Paragraph("Mã nhóm").SetFont(font).SetBold()),
+                    new Cell().Add(new Paragraph("Tên nhóm tài sản").SetFont(font).SetBold()),
+                    new Cell().Add(new Paragraph("Số lượng").SetFont(font).SetBold())
+};
 
                 foreach (var cell in headerCells)
                 {
                     cell.SetBackgroundColor(new DeviceRgb(220, 220, 220));
                     cell.SetTextAlignment(TextAlignment.CENTER);
-                    // Bỏ qua phần thiết lập căn chỉnh dọc vì đang gây lỗi
                     cell.SetPadding(5);
                     table.AddHeaderCell(cell);
                 }
 
+                var danhSachNhom = _dsChiTiet
+                    .GroupBy(x => new { x.MaNhomTS, x.TenNhomTS })
+                    .Select(g => new
+                    {
+                        MaNhomTS = g.Key.MaNhomTS ?? 0,
+                        TenNhomTS = g.Key.TenNhomTS ?? "Chưa phân loại",
+                        SoLuong = g.Count()
+                    })
+                    .ToList();
+
                 // Dữ liệu cho bảng
-                for (int i = 0; i < _dsChiTiet.Count; i++)
+                foreach (var nhom in danhSachNhom)
                 {
-                    var item = _dsChiTiet[i];
+                    // Mã nhóm
+                    table.AddCell(new Cell()
+                        .Add(new Paragraph(nhom.MaNhomTS.ToString()).SetFont(font))
+                        .SetTextAlignment(TextAlignment.CENTER));
 
-                    // STT
-                    Cell cellSTT = new Cell().Add(new Paragraph((i + 1).ToString()).SetFont(font))
-                        .SetTextAlignment(TextAlignment.CENTER);
-                    // Bỏ qua phần thiết lập căn chỉnh dọc vì đang gây lỗi
-                    table.AddCell(cellSTT);
+                    // Tên nhóm
+                    table.AddCell(new Cell()
+                        .Add(new Paragraph(nhom.TenNhomTS).SetFont(font)));
 
-                    // Mã tài sản
-                    Cell cellMaTS = new Cell().Add(new Paragraph(item.MaTaiSan.ToString()).SetFont(font))
-                        .SetTextAlignment(TextAlignment.CENTER);
-                    table.AddCell(cellMaTS);
-
-                    // Tên tài sản
-                    Cell cellTenTS = new Cell().Add(new Paragraph(item.TenTaiSan).SetFont(font));
-                    table.AddCell(cellTenTS);
-
-                    // Số Seri
-                    Cell cellSeri = new Cell().Add(new Paragraph(item.SoSeri ?? "-").SetFont(font))
-                        .SetTextAlignment(TextAlignment.CENTER);
-                    table.AddCell(cellSeri);
-
-                    // Vị trí
-                    Cell cellViTri = new Cell().Add(new Paragraph(item.ViTriTS.ToString()).SetFont(font))
-                        .SetTextAlignment(TextAlignment.CENTER);
-                    table.AddCell(cellViTri);
-
-                    // Ghi chú
-                    Cell cellGhiChu = new Cell().Add(new Paragraph(item.GhiChu ?? "-").SetFont(font));
-                    table.AddCell(cellGhiChu);
+                    // Số lượng
+                    table.AddCell(new Cell()
+                        .Add(new Paragraph(nhom.SoLuong.ToString()).SetFont(font))
+                        .SetTextAlignment(TextAlignment.CENTER));
                 }
 
                 document.Add(table);

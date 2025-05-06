@@ -2,19 +2,29 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Project_QLTS_DNC.Services.QLTaiSanService;
-using Project_QLTS_DNC.Helpers; // Thêm namespace cho NetworkHelper
+using Project_QLTS_DNC.Helpers;
 
 namespace Project_QLTS_DNC.DTOs
 {
+    // Static class to hold shared cache data
+    public static class TaiSanQRDTOCache
+    {
+        public static Dictionary<int, string> NhomTSNames { get; } = new Dictionary<int, string>();
+    }
+
     public class TaiSanQRDTO : TaiSanDTO
     {
         private int? _maNhomTS;
         private string _tenNhomTS;
         private string _maQrUrl;
 
+        // Cache đã tải thông tin nhóm tài sản hay chưa
+        private bool _hasLoadedGroupInfo = false;
+
         // Mã nhóm tài sản
-        public int? MaNhomTS
+        public new int? MaNhomTS
         {
             get { return _maNhomTS; }
             set
@@ -28,7 +38,7 @@ namespace Project_QLTS_DNC.DTOs
         }
 
         // Tên nhóm tài sản
-        public string TenNhomTS
+        public new string TenNhomTS
         {
             get { return _tenNhomTS; }
             set
@@ -71,9 +81,16 @@ namespace Project_QLTS_DNC.DTOs
                 GhiChu = taiSanDTO.GhiChu,
                 MaPhong = taiSanDTO.MaPhong,
                 TenPhong = taiSanDTO.TenPhong,
-                TenNhomTS = taiSanDTO.TenNhomTS,
                 IsSelected = taiSanDTO.IsSelected
             };
+
+            // Kế thừa thông tin nhóm tài sản nếu có
+            if (taiSanDTO.MaNhomTS.HasValue)
+            {
+                qrDTO.MaNhomTS = taiSanDTO.MaNhomTS;
+                qrDTO.TenNhomTS = taiSanDTO.TenNhomTS;
+                qrDTO._hasLoadedGroupInfo = true;
+            }
 
             // Tạo URL với IP tĩnh cho QR code sử dụng NetworkHelper
             string baseUrl = NetworkHelper.GetLocalIPv4Address(8080);
@@ -82,24 +99,38 @@ namespace Project_QLTS_DNC.DTOs
             return qrDTO;
         }
 
-        // Lấy thông tin nhóm tài sản từ chi tiết phiếu nhập
+        // Tối ưu hóa phương thức LoadNhomTaiSanInfoAsync
         public async Task LoadNhomTaiSanInfoAsync()
         {
+            // Kiểm tra xem đã tải thông tin nhóm tài sản chưa
+            if (_hasLoadedGroupInfo || !MaChiTietPN.HasValue)
+                return;
+
             try
             {
-                if (MaChiTietPN.HasValue)
-                {
-                    var chiTietPN = await ChiTietPhieuNhapService.LayChiTietPhieuNhapTheoMaAsync(MaChiTietPN.Value);
-                    MaNhomTS = chiTietPN.MaNhomTS;
+                var chiTietPN = await ChiTietPhieuNhapService.LayChiTietPhieuNhapTheoMaAsync(MaChiTietPN.Value);
+                MaNhomTS = chiTietPN.MaNhomTS;
 
-                    // Lấy tên nhóm tài sản từ mã nhóm
+                // Lấy tên nhóm tài sản từ cache nếu có
+                if (TaiSanQRDTOCache.NhomTSNames.TryGetValue(MaNhomTS.Value, out string tenNhom))
+                {
+                    TenNhomTS = tenNhom;
+                }
+                else
+                {
+                    // Nếu không có trong cache, tải từ database
                     var nhomTSList = await NhomTaiSanService.LayDanhSachNhomTaiSanAsync();
                     var nhomTS = nhomTSList.FirstOrDefault(n => n.MaNhomTS == MaNhomTS);
                     if (nhomTS != null)
                     {
                         TenNhomTS = nhomTS.TenNhom;
+
+                        // Lưu vào cache
+                        TaiSanQRDTOCache.NhomTSNames[MaNhomTS.Value] = nhomTS.TenNhom;
                     }
                 }
+
+                _hasLoadedGroupInfo = true;
             }
             catch (Exception ex)
             {
