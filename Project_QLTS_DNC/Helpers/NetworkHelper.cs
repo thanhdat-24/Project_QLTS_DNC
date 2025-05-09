@@ -8,23 +8,21 @@ namespace Project_QLTS_DNC.Helpers
     public static class NetworkHelper
     {
         /// <summary>
-        /// Trả về địa chỉ IP tĩnh đã được cấu hình
+        /// Trả về URL cơ sở của hệ thống
         /// </summary>
         /// <param name="port">Cổng dịch vụ (mặc định: 8080)</param>
-        /// <returns>URL đầy đủ với địa chỉ IP tĩnh và port</returns>
-        public static string GetLocalIPv4Address(int port = 8080)
+        /// <returns>URL đầy đủ với tên miền</returns>
+        public static string GetBaseUrl(int port = 8080)
         {
             try
             {
-                // Sử dụng IP tĩnh đã cấu hình
-                string staticIp = "14.225.206.70";
-                return $"http://{staticIp}:{port}";
+                // Sử dụng tên miền thay vì IP
+                string domain = "thanhdatdnc.id.vn";
+                return $"https://{domain}";  // Sử dụng HTTPS thay vì HTTP
             }
             catch (Exception ex)
             {
-                // Log lỗi
-                System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy địa chỉ IP: {ex.Message}");
-                // Trả về địa chỉ localhost nếu có lỗi
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy địa chỉ URL: {ex.Message}");
                 return $"http://localhost:{port}";
             }
         }

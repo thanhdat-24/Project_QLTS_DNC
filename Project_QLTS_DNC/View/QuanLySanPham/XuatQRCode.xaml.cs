@@ -658,36 +658,34 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
         // Nội dung phương thức ExportQRCodeToPDF
         private void ExportQRCodeToPDF(string filePath, List<TaiSanQRDTO> selectedItems)
         {
-            // Cấu hình PDF writer
             using (PdfWriter writer = new PdfWriter(filePath))
             {
                 using (PdfDocument pdf = new PdfDocument(writer))
                 {
                     Document document = new Document(pdf);
-
-                    // Tạo bảng 2x2 để hiển thị 4 mã QR trên mỗi trang
                     iText.Layout.Element.Table table = new iText.Layout.Element.Table(2);
                     table.SetWidth(UnitValue.CreatePercentValue(100));
 
                     int cellCount = 0;
 
-                    // Lấy địa chỉ IP tĩnh
-                    string baseUrl = NetworkHelper.GetLocalIPv4Address(8080);
+                    // Lấy base URL từ NetworkHelper
+                    string baseUrl = NetworkHelper.GetBaseUrl();
 
                     foreach (var item in selectedItems)
                     {
-                        // Tạo mã QR từ thông tin tài sản với địa chỉ IP tĩnh
+                        // Tạo mã QR với tên miền
                         string qrContent = $"{baseUrl}/qr?id={item.MaTaiSan}&seri={item.SoSeri}";
 
-                        // Tạo QR code sử dụng ZXing
+                        // Tạo QR code với độ phân giải và error correction cao hơn
                         BarcodeWriter<Bitmap> barcodeWriter = new BarcodeWriter<Bitmap>();
                         barcodeWriter.Format = BarcodeFormat.QR_CODE;
                         barcodeWriter.Options = new QrCodeEncodingOptions
                         {
-                            Height = 300,
-                            Width = 300,
-                            Margin = 0,
-                            ErrorCorrection = ZXingErrorCorrectionLevel.H
+                            Height = 400, // Tăng kích thước
+                            Width = 400,
+                            Margin = 1,
+                            ErrorCorrection = ZXingErrorCorrectionLevel.H, // Độ chịu lỗi cao nhất
+                            CharacterSet = "UTF-8"
                         };
                         barcodeWriter.Renderer = new BitmapRenderer();
 
