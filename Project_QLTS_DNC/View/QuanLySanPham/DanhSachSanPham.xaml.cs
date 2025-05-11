@@ -1,4 +1,10 @@
-﻿using System;
+﻿using ClosedXML.Excel;
+using Project_QLTS_DNC.DTOs;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.Services.QLTaiSanService;
+using Project_QLTS_DNC.Services.QLToanNha;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,12 +13,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Project_QLTS_DNC.DTOs;
-using Project_QLTS_DNC.Services.QLTaiSanService;
-using Project_QLTS_DNC.Models.QLTaiSan;
 using System.Windows.Media;
-using Project_QLTS_DNC.Services.QLToanNha;
-using ClosedXML.Excel;
+using System.IO;
 
 namespace Project_QLTS_DNC.View.QuanLySanPham
 {
@@ -887,103 +889,144 @@ namespace Project_QLTS_DNC.View.QuanLySanPham
             }
         }
 
-        private void ExportExcel(string filePath)
-        {
-            // Tạo workbook mới
-            using (var workbook = new XLWorkbook())
-            {
-                // Tạo worksheet
-                var worksheet = workbook.Worksheets.Add("Danh sách tài sản");
 
-                // Định dạng tiêu đề
-                var headerRow = worksheet.Row(1);
-                headerRow.Style.Font.Bold = true;
-                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
-                headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // Thêm tiêu đề cho các cột
-                worksheet.Cell(1, 1).Value = "STT";
-                worksheet.Cell(1, 2).Value = "Mã TS";
-                worksheet.Cell(1, 3).Value = "Tên tài sản";
-                worksheet.Cell(1, 4).Value = "Số Seri";
-                worksheet.Cell(1, 5).Value = "Ngày sử dụng";
-                worksheet.Cell(1, 6).Value = "Hạn BH";
-                worksheet.Cell(1, 7).Value = "Tình trạng";
-                worksheet.Cell(1, 8).Value = "Ghi chú";
-                worksheet.Cell(1, 9).Value = "Phòng";
-                worksheet.Cell(1, 10).Value = "Nhóm tài sản";
-
-                // Đặt style cho tất cả các ô trong header
-                var headerRange = worksheet.Range(1, 1, 1, 10);
-                headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-
-                // Lấy danh sách tài sản (áp dụng bộ lọc nếu có)
-                var filteredItems = _viewSource != null && _viewSource.View != null
-                    ? _viewSource.View.Cast<TaiSanDTO>().ToList()
-                    : _listTaiSan.ToList();
-
-                // Thêm dữ liệu vào worksheet
-                for (int i = 0; i < filteredItems.Count; i++)
+            private void ExportExcel(string filePath)
                 {
-                    var taiSan = filteredItems[i];
-                    int row = i + 2; // Dòng 1 là header
+                    try
+                    {
+                        using (var workbook = new XLWorkbook())
+                        {
+                            var worksheet = workbook.Worksheets.Add("Danh sách tài sản");
 
-                    worksheet.Cell(row, 1).Value = i + 1; // STT
-                    worksheet.Cell(row, 2).Value = taiSan.MaTaiSan;
-                    worksheet.Cell(row, 3).Value = taiSan.TenTaiSan;
-                    worksheet.Cell(row, 4).Value = taiSan.SoSeri;
+                            var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
+                            int currentRow = 1;
+                            int logoHeightPx = 80;
 
-                    // Xử lý các giá trị DateTime
-                    if (taiSan.NgaySuDung.HasValue)
-                        worksheet.Cell(row, 5).Value = taiSan.NgaySuDung.Value.ToString("dd/MM/yyyy");
-                    else
-                        worksheet.Cell(row, 5).Value = "";
+                            // Logo công ty
+                            if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                            {
+                                var image = worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                                     .MoveTo(worksheet.Cell(currentRow, 1))
+                                                     .WithSize(logoHeightPx * 2, logoHeightPx);
+                                worksheet.Row(currentRow).Height = 60;
+                            }
 
-                    if (taiSan.HanBH.HasValue)
-                        worksheet.Cell(row, 6).Value = taiSan.HanBH.Value.ToString("dd/MM/yyyy");
-                    else
-                        worksheet.Cell(row, 6).Value = "";
+                            // Tên công ty
+                            worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                            worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                            worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                            worksheet.Range(currentRow, 2, currentRow, 10).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            currentRow++;
 
-                    worksheet.Cell(row, 7).Value = taiSan.TinhTrangSP;
-                    worksheet.Cell(row, 8).Value = taiSan.GhiChu;
-                    worksheet.Cell(row, 9).Value = taiSan.TenPhong;
-                    worksheet.Cell(row, 10).Value = taiSan.TenNhomTS;
+                            // Địa chỉ
+                            worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                            worksheet.Range(currentRow, 2, currentRow, 10).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            currentRow++;
 
-                    // Đặt style cho dòng dữ liệu
-                    var dataRange = worksheet.Range(row, 1, row, 10);
-                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                            // SĐT & Email
+                            worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                            worksheet.Range(currentRow, 2, currentRow, 10).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            currentRow++;
+
+                            // Mã số thuế
+                            worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                            worksheet.Range(currentRow, 2, currentRow, 10).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            currentRow += 2;
+
+                            // Tiêu đề
+                            worksheet.Cell(currentRow, 1).Value = "DANH SÁCH TÀI SẢN";
+                            worksheet.Range(currentRow, 1, currentRow, 10).Merge();
+                            worksheet.Range(currentRow, 1, currentRow, 10).Style.Font.Bold = true;
+                            worksheet.Range(currentRow, 1, currentRow, 10).Style.Font.FontSize = 16;
+                            worksheet.Range(currentRow, 1, currentRow, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            currentRow += 2;
+
+                            // Header
+                            var headers = new[] { "STT", "Mã TS", "Tên tài sản", "Số Seri", "Ngày sử dụng", "Hạn BH", "Tình trạng", "Ghi chú", "Phòng", "Nhóm tài sản" };
+                            for (int i = 0; i < headers.Length; i++)
+                            {
+                                worksheet.Cell(currentRow, i + 1).Value = headers[i];
+                            }
+
+                            var headerRange = worksheet.Range(currentRow, 1, currentRow, headers.Length);
+                            headerRange.Style.Font.Bold = true;
+                            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+                            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                            var filteredItems = _viewSource != null && _viewSource.View != null
+                                ? _viewSource.View.Cast<TaiSanDTO>().ToList()
+                                : _listTaiSan.ToList();
+
+                            for (int i = 0; i < filteredItems.Count; i++)
+                            {
+                                var taiSan = filteredItems[i];
+                                int row = currentRow + 1 + i;
+
+                                worksheet.Cell(row, 1).Value = i + 1;
+                                worksheet.Cell(row, 2).Value = taiSan.MaTaiSan;
+                                worksheet.Cell(row, 3).Value = taiSan.TenTaiSan;
+                                worksheet.Cell(row, 4).Value = taiSan.SoSeri;
+                                worksheet.Cell(row, 5).Value = taiSan.NgaySuDung?.ToString("dd/MM/yyyy");
+                                worksheet.Cell(row, 6).Value = taiSan.HanBH?.ToString("dd/MM/yyyy");
+                                worksheet.Cell(row, 7).Value = taiSan.TinhTrangSP;
+                                worksheet.Cell(row, 8).Value = taiSan.GhiChu;
+                                worksheet.Cell(row, 9).Value = taiSan.TenPhong;
+                                worksheet.Cell(row, 10).Value = taiSan.TenNhomTS;
+
+                                var dataRange = worksheet.Range(row, 1, row, 10);
+                                dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                            }
+
+                            // Căn giữa
+                            worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Column(4).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Column(5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Column(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Column(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                            worksheet.Columns().AdjustToContents();
+
+                            // Ngày xuất báo cáo
+                            int lastRow = currentRow + filteredItems.Count + 2;
+                            worksheet.Cell(lastRow, 9).Value = "Ngày xuất:";
+                            worksheet.Cell(lastRow, 10).Value = DateTime.Now;
+                            worksheet.Cell(lastRow, 10).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                            worksheet.Range(lastRow, 9, lastRow, 10).Style.Font.Italic = true;
+
+                            // Lưu
+                            workbook.SaveAs(filePath);
+
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = filePath,
+                                UseShellExecute = true
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Lỗi khi xuất Excel: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
 
-                // Căn giữa một số cột
-                worksheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // STT
-                worksheet.Column(2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Mã TS
-                worksheet.Column(4).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Số Seri
-                worksheet.Column(5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Ngày sử dụng
-                worksheet.Column(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Hạn BH
-                worksheet.Column(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center; // Tình trạng
 
-                // Tự động điều chỉnh độ rộng các cột
-                worksheet.Columns().AdjustToContents();
 
-                // Lưu workbook
-                workbook.SaveAs(filePath);
-            }
-        }
-
-        #endregion
-    }
-
-    // Lớp hỗ trợ cho ComboBox phòng
-    public class PhongFilter
-    {
-        public int? MaPhong { get; set; }
-        public string TenPhong { get; set; }
-
-        public override string ToString()
-        {
-            return TenPhong;
-        }
-    }
+    #endregion
 }
+
+            // Lớp hỗ trợ cho ComboBox phòng
+            public class PhongFilter
+                {
+                    public int? MaPhong { get; set; }
+                    public string TenPhong { get; set; }
+
+                    public override string ToString()
+                    {
+                        return TenPhong;
+                    }
+                }
+            }

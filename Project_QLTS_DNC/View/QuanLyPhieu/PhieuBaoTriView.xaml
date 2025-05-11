@@ -508,7 +508,7 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
                 <!-- Nút bên trái -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <!-- Nút Xuất Excel -->
-                    <Button x:Name="btnIn" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
+                    <Button x:Name="btnIn" Content="Xuất Excel" Style="{StaticResource ExportButton}" />
                    
                 </StackPanel>
 

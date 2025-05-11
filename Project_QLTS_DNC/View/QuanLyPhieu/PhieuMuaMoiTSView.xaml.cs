@@ -10,6 +10,7 @@ using ClosedXML.Excel;
 using Microsoft.Win32;
 using System.Data;
 using System.Windows.Data;
+using System.IO;
 using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.View.QuanLyKho;
 namespace Project_QLTS_DNC.View.QuanLyPhieu
@@ -296,7 +297,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             foreach (DataGridColumn column in dataGrid.Columns)
             {
-                // Header là tên cột
                 dt.Columns.Add(column.Header.ToString());
             }
 
@@ -309,7 +309,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 for (int i = 0; i < dataGrid.Columns.Count; i++)
                 {
                     var column = dataGrid.Columns[i];
-
                     var cellContent = column.GetCellContent(item);
                     if (cellContent is TextBlock tb)
                         row[i] = tb.Text;
@@ -318,7 +317,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 dt.Rows.Add(row);
             }
 
-            // Mở hộp thoại lưu
+            // Hộp thoại lưu file
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "Excel Workbook (*.xlsx)|*.xlsx",
@@ -327,18 +326,78 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
             if (saveFileDialog.ShowDialog() == true)
             {
+                // Đọc thông tin công ty
+                var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
+
                 using (var workbook = new XLWorkbook())
                 {
-                    var worksheet = workbook.Worksheets.Add(dt, "DanhSachPhieu");
+                    var worksheet = workbook.Worksheets.Add("DanhSachPhieu");
 
-                    // Format sheet (optional)
+                    int currentRow = 1;
+
+                    // Thêm logo công ty (nếu có)
+                    if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                    {
+                        var image = worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                             .MoveTo(worksheet.Cell(currentRow, 1))
+                                             .WithSize(140, 70); // width, height in px
+                        worksheet.Row(currentRow).Height = 60;
+                    }
+
+                    // Tên công ty
+                    worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                    worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                    worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow++;
+
+                    // Địa chỉ
+                    worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow++;
+
+                    // SĐT & Email
+                    worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow++;
+
+                    // Mã số thuế
+                    worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, dt.Columns.Count).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow += 2;
+
+                    // Tiêu đề
+                    worksheet.Cell(currentRow, 1).Value = "DANH SÁCH PHIẾU MUA MỚI";
+                    worksheet.Range(currentRow, 1, currentRow, dt.Columns.Count).Merge();
+                    worksheet.Range(currentRow, 1, currentRow, dt.Columns.Count).Style.Font.Bold = true;
+                    worksheet.Range(currentRow, 1, currentRow, dt.Columns.Count).Style.Font.FontSize = 16;
+                    worksheet.Range(currentRow, 1, currentRow, dt.Columns.Count).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    currentRow += 2;
+
+                    // Đổ dữ liệu từ DataTable vào sheet bắt đầu từ currentRow
+                    worksheet.Cell(currentRow, 1).InsertTable(dt);
+
+                    // Định dạng cột
                     worksheet.Columns().AdjustToContents();
 
+                    // Thêm ngày xuất
+                    int lastRow = currentRow + dt.Rows.Count + 2;
+                    worksheet.Cell(lastRow, dt.Columns.Count - 1).Value = "Ngày xuất báo cáo:";
+                    worksheet.Cell(lastRow, dt.Columns.Count).Value = DateTime.Now;
+                    worksheet.Cell(lastRow, dt.Columns.Count).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                    worksheet.Range(lastRow, dt.Columns.Count - 1, lastRow, dt.Columns.Count).Style.Font.Italic = true;
+
+                    // Lưu file
                     workbook.SaveAs(saveFileDialog.FileName);
                     MessageBox.Show("Xuất Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             ExportDataGridToExcel(dgPhieuXuatKho);

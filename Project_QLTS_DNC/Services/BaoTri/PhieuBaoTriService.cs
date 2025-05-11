@@ -428,32 +428,44 @@ namespace Project_QLTS_DNC.Services
 
                     // Thêm thông tin công ty vào header
                     int currentRow = 1;
+                    int logoHeightPx = 80;
 
-                    // Tên công ty (in đậm, cỡ lớn)
-                    worksheet.Cell(currentRow, 1).Value = thongTinCongTy.Ten;
-                    worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
-                    worksheet.Cell(currentRow, 1).Style.Font.FontSize = 14;
-                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
-                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                    {
+                        var image = worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                             .MoveTo(worksheet.Cell(currentRow, 1))
+                                             .WithSize(logoHeightPx * 2, logoHeightPx); // Width x Height (px)
+
+                        // Đặt chiều cao hàng chứa logo để hình không bị cắt
+                        worksheet.Row(currentRow).Height = 60;
+                    }
+
+                    // Tên công ty
+                    worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                    worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                    worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                    worksheet.Range(currentRow, 2, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     currentRow++;
 
                     // Địa chỉ
-                    worksheet.Cell(currentRow, 1).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
-                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
-                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                    worksheet.Range(currentRow, 2, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     currentRow++;
 
                     // Số điện thoại và Email
-                    worksheet.Cell(currentRow, 1).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
-                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
-                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                    worksheet.Range(currentRow, 2, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     currentRow++;
 
                     // Mã số thuế
-                    worksheet.Cell(currentRow, 1).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
-                    worksheet.Range(currentRow, 1, currentRow, 9).Merge();
-                    worksheet.Range(currentRow, 1, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                    worksheet.Range(currentRow, 2, currentRow, 9).Merge();
+                    worksheet.Range(currentRow, 2, currentRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     currentRow += 2; // Thêm khoảng trống
+
 
                     // Tạo tiêu đề báo cáo (giữ nguyên phần code của bạn)
                     worksheet.Cell($"A{currentRow}").Value = "DANH SÁCH PHIẾU BẢO TRÌ";
