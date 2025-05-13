@@ -23,7 +23,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.IO;
+using Project_QLTS_DNC.Models.ThongTinCongTy;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -358,8 +361,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
-                    var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy(); // Lấy thông tin công ty
-
                     using (var workbook = new XLWorkbook())
                     {
                         var worksheet = workbook.Worksheets.Add("Danh sách phiếu nhập");
@@ -368,17 +369,14 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                         string[] headers = { "Mã phiếu nhập", "Tên kho", "Người lập phiếu", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
                         for (int i = 0; i < headers.Length; i++)
                         {
-                            worksheet.Cell(currentRow, i + 1).Value = headers[i];
-                            worksheet.Cell(currentRow, i + 1).Style.Font.Bold = true;
-                            worksheet.Cell(currentRow, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
-                            worksheet.Cell(currentRow, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                            worksheet.Cell(currentRow, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                            worksheet.Cell(1, i + 1).Value = headers[i];
+                            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
+                            worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                            worksheet.Cell(1, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Cell(1, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                         }
 
-                        int dataStartRow = currentRow + 1;
-
-                        // Dữ liệu
-                        int row = dataStartRow;
+                        int row = 2;
                         foreach (dynamic item in dgSanPham.ItemsSource)
                         {
                             worksheet.Cell(row, 1).Value = item.MaPhieuNhap;
@@ -400,7 +398,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                             row++;
                         }
 
-                        // Tự động điều chỉnh cột
                         worksheet.Columns().AdjustToContents();
                         workbook.SaveAs(saveFileDialog.FileName);
                     }
@@ -413,7 +410,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Lỗi khi xuất Excel: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         private void btnExportPDF_Click(object sender, RoutedEventArgs e)
         {
