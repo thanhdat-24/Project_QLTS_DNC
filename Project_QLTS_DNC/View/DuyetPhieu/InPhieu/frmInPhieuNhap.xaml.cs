@@ -13,16 +13,17 @@ using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.QLNhomTS;
 using Project_QLTS_DNC.Models.TonKho;
 using iText.Layout.Borders;
-
 using Project_QLTS_DNC.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using Project_QLTS_DNC.View.DuyetPhieu.ChiTietPhieu;
+using Project_QLTS_DNC.View.Common; // thêm namespace chứa SuccessNotificationDialog
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 {
@@ -129,8 +130,15 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 
                 if (dialog.ShowDialog() == true)
                 {
-                    ExportPhieuNhapToPDF(dialog.FileName);
-                    MessageBox.Show("Xuất file PDF thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string filePath = dialog.FileName;
+                    ExportPhieuNhapToPDF(filePath);
+
+                    // Mở thông báo có nút mở file
+                    var dialogSuccess = new SuccessNotificationDialog(
+                        "Xuất PDF thành công",
+                        "Bạn có muốn mở file vừa tạo không?",
+                        filePath);
+                    dialogSuccess.ShowDialog(); // Có nút MỞ FILE bên trong dialog này
                 }
             }
             catch (Exception ex)
@@ -146,65 +154,37 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             {
                 Document document = new Document(pdf, PageSize.A4);
                 document.SetMargins(36, 36, 36, 36);
-
                 PdfFont font = PdfFontFactory.CreateFont(@"C:\Windows\Fonts\arial.ttf", PdfEncodings.IDENTITY_H);
 
-                // Tiêu đề
                 document.Add(new Paragraph("PHIẾU NHẬP KHO")
-                    .SetFont(font)
-                    .SetFontSize(16)
-                    .SetBold()
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
+                    .SetFont(font).SetFontSize(16).SetBold().SetTextAlignment(iTextTextAlignment.CENTER));
 
-                // Mã phiếu và ngày
                 document.Add(new Paragraph($"Số phiếu: PN{thongTinPhieu.MaPhieu}     Ngày nhập: {thongTinPhieu.NgayNhap:dd/MM/yyyy}")
-                    .SetFont(font)
-                    .SetMarginBottom(10));
+                    .SetFont(font).SetMarginBottom(10));
 
-                // Thông tin phiếu
                 Table infoTable = new Table(UnitValue.CreatePercentArray(new float[] { 25, 75 }))
-     .SetWidth(UnitValue.CreatePercentValue(100));
+                    .SetWidth(UnitValue.CreatePercentValue(100));
 
-                infoTable.AddCell(new Cell().Add(new Paragraph("Kho nhập:").SetFont(font).SetBold())
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
-                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TenKho).SetFont(font))
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph("Kho nhập:").SetFont(font).SetBold()).SetBorder(Border.NO_BORDER).SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TenKho).SetFont(font)).SetBorder(Border.NO_BORDER).SetPadding(2));
 
-                infoTable.AddCell(new Cell().Add(new Paragraph("Nhân viên:").SetFont(font).SetBold())
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
-                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TenNV).SetFont(font))
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph("Nhân viên:").SetFont(font).SetBold()).SetBorder(Border.NO_BORDER).SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TenNV).SetFont(font)).SetBorder(Border.NO_BORDER).SetPadding(2));
 
-                infoTable.AddCell(new Cell().Add(new Paragraph("Nhà cung cấp:").SetFont(font).SetBold())
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
-                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TenNCC).SetFont(font))
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph("Nhà cung cấp:").SetFont(font).SetBold()).SetBorder(Border.NO_BORDER).SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TenNCC).SetFont(font)).SetBorder(Border.NO_BORDER).SetPadding(2));
 
-                infoTable.AddCell(new Cell().Add(new Paragraph("Trạng thái:").SetFont(font).SetBold())
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
-                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TrangThai).SetFont(font))
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph("Trạng thái:").SetFont(font).SetBold()).SetBorder(Border.NO_BORDER).SetPadding(2));
+                infoTable.AddCell(new Cell().Add(new Paragraph(thongTinPhieu.TrangThai).SetFont(font)).SetBorder(Border.NO_BORDER).SetPadding(2));
 
                 document.Add(infoTable);
-
-
                 document.Add(new Paragraph("\n"));
 
-                // Bảng chi tiết tài sản
                 Table table = new Table(new float[] { 40, 80, 150, 60, 80, 80, 60 }).UseAllAvailableWidth();
                 string[] headers = { "STT", "Mã CT", "Tên tài sản", "SL", "Đơn giá", "Tổng tiền", "QL riêng" };
                 foreach (var h in headers)
                 {
-                    table.AddHeaderCell(new Cell().Add(new Paragraph(h).SetFont(font).SetBold())
-                        .SetBackgroundColor(new DeviceRgb(220, 220, 220)));
+                    table.AddHeaderCell(new Cell().Add(new Paragraph(h).SetFont(font).SetBold()).SetBackgroundColor(new DeviceRgb(220, 220, 220)));
                 }
 
                 for (int i = 0; i < danhSachChiTiet.Count; i++)
@@ -220,42 +200,29 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 }
 
                 document.Add(table);
+                document.Add(new Paragraph($"\nTổng cộng: {txtTongTien.Text}").SetFont(font).SetBold().SetTextAlignment(iTextTextAlignment.RIGHT));
 
-                // Tổng cộng
-                document.Add(new Paragraph($"\nTổng cộng: {txtTongTien.Text}")
-                    .SetFont(font).SetBold()
-                    .SetTextAlignment(iTextTextAlignment.RIGHT));
-
-                // Ký tên
                 document.Add(new Paragraph("\n\n"));
                 Table signTable = new Table(2).UseAllAvailableWidth();
 
-                Cell nguoiLap = new Cell()
+                signTable.AddCell(new Cell()
                     .Add(new Paragraph("NGƯỜI LẬP PHIẾU").SetFont(font).SetBold().SetTextAlignment(iTextTextAlignment.CENTER))
                     .Add(new Paragraph("(Ký và ghi rõ họ tên)").SetFont(font).SetFontSize(10).SetItalic().SetTextAlignment(iTextTextAlignment.CENTER))
                     .Add(new Paragraph("\n\n\n"))
                     .Add(new Paragraph(thongTinPhieu.TenNV).SetFont(font).SetTextAlignment(iTextTextAlignment.CENTER))
-                    .SetBorder(Border.NO_BORDER);
+                    .SetBorder(Border.NO_BORDER));
 
-                Cell nguoiDuyet = new Cell()
+                signTable.AddCell(new Cell()
                     .Add(new Paragraph("NGƯỜI PHÊ DUYỆT").SetFont(font).SetBold().SetTextAlignment(iTextTextAlignment.CENTER))
                     .Add(new Paragraph("(Ký và ghi rõ họ tên)").SetFont(font).SetFontSize(10).SetItalic().SetTextAlignment(iTextTextAlignment.CENTER))
                     .Add(new Paragraph("\n\n\n"))
                     .Add(new Paragraph("").SetFont(font).SetTextAlignment(iTextTextAlignment.CENTER))
-                    .SetBorder(Border.NO_BORDER);
+                    .SetBorder(Border.NO_BORDER));
 
-                signTable.AddCell(nguoiLap);
-                signTable.AddCell(nguoiDuyet);
                 document.Add(signTable);
-
-                // Ngày in
                 document.Add(new Paragraph($"Ngày in: {DateTime.Now:dd/MM/yyyy HH:mm:ss}")
-                    .SetFont(font)
-                    .SetFontSize(8)
-                    .SetItalic()
-                    .SetTextAlignment(iTextTextAlignment.RIGHT));
+                    .SetFont(font).SetFontSize(8).SetItalic().SetTextAlignment(iTextTextAlignment.RIGHT));
             }
         }
-
     }
 }

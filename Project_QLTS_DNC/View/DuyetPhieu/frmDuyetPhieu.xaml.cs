@@ -28,6 +28,27 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
             InitializeComponent();
             Loaded += dgPhieuCanDuyet_Loaded;
         }
+        private async Task KhoiTaoDuLieuDuyetPhieu()
+        {
+            try
+            {
+                isLoadingData = true;
+                SetLoadingState(true);
+
+                cboLoaiPhieu.SelectedIndex = 0;
+                dpTuNgay.SelectedDate = null;
+                dpDenNgay.SelectedDate = null;
+                txtSearch.Text = string.Empty;
+
+                await LocDuLieuTheoLoaiVaNgay();
+                LoadThongKePhieu();
+            }
+            finally
+            {
+                isLoadingData = false;
+                SetLoadingState(false);
+            }
+        }
 
         private async void dgPhieuCanDuyet_Loaded(object sender, RoutedEventArgs e)
         {
@@ -300,7 +321,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
 
         private void btnSearch_Click(object sender, RoutedEventArgs e) => TimKiemPhieu(txtSearch?.Text);
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) => TimKiemPhieu(txtSearch?.Text);
+       // private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) => TimKiemPhieu(txtSearch?.Text);
 
         private void TimKiemPhieu(string tuKhoa)
         {
@@ -497,7 +518,8 @@ namespace Project_QLTS_DNC.View.DuyetPhieu
         // Thêm sự kiện cho nút Refresh
         private async void btnLoadDuLieu_Click(object sender, RoutedEventArgs e)
         {
-            await LoadDuLieuTongHopPhieuAsync();
+            txtSearch.Text = "";
+            await KhoiTaoDuLieuDuyetPhieu();
         }
 
 

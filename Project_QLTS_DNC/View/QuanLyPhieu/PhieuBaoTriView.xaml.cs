@@ -1,21 +1,23 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Project_QLTS_DNC.Models.BaoTri;
+using Project_QLTS_DNC.Models.NhanVien;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Services;
+using Project_QLTS_DNC.ViewModel.Baotri;
+using Project_QLTS_DNC.Views;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Data;
-using Project_QLTS_DNC.Models.BaoTri;
-using Project_QLTS_DNC.Services;
-using Project_QLTS_DNC.ViewModel.Baotri;
-using Project_QLTS_DNC.Views;
-using System.IO;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Project_QLTS_DNC.Models.NhanVien;
-using Project_QLTS_DNC.Models.QLTaiSan;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
@@ -502,7 +504,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Xử lý khi nhấn nút In phiếu
+        // Xử lý khi nhấn nút In phiếu PDF
         private async void btnInPhieu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -538,43 +540,62 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         document.FontSize = 12;
                         document.TextAlignment = System.Windows.TextAlignment.Left;
 
-                        // ===== THÊM THÔNG TIN CÔNG TY =====
-                        // Tên công ty
-                        System.Windows.Documents.Paragraph companyNamePara = new System.Windows.Documents.Paragraph();
-                        companyNamePara.TextAlignment = System.Windows.TextAlignment.Center;
-                        System.Windows.Documents.Run companyNameRun = new System.Windows.Documents.Run(thongTinCongTy.Ten);
-                        companyNameRun.FontSize = 16;
-                        companyNameRun.FontWeight = System.Windows.FontWeights.Bold;
-                        companyNamePara.Inlines.Add(companyNameRun);
-                        document.Blocks.Add(companyNamePara);
+                        if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                        {
+                            // Tạo StackPanel để chứa logo và thông tin công ty
+                            StackPanel headerPanel = new StackPanel
+                            {
+                                Orientation = Orientation.Horizontal,
+                                Margin = new Thickness(0, 0, 0, 20)
+                            };
 
-                        // Địa chỉ
-                        System.Windows.Documents.Paragraph addressPara = new System.Windows.Documents.Paragraph();
-                        addressPara.TextAlignment = System.Windows.TextAlignment.Center;
-                        addressPara.Margin = new System.Windows.Thickness(0, 5, 0, 0);
-                        System.Windows.Documents.Run addressRun = new System.Windows.Documents.Run("Địa chỉ: " + thongTinCongTy.DiaChi);
-                        addressRun.FontSize = 10;
-                        addressPara.Inlines.Add(addressRun);
-                        document.Blocks.Add(addressPara);
+                            // Logo bên trái
+                            Image logoImage = new Image
+                            {
+                                Source = new BitmapImage(new Uri(thongTinCongTy.LogoPath, UriKind.Absolute)),
+                                Height = 80,
+                                Width = 80,
+                                Margin = new Thickness(0, 0, 20, 0)
+                            };
+                            headerPanel.Children.Add(logoImage);
 
-                        // Số điện thoại và email
-                        System.Windows.Documents.Paragraph contactPara = new System.Windows.Documents.Paragraph();
-                        contactPara.TextAlignment = System.Windows.TextAlignment.Center;
-                        contactPara.Margin = new System.Windows.Thickness(0, 5, 0, 0);
-                        System.Windows.Documents.Run contactRun = new System.Windows.Documents.Run($"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}");
-                        contactRun.FontSize = 10;
-                        contactPara.Inlines.Add(contactRun);
-                        document.Blocks.Add(contactPara);
+                            // Thông tin công ty bên phải
+                            StackPanel infoPanel = new StackPanel
+                            {
+                                VerticalAlignment = VerticalAlignment.Center
+                            };
 
-                        // Mã số thuế
-                        System.Windows.Documents.Paragraph taxPara = new System.Windows.Documents.Paragraph();
-                        taxPara.TextAlignment = System.Windows.TextAlignment.Center;
-                        taxPara.Margin = new System.Windows.Thickness(0, 5, 0, 20);
-                        System.Windows.Documents.Run taxRun = new System.Windows.Documents.Run("Mã số thuế: " + thongTinCongTy.MaSoThue);
-                        taxRun.FontSize = 10;
-                        taxPara.Inlines.Add(taxRun);
-                        document.Blocks.Add(taxPara);
-                        // ===== KẾT THÚC THÔNG TIN CÔNG TY =====
+                            TextBlock companyName = new TextBlock
+                            {
+                                Text = thongTinCongTy.Ten,
+                                FontSize = 16,
+                                FontWeight = FontWeights.Bold
+                            };
+                            infoPanel.Children.Add(companyName);
+
+                            infoPanel.Children.Add(new TextBlock
+                            {
+                                Text = "Địa chỉ: " + thongTinCongTy.DiaChi,
+                                FontSize = 10
+                            });
+                            infoPanel.Children.Add(new TextBlock
+                            {
+                                Text = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}",
+                                FontSize = 10
+                            });
+                            infoPanel.Children.Add(new TextBlock
+                            {
+                                Text = "Mã số thuế: " + thongTinCongTy.MaSoThue,
+                                FontSize = 10
+                            });
+
+                            headerPanel.Children.Add(infoPanel);
+
+                            // Thêm vào document
+                            BlockUIContainer container = new BlockUIContainer(headerPanel);
+                            document.Blocks.Add(container);
+                        }
+
 
                         // Thêm tiêu đề chung cho tất cả phiếu
                         System.Windows.Documents.Paragraph titlePara = new System.Windows.Documents.Paragraph();
@@ -869,5 +890,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
             return selectedPhieus;
         }
+
+      
     }
 }

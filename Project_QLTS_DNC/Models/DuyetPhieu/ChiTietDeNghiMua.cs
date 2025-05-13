@@ -13,7 +13,7 @@ namespace Project_QLTS_DNC.Models.DuyetPhieu
         [Column("ma_phieu_denghi")]
         public long MaPhieuDeNghi { get; set; }
 
-        [Column("ten_tai_san")]
+        [Column("ten_tai_san")] 
         public string TenTaiSan { get; set; }
 
         [Column("so_luong")]

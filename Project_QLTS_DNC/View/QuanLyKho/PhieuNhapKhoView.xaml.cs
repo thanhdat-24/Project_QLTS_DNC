@@ -361,22 +361,67 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
+                    var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy(); // Lấy thông tin công ty
+
                     using (var workbook = new XLWorkbook())
                     {
                         var worksheet = workbook.Worksheets.Add("Danh sách phiếu nhập");
+                        int currentRow = 1;
+
+                        // Thêm logo nếu có
+                        if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                        {
+                            worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                     .MoveTo(worksheet.Cell(currentRow, 1))
+                                     .WithSize(140, 60); // Điều chỉnh kích thước logo
+                            worksheet.Row(currentRow).Height = 50;
+                        }
+
+                        // Tên công ty
+                        worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                        worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                        worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        // Địa chỉ
+                        worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        // SĐT - Email
+                        worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        // Mã số thuế
+                        worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
+
+                        // Tiêu đề
+                        worksheet.Cell(currentRow, 1).Value = "DANH SÁCH PHIẾU NHẬP";
+                        worksheet.Range(currentRow, 1, currentRow, 7).Merge();
+                        worksheet.Row(currentRow).Style.Font.Bold = true;
+                        worksheet.Row(currentRow).Style.Font.FontSize = 16;
+                        worksheet.Row(currentRow).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
 
                         // Header
                         string[] headers = { "Mã phiếu nhập", "Tên kho", "Người lập phiếu", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
                         for (int i = 0; i < headers.Length; i++)
                         {
-                            worksheet.Cell(1, i + 1).Value = headers[i];
-                            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
-                            worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
-                            worksheet.Cell(1, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                            worksheet.Cell(1, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                            worksheet.Cell(currentRow, i + 1).Value = headers[i];
+                            worksheet.Cell(currentRow, i + 1).Style.Font.Bold = true;
+                            worksheet.Cell(currentRow, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                            worksheet.Cell(currentRow, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Cell(currentRow, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                         }
 
-                        int row = 2;
+                        int dataStartRow = currentRow + 1;
+
+                        // Dữ liệu
+                        int row = dataStartRow;
                         foreach (dynamic item in dgSanPham.ItemsSource)
                         {
                             worksheet.Cell(row, 1).Value = item.MaPhieuNhap;
@@ -398,11 +443,26 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                             row++;
                         }
 
+                        // Tự động điều chỉnh cột
                         worksheet.Columns().AdjustToContents();
-                        workbook.SaveAs(saveFileDialog.FileName);
-                    }
 
-                    MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        // Ngày xuất
+                        int ngayXuatRow = row + 2;
+                        worksheet.Cell(ngayXuatRow, 6).Value = "Ngày xuất:";
+                        worksheet.Cell(ngayXuatRow, 7).Value = DateTime.Now;
+                        worksheet.Cell(ngayXuatRow, 7).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                        worksheet.Range(ngayXuatRow, 6, ngayXuatRow, 7).Style.Font.Italic = true;
+
+                        // Lưu file
+                        workbook.SaveAs(saveFileDialog.FileName);
+                        MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = saveFileDialog.FileName,
+                            UseShellExecute = true
+                        });
+                    }
                 }
             }
             catch (Exception ex)

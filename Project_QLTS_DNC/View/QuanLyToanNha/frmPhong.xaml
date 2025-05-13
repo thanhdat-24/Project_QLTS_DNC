@@ -178,7 +178,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Mã tầng" Binding="{Binding MaTang}" Width="*" MinWidth="120">
+                        <DataGridTextColumn Header="Mã tầng" Binding="{Binding MaTang}" Width="*" MinWidth="80">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -186,7 +186,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Tên phòng" Binding="{Binding TenPhong}" Width="*" MinWidth="120">
+                        <DataGridTextColumn Header="Tên phòng" Binding="{Binding TenPhong}" Width="*" MinWidth="90">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -195,7 +195,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
                        
-                        <DataGridTextColumn Header="Sức chứa" Binding="{Binding SucChua}" Width="120" MinWidth="100">
+                        <DataGridTextColumn Header="Sức chứa" Binding="{Binding SucChua}" Width="120" MinWidth="90">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -203,7 +203,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTaPhong}" Width="*" MinWidth="120">
+                        <DataGridTextColumn Header="Mô tả" Binding="{Binding MoTaPhong}" Width="*" MinWidth="110">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -212,7 +212,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTemplateColumn Width="110" MinWidth="110" Header="Thao tác">
+                        <DataGridTemplateColumn Width="110" MinWidth="150" Header="Thao tác">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

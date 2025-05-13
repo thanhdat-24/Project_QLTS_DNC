@@ -475,7 +475,14 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
                     // Thêm thông tin công ty vào header
                     int rowIndex = 1;
-
+                    // ✅ THÊM LOGO (nếu có)
+                    if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                    {
+                        worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                 .MoveTo(worksheet.Cell(rowIndex, 1))
+                                 .WithSize(140, 60);
+                        worksheet.Row(rowIndex).Height = 50;
+                    } 
                     // Tên công ty
                     worksheet.Cell($"A{rowIndex}").Value = thongTinCongTy.Ten?.ToUpper() ?? "CÔNG TY";
                     worksheet.Cell($"A{rowIndex}").Style.Font.Bold = true;
@@ -523,6 +530,8 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     worksheet.Cell($"A{rowIndex}").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
                     rowIndex++;
+
+
 
                     // Thêm ngày xuất báo cáo
                     worksheet.Cell($"A{rowIndex}").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";

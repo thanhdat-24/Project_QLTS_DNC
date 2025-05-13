@@ -26,7 +26,7 @@ using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Services.BanGiaoTaiSanService;
 using System.Windows.Media;
 using Project_QLTS_DNC.Helpers;
-
+using System.IO;
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
     public partial class DanhSachBanGiaoView : UserControl
@@ -350,92 +350,121 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         {
             try
             {
-                // Kiểm tra có dữ liệu hay không
                 if (dgBanGiao.Items.Count == 0)
                 {
                     MessageBox.Show("Không có dữ liệu để xuất!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
-                // Tạo SaveFileDialog để người dùng chọn vị trí lưu file
                 SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
                     Filter = "Excel Files|*.xlsx",
                     Title = "Lưu danh sách phiếu bàn giao",
-                    FileName = $"DanhSachPhieuBanGiao_{DateTime.Now:yyyyMMdd_HHmmss}"
+                    FileName = $"DanhSachPhieuBanGiao_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
                 };
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
+                    var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy(); // Thông tin công ty
+
                     using (var workbook = new XLWorkbook())
                     {
                         var worksheet = workbook.Worksheets.Add("PhieuBanGiao");
+                        int currentRow = 1;
 
-                        // Tạo tiêu đề
-                        worksheet.Cell("A1").Value = "DANH SÁCH PHIẾU BÀN GIAO TÀI SẢN";
-                        worksheet.Cell("A1").Style.Font.Bold = true;
-                        worksheet.Cell("A1").Style.Font.FontSize = 16;
-                        worksheet.Range("A1:H1").Merge();
-                        worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        // Logo công ty
+                        if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                        {
+                            worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                     .MoveTo(worksheet.Cell(currentRow, 1))
+                                     .WithSize(140, 60);
+                            worksheet.Row(currentRow).Height = 50;
+                        }
 
-                        // Tạo tiêu đề cột
-                        worksheet.Cell("A3").Value = "Mã phiếu";
-                        worksheet.Cell("B3").Value = "Ngày bàn giao";
-                        worksheet.Cell("C3").Value = "Người lập phiếu";
-                        worksheet.Cell("D3").Value = "Phòng";
-                        worksheet.Cell("E3").Value = "Tòa nhà";
-                        worksheet.Cell("F3").Value = "Nội dung";
-                        worksheet.Cell("G3").Value = "Trạng thái";
+                        // Thông tin công ty
+                        worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                        worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                        worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
 
-                        // Định dạng tiêu đề cột
-                        var headerRange = worksheet.Range("A3:G3");
+                        worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
+
+                        // Tiêu đề báo cáo
+                        worksheet.Cell(currentRow, 1).Value = "DANH SÁCH PHIẾU BÀN GIAO TÀI SẢN";
+                        worksheet.Range(currentRow, 1, currentRow, 7).Merge();
+                        worksheet.Row(currentRow).Style.Font.Bold = true;
+                        worksheet.Row(currentRow).Style.Font.FontSize = 16;
+                        worksheet.Row(currentRow).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
+
+                        // Tiêu đề cột
+                        string[] headers = { "Mã phiếu", "Ngày bàn giao", "Người lập phiếu", "Phòng", "Tòa nhà", "Nội dung", "Trạng thái" };
+                        for (int i = 0; i < headers.Length; i++)
+                        {
+                            worksheet.Cell(currentRow, i + 1).Value = headers[i];
+                        }
+
+                        var headerRange = worksheet.Range(currentRow, 1, currentRow, 7);
                         headerRange.Style.Font.Bold = true;
                         headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
                         headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
 
-                        // Điền dữ liệu
-                        int row = 4;
+                        // Dữ liệu
                         foreach (BanGiaoTaiSanDTO item in dgBanGiao.Items)
                         {
-                            worksheet.Cell($"A{row}").Value = item.MaBanGiaoTS;
-                            worksheet.Cell($"B{row}").Value = item.NgayBanGiao;
-                            worksheet.Cell($"B{row}").Style.DateFormat.Format = "dd/MM/yyyy HH:mm";
-                            worksheet.Cell($"C{row}").Value = item.TenNV;
-                            worksheet.Cell($"D{row}").Value = item.TenPhong;
-                            worksheet.Cell($"E{row}").Value = item.TenToaNha;
-                            worksheet.Cell($"F{row}").Value = item.NoiDung;
-                            worksheet.Cell($"G{row}").Value = item.TrangThaiText;
+                            worksheet.Cell(currentRow, 1).Value = item.MaBanGiaoTS;
+                            worksheet.Cell(currentRow, 2).Value = item.NgayBanGiao;
+                            worksheet.Cell(currentRow, 2).Style.DateFormat.Format = "dd/MM/yyyy HH:mm";
+                            worksheet.Cell(currentRow, 3).Value = item.TenNV;
+                            worksheet.Cell(currentRow, 4).Value = item.TenPhong;
+                            worksheet.Cell(currentRow, 5).Value = item.TenToaNha;
+                            worksheet.Cell(currentRow, 6).Value = item.NoiDung;
+                            worksheet.Cell(currentRow, 7).Value = item.TrangThaiText;
 
-                            // Định dạng màu cho trạng thái
+                            // Màu trạng thái
                             if (item.TrangThaiText == "Chờ duyệt")
-                            {
-                                worksheet.Cell($"G{row}").Style.Font.FontColor = XLColor.Orange;
-                            }
+                                worksheet.Cell(currentRow, 7).Style.Font.FontColor = XLColor.Orange;
                             else if (item.TrangThaiText == "Đã duyệt")
-                            {
-                                worksheet.Cell($"G{row}").Style.Font.FontColor = XLColor.Green;
-                            }
+                                worksheet.Cell(currentRow, 7).Style.Font.FontColor = XLColor.Green;
                             else if (item.TrangThaiText == "Từ chối duyệt")
-                            {
-                                worksheet.Cell($"G{row}").Style.Font.FontColor = XLColor.Red;
-                            }
+                                worksheet.Cell(currentRow, 7).Style.Font.FontColor = XLColor.Red;
 
-                            row++;
+                            currentRow++;
                         }
 
-                        // Định dạng bảng
-                        var dataRange = worksheet.Range($"A3:G{row - 1}");
+                        // Viền bảng
+                        var dataRange = worksheet.Range(worksheet.Cell(currentRow - dgBanGiao.Items.Count - 1, 1), worksheet.Cell(currentRow - 1, 7));
                         dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                         dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
-                        // Điều chỉnh độ rộng cột
+                        // Ngày xuất
+                        worksheet.Cell(currentRow + 2, 6).Value = "Ngày xuất:";
+                        worksheet.Cell(currentRow + 2, 7).Value = DateTime.Now;
+                        worksheet.Cell(currentRow + 2, 7).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                        worksheet.Range(currentRow + 2, 6, currentRow + 2, 7).Style.Font.Italic = true;
+
                         worksheet.Columns().AdjustToContents();
-
-                        // Lưu workbook
                         workbook.SaveAs(saveFileDialog.FileName);
-                    }
 
-                    MessageBox.Show($"Xuất Excel thành công! File được lưu tại:\n{saveFileDialog.FileName}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"Xuất Excel thành công! File được lưu tại:\n{saveFileDialog.FileName}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = saveFileDialog.FileName,
+                            UseShellExecute = true
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -443,6 +472,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void btnXuatPDF_Click(object sender, RoutedEventArgs e)
         {
