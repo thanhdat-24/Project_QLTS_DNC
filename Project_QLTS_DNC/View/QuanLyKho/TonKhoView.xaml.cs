@@ -1,4 +1,14 @@
-﻿using System;
+﻿using ClosedXML.Excel;
+using Project_QLTS_DNC.Helpers;
+using Project_QLTS_DNC.Models.BanGiaoTaiSan;
+using Project_QLTS_DNC.Models.Kho;
+using Project_QLTS_DNC.Models.PhieuNhapKho;
+using Project_QLTS_DNC.Models.PhieuXuatKho;
+using Project_QLTS_DNC.Models.QLNhomTS;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Services;
+using Supabase;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -255,22 +265,66 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
 
                 if (dialog.ShowDialog() == true)
                 {
+                    var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy(); // Gọi thông tin công ty
+
                     using (var workbook = new ClosedXML.Excel.XLWorkbook())
                     {
                         var worksheet = workbook.Worksheets.Add("Tồn Kho");
+                        int currentRow = 1;
 
-                        string[] headers = { "Mã Tồn Kho", "Tên Kho", "Tên Nhóm TS", "Số Lượng Nhập", "Số Lượng Xuất", "Số Lượng Tồn" };
-
-                        for (int i = 0; i < headers.Length; i++)
+                        // Logo
+                        if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
                         {
-                            worksheet.Cell(1, i + 1).Value = headers[i];
-                            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
-                            worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGreen;
-                            worksheet.Cell(1, i + 1).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                            worksheet.Cell(1, i + 1).Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                            worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                     .MoveTo(worksheet.Cell(currentRow, 1))
+                                     .WithSize(140, 60);
+                            worksheet.Row(currentRow).Height = 50;
                         }
 
-                        int row = 2;
+                        // Tên công ty
+                        worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                        worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                        worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                        worksheet.Range(currentRow, 2, currentRow, 6).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        // Địa chỉ
+                        worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                        worksheet.Range(currentRow, 2, currentRow, 6).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        // Liên hệ
+                        worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                        worksheet.Range(currentRow, 2, currentRow, 6).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        // Mã số thuế
+                        worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                        worksheet.Range(currentRow, 2, currentRow, 6).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
+
+                        // Tiêu đề
+                        worksheet.Cell(currentRow, 1).Value = "DANH SÁCH TỒN KHO";
+                        worksheet.Range(currentRow, 1, currentRow, 6).Merge();
+                        worksheet.Row(currentRow).Style.Font.Bold = true;
+                        worksheet.Row(currentRow).Style.Font.FontSize = 16;
+                        worksheet.Row(currentRow).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
+
+                        // Header
+                        string[] headers = { "Mã Tồn Kho", "Tên Kho", "Tên Nhóm TS", "Số Lượng Nhập", "Số Lượng Xuất", "Số Lượng Tồn" };
+                        for (int i = 0; i < headers.Length; i++)
+                        {
+                            worksheet.Cell(currentRow, i + 1).Value = headers[i];
+                            worksheet.Cell(currentRow, i + 1).Style.Font.Bold = true;
+                            worksheet.Cell(currentRow, i + 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                            worksheet.Cell(currentRow, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Cell(currentRow, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        }
+
+                        int dataStartRow = currentRow + 1;
+                        int row = dataStartRow;
+
                         foreach (dynamic item in dgTonKho.ItemsSource)
                         {
                             worksheet.Cell(row, 1).Value = item.MaTonKho;
@@ -282,19 +336,31 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
 
                             for (int i = 1; i <= 6; i++)
                             {
-                                worksheet.Cell(row, i).Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-                                worksheet.Cell(row, i).Style.Alignment.Vertical = ClosedXML.Excel.XLAlignmentVerticalValues.Center;
-                                worksheet.Cell(row, i).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                                worksheet.Cell(row, i).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                worksheet.Cell(row, i).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                                worksheet.Cell(row, i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                             }
 
                             row++;
                         }
 
+                        // Ngày xuất
+                        int exportRow = row + 2;
+                        worksheet.Cell(exportRow, 5).Value = "Ngày xuất:";
+                        worksheet.Cell(exportRow, 6).Value = DateTime.Now;
+                        worksheet.Cell(exportRow, 6).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                        worksheet.Range(exportRow, 5, exportRow, 6).Style.Font.Italic = true;
+
                         worksheet.Columns().AdjustToContents();
                         workbook.SaveAs(dialog.FileName);
-                    }
 
-                    MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = dialog.FileName,
+                            UseShellExecute = true
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -302,6 +368,7 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
                 MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void btnExportPDF_Click(object sender, RoutedEventArgs e)
         {
