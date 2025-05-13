@@ -23,7 +23,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.IO;
+using Project_QLTS_DNC.Models.ThongTinCongTy;
 
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
@@ -33,17 +36,18 @@ namespace Project_QLTS_DNC.View.QuanLyKho
         private Dictionary<int, string> _khoLookup = new();
         private Dictionary<int, string> _nccLookup = new();
         private Dictionary<int, string> _nvLookup = new();
+        private ThongTinCongTy _thongTinCongTy;
 
         private string _keyword = "";
         private int? _filterMaKho = null;
         private int? _filterMaNhom = null;
         private string _filterTrangThai = null;
 
-
         public PhieuNhapKhoView()
         {
             InitializeComponent();
             _ = Init();
+            LoadThongTinCongTy();
         }
 
         private async Task Init()
@@ -94,7 +98,19 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             _nvLookup = result.Models.ToDictionary(nv => nv.MaNV, nv => nv.TenNV);
         }
 
-
+        private void LoadThongTinCongTy()
+        {
+            string jsonPath = "thongtincongty.json";
+            if (File.Exists(jsonPath))
+            {
+                string json = File.ReadAllText(jsonPath);
+                _thongTinCongTy = JsonSerializer.Deserialize<ThongTinCongTy>(json);
+            }
+            else
+            {
+                _thongTinCongTy = new ThongTinCongTy();
+            }
+        }
 
         private async Task LoadPhieuNhapAsync()
         {
@@ -140,7 +156,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                                 false => "Từ chối duyệt"
                             }
                         })
-                        .OrderByDescending(p => p.NgayNhap)
+                        .OrderByDescending(p => p.MaPhieuNhap)
                         .ToList();
 
                     dgSanPham.ItemsSource = displayList;
@@ -156,7 +172,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show($"Lỗi khi tải dữ liệu phiếu nhập: {ex.Message}");
             }
         }
-
 
         private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -309,7 +324,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             }
         }
 
-
         private void btnChiTiet_Click(object sender, RoutedEventArgs e)
         {
             if (!QuyenNguoiDungHelper.HasPermission("btnNhapKho", "xem"))
@@ -327,7 +341,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Không thể lấy thông tin phiếu nhập.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         private void btnExportExcel_Click(object sender, RoutedEventArgs e)
         {
@@ -398,101 +411,143 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             }
         }
 
-
         private void btnExportPDF_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (dgSanPham.ItemsSource == null)
                 {
-                    MessageBox.Show("Không có dữ liệu để xuất.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Không có dữ liệu để in.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
-                SaveFileDialog saveFileDialog = new SaveFileDialog
+                PrintDialog printDialog = new PrintDialog();
+                if (printDialog.ShowDialog() == true)
                 {
-                    Filter = "PDF Files|*.pdf",
-                    Title = "Lưu file PDF",
-                    FileName = "DanhSachPhieuNhap.pdf"
-                };
+                    FlowDocument flowDocument = new FlowDocument();
+                    flowDocument.PagePadding = new Thickness(50);
+                    flowDocument.ColumnWidth = double.PositiveInfinity;
 
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    var document = new PdfSharpCore.Pdf.PdfDocument();
-                    var page = document.AddPage();
-                    page.Orientation = PdfSharpCore.PageOrientation.Landscape; 
-
-                    var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
-                    var fontHeader = new PdfSharpCore.Drawing.XFont("Arial", 14, PdfSharpCore.Drawing.XFontStyle.Bold);
-                    var fontContent = new PdfSharpCore.Drawing.XFont("Arial", 10, PdfSharpCore.Drawing.XFontStyle.Regular);
-
-                    double margin = 40;
-                    double y = margin;
-                    double rowHeight = 25;
-                    double[] columnWidths = { 60, 100, 100, 150, 80, 90, 80 }; 
-
-                    // Vẽ tiêu đề
-                    gfx.DrawString("DANH SÁCH PHIẾU NHẬP", fontHeader, PdfSharpCore.Drawing.XBrushes.Black,
-                        new PdfSharpCore.Drawing.XRect(0, y, page.Width, page.Height),
-                        PdfSharpCore.Drawing.XStringFormats.TopCenter);
-
-                    y += 40;
-
-                    // Header bảng
-                    string[] headers = { "Mã PN", "Tên kho", "Người lập", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
-                    double x = margin;
-                    for (int i = 0; i < headers.Length; i++)
+                    // Add company logo if exists
+                    if (_thongTinCongTy != null && !string.IsNullOrEmpty(_thongTinCongTy.LogoPath) && File.Exists(_thongTinCongTy.LogoPath))
                     {
-                        gfx.DrawRectangle(PdfSharpCore.Drawing.XPens.Black, PdfSharpCore.Drawing.XBrushes.LightBlue, x, y, columnWidths[i], rowHeight);
-                        gfx.DrawString(headers[i], fontContent, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XRect(x, y, columnWidths[i], rowHeight), PdfSharpCore.Drawing.XStringFormats.Center);
-                        x += columnWidths[i];
+                        Image logo = new Image
+                        {
+                            Source = new BitmapImage(new Uri(_thongTinCongTy.LogoPath)),
+                            Width = 100,
+                            Height = 100,
+                            Stretch = Stretch.Uniform
+                        };
+                        flowDocument.Blocks.Add(new BlockUIContainer(logo));
                     }
 
-                    y += rowHeight;
+                    // Add company information
+                    if (_thongTinCongTy != null)
+                    {
+                        Paragraph header = new Paragraph();
+                        header.Inlines.Add(new Run(_thongTinCongTy.Ten) { FontSize = 20, FontWeight = FontWeights.Bold });
+                        header.Inlines.Add(new LineBreak());
+                        header.Inlines.Add(new Run($"Mã số thuế: {_thongTinCongTy.MaSoThue}"));
+                        header.Inlines.Add(new LineBreak());
+                        header.Inlines.Add(new Run($"Địa chỉ: {_thongTinCongTy.DiaChi}"));
+                        header.Inlines.Add(new LineBreak());
+                        header.Inlines.Add(new Run($"Số điện thoại: {_thongTinCongTy.SoDienThoai}"));
+                        header.Inlines.Add(new LineBreak());
+                        header.Inlines.Add(new Run($"Email: {_thongTinCongTy.Email}"));
+                        header.Inlines.Add(new LineBreak());
+                        header.Inlines.Add(new Run($"Người đại diện: {_thongTinCongTy.NguoiDaiDien}"));
+                        header.Inlines.Add(new LineBreak());
+                        if (!string.IsNullOrEmpty(_thongTinCongTy.GhiChu))
+                        {
+                            header.Inlines.Add(new Run($"Ghi chú: {_thongTinCongTy.GhiChu}"));
+                        }
+                        header.Margin = new Thickness(0, 0, 0, 20);
+                        flowDocument.Blocks.Add(header);
+                    }
 
-                    // Nội dung bảng
+                    // Add a line separator
+                    flowDocument.Blocks.Add(new Paragraph(new Run(new string('-', 100))));
+
+                    // Add title
+                    Paragraph title = new Paragraph(new Run("DANH SÁCH PHIẾU NHẬP"))
+                    {
+                        FontSize = 16,
+                        FontWeight = FontWeights.Bold,
+                        TextAlignment = TextAlignment.Center,
+                        Margin = new Thickness(0, 0, 0, 20)
+                    };
+                    flowDocument.Blocks.Add(title);
+
+                    // Create table
+                    Table table = new Table();
+                    table.CellSpacing = 0;
+                    table.BorderThickness = new Thickness(1);
+                    table.BorderBrush = Brushes.Black;
+
+                    // Add columns
+                    string[] headers = { "Mã PN", "Tên kho", "Người lập", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
+                    double[] columnWidths = { 60, 100, 100, 150, 80, 90, 80 };
+
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        table.Columns.Add(new TableColumn { Width = new GridLength(columnWidths[i]) });
+                    }
+
+                    // Add header row
+                    TableRow headerRow = new TableRow();
+                    headerRow.Background = Brushes.LightBlue;
+                    foreach (string header in headers)
+                    {
+                        TableCell cell = new TableCell(new Paragraph(new Run(header))
+                        {
+                            FontWeight = FontWeights.Bold,
+                            TextAlignment = TextAlignment.Center
+                        });
+                        cell.BorderThickness = new Thickness(1);
+                        cell.BorderBrush = Brushes.Black;
+                        headerRow.Cells.Add(cell);
+                    }
+                    table.RowGroups.Add(new TableRowGroup());
+                    table.RowGroups[0].Rows.Add(headerRow);
+
+                    // Add data rows
                     foreach (dynamic item in dgSanPham.ItemsSource)
                     {
-                        x = margin;
+                        TableRow row = new TableRow();
                         string[] data = {
-                    item.MaPhieuNhap.ToString(),
-                    item.TenKho,
-                    item.TenNhanVien,
-                    item.TenNCC,
-                    ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy"),
-                    string.Format("{0:N0} VNĐ", item.TongTien),
-                    item.TrangThai.ToString()
-                };
+                            item.MaPhieuNhap.ToString(),
+                            item.TenKho,
+                            item.TenNhanVien,
+                            item.TenNCC,
+                            ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy"),
+                            string.Format("{0:N0} VNĐ", item.TongTien),
+                            item.TrangThai.ToString()
+                        };
 
                         for (int i = 0; i < data.Length; i++)
                         {
-                            gfx.DrawRectangle(PdfSharpCore.Drawing.XPens.Black, x, y, columnWidths[i], rowHeight);
-                            gfx.DrawString(data[i], fontContent, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XRect(x + 5, y + 5, columnWidths[i] - 10, rowHeight - 10), PdfSharpCore.Drawing.XStringFormats.TopLeft);
-                            x += columnWidths[i];
+                            TableCell cell = new TableCell(new Paragraph(new Run(data[i]))
+                            {
+                                TextAlignment = i == 5 ? TextAlignment.Right : TextAlignment.Left
+                            });
+                            cell.BorderThickness = new Thickness(1);
+                            cell.BorderBrush = Brushes.Black;
+                            row.Cells.Add(cell);
                         }
-
-                        y += rowHeight;
-
-                        // Thêm trang mới nếu hết trang
-                        if (y > page.Height - margin - rowHeight)
-                        {
-                            page = document.AddPage();
-                            page.Orientation = PdfSharpCore.PageOrientation.Landscape; 
-                            gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
-                            y = margin;
-                        }
+                        table.RowGroups[0].Rows.Add(row);
                     }
 
-                    document.Save(saveFileDialog.FileName);
+                    flowDocument.Blocks.Add(table);
 
-                    MessageBox.Show("Xuất file PDF thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Print the document
+                    DocumentPaginator paginator = ((IDocumentPaginatorSource)flowDocument).DocumentPaginator;
+                    printDialog.PrintDocument(paginator, "Danh sách phiếu nhập");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi xuất PDF: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Lỗi khi in: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
     }
 }
