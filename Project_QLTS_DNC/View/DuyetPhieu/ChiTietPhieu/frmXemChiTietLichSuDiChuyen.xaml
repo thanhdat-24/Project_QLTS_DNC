@@ -136,7 +136,7 @@
                                                   Width="36"
                                                   Height="36"
                                                   VerticalAlignment="Center"/>
-                        <TextBlock Text="CHI TIẾT PHIẾU LỊCH SỬ DI CHUYỂN TÀI SẢN" 
+                        <TextBlock Text="CHI TIẾT PHIẾU DI CHUYỂN TÀI SẢN" 
                                      FontSize="28" 
                                      FontWeight="Bold" 
                                      Foreground="{DynamicResource PrimaryHueMidBrush}"

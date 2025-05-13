@@ -9,6 +9,7 @@ using iText.Kernel.Geom;
 using iText.Layout.Borders;
 using Microsoft.Win32;
 using Project_QLTS_DNC.Models.DuyetPhieu;
+using Project_QLTS_DNC.View.Common; // dùng SuccessNotificationDialog
 using Project_QLTS_DNC.Models.NhanVien;
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using Project_QLTS_DNC.Services;
@@ -17,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Project_QLTS_DNC.View.Common;
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 {
@@ -50,17 +52,19 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 if (thongTinPhieu == null) throw new Exception("Không tìm thấy phiếu đề nghị mua!");
 
                 var dsNhanVien = await client.From<NhanVienModel>().Get();
-                var tenNV = dsNhanVien.Models.FirstOrDefault(x => x.MaNV == thongTinPhieu.MaNV)?.TenNV ?? "???";
+                var nhanVien = dsNhanVien.Models.FirstOrDefault(x => x.MaNV == thongTinPhieu.MaNV);
+                string tenNV = nhanVien?.TenNV ?? "???";
+                string donVi = thongTinPhieu.DonViDeNghi ?? "(Không rõ)";
 
                 var dsChiTiet = await client.From<CTdenghimua>().Where(x => x.MaPhieuDeNghi == maPhieu).Get();
 
                 txtMaPhieu.Text = "PDN" + thongTinPhieu.MaPhieuDeNghi;
                 txtTenNV.Text = tenNV;
-                txtDonVi.Text = ""; // Không lấy tên phòng
+                txtDonVi.Text = donVi;
                 txtNgayNhap.Text = thongTinPhieu.NgayDeNghiMua?.ToString("dd/MM/yyyy") ?? "";
-
                 txtTenNCC.Text = thongTinPhieu.GhiChu;
-                txtTrangThai.Text = thongTinPhieu.TrangThai == true ? "Đã duyệt" : thongTinPhieu.TrangThai == false ? "Từ chối duyệt" : "Chưa duyệt";
+                txtTrangThai.Text = thongTinPhieu.TrangThai == true ? "Đã duyệt" :
+                                    thongTinPhieu.TrangThai == false ? "Từ chối duyệt" : "Chưa duyệt";
 
                 danhSachChiTiet = dsChiTiet.Models;
                 dgChiTietPhieuNhap.ItemsSource = danhSachChiTiet;
@@ -93,8 +97,16 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 
                 if (dialog.ShowDialog() == true)
                 {
-                    ExportToPDF(dialog.FileName);
-                    MessageBox.Show("Xuất PDF thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string filePath = dialog.FileName;
+                    ExportToPDF(filePath);
+
+                    // ✅ Hiển thị dialog hỏi mở file
+                    var dialogSuccess = new SuccessNotificationDialog(
+                        "Xuất PDF thành công",
+                        "Bạn có muốn mở file PDF vừa tạo không?",
+                        filePath
+                    );
+                    dialogSuccess.ShowDialog(); // người dùng chọn MỞ FILE hoặc OK
                 }
             }
             catch (Exception ex)
@@ -102,6 +114,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 MessageBox.Show("Lỗi khi xuất PDF: " + ex.Message);
             }
         }
+
 
         private void ExportToPDF(string filePath)
         {
@@ -112,11 +125,14 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 
             var font = PdfFontFactory.CreateFont("C:\\Windows\\Fonts\\arial.ttf", PdfEncodings.IDENTITY_H);
 
-            doc.Add(new Paragraph("PHIẾU ĐỀ NGHỊ MUA TÀI SẢN").SetFont(font).SetFontSize(16).SetBold().SetTextAlignment(iTextTextAlignment.CENTER));
-            doc.Add(new Paragraph($"Số phiếu: PDN{thongTinPhieu.MaPhieuDeNghi}     Ngày đề nghị: {thongTinPhieu.NgayDeNghiMua:dd/MM/yyyy}").SetFont(font).SetMarginBottom(10));
+            doc.Add(new Paragraph("PHIẾU ĐỀ NGHỊ MUA TÀI SẢN")
+                .SetFont(font).SetFontSize(16).SetBold().SetTextAlignment(iTextTextAlignment.CENTER));
+            doc.Add(new Paragraph($"Số phiếu: PDN{thongTinPhieu.MaPhieuDeNghi}     Ngày đề nghị: {thongTinPhieu.NgayDeNghiMua:dd/MM/yyyy}")
+                .SetFont(font).SetMarginBottom(10));
 
             Table info = new Table(UnitValue.CreatePercentArray(new float[] { 25, 75 })).UseAllAvailableWidth();
             info.AddCell(Cell("Nhân viên:", font, true)); info.AddCell(Cell(txtTenNV.Text, font));
+            info.AddCell(Cell("Đơn vị:", font, true)); info.AddCell(Cell(txtDonVi.Text, font));
             info.AddCell(Cell("Ghi chú:", font, true)); info.AddCell(Cell(txtTenNCC.Text, font));
             info.AddCell(Cell("Trạng thái:", font, true)); info.AddCell(Cell(txtTrangThai.Text, font));
             doc.Add(info);
@@ -128,43 +144,31 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             {
                 table.AddHeaderCell(new Cell().Add(new Paragraph(h).SetFont(font).SetBold())
                     .SetBackgroundColor(new DeviceRgb(230, 230, 230))
-                     .SetTextAlignment(iTextTextAlignment.CENTER));
+                    .SetTextAlignment(iTextTextAlignment.CENTER));
             }
 
             foreach (var ct in danhSachChiTiet)
             {
-                table.AddCell(new Cell().Add(new Paragraph(ct.MaChiTietDNM.ToString()).SetFont(font))
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
-                table.AddCell(new Cell().Add(new Paragraph(ct.TenTaiSan ?? "").SetFont(font))
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
-                table.AddCell(new Cell().Add(new Paragraph(ct.DonViTinh ?? "").SetFont(font))
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
-                table.AddCell(new Cell().Add(new Paragraph(ct.SoLuong.ToString()).SetFont(font))
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
-                table.AddCell(new Cell().Add(new Paragraph((ct.DuKienGia.HasValue ? ct.DuKienGia.Value.ToString("N0") : "0") + " VNĐ").SetFont(font))
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
-                table.AddCell(new Cell().Add(new Paragraph(ct.MoTa ?? "").SetFont(font))
-                    .SetTextAlignment(iTextTextAlignment.CENTER));
+                table.AddCell(new Cell().Add(new Paragraph(ct.MaChiTietDNM.ToString()).SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
+                table.AddCell(new Cell().Add(new Paragraph(ct.TenTaiSan ?? "").SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
+                table.AddCell(new Cell().Add(new Paragraph(ct.DonViTinh ?? "").SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
+                table.AddCell(new Cell().Add(new Paragraph(ct.SoLuong.ToString()).SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
+                table.AddCell(new Cell().Add(new Paragraph((ct.DuKienGia.HasValue ? ct.DuKienGia.Value.ToString("N0") : "0") + " VNĐ").SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
+                table.AddCell(new Cell().Add(new Paragraph(ct.MoTa ?? "").SetFont(font)).SetTextAlignment(iTextTextAlignment.CENTER));
             }
 
             doc.Add(table);
-
-            //  THÊM SAU DÒNG NÀY:
             doc.Add(new Paragraph("\n\n"));
 
-            //  BẢNG CHỮ KÝ
             Table sign = new Table(2).UseAllAvailableWidth();
             sign.AddCell(SignatureCell("NGƯỜI ĐỀ NGHỊ", txtTenNV.Text, font));
             sign.AddCell(SignatureCell("NGƯỜI PHÊ DUYỆT", "", font));
             doc.Add(sign);
 
-            // Ngày in
             doc.Add(new Paragraph($"\n\nNgày in: {DateTime.Now:dd/MM/yyyy HH:mm:ss}")
                 .SetFont(font).SetFontSize(8).SetItalic().SetTextAlignment(iTextTextAlignment.RIGHT));
-
-
-
         }
+
         private Cell SignatureCell(string title, string name, PdfFont font)
         {
             return new Cell()
@@ -174,7 +178,6 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 .Add(new Paragraph(name ?? "").SetFont(font).SetTextAlignment(iTextTextAlignment.CENTER))
                 .SetBorder(Border.NO_BORDER);
         }
-
 
         private Cell Cell(string text, PdfFont font, bool bold = false)
         {
