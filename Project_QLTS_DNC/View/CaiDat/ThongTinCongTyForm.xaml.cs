@@ -106,6 +106,22 @@ namespace Project_QLTS_DNC.View.CaiDat
 
         private void BtnLuu_Click(object sender, RoutedEventArgs e)
         {
+            // Kiểm tra định dạng email trước
+            if (!string.IsNullOrWhiteSpace(txtEmail.Text))
+            {
+                try
+                {
+                    var addr = new System.Net.Mail.MailAddress(txtEmail.Text);
+                }
+                catch
+                {
+                    MessageBox.Show("Email không hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    txtEmail.Focus();
+                    return; // Dừng không cho lưu tiếp
+                }
+            }
+
+            // Nếu hợp lệ thì tiếp tục lưu
             thongTin.Ten = txtTen.Text;
             thongTin.MaSoThue = txtMaSoThue.Text;
             thongTin.DiaChi = txtDiaChi.Text;
@@ -118,6 +134,32 @@ namespace Project_QLTS_DNC.View.CaiDat
 
             MessageBox.Show("Đã lưu thông tin công ty!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             SetEditable(false);
+        }
+
+
+
+        // Chỉ cho phép nhập số
+        private void OnlyNumber_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !ulong.TryParse(e.Text, out _);
+        }
+
+
+
+        private void txt_Pasting_NumberOnly(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!ulong.TryParse(text, out _))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
         }
 
         private void SetEditable(bool enable)

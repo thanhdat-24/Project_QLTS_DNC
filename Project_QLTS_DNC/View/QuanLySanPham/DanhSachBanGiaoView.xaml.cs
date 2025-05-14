@@ -474,10 +474,10 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         }
 
 
-        private void btnXuatPDF_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Chức năng xuất PDF sẽ được phát triển trong phiên bản sau!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        //private void btnXuatPDF_Click(object sender, RoutedEventArgs e)
+        //{
+        //    MessageBox.Show("Chức năng xuất PDF sẽ được phát triển trong phiên bản sau!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+        //}
     }
 
     public class EqualityToVisibilityConverter : IValueConverter

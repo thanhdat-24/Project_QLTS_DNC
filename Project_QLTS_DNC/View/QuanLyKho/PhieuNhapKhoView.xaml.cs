@@ -356,53 +356,111 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 {
                     Filter = "Excel Files|*.xlsx",
                     Title = "Lưu file Excel",
-                    FileName = "DanhSachPhieuNhap.xlsx"
+                    FileName = $"DanhSachPhieuNhap_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
                 };
 
                 if (saveFileDialog.ShowDialog() == true)
                 {
+                    var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy(); // Lấy thông tin công ty
+
                     using (var workbook = new XLWorkbook())
                     {
                         var worksheet = workbook.Worksheets.Add("Danh sách phiếu nhập");
+                        int currentRow = 1;
+
+                        // Logo công ty
+                        if (!string.IsNullOrEmpty(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                        {
+                            worksheet.AddPicture(thongTinCongTy.LogoPath)
+                                     .MoveTo(worksheet.Cell(currentRow, 1))
+                                     .WithSize(140, 60);
+                            worksheet.Row(currentRow).Height = 50;
+                        }
+
+                        // Thông tin công ty
+                        worksheet.Cell(currentRow, 2).Value = thongTinCongTy.Ten;
+                        worksheet.Cell(currentRow, 2).Style.Font.Bold = true;
+                        worksheet.Cell(currentRow, 2).Style.Font.FontSize = 14;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        worksheet.Cell(currentRow, 2).Value = "Địa chỉ: " + thongTinCongTy.DiaChi;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        worksheet.Cell(currentRow, 2).Value = $"SĐT: {thongTinCongTy.SoDienThoai} - Email: {thongTinCongTy.Email}";
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow++;
+
+                        worksheet.Cell(currentRow, 2).Value = "Mã số thuế: " + thongTinCongTy.MaSoThue;
+                        worksheet.Range(currentRow, 2, currentRow, 7).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
+
+                        // Tiêu đề báo cáo
+                        worksheet.Cell(currentRow, 1).Value = "DANH SÁCH PHIẾU NHẬP KHO";
+                        worksheet.Range(currentRow, 1, currentRow, 7).Merge();
+                        worksheet.Row(currentRow).Style.Font.Bold = true;
+                        worksheet.Row(currentRow).Style.Font.FontSize = 16;
+                        worksheet.Row(currentRow).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        currentRow += 2;
 
                         // Header
                         string[] headers = { "Mã phiếu nhập", "Tên kho", "Người lập phiếu", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
                         for (int i = 0; i < headers.Length; i++)
                         {
-                            worksheet.Cell(1, i + 1).Value = headers[i];
-                            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
-                            worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
-                            worksheet.Cell(1, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                            worksheet.Cell(1, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                            worksheet.Cell(currentRow, i + 1).Value = headers[i];
+                            worksheet.Cell(currentRow, i + 1).Style.Font.Bold = true;
+                            worksheet.Cell(currentRow, i + 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                            worksheet.Cell(currentRow, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            worksheet.Cell(currentRow, i + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                         }
 
-                        int row = 2;
+                        currentRow++;
+                        int dataStartRow = currentRow;
+
                         foreach (dynamic item in dgSanPham.ItemsSource)
                         {
-                            worksheet.Cell(row, 1).Value = item.MaPhieuNhap;
-                            worksheet.Cell(row, 2).Value = item.TenKho;
-                            worksheet.Cell(row, 3).Value = item.TenNhanVien;
-                            worksheet.Cell(row, 4).Value = item.TenNCC;
-                            worksheet.Cell(row, 5).Value = item.NgayNhap.ToString("dd/MM/yyyy");
-                            worksheet.Cell(row, 6).Value = item.TongTien;
-                            worksheet.Cell(row, 7).Value = item.TrangThai;
+                            worksheet.Cell(currentRow, 1).Value = item.MaPhieuNhap;
+                            worksheet.Cell(currentRow, 2).Value = item.TenKho;
+                            worksheet.Cell(currentRow, 3).Value = item.TenNhanVien;
+                            worksheet.Cell(currentRow, 4).Value = item.TenNCC;
+                            worksheet.Cell(currentRow, 5).Value = item.NgayNhap.ToString("dd/MM/yyyy");
+                            worksheet.Cell(currentRow, 6).Value = item.TongTien;
+                            worksheet.Cell(currentRow, 7).Value = item.TrangThai;
 
                             for (int i = 1; i <= 7; i++)
                             {
-                                worksheet.Cell(row, i).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                                worksheet.Cell(row, i).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                                worksheet.Cell(row, i).Style.Alignment.Horizontal = (i == 6) ? XLAlignmentHorizontalValues.Right : XLAlignmentHorizontalValues.Center;
+                                worksheet.Cell(currentRow, i).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                worksheet.Cell(currentRow, i).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                                worksheet.Cell(currentRow, i).Style.Alignment.Horizontal = (i == 6) ? XLAlignmentHorizontalValues.Right : XLAlignmentHorizontalValues.Center;
                             }
 
-                            worksheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0 VNĐ";
-                            row++;
+                            worksheet.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0 VNĐ";
+                            currentRow++;
                         }
+
+                        // Viền bảng
+                        var dataRange = worksheet.Range(dataStartRow - 1, 1, currentRow - 1, 7);
+                        dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                        // Ngày xuất
+                        worksheet.Cell(currentRow + 2, 6).Value = "Ngày xuất:";
+                        worksheet.Cell(currentRow + 2, 7).Value = DateTime.Now;
+                        worksheet.Cell(currentRow + 2, 7).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                        worksheet.Range(currentRow + 2, 6, currentRow + 2, 7).Style.Font.Italic = true;
 
                         worksheet.Columns().AdjustToContents();
                         workbook.SaveAs(saveFileDialog.FileName);
-                    }
 
-                    MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Xuất file Excel thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = saveFileDialog.FileName,
+                            UseShellExecute = true
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -410,6 +468,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Lỗi khi xuất Excel: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void btnExportPDF_Click(object sender, RoutedEventArgs e)
         {
@@ -424,51 +483,86 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 PrintDialog printDialog = new PrintDialog();
                 if (printDialog.ShowDialog() == true)
                 {
-                    FlowDocument flowDocument = new FlowDocument();
-                    flowDocument.PagePadding = new Thickness(50);
-                    flowDocument.ColumnWidth = double.PositiveInfinity;
-
-                    // Add company logo if exists
-                    if (_thongTinCongTy != null && !string.IsNullOrEmpty(_thongTinCongTy.LogoPath) && File.Exists(_thongTinCongTy.LogoPath))
+                    FlowDocument flowDocument = new FlowDocument
                     {
-                        Image logo = new Image
-                        {
-                            Source = new BitmapImage(new Uri(_thongTinCongTy.LogoPath)),
-                            Width = 100,
-                            Height = 100,
-                            Stretch = Stretch.Uniform
-                        };
-                        flowDocument.Blocks.Add(new BlockUIContainer(logo));
-                    }
+                        FontFamily = new FontFamily("Times New Roman"), // <- Font chữ
+                        FontSize = 12,                                  // <- Cỡ chữ
+                        PagePadding = new Thickness(50),
+                        ColumnWidth = double.PositiveInfinity
+                    };
 
-                    // Add company information
+
+                    // ===== HEADER: Logo + Thông tin công ty (giống hình mẫu) =====
                     if (_thongTinCongTy != null)
                     {
-                        Paragraph header = new Paragraph();
-                        header.Inlines.Add(new Run(_thongTinCongTy.Ten) { FontSize = 20, FontWeight = FontWeights.Bold });
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Mã số thuế: {_thongTinCongTy.MaSoThue}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Địa chỉ: {_thongTinCongTy.DiaChi}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Số điện thoại: {_thongTinCongTy.SoDienThoai}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Email: {_thongTinCongTy.Email}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Người đại diện: {_thongTinCongTy.NguoiDaiDien}"));
-                        header.Inlines.Add(new LineBreak());
-                        if (!string.IsNullOrEmpty(_thongTinCongTy.GhiChu))
+                        Grid headerGrid = new Grid
                         {
-                            header.Inlines.Add(new Run($"Ghi chú: {_thongTinCongTy.GhiChu}"));
+                            Margin = new Thickness(0, 0, 0, 20)
+                        };
+                        headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) }); // Logo
+                        headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });     // Thông tin
+
+                        // Logo
+                        if (!string.IsNullOrEmpty(_thongTinCongTy.LogoPath) && File.Exists(_thongTinCongTy.LogoPath))
+                        {
+                            Image logo = new Image
+                            {
+                                Source = new BitmapImage(new Uri(_thongTinCongTy.LogoPath)),
+                                Width = 100,
+                                Height = 100,
+                                Stretch = Stretch.UniformToFill,
+                                Margin = new Thickness(0, 0, 10, 0)
+                            };
+                            Grid.SetColumn(logo, 0);
+                            headerGrid.Children.Add(logo);
                         }
-                        header.Margin = new Thickness(0, 0, 0, 20);
-                        flowDocument.Blocks.Add(header);
+
+                        // Thông tin công ty
+                        StackPanel infoPanel = new StackPanel
+                        {
+                            VerticalAlignment = VerticalAlignment.Center
+                        };
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = _thongTinCongTy.Ten,
+                            FontSize = 16,
+                            FontWeight = FontWeights.Bold
+                        });
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = "Địa chỉ: " + _thongTinCongTy.DiaChi,
+                            FontSize = 12
+                        });
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = $"SĐT: {_thongTinCongTy.SoDienThoai} - Email: {_thongTinCongTy.Email}",
+                            FontSize = 12
+                        });
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = "Mã số thuế: " + _thongTinCongTy.MaSoThue,
+                            FontSize = 12
+                        });
+
+                      
+
+                        Grid.SetColumn(infoPanel, 1);
+                        headerGrid.Children.Add(infoPanel);
+
+                        flowDocument.Blocks.Add(new BlockUIContainer(headerGrid));
+
+                      
                     }
 
-                    // Add a line separator
-                    flowDocument.Blocks.Add(new Paragraph(new Run(new string('-', 100))));
 
-                    // Add title
+                    //// ===== Dòng kẻ ngang =====
+                    //flowDocument.Blocks.Add(new Paragraph(new Run(new string('-', 100))) { Margin = new Thickness(0, 0, 0, 10) });
+
+                    // ===== Tiêu đề =====
                     Paragraph title = new Paragraph(new Run("DANH SÁCH PHIẾU NHẬP"))
                     {
                         FontSize = 16,
@@ -478,13 +572,25 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                     };
                     flowDocument.Blocks.Add(title);
 
-                    // Create table
-                    Table table = new Table();
-                    table.CellSpacing = 0;
-                    table.BorderThickness = new Thickness(1);
-                    table.BorderBrush = Brushes.Black;
 
-                    // Add columns
+                    // Thêm ngày in ở trên cùng
+                    System.Windows.Documents.Paragraph datePara = new System.Windows.Documents.Paragraph();
+                    datePara.TextAlignment = System.Windows.TextAlignment.Right;
+                    datePara.Margin = new System.Windows.Thickness(0, 0, 0, 20);
+                    System.Windows.Documents.Run dateRun = new System.Windows.Documents.Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                    dateRun.FontStyle = System.Windows.FontStyles.Italic;
+                    dateRun.FontSize = 10;
+                    datePara.Inlines.Add(dateRun);
+                    flowDocument.Blocks.Add(datePara);
+
+                    // ===== Bảng dữ liệu =====
+                    Table table = new Table
+                    {
+                        CellSpacing = 0,
+                        BorderThickness = new Thickness(1),
+                        BorderBrush = Brushes.Black
+                    };
+
                     string[] headers = { "Mã PN", "Tên kho", "Người lập", "Nhà cung cấp", "Ngày nhập", "Tổng tiền", "Trạng thái" };
                     double[] columnWidths = { 60, 100, 100, 150, 80, 90, 80 };
 
@@ -493,53 +599,115 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                         table.Columns.Add(new TableColumn { Width = new GridLength(columnWidths[i]) });
                     }
 
-                    // Add header row
-                    TableRow headerRow = new TableRow();
-                    headerRow.Background = Brushes.LightBlue;
-                    foreach (string header in headers)
+                    TableRow headerRow = new TableRow { Background = Brushes.LightBlue };
+                    foreach (string h in headers)
                     {
-                        TableCell cell = new TableCell(new Paragraph(new Run(header))
+                        TableCell cell = new TableCell(new Paragraph(new Run(h))
                         {
                             FontWeight = FontWeights.Bold,
                             TextAlignment = TextAlignment.Center
-                        });
-                        cell.BorderThickness = new Thickness(1);
-                        cell.BorderBrush = Brushes.Black;
+                        })
+                        {
+                            BorderThickness = new Thickness(1),
+                            BorderBrush = Brushes.Black
+                        };
                         headerRow.Cells.Add(cell);
                     }
+
                     table.RowGroups.Add(new TableRowGroup());
                     table.RowGroups[0].Rows.Add(headerRow);
 
-                    // Add data rows
+                    // Dòng dữ liệu
                     foreach (dynamic item in dgSanPham.ItemsSource)
                     {
                         TableRow row = new TableRow();
                         string[] data = {
-                            item.MaPhieuNhap.ToString(),
-                            item.TenKho,
-                            item.TenNhanVien,
-                            item.TenNCC,
-                            ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy"),
-                            string.Format("{0:N0} VNĐ", item.TongTien),
-                            item.TrangThai.ToString()
-                        };
+                    item.MaPhieuNhap.ToString(),
+                    item.TenKho,
+                    item.TenNhanVien,
+                    item.TenNCC,
+                    ((DateTime)item.NgayNhap).ToString("dd/MM/yyyy"),
+                    string.Format("{0:N0} VNĐ", item.TongTien),
+                    item.TrangThai.ToString()
+                };
 
                         for (int i = 0; i < data.Length; i++)
                         {
                             TableCell cell = new TableCell(new Paragraph(new Run(data[i]))
                             {
                                 TextAlignment = i == 5 ? TextAlignment.Right : TextAlignment.Left
-                            });
-                            cell.BorderThickness = new Thickness(1);
-                            cell.BorderBrush = Brushes.Black;
+                            })
+                            {
+                                BorderThickness = new Thickness(1),
+                                BorderBrush = Brushes.Black
+                            };
                             row.Cells.Add(cell);
                         }
+
                         table.RowGroups[0].Rows.Add(row);
                     }
 
                     flowDocument.Blocks.Add(table);
 
-                    // Print the document
+
+                    // ===== FOOTER: Người lập phiếu - Xác nhận quản lý =====
+                    Grid footerGrid = new Grid
+                    {
+                        Margin = new Thickness(0, 40, 0, 0) // cách xa phần nội dung
+                    };
+                    footerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    footerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+                    // Cột: Người lập phiếu
+                    StackPanel nguoiLapPhieuPanel = new StackPanel
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+
+                    nguoiLapPhieuPanel.Children.Add(new TextBlock
+                    {
+                        Text = "Người lập phiếu",
+                        FontWeight = FontWeights.Bold,
+                        TextAlignment = TextAlignment.Center
+                    });
+
+                    nguoiLapPhieuPanel.Children.Add(new TextBlock
+                    {
+                        Text = "(Ký và ghi rõ họ tên)",
+                        FontStyle = FontStyles.Italic,
+                        Margin = new Thickness(0, 20, 0, 0),
+                        TextAlignment = TextAlignment.Center
+                    });
+                    Grid.SetColumn(nguoiLapPhieuPanel, 0);
+                    footerGrid.Children.Add(nguoiLapPhieuPanel);
+
+                    // Cột: Xác nhận của quản lý
+                    StackPanel quanLyPanel = new StackPanel
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+
+                    quanLyPanel.Children.Add(new TextBlock
+                    {
+                        Text = "Xác nhận của quản lý",
+                        FontWeight = FontWeights.Bold,
+                        TextAlignment = TextAlignment.Center
+                    });
+
+                    quanLyPanel.Children.Add(new TextBlock
+                    {
+                        Text = "(Ký và ghi rõ họ tên)",
+                        FontStyle = FontStyles.Italic,
+                        Margin = new Thickness(0, 20, 0, 0),
+                        TextAlignment = TextAlignment.Center
+                    });
+                    Grid.SetColumn(quanLyPanel, 1);
+                    footerGrid.Children.Add(quanLyPanel);
+
+                    // Thêm footer vào FlowDocument
+                    flowDocument.Blocks.Add(new BlockUIContainer(footerGrid));
+
+                    // In tài liệu
                     DocumentPaginator paginator = ((IDocumentPaginatorSource)flowDocument).DocumentPaginator;
                     printDialog.PrintDocument(paginator, "Danh sách phiếu nhập");
                 }
@@ -549,5 +717,6 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 MessageBox.Show("Lỗi khi in: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
     }
 }

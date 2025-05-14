@@ -533,12 +533,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
 
 
 
-                    // Thêm ngày xuất báo cáo
-                    worksheet.Cell($"A{rowIndex}").Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
-                    worksheet.Range($"A{rowIndex}:I{rowIndex}").Merge();
-                    worksheet.Cell($"A{rowIndex}").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-                    worksheet.Cell($"A{rowIndex}").Style.Font.Italic = true;
-                    rowIndex += 2; // Thêm dòng trống
 
                     // Thêm header dựa trên DataGrid
                     var headerRow = rowIndex;
@@ -599,6 +593,15 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     worksheet.Cell(footerRow, 1).Value = "Tổng số tài sản:";
                     worksheet.Cell(footerRow, 2).Value = filteredData.Count.ToString();
                     worksheet.Cell(footerRow, 1).Style.Font.Bold = true;
+
+                    // Thêm dòng Ngày xuất cuối file
+                    int ngayXuatRow = footerRow + 2;
+                    worksheet.Cell(ngayXuatRow, 8).Value = "Ngày xuất:";
+                    worksheet.Cell(ngayXuatRow, 9).Value = DateTime.Now;
+                    worksheet.Cell(ngayXuatRow, 9).Style.DateFormat.Format = "dd/MM/yyyy HH:mm";
+                    worksheet.Range(ngayXuatRow, 8, ngayXuatRow, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                    worksheet.Range(ngayXuatRow, 8, ngayXuatRow, 9).Style.Font.Italic = true;
+
 
                     // Lưu file
                     workbook.SaveAs(filePath);

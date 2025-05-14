@@ -383,51 +383,91 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
                 PrintDialog printDialog = new PrintDialog();
                 if (printDialog.ShowDialog() == true)
                 {
-                    FlowDocument flowDocument = new FlowDocument();
-                    flowDocument.PagePadding = new Thickness(50);
-                    flowDocument.ColumnWidth = double.PositiveInfinity;
-
-                    // Add company logo if exists
-                    if (_thongTinCongTy != null && !string.IsNullOrEmpty(_thongTinCongTy.LogoPath) && File.Exists(_thongTinCongTy.LogoPath))
+                    FlowDocument flowDocument = new FlowDocument
                     {
-                        Image logo = new Image
-                        {
-                            Source = new BitmapImage(new Uri(_thongTinCongTy.LogoPath)),
-                            Width = 100,
-                            Height = 100,
-                            Stretch = Stretch.Uniform
-                        };
-                        flowDocument.Blocks.Add(new BlockUIContainer(logo));
-                    }
+                        FontFamily = new FontFamily("Times New Roman"),
+                        FontSize = 12,
+                        PagePadding = new Thickness(50),
+                        ColumnWidth = double.PositiveInfinity
+                    };
 
-                    // Add company information
+                    // === HEADER: Logo + Thông tin công ty ===
                     if (_thongTinCongTy != null)
                     {
-                        Paragraph header = new Paragraph();
-                        header.Inlines.Add(new Run(_thongTinCongTy.Ten) { FontSize = 20, FontWeight = FontWeights.Bold });
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Mã số thuế: {_thongTinCongTy.MaSoThue}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Địa chỉ: {_thongTinCongTy.DiaChi}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Số điện thoại: {_thongTinCongTy.SoDienThoai}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Email: {_thongTinCongTy.Email}"));
-                        header.Inlines.Add(new LineBreak());
-                        header.Inlines.Add(new Run($"Người đại diện: {_thongTinCongTy.NguoiDaiDien}"));
-                        header.Inlines.Add(new LineBreak());
-                        if (!string.IsNullOrEmpty(_thongTinCongTy.GhiChu))
+                        Grid headerGrid = new Grid
                         {
-                            header.Inlines.Add(new Run($"Ghi chú: {_thongTinCongTy.GhiChu}"));
+                            Margin = new Thickness(0, 0, 0, 20)
+                        };
+                        headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) }); // Logo
+                        headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });     // Info
+
+                        // Logo
+                        if (!string.IsNullOrEmpty(_thongTinCongTy.LogoPath) && File.Exists(_thongTinCongTy.LogoPath))
+                        {
+                            Image logo = new Image
+                            {
+                                Source = new BitmapImage(new Uri(_thongTinCongTy.LogoPath)),
+                                Width = 100,
+                                Height = 100,
+                                Stretch = Stretch.UniformToFill,
+                                Margin = new Thickness(0, 0, 10, 0)
+                            };
+                            Grid.SetColumn(logo, 0);
+                            headerGrid.Children.Add(logo);
                         }
-                        header.Margin = new Thickness(0, 0, 0, 20);
-                        flowDocument.Blocks.Add(header);
+
+                        // Thông tin công ty
+                        StackPanel infoPanel = new StackPanel
+                        {
+                            VerticalAlignment = VerticalAlignment.Center
+                        };
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = _thongTinCongTy.Ten,
+                            FontSize = 16,
+                            FontWeight = FontWeights.Bold
+                        });
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = "Địa chỉ: " + _thongTinCongTy.DiaChi,
+                            FontSize = 12
+                        });
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = $"SĐT: {_thongTinCongTy.SoDienThoai} - Email: {_thongTinCongTy.Email}",
+                            FontSize = 12
+                        });
+
+                        infoPanel.Children.Add(new TextBlock
+                        {
+                            Text = "Mã số thuế: " + _thongTinCongTy.MaSoThue,
+                            FontSize = 12
+                        });
+
+                        Grid.SetColumn(infoPanel, 1);
+                        headerGrid.Children.Add(infoPanel);
+
+                        flowDocument.Blocks.Add(new BlockUIContainer(headerGrid));
                     }
 
-                    // Add a line separator
-                    flowDocument.Blocks.Add(new Paragraph(new Run(new string('-', 100))));
+                    // === Ngày in ===
+                    Paragraph datePara = new Paragraph
+                    {
+                        TextAlignment = TextAlignment.Right,
+                        Margin = new Thickness(0, 0, 0, 20)
+                    };
+                    Run dateRun = new Run("Ngày in: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"))
+                    {
+                        FontStyle = FontStyles.Italic,
+                        FontSize = 10
+                    };
+                    datePara.Inlines.Add(dateRun);
+                    flowDocument.Blocks.Add(datePara);
 
-                    // Add title
+                    // === Tiêu đề ===
                     Paragraph title = new Paragraph(new Run("DANH SÁCH TỒN KHO"))
                     {
                         FontSize = 16,
@@ -437,13 +477,14 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
                     };
                     flowDocument.Blocks.Add(title);
 
-                    // Create table
-                    Table table = new Table();
-                    table.CellSpacing = 0;
-                    table.BorderThickness = new Thickness(1);
-                    table.BorderBrush = Brushes.Black;
+                    // === Bảng ===
+                    Table table = new Table
+                    {
+                        CellSpacing = 0,
+                        BorderThickness = new Thickness(1),
+                        BorderBrush = Brushes.Black
+                    };
 
-                    // Add columns
                     string[] headers = { "Mã Tồn Kho", "Tên Kho", "Tên Nhóm TS", "Số Nhập", "Số Xuất", "Số Tồn" };
                     double[] columnWidths = { 70, 110, 170, 90, 90, 90 };
 
@@ -452,52 +493,111 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
                         table.Columns.Add(new TableColumn { Width = new GridLength(columnWidths[i]) });
                     }
 
-                    // Add header row
-                    TableRow headerRow = new TableRow();
-                    headerRow.Background = Brushes.LightGreen;
-                    foreach (string header in headers)
+                    TableRow headerRow = new TableRow { Background = Brushes.LightGreen };
+                    foreach (string h in headers)
                     {
-                        TableCell cell = new TableCell(new Paragraph(new Run(header))
+                        TableCell cell = new TableCell(new Paragraph(new Run(h))
                         {
                             FontWeight = FontWeights.Bold,
                             TextAlignment = TextAlignment.Center
-                        });
-                        cell.BorderThickness = new Thickness(1);
-                        cell.BorderBrush = Brushes.Black;
+                        })
+                        {
+                            BorderThickness = new Thickness(1),
+                            BorderBrush = Brushes.Black
+                        };
                         headerRow.Cells.Add(cell);
                     }
+
                     table.RowGroups.Add(new TableRowGroup());
                     table.RowGroups[0].Rows.Add(headerRow);
 
-                    // Add data rows
                     foreach (dynamic item in dgTonKho.ItemsSource)
                     {
                         TableRow row = new TableRow();
                         string[] data = {
-                            item.MaTonKho?.ToString() ?? "",
-                            item.TenKho ?? "",
-                            item.TenNhomTS ?? "",
-                            item.SoLuongNhap?.ToString() ?? "0",
-                            item.SoLuongXuat?.ToString() ?? "0",
-                            item.SoLuongTon?.ToString() ?? "0"
-                        };
+                    item.MaTonKho?.ToString() ?? "",
+                    item.TenKho ?? "",
+                    item.TenNhomTS ?? "",
+                    item.SoLuongNhap?.ToString() ?? "0",
+                    item.SoLuongXuat?.ToString() ?? "0",
+                    item.SoLuongTon?.ToString() ?? "0"
+                };
 
                         for (int i = 0; i < data.Length; i++)
                         {
                             TableCell cell = new TableCell(new Paragraph(new Run(data[i]))
                             {
                                 TextAlignment = TextAlignment.Center
-                            });
-                            cell.BorderThickness = new Thickness(1);
-                            cell.BorderBrush = Brushes.Black;
+                            })
+                            {
+                                BorderThickness = new Thickness(1),
+                                BorderBrush = Brushes.Black
+                            };
                             row.Cells.Add(cell);
                         }
+
                         table.RowGroups[0].Rows.Add(row);
                     }
 
                     flowDocument.Blocks.Add(table);
 
-                    // Print the document
+                    // === FOOTER ===
+                    Grid footerGrid = new Grid
+                    {
+                        Margin = new Thickness(0, 40, 0, 0)
+                    };
+                    footerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    footerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+                    // Người lập phiếu
+                    StackPanel nguoiLapPhieuPanel = new StackPanel
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+
+                    nguoiLapPhieuPanel.Children.Add(new TextBlock
+                    {
+                        Text = "Người lập phiếu",
+                        FontWeight = FontWeights.Bold,
+                        TextAlignment = TextAlignment.Center
+                    });
+
+                    nguoiLapPhieuPanel.Children.Add(new TextBlock
+                    {
+                        Text = "(Ký và ghi rõ họ tên)",
+                        FontStyle = FontStyles.Italic,
+                        Margin = new Thickness(0, 20, 0, 0),
+                        TextAlignment = TextAlignment.Center
+                    });
+                    Grid.SetColumn(nguoiLapPhieuPanel, 0);
+                    footerGrid.Children.Add(nguoiLapPhieuPanel);
+
+                    // Xác nhận quản lý
+                    StackPanel quanLyPanel = new StackPanel
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+
+                    quanLyPanel.Children.Add(new TextBlock
+                    {
+                        Text = "Xác nhận của quản lý",
+                        FontWeight = FontWeights.Bold,
+                        TextAlignment = TextAlignment.Center
+                    });
+
+                    quanLyPanel.Children.Add(new TextBlock
+                    {
+                        Text = "(Ký và ghi rõ họ tên)",
+                        FontStyle = FontStyles.Italic,
+                        Margin = new Thickness(0, 20, 0, 0),
+                        TextAlignment = TextAlignment.Center
+                    });
+                    Grid.SetColumn(quanLyPanel, 1);
+                    footerGrid.Children.Add(quanLyPanel);
+
+                    flowDocument.Blocks.Add(new BlockUIContainer(footerGrid));
+
+                    // In
                     DocumentPaginator paginator = ((IDocumentPaginatorSource)flowDocument).DocumentPaginator;
                     printDialog.PrintDocument(paginator, "Danh sách tồn kho");
                 }
@@ -507,5 +607,6 @@ WHERE tk.ma_nhom_ts = tong_xuat.ma_nhom_ts;
                 MessageBox.Show("Lỗi khi in: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
     }
 }
