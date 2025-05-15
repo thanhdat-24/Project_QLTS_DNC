@@ -585,6 +585,11 @@ HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding DsBaoTri}">
 
                 <!-- Nút bên phải -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="btnXemLichSu" 
+            Content="Xem lịch sử" 
+            Style="{StaticResource PrimaryButton}"
+            Click="btnXemLichSu_Click"
+            ToolTip="Xem lịch sử bảo trì của tài sản"/>
                     <Button x:Name="btnInPhieu" 
             Content="In phiếu" 
             Style="{StaticResource PrimaryButton}"

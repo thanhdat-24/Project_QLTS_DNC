@@ -16,6 +16,9 @@ using System.ComponentModel;
 using ClosedXML.Excel;
 using Project_QLTS_DNC.Services;
 using KiemKeTaiSanModel = Project_QLTS_DNC.Models.KiemKe.KiemKeTaiSanModel;
+using Project_QLTS_DNC.Utils;
+using Project_QLTS_DNC.Views;
+using System.Threading.Tasks;
 
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
@@ -44,11 +47,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             // Đăng ký sự kiện cho nút xuất Excel
             btnXuatExcel.Click += BtnXuatExcel_Click;
 
+            // Đăng ký sự kiện cho nút xem lịch sử
+            btnXemLichSu.Click += BtnXemLichSu_Click;
+
             // Đăng ký sự kiện cho checkbox chọn tất cả
             chkSelectAll.Checked += ChkSelectAll_CheckedChanged;
             chkSelectAll.Unchecked += ChkSelectAll_CheckedChanged;
-
-            
 
             // Đăng ký sự kiện cho ComboBox lọc
             RegisterFilterEvents();
@@ -354,7 +358,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-       
+
         // Phương thức thêm ô vào hàng với căn chỉnh và định dạng đẹp hơn
         private void AddCellToRow(System.Windows.Documents.TableRow row, string text, System.Windows.TextAlignment alignment)
         {
@@ -437,11 +441,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     {
                         // Xuất Excel với tất cả dữ liệu đã lọc
                         XuatDanhSachTaiSanRaExcel(saveDialog.FileName);
-
-                        // THÊM MỚI: Lưu hoạt động xuất Excel vào lịch sử
-                        var theoDoiService = new TheoDoiHoatDongService();
-                        string ghiChu = $"Xuất Excel danh sách tài sản cần bảo trì vào file {saveDialog.FileName}";
-                        await theoDoiService.LuuHoatDongXuatExcelDanhSach(danhSachXuat, ghiChu);
 
                         MessageBox.Show("Xuất Excel thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -602,74 +601,87 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 throw; // Rethrow để caller biết lỗi
             }
         }
-
-
-        private async void BtnSua_Click(object sender, RoutedEventArgs e)
+        private void BtnXemLichSu_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Lấy item được chọn từ CommandParameter
-                if (sender is Button button && button.CommandParameter is int maKiemKeTS)
+                // Lấy danh sách tài sản đã được chọn hoặc hiển thị
+                var selectedItems = new List<KiemKeTaiSan>(); // Thay KiemKeTaiSanModel thành KiemKeTaiSan
+
+                // Nếu có tài sản được chọn, lấy danh sách tài sản đã chọn
+                foreach (var item in dgDanhSachTaiSan.Items)
                 {
-                    // Tìm item trong danh sách
-                    var item = _viewModel.DsKiemKe.FirstOrDefault(x => x.MaKiemKeTS == maKiemKeTS);
-                    if (item == null)
+                    if (item is KiemKeTaiSan kiemKeTaiSan && kiemKeTaiSan.IsSelected)
                     {
-                        MessageBox.Show("Không tìm thấy thông tin tài sản!", "Lỗi",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
-                    // Lấy client Supabase
-                    var client = await SupabaseService.GetClientAsync();
-                    if (client == null)
-                    {
-                        MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu!", "Lỗi",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
-                    // Mở form sửa
-                    var formSua = new DSBaoTriInputForm(client, item);
-                    formSua.Owner = Window.GetWindow(this);
-                    var result = formSua.ShowDialog();
-
-                    // Nếu lưu thành công, tải lại dữ liệu
-                    if (result == true)
-                    {
-                        await _viewModel.LoadDSKiemKeAsync();
+                        selectedItems.Add(kiemKeTaiSan);
                     }
                 }
+
+                // Nếu không có tài sản nào được chọn, lấy tất cả tài sản hiển thị
+                if (selectedItems.Count == 0)
+                {
+                    foreach (var item in dgDanhSachTaiSan.Items)
+                    {
+                        if (item is KiemKeTaiSan kiemKeTaiSan) // Đã khai báo kiemKeTaiSan ở đây
+                        {
+                            selectedItems.Add(kiemKeTaiSan);
+                        }
+                    }
+                }
+
+                if (selectedItems.Count == 0)
+                {
+                    MessageBox.Show("Không có tài sản nào để xem lịch sử.", "Thông báo",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Mở cửa sổ lịch sử bảo trì
+                OpenLichSuBaoTriWindow(selectedItems);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi mở form sửa: {ex.Message}", "Lỗi",
+                MessageBox.Show($"Lỗi khi hiển thị lịch sử: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        private async void BtnXoa_Click(object sender, RoutedEventArgs e)
+
+        // Phần 2: Cập nhật phương thức OpenLichSuBaoTriWindow
+        private void OpenLichSuBaoTriWindow(List<KiemKeTaiSan> selectedItems) // Thay KiemKeTaiSanModel thành KiemKeTaiSan
         {
             try
             {
-                Mouse.OverrideCursor = Cursors.Wait;
+                // Tạo danh sách mã tài sản để lọc
+                var maTaiSanList = selectedItems.Select(item => item.MaTaiSan.HasValue ? item.MaTaiSan.Value : 0)
+                    .Where(id => id > 0)
+                    .ToList();
 
-                // Gọi phương thức xóa và chờ kết quả
-                bool xoaThanhCong = await _viewModel.XoaTaiSanDaChonAsync();
-
-                // Nếu xóa thành công, không cần tải lại dữ liệu (đã làm trong XoaTaiSanDaChonAsync)
-
-                Mouse.OverrideCursor = null;
+                // Tạo và mở cửa sổ lịch sử, truyền danh sách mã tài sản
+                var lichSuWindow = new LichSuBaoTriWindow(maTaiSanList);
+                lichSuWindow.Owner = Window.GetWindow(this);
+                lichSuWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                lichSuWindow.ShowDialog();
             }
             catch (Exception ex)
             {
-                Mouse.OverrideCursor = null;
-                MessageBox.Show(
-                    $"Lỗi khi xóa tài sản: {ex.Message}",
-                    "Lỗi",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show($"Lỗi khi mở cửa sổ lịch sử: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+        private void btnXemLichSu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Tạo và hiển thị cửa sổ lịch sử bảo trì
+                Project_QLTS_DNC.Views.LichSuBaoTriWindow lichSuWindow = new Project_QLTS_DNC.Views.LichSuBaoTriWindow();
+                lichSuWindow.Owner = Window.GetWindow(this);
+                lichSuWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở cửa sổ lịch sử: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }

@@ -39,5 +39,7 @@ namespace Project_QLTS_DNC.Converters
             // Chuyển giá trị decimal thành chuỗi mà không có dấu phẩy, nếu giá trị là null thì mặc định 0
             writer.WriteNumberValue(value ?? 0);
         }
+
     }
+
 }

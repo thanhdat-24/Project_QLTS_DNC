@@ -331,7 +331,7 @@ HorizontalScrollBarVisibility="Auto">
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Tên tài sản" Width="160" Binding="{Binding TenTaiSan}">
+                        <DataGridTextColumn Header="Tên tài sản" Width="170" Binding="{Binding TenTaiSan}">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="TextAlignment" Value="Center"/>
@@ -374,7 +374,7 @@ HorizontalScrollBarVisibility="Auto">
        </DataTemplate>
    </DataGridTemplateColumn.CellEditingTemplate>
 </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Ghi chú" Width="170" Binding="{Binding GhiChu}">
+                        <DataGridTextColumn Header="Ghi chú" Width="300" Binding="{Binding GhiChu}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="TextAlignment" Value="Center"/>
@@ -384,31 +384,7 @@ HorizontalScrollBarVisibility="Auto">
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Width="120" MinWidth="120" Header="Tùy chọn">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Style="{StaticResource MaterialDesignIconButton}"
-                                    CommandParameter="{Binding MaKiemKeTS}"
-                                    ToolTip="Sửa"
-                                    Background="{DynamicResource PrimaryHueLightBrush}" 
-                                    Width="30" Height="30" Padding="2" Margin="0,1"
-                                    Click="BtnSua_Click">
-                                            <materialDesign:PackIcon Kind="Edit" Width="16" Height="16" Foreground="White"/>
-                                        </Button>
-                                        <Button x:Name="btnXoa" Style="{StaticResource MaterialDesignIconButton}"
-                                    CommandParameter="{Binding MaKiemKeTS}" 
-                                    ToolTip="Xóa" Margin="8,1,0,1"
-                                    Background="{DynamicResource SecondaryDelete}" 
-                                    Width="30" Height="30" 
-                                    Padding="2"
-                                    Click="BtnXoa_Click">
-                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="White"/>
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                       
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -423,7 +399,13 @@ HorizontalScrollBarVisibility="Auto">
                 <!-- Nút bên trái -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button x:Name="btnXuatExcel" Content="Xuất Excel" Style="{StaticResource ExportButton}"/>
-                    
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="btnXemLichSu" 
+Content="Xem lịch sử" 
+Style="{StaticResource PrimaryButton}"
+Click="btnXemLichSu_Click"
+ToolTip="Xem lịch sử bảo trì của tài sản"/>
                 </StackPanel>
                 <!-- Phân trang -->
                 <Grid Grid.Column="1" HorizontalAlignment="Center">
@@ -493,6 +475,7 @@ HorizontalScrollBarVisibility="Auto">
                             <ComboBoxItem Content="100"/>
                         </ComboBox>
                     </StackPanel>
+                    
                 </Grid>
    
             </Grid>

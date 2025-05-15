@@ -792,6 +792,7 @@ namespace Project_QLTS_DNC.ViewModel.Baotri
                 if (string.IsNullOrEmpty(item.TenNhomTS) ||
                     !item.TenNhomTS.Equals(NhomTaiSanDuocChon, StringComparison.OrdinalIgnoreCase))
                 {
+
                     return false;
                 }
             }

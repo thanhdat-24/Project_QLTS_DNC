@@ -16,17 +16,21 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.QLTaiSan;
+using Microsoft.Win32;
 
 namespace Project_QLTS_DNC.View.QuanLyPhieu
 {
     public partial class PhieuBaoTriView : UserControl
     {
+        // Thêm khai báo service ở đầu lớp PhieuBaoTriView
+        private readonly LichSuBaoTriService _lichSuService = new LichSuBaoTriService();
         private readonly PhieuBaoTriService _phieuBaoTriService = new();
         private readonly PhieuBaoTriViewModel _viewModel;
         private int _currentPage = 1;
         private int _totalPages = 1;
         private int _pageSize = 10;
 
+        // Cập nhật constructor nếu cần
         public PhieuBaoTriView()
         {
             InitializeComponent();
@@ -442,7 +446,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Xử lý khi nhấn nút xuất Excel
+        // Cập nhật phương thức btnIn_Click để lưu lịch sử xuất Excel
         private async void btnIn_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -481,10 +485,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         // Gọi phương thức xuất Excel từ service
                         _phieuBaoTriService.ExportToExcel(danhSachXuat, saveFileDialog.FileName);
 
-                        // THÊM MỚI: Lưu hoạt động xuất Excel vào lịch sử
-                        var theoDoiService = new TheoDoiHoatDongService();
-                        string ghiChu = $"Xuất Excel phiếu bảo trì vào file {saveFileDialog.FileName}";
-                        await theoDoiService.LuuHoatDongXuatExcel(danhSachXuat, ghiChu);
+                        // THAY ĐỔI: Sử dụng LichSuBaoTriService thay vì phương thức cục bộ
+                        await _lichSuService.LuuLichSuHoatDongAsync("Xuất Excel", danhSachXuat,
+                            $"Xuất file Excel {System.IO.Path.GetFileName(saveFileDialog.FileName)}");
 
                         MessageBox.Show("Xuất Excel thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -502,7 +505,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Xử lý khi nhấn nút In phiếu
+        // Cập nhật phương thức btnInPhieu_Click để lưu lịch sử
         private async void btnInPhieu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -732,10 +735,9 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         printDialog.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)document).DocumentPaginator,
                             "In phiếu bảo trì");
 
-                        // THÊM MỚI: Lưu hoạt động in phiếu vào lịch sử
-                        var theoDoiService = new TheoDoiHoatDongService();
-                        string ghiChu = $"In phiếu bảo trì - {selectedPhieu.Count} phiếu";
-                        await theoDoiService.LuuHoatDongInPhieu(selectedPhieu, ghiChu);
+                        // THAY ĐỔI: Sử dụng LichSuBaoTriService thay vì phương thức cục bộ
+                        await _lichSuService.LuuLichSuHoatDongAsync("In phiếu", selectedPhieu,
+                            $"In {selectedPhieu.Count} phiếu bảo trì");
 
                         MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -753,6 +755,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void AddHeaderCell(System.Windows.Documents.TableRow row, string text)
         {
             System.Windows.Documents.TableCell cell = new System.Windows.Documents.TableCell();
@@ -830,13 +833,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         // Đọc thông tin công ty
                         var thongTinCongTy = ThongTinCongTyService.DocThongTinCongTy();
 
-                        // (Mã code in phiếu chi tiết hiện tại của bạn)
-                        // Thêm thông tin công ty vào đầu FlowDocument giống như btnInPhieu_Click
-
-                        // THÊM MỚI: Lưu hoạt động in phiếu chi tiết vào lịch sử
-                        var theoDoiService = new TheoDoiHoatDongService();
-                        string ghiChu = $"In phiếu bảo trì chi tiết - {selectedPhieu.Count} phiếu";
-                        await theoDoiService.LuuHoatDongInPhieu(selectedPhieu, ghiChu);
+                      
 
                         MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì chi tiết thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -869,5 +866,23 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
             return selectedPhieus;
         }
+        // Thêm xử lý sự kiện khi click vào nút xem lịch sử
+        private void btnXemLichSu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Tạo và hiển thị cửa sổ lịch sử bảo trì
+                Project_QLTS_DNC.Views.LichSuBaoTriWindow lichSuWindow = new Project_QLTS_DNC.Views.LichSuBaoTriWindow();
+                lichSuWindow.Owner = Window.GetWindow(this);
+                lichSuWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi mở cửa sổ lịch sử: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
     }
 }

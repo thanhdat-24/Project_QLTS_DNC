@@ -626,10 +626,7 @@ namespace Project_QLTS_DNC
 
         }
 
-        private void btnLichSuBaoTri_Selected(object sender, RoutedEventArgs e)
-        {
-            MainContentPanel.Content = new View.QuanLyPhieu.LichSuSuaChuaUserControl();
-        }
+      
     }
     public static class MainWindowExtensions
     {
