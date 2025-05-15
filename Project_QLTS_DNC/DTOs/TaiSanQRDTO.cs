@@ -92,8 +92,8 @@ namespace Project_QLTS_DNC.DTOs
                 qrDTO._hasLoadedGroupInfo = true;
             }
 
-            // Tạo URL với IP tĩnh cho QR code sử dụng NetworkHelper
-            string baseUrl = NetworkHelper.GetLocalIPv4Address(8080);
+            // Tạo URL với tên miền cho QR code
+            string baseUrl = NetworkHelper.GetBaseUrl();
             qrDTO.MaQrUrl = $"{baseUrl}/qr?id={qrDTO.MaTaiSan}&seri={qrDTO.SoSeri}";
 
             return qrDTO;

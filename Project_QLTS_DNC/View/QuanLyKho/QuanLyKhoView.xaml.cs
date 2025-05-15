@@ -79,14 +79,16 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 var toaNhaDict = toaNhaResult.Models.ToDictionary(t => t.MaToaNha, t => t.TenToaNha);
 
                 // Chuyển sang ViewModel để hiển thị tên tòa nhà
-                var viewModels = result.Models.Select(k => new KhoViewModel
-                {
-                    MaKho = k.MaKho,
-                    TenKho = k.TenKho,
-                    MoTa = k.MoTa,
-                    MaToaNha = k.MaToaNha,
-                    TenToaNha = toaNhaDict.TryGetValue(k.MaToaNha, out var tenToaNha) ? tenToaNha : "---"
-                }).ToList();
+                var viewModels = result.Models
+                    .OrderByDescending(k => k.MaKho)
+                    .Select(k => new KhoViewModel
+                    {
+                        MaKho = k.MaKho,
+                        TenKho = k.TenKho,
+                        MoTa = k.MoTa,
+                        MaToaNha = k.MaToaNha,
+                        TenToaNha = toaNhaDict.TryGetValue(k.MaToaNha, out var tenToaNha) ? tenToaNha : "---"
+                    }).ToList();
 
                 _allKho = new ObservableCollection<KhoViewModel>(viewModels);
                 dgKho.ItemsSource = _allKho;
@@ -123,7 +125,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 return;
             }
             ThemKho themKhoForm = new ThemKho();
-            themKhoForm.ShowDialog(); 
+            themKhoForm.ShowDialog();
             await LoadKhoDataAsync();
         }
         // Phương thức để mở form chỉnh sửa kho
@@ -140,7 +142,7 @@ namespace Project_QLTS_DNC.View.QuanLyKho
 
             if (selectedKhoVM != null)
             {
-             
+
                 Kho khoToEdit = new Kho
                 {
                     MaKho = selectedKhoVM.MaKho,
@@ -152,8 +154,8 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 ThemKho editKhoForm = new ThemKho(khoToEdit);  // Form chỉnh sửa kho
                 editKhoForm.ShowDialog();
 
-                
-                _ = LoadKhoDataAsync(); 
+
+                _ = LoadKhoDataAsync();
             }
             else
             {

@@ -12,6 +12,7 @@ using Project_QLTS_DNC.Models.BanGiaoTaiSan;
 using Project_QLTS_DNC.Models.NhanVien;
 using Project_QLTS_DNC.Models.QLTaiSan;
 using Project_QLTS_DNC.Models.ToaNha;
+using Project_QLTS_DNC.View.Common; // SuccessNotificationDialog
 using Project_QLTS_DNC.Services;
 using Project_QLTS_DNC.Models.Kho;
 using Project_QLTS_DNC.DTOs;
@@ -132,8 +133,16 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 
                 if (dialog.ShowDialog() == true)
                 {
-                    ExportToPDF(dialog.FileName);
-                    MessageBox.Show("✅ Xuất PDF thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string filePath = dialog.FileName;
+                    ExportToPDF(filePath);
+
+                    // ✅ Gọi form SuccessNotificationDialog thay vì MessageBox
+                    var dialogSuccess = new SuccessNotificationDialog(
+                        "Xuất PDF thành công",
+                        "Bạn có muốn mở file PDF vừa tạo không?",
+                        filePath // đường dẫn để mở nếu người dùng nhấn "MỞ FILE"
+                    );
+                    dialogSuccess.ShowDialog(); // sẽ tự xử lý nút MỞ FILE hoặc OK
                 }
             }
             catch (Exception ex)
@@ -141,6 +150,8 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
                 MessageBox.Show("❌ Lỗi khi xuất PDF: " + ex.Message);
             }
         }
+
+
 
         private void ExportToPDF(string filePath)
         {

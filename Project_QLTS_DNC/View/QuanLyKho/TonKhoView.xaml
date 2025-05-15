@@ -194,6 +194,15 @@
         <!-- Nút xuất -->
         <materialDesign:ColorZone Grid.Row="3" Mode="Standard" Padding="16" Name="StatusBar">
             <DockPanel>
+                <!-- Tổng số lượng bên trái -->
+                <TextBlock x:Name="txtTongSoLuong"
+                           FontWeight="Bold"
+                           FontSize="14"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0"
+                           Text="Tổng số lượng nhập: 0 | xuất: 0 | tồn: 0"
+                           DockPanel.Dock="Left"/>
+                <!-- Nút xuất bên phải -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Style="{StaticResource MaterialDesignRaisedButton}"
                             materialDesign:ButtonAssist.CornerRadius="8"

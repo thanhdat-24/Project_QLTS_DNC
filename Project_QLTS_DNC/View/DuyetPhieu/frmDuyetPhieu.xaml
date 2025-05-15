@@ -177,7 +177,7 @@
                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
                  VerticalAlignment="Center" Margin="0,0,20,0" 
                  FontSize="14"
-                 TextChanged="txtSearch_TextChanged"/>
+             />
 
                 <!-- Search Button with Material Design -->
                 <Button x:Name="btnSearch" Grid.Column="2" Style="{StaticResource MaterialDesignRaisedButton}"
@@ -193,13 +193,13 @@
                 </Button>
 
                 <!-- Refresh Button with Material Design -->
-                <Button x:Name="btnLoadDuLieu" Grid.Column="3" Margin="12,0,0,0" 
+                <Button x:Name="btnLoadDuLieu" Grid.Column="3" Margin="12,0,0,0"  Click="btnLoadDuLieu_Click"
                     Background="{DynamicResource PrimaryHueLightBrush}" Height="40" Width="40" 
                     Style="{StaticResource MaterialDesignFloatingActionMiniButton}" 
                     ToolTip="Làm mới dữ liệu"
                     HorizontalAlignment="Right">
                     <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20" 
-                         VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                         VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </Button>
             </Grid>
         </materialDesign:Card>
@@ -393,12 +393,12 @@
                                 <ComboBox x:Name="cboLoaiPhieu" 
                                     materialDesign:HintAssist.Hint="Chọn loại phiếu"
                                     Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                    Width="194"
+                                    Width="240"
                                     SelectionChanged="cboLoaiPhieu_SelectionChanged"
                                     SelectedIndex="0">
                                     <ComboBoxItem Content="Tất cả"/>
                                     <ComboBoxItem Content="Phiếu nhập"/>
-                                    <ComboBoxItem Content="Phiếu xuất"/>
+                                    <!--  <ComboBoxItem Content="Phiếu xuất"/>-->
                                     <ComboBoxItem Content="Phiếu báo hỏng"/>
                                     <ComboBoxItem Content="Phiếu bàn giao tài sản"/>
                                     <ComboBoxItem Content="Phiếu đề nghị mua"/>

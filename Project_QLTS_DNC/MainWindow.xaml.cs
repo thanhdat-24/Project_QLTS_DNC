@@ -40,7 +40,7 @@ namespace Project_QLTS_DNC
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         //public event Action<string> TreeViewItemSelected;
-
+        public static MainWindow Instance { get; private set; }
         private TaiKhoanModel _taiKhoan;
         private List<TaiKhoanModel> _danhSachTaiKhoan;
         public UserProfileViewModel UserProfileVM { get; set; }
@@ -72,7 +72,7 @@ namespace Project_QLTS_DNC
             _taiKhoan = ThongTinDangNhap.TaiKhoanDangNhap;
             _danhSachTaiKhoan = new List<TaiKhoanModel>(); // hoặc null nếu không dùng
 
-            // Bây giờ bạn đã có ThongTinDangNhap.LoaiTaiKhoanDangNhap.TenLoaiTk để check quyền
+            Instance = this;
         }
 
         #region Window Loading Functions
@@ -218,26 +218,7 @@ namespace Project_QLTS_DNC
                 // Đánh dấu đã đọc
                 _ = new ThongBaoService().DanhDauDaDocAsync(tb.Id);
 
-                // Kiểm tra loại phiếu và mở chi tiết tương ứng
-                //if (!string.IsNullOrEmpty(tb.LoaiPhieu) && tb.MaPhieu.HasValue)
-                //{
-                //    string loai = tb.LoaiPhieu.ToLower();
-
-                //    if (loai.Contains("đề nghị"))
-                //    {
-                //        var form = new ChiTietPhieuDeNghiWindow(tb.MaPhieu.Value);
-                //        form.ShowDialog();
-                //    }
-                //    else if (loai.Contains("bảo trì"))
-                //    {
-                //        var form = new ChiTietPhieuBaoTriWindow(tb.MaPhieu.Value);
-                //        form.ShowDialog();
-                //    }
-                //    else
-                //    {
-                //        MessageBox.Show("Loại phiếu này chưa được hỗ trợ mở chi tiết.", "Thông báo");
-                //    }
-                //}
+                
             }
         }
 

@@ -15,12 +15,14 @@ using Project_QLTS_DNC.Models.ToaNha;
 using Project_QLTS_DNC.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using static Supabase.Postgrest.Constants;
 using iTextTextAlignment = iText.Layout.Properties.TextAlignment;
 using iTextVerticalAlignment = iText.Layout.Properties.VerticalAlignment;
+using Project_QLTS_DNC.View.Common; // dùng SuccessNotificationDialog
 
 namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 {
@@ -130,8 +132,16 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
 
                 if (dialog.ShowDialog() == true)
                 {
-                    ExportToPDF(dialog.FileName);
-                    MessageBox.Show("✅ Xuất PDF thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    string filePath = dialog.FileName;
+                    ExportToPDF(filePath);
+
+                    // Hiển thị SuccessNotificationDialog
+                    var dialogSuccess = new SuccessNotificationDialog(
+                        "Xuất PDF thành công",
+                        "Bạn có muốn mở file PDF vừa tạo không?",
+                        filePath
+                    );
+                    dialogSuccess.ShowDialog(); // Tự động đóng hoặc có nút mở
                 }
             }
             catch (Exception ex)
@@ -148,7 +158,7 @@ namespace Project_QLTS_DNC.View.DuyetPhieu.InPhieu
             doc.SetMargins(36, 36, 36, 36);
             var font = PdfFontFactory.CreateFont("C:\\Windows\\Fonts\\arial.ttf", PdfEncodings.IDENTITY_H);
 
-            doc.Add(new Paragraph("PHIẾU LỊCH SỬ DI CHUYỂN TÀI SẢN")
+            doc.Add(new Paragraph("PHIẾU DI CHUYỂN TÀI SẢN")
                 .SetFont(font).SetFontSize(16).SetBold().SetTextAlignment(iTextTextAlignment.CENTER));
 
             doc.Add(new Paragraph($"Số phiếu: LS{maLichSu}     Ngày bàn giao: {thongTinPhieu.NgayBanGiao:dd/MM/yyyy}")
