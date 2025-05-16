@@ -28,6 +28,9 @@ using System.IO;
 using System.Text.Json;
 using Project_QLTS_DNC.Models.ThongTinCongTy;
 
+using System.Windows.Media.Imaging;
+
+
 namespace Project_QLTS_DNC.View.QuanLyKho
 {
     public partial class ChiTietPhieuNhapView : Window
@@ -255,28 +258,78 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             // Thêm header công ty lên đầu
             if (thongTin != null)
             {
-                var header = new System.Windows.Documents.Paragraph();
-                header.Inlines.Add(new System.Windows.Documents.Run(thongTin.Ten ?? "") { FontWeight = System.Windows.FontWeights.Bold, FontSize = 18 });
-                header.Inlines.Add(new System.Windows.Documents.LineBreak());
-                header.Inlines.Add(new System.Windows.Documents.Run($"Địa chỉ: {thongTin.DiaChi ?? ""}"));
-                header.Inlines.Add(new System.Windows.Documents.LineBreak());
-                header.Inlines.Add(new System.Windows.Documents.Run($"Mã số thuế: {thongTin.MaSoThue ?? ""}"));
-                header.Inlines.Add(new System.Windows.Documents.LineBreak());
-                header.Inlines.Add(new System.Windows.Documents.Run($"SĐT: {thongTin.SoDienThoai ?? ""}"));
-                header.Inlines.Add(new System.Windows.Documents.LineBreak());
-                header.Inlines.Add(new System.Windows.Documents.Run($"Email: {thongTin.Email ?? ""}"));
-                header.Margin = new Thickness(0, 0, 0, 20);
-                header.TextAlignment = System.Windows.TextAlignment.Left;
-                doc.Blocks.Add(header);
+                // Grid 2 cột: logo - thông tin
+                var headerGrid = new Grid
+                {
+                    Margin = new Thickness(0, 0, 0, 20),
+                    VerticalAlignment = System.Windows.VerticalAlignment.Center
+                };
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+                // Logo
+                if (!string.IsNullOrEmpty(thongTin.LogoPath))
+                {
+                    string logoPath = thongTin.LogoPath;
+                    if (!System.IO.Path.IsPathRooted(logoPath))
+                        logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logoPath);
+
+                    if (File.Exists(logoPath))
+                    {
+                        try
+                        {
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.UriSource = new Uri(logoPath, UriKind.Absolute);
+                            bitmap.EndInit();
+
+                            var logoImage = new System.Windows.Controls.Image
+                            {
+                                Source = bitmap,
+                                Height = 80,
+                                Width = 80,
+                                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                                Margin = new Thickness(0, 0, 10, 0)
+                            };
+                            Grid.SetColumn(logoImage, 0);
+                            headerGrid.Children.Add(logoImage);
+                        }
+                        catch { }
+                    }
+                }
+
+                // Thông tin công ty
+                var infoPanel = new StackPanel
+                {
+                    VerticalAlignment = System.Windows.VerticalAlignment.Center
+                };
+                infoPanel.Children.Add(new TextBlock
+                {
+                    Text = thongTin.Ten ?? "",
+                    FontWeight = System.Windows.FontWeights.Bold,
+                    FontSize = 20
+                });
+                infoPanel.Children.Add(new TextBlock { Text = $"Địa chỉ: {thongTin.DiaChi ?? ""}", Margin = new Thickness(0, 2, 0, 0) });
+                infoPanel.Children.Add(new TextBlock { Text = $"Mã số thuế: {thongTin.MaSoThue ?? ""}", Margin = new Thickness(0, 2, 0, 0) });
+                infoPanel.Children.Add(new TextBlock { Text = $"SĐT: {thongTin.SoDienThoai ?? ""}", Margin = new Thickness(0, 2, 0, 0) });
+                infoPanel.Children.Add(new TextBlock { Text = $"Email: {thongTin.Email ?? ""}", Margin = new Thickness(0, 2, 0, 0) });
+                Grid.SetColumn(infoPanel, 1);
+                headerGrid.Children.Add(infoPanel);
+
+                doc.Blocks.Add(new BlockUIContainer(headerGrid));
             }
 
-            // Tiêu đề
+            // Tiêu đề căn giữa
             var title = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("PHIẾU NHẬP KHO"));
-            title.FontSize = 20;
+            title.FontSize = 22;
             title.FontWeight = System.Windows.FontWeights.Bold;
             title.TextAlignment = System.Windows.TextAlignment.Center;
-            title.Margin = new Thickness(0, 0, 0, 20);
+            title.Margin = new Thickness(0, 10, 0, 20);
             doc.Blocks.Add(title);
+
+
 
             // Bảng thông tin phiếu
             var infoTable = new System.Windows.Documents.Table();
@@ -313,7 +366,10 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             infoTable.Margin = new Thickness(0, 0, 0, 20);
             doc.Blocks.Add(infoTable);
 
-            // Bảng chi tiết
+            // Bảng chi tiết căn giữa
+            var detailSection = new Section();
+            detailSection.TextAlignment = System.Windows.TextAlignment.Center;
+
             var detailTable = new System.Windows.Documents.Table();
             detailTable.CellSpacing = 0;
             detailTable.Margin = new Thickness(0, 0, 0, 30);
@@ -326,7 +382,13 @@ namespace Project_QLTS_DNC.View.QuanLyKho
             string[] headers = { "STT", "Tên tài sản", "Nhóm tài sản", "Số lượng", "Đơn giá", "QLR" };
             foreach (var h in headers)
             {
-                var cell = new System.Windows.Documents.TableCell(new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(h)) { FontWeight = System.Windows.FontWeights.Bold, TextAlignment = System.Windows.TextAlignment.Center });
+                var cell = new System.Windows.Documents.TableCell(
+                    new System.Windows.Documents.Paragraph(
+                        new System.Windows.Documents.Run(h))
+                    {
+                        FontWeight = System.Windows.FontWeights.Bold,
+                        TextAlignment = System.Windows.TextAlignment.Center
+                    });
                 cell.Background = System.Windows.Media.Brushes.LightGray;
                 cell.BorderBrush = System.Windows.Media.Brushes.Black;
                 cell.BorderThickness = new Thickness(1);
@@ -363,7 +425,11 @@ namespace Project_QLTS_DNC.View.QuanLyKho
                 dataGroup.Rows.Add(row);
             }
             detailTable.RowGroups.Add(dataGroup);
-            doc.Blocks.Add(detailTable);
+
+            // Thêm bảng vào section căn giữa, rồi thêm section vào doc
+            detailSection.Blocks.Add(detailTable);
+            doc.Blocks.Add(detailSection);
+
 
             // Chữ ký
             var signTable = new System.Windows.Documents.Table();
