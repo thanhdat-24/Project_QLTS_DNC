@@ -48,6 +48,25 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Style cho DatePicker -->
+        <Style TargetType="DatePicker" x:Key="FilterDatePicker">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.7"/>
+            <Style.Resources>
+                <Style TargetType="DatePickerTextBox">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+            </Style.Resources>
+        </Style>
     </Window.Resources>
 
     <Border Background="White" Margin="15" CornerRadius="10">
@@ -57,6 +76,7 @@
 
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -81,13 +101,9 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Thanh tìm kiếm và lọc -->
-            <Grid Grid.Row="1" Margin="20,20,20,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <materialDesign:Card Grid.Column="0" Padding="0" Margin="0" UniformCornerRadius="5">
+            <!-- Thanh tìm kiếm -->
+            <Grid Grid.Row="1" Margin="20,10,20,10">
+                <materialDesign:Card Padding="0" Margin="0" UniformCornerRadius="5">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -118,72 +134,159 @@
                         </Button>
                     </Grid>
                 </materialDesign:Card>
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <ComboBox x:Name="cboLoaiHoatDong" Width="150" Height="42" Margin="15,0" 
-               HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-               SelectionChanged="cboLoaiHoatDong_SelectionChanged"
-               Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
-                        <ComboBoxItem Content="Tất cả hoạt động" IsSelected="True"/>
-                        <ComboBoxItem Content="Xuất Excel"/>
-                        <ComboBoxItem Content="In phiếu"/>
-                    </ComboBox>
-                </StackPanel>
+            </Grid>
+
+            <!-- Bộ lọc theo ngày -->
+            <Grid Grid.Row="2" Margin="20,5,20,10">
+                <materialDesign:Card Padding="8" UniformCornerRadius="5">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <materialDesign:PackIcon Kind="CalendarRange" 
+                                               Grid.Column="0"
+                                               Width="24" 
+                                               Height="24"
+                                               VerticalAlignment="Center" 
+                                               Margin="5,0" 
+                                               Foreground="{StaticResource PrimaryHueMidBrush}"/>
+
+                        <TextBlock Text="Từ ngày:" 
+                                 Grid.Column="1"
+                                 VerticalAlignment="Center" 
+                                 FontWeight="Medium"
+                                 Margin="5,0"/>
+
+                        <DatePicker x:Name="dpTuNgay" 
+                                  Grid.Column="2"
+                                  Style="{StaticResource FilterDatePicker}" 
+                                  materialDesign:HintAssist.Hint="Chọn ngày"
+                                  Language="vi-VN"/>
+
+                        <TextBlock Text="Đến ngày:" 
+                                 Grid.Column="3"
+                                 VerticalAlignment="Center" 
+                                 FontWeight="Medium"
+                                 Margin="10,0,5,0"/>
+
+                        <DatePicker x:Name="dpDenNgay" 
+                                  Grid.Column="4"
+                                  Style="{StaticResource FilterDatePicker}"
+                                  materialDesign:HintAssist.Hint="Chọn ngày"
+                                  Language="vi-VN"/>
+
+                        <Button x:Name="btnLocTheoNgay" 
+                              Grid.Column="5"
+                              Width="120" 
+                              Height="42" 
+                              Margin="15,0,5,0" 
+                              Click="btnLocTheoNgay_Click"
+                              Background="{StaticResource PrimaryHueMidBrush}"
+                              Foreground="White"
+                              HorizontalAlignment="Left"
+                              BorderThickness="0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Filter" 
+                                                     Width="18" 
+                                                     Height="18" 
+                                                     VerticalAlignment="Center" 
+                                                     Margin="0,0,-2,0"/>
+                                <TextBlock Text="Lọc dữ liệu" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </materialDesign:Card>
             </Grid>
 
             <!-- Thông báo lọc -->
-            <TextBlock Grid.Row="2" x:Name="lblFilterInfo" Margin="20,5,20,0" 
-                       Foreground="Blue" FontStyle="Italic" 
-                       HorizontalAlignment="Left" VerticalAlignment="Top" 
-                       TextWrapping="Wrap" Visibility="Collapsed"/>
+            <TextBlock Grid.Row="3" x:Name="lblFilterInfo" Margin="20,5,20,0" 
+                     Foreground="Blue" FontStyle="Italic" 
+                     HorizontalAlignment="Left" VerticalAlignment="Top" 
+                     TextWrapping="Wrap" Visibility="Collapsed"/>
 
-            <!-- Danh sách lịch sử bảo trì -->
-            <Border Grid.Row="3" BorderThickness="0" Margin="20,10">
+
+            <Border Grid.Row="4" BorderThickness="0" Margin="20,10">
                 <DataGrid x:Name="dgLichSu" AutoGenerateColumns="False" 
-                HeadersVisibility="Column"
-                BorderThickness="1" BorderBrush="#E0E0E0"
-                Background="White" RowBackground="White"
-                AlternatingRowBackground="#F8F8F8" 
-                GridLinesVisibility="All"
-                CanUserAddRows="False" CanUserDeleteRows="False" 
-                IsReadOnly="True"
-                ColumnHeaderHeight="50" RowHeight="45" 
-                VerticalScrollBarVisibility="Auto"
-                HorizontalScrollBarVisibility="Auto" 
-                ItemsSource="{Binding DanhSachLichSu}">
+              HeadersVisibility="Column"
+              BorderThickness="1" BorderBrush="#E0E0E0"
+              Background="White" RowBackground="White"
+              AlternatingRowBackground="#F5F9FF" 
+              GridLinesVisibility="All"
+              CanUserAddRows="False" CanUserDeleteRows="False" 
+              IsReadOnly="True"
+              ColumnHeaderHeight="50" RowHeight="55" 
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Auto" 
+              ItemsSource="{Binding DanhSachLichSu}">
                     <DataGrid.Resources>
+                        <!-- Style cho header cột -->
                         <Style TargetType="{x:Type DataGridColumnHeader}">
-                            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                            <Setter Property="Background" Value="#0078D7"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Padding" Value="15,0"/>
-                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                            <Setter Property="BorderBrush" Value="#C0C0C0"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="10,0"/>
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="BorderThickness" Value="1,1,1,1"/>
+                            <Setter Property="BorderBrush" Value="#0066C0"/>
+                            <Setter Property="FontSize" Value="13"/>
                         </Style>
+
+                        <!-- Style cho các ô -->
                         <Style TargetType="{x:Type DataGridCell}">
-                            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                            <Setter Property="Padding" Value="8,5"/>
+                            <Setter Property="BorderThickness" Value="1,0,1,1"/>
                             <Setter Property="BorderBrush" Value="#E0E0E0"/>
-                            <Setter Property="Padding" Value="8,4"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter Margin="{TemplateBinding Padding}" 
+                                                 VerticalAlignment="{TemplateBinding VerticalAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <!-- Style cho các hàng -->
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="BorderThickness" Value="0"/>
                             <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#EAF6FF"/>
+                                </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#D4E6F1"/>
+                                    <Setter Property="Background" Value="#CCE8FF"/>
                                     <Setter Property="Foreground" Value="Black"/>
-                                    <Setter Property="BorderBrush" Value="#C0C0C0"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
                     </DataGrid.Resources>
-                    <DataGrid.RowDetailsTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="10">
-                                <TextBlock Text="Chi tiết tài sản:" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding ChiTietTaiSan}" TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGrid.RowDetailsTemplate>
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="STT" Width="60">
+                        <!-- STT Column -->
+                        <DataGridTextColumn Header="STT" Width="50" Binding="{Binding STT}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Mã lịch sử -->
+                        <DataGridTextColumn Header="Mã lịch sử" Width="80" Binding="{Binding MaLichSu}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -191,33 +294,43 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Ngày thực hiện" Width="150" Binding="{Binding LichSu.NgayThucHien, StringFormat=dd/MM/yyyy HH:mm:ss}">
+
+                        <!-- Mã tài sản -->
+                        <DataGridTextColumn Header="Mã tài sản" Width="80" Binding="{Binding MaTaiSan}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Loại hoạt động" Width="120" Binding="{Binding LichSu.LoaiHoatDong}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+
+                        <!-- Thông tin tài sản -->
                         <DataGridTemplateColumn Header="Thông tin tài sản" Width="250">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="5,3">
-                                        <TextBlock Text="{Binding LichSu.TenTaiSan}" FontWeight="Medium" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding LichSu.SoSeri, StringFormat=Số sê-ri: {0}}" Foreground="#555" Margin="0,2,0,0"/>
+                                        <!-- Tên tài sản -->
+                                        <TextBlock Text="{Binding TenTaiSan}" 
+                                     FontWeight="SemiBold" 
+                                     TextWrapping="Wrap" 
+                                     Foreground="#212121"/>
+
+                                        <!-- Số sê-ri -->
+                                        <TextBlock Text="{Binding SoSeri, StringFormat='Số sê-ri: {0}'}" 
+                                     Foreground="#757575" 
+                                     Margin="0,4,0,0" 
+                                     FontSize="11"
+                                     TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Người thực hiện" Width="150" Binding="{Binding LichSu.TenNguoiThucHien}">
+
+                        <!-- Ngày thực hiện -->
+                        <DataGridTextColumn Header="Ngày thực hiện" Width="150" 
+                              Binding="{Binding NgayThucHien, StringFormat=dd/MM/yyyy HH:mm:ss}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -225,29 +338,102 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Số lần bảo trì" Width="100" Binding="{Binding SoLanBaoTri}">
+
+                        <!-- Mã NV -->
+                        <DataGridTextColumn Header="Mã NV" Width="70" Binding="{Binding MaNguoiThucHien}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Ghi chú" Width="*" Binding="{Binding LichSu.GhiChu}">
+
+                        <!-- Người thực hiện -->
+                        <DataGridTextColumn Header="Người thực hiện" Width="140" Binding="{Binding TenNguoiThucHien}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
                                     <Setter Property="TextWrapping" Value="Wrap"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
+
+                        <!-- Tình trạng tài sản -->
+                        <DataGridTemplateColumn Header="Tình trạng tài sản" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="7,3" Margin="5,0" HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <!-- Default color -->
+                                                <Setter Property="Background" Value="#9E9E9E"/>
+                                                <Style.Triggers>
+                                                    <!-- Trạng thái tốt - màu xanh lá -->
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Tốt">
+                                                        <Setter Property="Background" Value="#4CAF50"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Hoạt động tốt">
+                                                        <Setter Property="Background" Value="#4CAF50"/>
+                                                    </DataTrigger>
+
+                                                    <!-- Trạng thái bình thường - màu xanh dương -->
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Bình thường">
+                                                        <Setter Property="Background" Value="#2196F3"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Hoạt động">
+                                                        <Setter Property="Background" Value="#2196F3"/>
+                                                    </DataTrigger>
+
+                                                    <!-- Trạng thái hỏng nặng - màu đỏ -->
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Hỏng nặng">
+                                                        <Setter Property="Background" Value="#E74C3C"/>
+                                                    </DataTrigger>
+
+                                                    <!-- Các trạng thái cần sửa chữa - màu đỏ -->
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Cần sửa chữa">
+                                                        <Setter Property="Background" Value="#F44336"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Hỏng">
+                                                        <Setter Property="Background" Value="#F44336"/>
+                                                    </DataTrigger>
+
+                                                    <!-- Trạng thái không xác định -->
+                                                    <DataTrigger Binding="{Binding TinhTrangTaiSan}" Value="Không xác định">
+                                                        <Setter Property="Background" Value="#9E9E9E"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding TinhTrangTaiSan, TargetNullValue='Không xác định'}" 
+                                     Foreground="White" 
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     FontWeight="Medium" FontSize="12"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Ghi chú -->
+                        <DataGridTemplateColumn Header="Ghi chú" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8,5">
+                                        <TextBlock Text="{Binding GhiChu}" 
+                                     TextWrapping="Wrap" 
+                                     MaxHeight="45" 
+                                     VerticalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
-
             <!-- Các nút điều khiển -->
-            <Grid Grid.Row="4" Margin="20,10,20,20">
+            <Grid Grid.Row="5" Margin="20,10,20,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>

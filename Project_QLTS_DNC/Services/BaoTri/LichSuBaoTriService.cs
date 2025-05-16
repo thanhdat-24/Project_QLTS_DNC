@@ -1,258 +1,335 @@
 ﻿using Project_QLTS_DNC.Models.BaoTri;
+using Project_QLTS_DNC.Models.QLTaiSan;
+using Project_QLTS_DNC.Models.NhanVien;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Supabase.Postgrest.Extensions;
+using static Supabase.Postgrest.Constants;
+using Project_QLTS_DNC.Services;
 
-namespace Project_QLTS_DNC.Services
+namespace Project_QLTS_DNC.ViewModel.Baotri
 {
-    public class LichSuBaoTriService
+    public class LichSuBaoTriViewModel : INotifyPropertyChanged
     {
-        // Cập nhật phương thức trong LichSuBaoTriService.cs
-        public async Task<bool> LuuLichSuHoatDongAsync(string loaiHoatDong, List<PhieuBaoTri> danhSachPhieu, string ghiChu = "")
+        private readonly LichSuBaoTriService _lichSuService = new LichSuBaoTriService();
+        private readonly PhieuBaoTriService _phieuService = new PhieuBaoTriService();
+        private List<int> _filteredMaTaiSanList;
+
+        // Danh sách hiển thị trên giao diện
+        private ObservableCollection<LichSuBaoTriExtended> _danhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>();
+        public ObservableCollection<LichSuBaoTriExtended> DanhSachLichSu
         {
-            try
+            get => _danhSachLichSu;
+            set
             {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
+                if (_danhSachLichSu != value)
                 {
-                    Console.WriteLine("Không thể kết nối Supabase Client");
-                    MessageBox.Show("Không thể kết nối đến máy chủ để lưu lịch sử", "Lỗi kết nối",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return false;
+                    _danhSachLichSu = value;
+                    OnPropertyChanged(nameof(DanhSachLichSu));
                 }
-
-                // Lấy thông tin người dùng hiện tại
-                string tenNguoiDung = "Người dùng hiện tại";
-                int? maNguoiDung = null;
-
-                // Kiểm tra session
-                var session = client.Auth.CurrentSession;
-                if (session != null)
-                {
-                    // Lấy thông tin từ session nếu có
-                }
-
-                // Lấy ngày giờ hiện tại
-                DateTime ngayThucHien = DateTime.Now;
-
-                // Debug: In thông tin phiếu đầu vào
-                Console.WriteLine($"Bắt đầu lưu lịch sử cho {danhSachPhieu.Count} tài sản - loại: {loaiHoatDong}");
-                Console.WriteLine($"Ghi chú: {ghiChu}");
-
-                // Lưu từng phiếu riêng biệt
-                int countSuccess = 0;
-                List<Exception> errors = new List<Exception>();
-
-                foreach (var phieu in danhSachPhieu)
-                {
-                    try
-                    {
-                        // Đảm bảo phiếu có mã tài sản
-                        if (!phieu.MaTaiSan.HasValue)
-                        {
-                            Console.WriteLine("Bỏ qua phiếu không có mã tài sản");
-                            continue;
-                        }
-
-                        // Thêm thông tin để dễ dàng tìm kiếm các tài sản thuộc cùng một lần in/xuất
-                        string ghiChuTaiSan = string.IsNullOrEmpty(ghiChu)
-                            ? $"Tổng số tài sản: {danhSachPhieu.Count}"
-                            : $"{ghiChu} | Tổng số tài sản: {danhSachPhieu.Count}";
-
-                        // Chuẩn bị dữ liệu đúng format
-                        var lichSu = new LichSuBaoTri
-                        {
-                            MaTaiSan = phieu.MaTaiSan,
-                            TenTaiSan = phieu.TenTaiSan ?? "Không xác định",
-                            SoSeri = phieu.SoSeri ?? "Không xác định",
-                            LoaiHoatDong = loaiHoatDong,
-                            NgayThucHien = ngayThucHien,
-                            MaNguoiThucHien = maNguoiDung,
-                            TenNguoiThucHien = tenNguoiDung,
-                            GhiChu = ghiChuTaiSan
-                        };
-
-                        // Ghi log trước khi insert
-                        Console.WriteLine($"Chuẩn bị lưu: MaTaiSan={lichSu.MaTaiSan}, TenTaiSan={lichSu.TenTaiSan}, GhiChu={lichSu.GhiChu}");
-
-                        try
-                        {
-                            // Sử dụng phương thức Insert không có Single
-                            var insertResponse = await client.From<LichSuBaoTri>().Insert(lichSu);
-
-                            if (insertResponse != null && insertResponse.Models.Count > 0)
-                            {
-                                countSuccess++;
-                                Console.WriteLine($"Đã lưu lịch sử tài sản ID={phieu.MaTaiSan} thành công");
-                            }
-                        }
-                        catch (Exception pex)
-                        {
-                            // Xử lý lỗi Postgrest cụ thể
-                            Console.WriteLine($"Lỗi khi lưu tài sản {phieu.MaTaiSan}: {pex.Message}");
-                            errors.Add(pex);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add(ex);
-                        Console.WriteLine($"Lỗi khi lưu lịch sử tài sản {phieu.MaTaiSan}: {ex.Message}");
-                        Console.WriteLine($"Chi tiết: {ex}");
-                        // Không dừng vòng lặp, tiếp tục lưu các tài sản khác
-                    }
-                }
-
-                Console.WriteLine($"Đã lưu thành công {countSuccess}/{danhSachPhieu.Count} tài sản");
-
-                // Hiển thị thông báo lỗi nếu có tài sản không lưu được
-                if (errors.Count > 0 && countSuccess < danhSachPhieu.Count)
-                {
-                    // Phân tích chi tiết lỗi để hiển thị thông báo cụ thể hơn
-                    var errorsGrouped = errors.GroupBy(e => e.GetType().Name).ToDictionary(g => g.Key, g => g.Count());
-                    string errorDetails = string.Join(", ", errorsGrouped.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-
-                    string errorMessage = $"Lưu {countSuccess}/{danhSachPhieu.Count} tài sản thành công.\n" +
-                                         $"Có {errors.Count} tài sản không lưu được.\n" +
-                                         $"Chi tiết lỗi: {errorDetails}";
-
-                    MessageBox.Show(errorMessage, "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-                else if (countSuccess > 0)
-                {
-                    MessageBox.Show($"Đã lưu thành công {countSuccess}/{danhSachPhieu.Count} tài sản.",
-                        "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-
-                // Nếu ít nhất một phiếu được lưu thành công
-                return countSuccess > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lưu lịch sử bảo trì: {ex.Message}");
-                Console.WriteLine($"Chi tiết: {ex}");
-                MessageBox.Show($"Có lỗi xảy ra khi lưu lịch sử bảo trì: {ex.Message}",
-                    "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
             }
         }
 
-        // Phần còn lại của class giữ nguyên
-        // Lấy danh sách lịch sử bảo trì với thông tin số lượng tài sản
-        public async Task<List<LichSuBaoTri>> GetLichSuBaoTriAsync()
+        // Danh sách gốc để phục vụ tìm kiếm, lọc
+        private List<LichSuBaoTriExtended> _allLichSu = new List<LichSuBaoTriExtended>();
+
+        // Constructor mặc định
+        public LichSuBaoTriViewModel()
         {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                {
-                    throw new Exception("Không thể kết nối Supabase Client");
-                }
-
-                var response = await client.From<LichSuBaoTri>()
-                    .Order("ngay_thuc_hien", Supabase.Postgrest.Constants.Ordering.Descending)
-                    .Get();
-
-                // Kiểm tra xem có dữ liệu không
-                if (response.Models.Count == 0)
-                {
-                    Console.WriteLine("Không có dữ liệu lịch sử bảo trì nào");
-                }
-                else
-                {
-                    Console.WriteLine($"Đã lấy {response.Models.Count} bản ghi lịch sử bảo trì");
-                }
-
-                return response.Models;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi lấy danh sách lịch sử bảo trì: {ex.Message}");
-                MessageBox.Show($"Lỗi khi lấy lịch sử bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return new List<LichSuBaoTri>();
-            }
+            _filteredMaTaiSanList = null;
         }
 
-        // Đếm số lượng tài sản cho mỗi hoạt động theo thời gian
-        public async Task<Dictionary<DateTime, int>> CountTaiSanByNgayThucHienAsync()
+        // Constructor với danh sách mã tài sản cần lọc
+        public LichSuBaoTriViewModel(List<int> maTaiSanList)
         {
-            try
-            {
-                var client = await SupabaseService.GetClientAsync();
-                if (client == null)
-                {
-                    throw new Exception("Không thể kết nối Supabase Client");
-                }
-
-                var lichSuResponse = await client.From<LichSuBaoTri>().Get();
-                var danhSachLichSu = lichSuResponse.Models;
-
-                // Nhóm theo ngày thực hiện và đếm số lượng tài sản
-                var result = new Dictionary<DateTime, int>();
-
-                // Nhóm các bản ghi theo ngay_thuc_hien chính xác đến giây
-                var groupedByTime = danhSachLichSu.GroupBy(ls => ls.NgayThucHien);
-
-                foreach (var group in groupedByTime)
-                {
-                    result[group.Key] = group.Count();
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi đếm số lượng tài sản theo hoạt động: {ex.Message}");
-                MessageBox.Show($"Lỗi khi đếm số lượng tài sản: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return new Dictionary<DateTime, int>();
-            }
+            _filteredMaTaiSanList = maTaiSanList;
         }
 
-        // Đếm số lần bảo trì của mỗi tài sản
-        public async Task<Dictionary<int, int>> CountBaoTriByTaiSanAsync()
+        // Phương thức tải dữ liệu
+        public async Task LoadDataAsync()
         {
             try
             {
+                DanhSachLichSu.Clear();
+                _allLichSu.Clear();
+
+                // Lấy danh sách lịch sử bảo trì
+                var lichSuList = await _lichSuService.GetLichSuBaoTriAsync(_filteredMaTaiSanList);
+                Console.WriteLine($"Tải được {lichSuList.Count} bản ghi lịch sử bảo trì");
+
+                // Lấy danh sách tất cả các phiếu bảo trì
+                var allPhieuBaoTri = await _phieuService.GetPhieuBaoTriAsync();
+
+                // Tạo từ điển với key là mã tài sản, value là số lần tài sản đó đã được bảo trì
+                var baoTriCountDict = allPhieuBaoTri
+                    .Where(p => p.MaTaiSan.HasValue)
+                    .GroupBy(p => p.MaTaiSan.Value)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // Lấy thông tin phòng ban của nhân viên (nếu cần)
                 var client = await SupabaseService.GetClientAsync();
                 if (client == null)
                 {
-                    throw new Exception("Không thể kết nối Supabase Client");
+                    MessageBox.Show("Không thể kết nối đến cơ sở dữ liệu!", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
 
-                var phieuBaoTriResponse = await client.From<PhieuBaoTri>().Get();
-                var danhSachPhieuBaoTri = phieuBaoTriResponse.Models;
+                var maNVList = lichSuList
+                    .Where(l => l.MaNguoiThucHien.HasValue)
+                    .Select(l => l.MaNguoiThucHien.Value)
+                    .Distinct()
+                    .ToList();
 
-                // Đếm số lần bảo trì cho mỗi tài sản
-                var result = new Dictionary<int, int>();
+                // Dictionary lưu thông tin nhân viên
+                var nhanVienDict = new Dictionary<int, NhanVienModel>();
 
-                foreach (var phieu in danhSachPhieuBaoTri)
+                if (maNVList.Any())
                 {
-                    if (phieu.MaTaiSan.HasValue)
+                    // Lấy thông tin nhân viên
+                    var nhanVienQuery = client.Postgrest.Table<NhanVienModel>();
+                    var nhanVienFilter = nhanVienQuery.Filter("ma_nv", Operator.In, maNVList);
+                    var nhanVienResponse = await nhanVienFilter.Get();
+
+                    nhanVienDict = nhanVienResponse.Models.ToDictionary(nv => nv.MaNV);
+                }
+
+                // Tạo danh sách mở rộng
+                var extendedList = new List<LichSuBaoTriExtended>();
+
+                // Tạo danh sách hiển thị và thêm STT
+                int stt = 1;
+                foreach (var lichSu in lichSuList)
+                {
+                    var extendedItem = new LichSuBaoTriExtended(lichSu)
                     {
-                        int maTaiSan = phieu.MaTaiSan.Value;
-                        if (result.ContainsKey(maTaiSan))
-                        {
-                            result[maTaiSan]++;
-                        }
-                        else
-                        {
-                            result[maTaiSan] = 1;
-                        }
+                        STT = stt++
+                    };
+
+                    // Nếu có mã tài sản, tính số lần bảo trì
+                    if (lichSu.MaTaiSan.HasValue && baoTriCountDict.ContainsKey(lichSu.MaTaiSan.Value))
+                    {
+                        extendedItem.SoLanBaoTri = baoTriCountDict[lichSu.MaTaiSan.Value];
                     }
+
+                    // Lấy thông tin nhân viên
+                    if (lichSu.MaNguoiThucHien.HasValue && nhanVienDict.ContainsKey(lichSu.MaNguoiThucHien.Value))
+                    {
+                        var nv = nhanVienDict[lichSu.MaNguoiThucHien.Value];
+                        extendedItem.PhongBan = $"Phòng ban: {nv.MaPB}"; // Thay bằng tên phòng ban thực tế nếu có
+
+                        // Cập nhật chi tiết hoạt động với thông tin nhân viên
+                        extendedItem.ChiTietHoatDong += $"\nEmail: {nv.Email}\nSĐT: {nv.SDT}";
+                    }
+
+                    extendedList.Add(extendedItem);
                 }
 
-                return result;
+                // Cập nhật danh sách
+                _allLichSu = extendedList;
+
+                // Cập nhật ObservableCollection từ danh sách đã xử lý
+                DanhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>(extendedList);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi khi đếm số lần bảo trì: {ex.Message}");
-                MessageBox.Show($"Lỗi khi đếm số lần bảo trì: {ex.Message}", "Lỗi",
+                Console.WriteLine($"Lỗi khi tải dữ liệu lịch sử bảo trì: {ex.Message}");
+                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                return new Dictionary<int, int>();
             }
+        }
+
+        // Phương thức tìm kiếm theo từ khóa
+        public void FilterByKeyword(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+            {
+                // Hiển thị tất cả
+                DanhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>(_allLichSu);
+                return;
+            }
+
+            keyword = keyword.ToLower();
+            var filteredList = _allLichSu.Where(item =>
+                (item.TenTaiSan?.ToLower().Contains(keyword) ?? false) ||
+                (item.SoSeri?.ToLower().Contains(keyword) ?? false) ||
+                (item.TenNguoiThucHien?.ToLower().Contains(keyword) ?? false) ||
+                (item.TinhTrangTaiSan?.ToLower().Contains(keyword) ?? false) ||
+                (item.GhiChu?.ToLower().Contains(keyword) ?? false)
+            ).ToList();
+
+            // Cập nhật STT
+            UpdateSTT(filteredList);
+
+            DanhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>(filteredList);
+        }
+
+        // Phương thức lọc theo khoảng thời gian
+        public void FilterByDateRange(DateTime? tuNgay, DateTime? denNgay)
+        {
+            if (!tuNgay.HasValue && !denNgay.HasValue)
+            {
+                // Hiển thị tất cả
+                DanhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>(_allLichSu);
+                return;
+            }
+
+            List<LichSuBaoTriExtended> filteredList;
+
+            if (tuNgay.HasValue && denNgay.HasValue)
+            {
+                // Có cả ngày bắt đầu và kết thúc
+                filteredList = _allLichSu.Where(item =>
+                    item.NgayThucHien >= tuNgay.Value &&
+                    item.NgayThucHien <= denNgay.Value
+                ).ToList();
+            }
+            else if (tuNgay.HasValue)
+            {
+                // Chỉ có ngày bắt đầu
+                filteredList = _allLichSu.Where(item =>
+                    item.NgayThucHien >= tuNgay.Value
+                ).ToList();
+            }
+            else
+            {
+                // Chỉ có ngày kết thúc
+                filteredList = _allLichSu.Where(item =>
+                    item.NgayThucHien <= denNgay.Value
+                ).ToList();
+            }
+
+            // Cập nhật STT
+            UpdateSTT(filteredList);
+
+            // Cập nhật danh sách hiển thị
+            DanhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>(filteredList);
+        }
+
+        // Phương thức tải lại tất cả dữ liệu
+        public void ReloadData()
+        {
+            // Cập nhật STT trước khi hiển thị
+            UpdateSTT(_allLichSu);
+
+            DanhSachLichSu = new ObservableCollection<LichSuBaoTriExtended>(_allLichSu);
+        }
+
+        // Cập nhật STT cho danh sách
+        private void UpdateSTT(List<LichSuBaoTriExtended> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i].STT = i + 1;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    // Class mở rộng từ LichSuBaoTri để thêm các thông tin hiển thị
+    public class LichSuBaoTriExtended : LichSuBaoTri, INotifyPropertyChanged
+    {
+        private int _stt;
+        public int STT
+        {
+            get => _stt;
+            set
+            {
+                if (_stt != value)
+                {
+                    _stt = value;
+                    OnPropertyChanged(nameof(STT));
+                }
+            }
+        }
+
+        private int _soLanBaoTri;
+        public int SoLanBaoTri
+        {
+            get => _soLanBaoTri;
+            set
+            {
+                if (_soLanBaoTri != value)
+                {
+                    _soLanBaoTri = value;
+                    OnPropertyChanged(nameof(SoLanBaoTri));
+                }
+            }
+        }
+
+        private string _chiTietHoatDong;
+        public string ChiTietHoatDong
+        {
+            get => _chiTietHoatDong;
+            set
+            {
+                if (_chiTietHoatDong != value)
+                {
+                    _chiTietHoatDong = value;
+                    OnPropertyChanged(nameof(ChiTietHoatDong));
+                }
+            }
+        }
+
+        private string _phongBan;
+        public string PhongBan
+        {
+            get => _phongBan;
+            set
+            {
+                if (_phongBan != value)
+                {
+                    _phongBan = value;
+                    OnPropertyChanged(nameof(PhongBan));
+                }
+            }
+        }
+
+        // Constructor
+        public LichSuBaoTriExtended()
+        {
+            // Khởi tạo các giá trị mặc định
+            _chiTietHoatDong = string.Empty;
+            _phongBan = string.Empty;
+        }
+
+        // Constructor từ LichSuBaoTri
+        public LichSuBaoTriExtended(LichSuBaoTri lichSu)
+        {
+            // Copy các thuộc tính từ LichSuBaoTri
+            this.MaLichSu = lichSu.MaLichSu;
+            this.MaTaiSan = lichSu.MaTaiSan;
+            this.TenTaiSan = lichSu.TenTaiSan ?? "Không có tên";
+            this.SoSeri = lichSu.SoSeri ?? "";
+            this.NgayThucHien = lichSu.NgayThucHien;
+            this.MaNguoiThucHien = lichSu.MaNguoiThucHien;
+            this.TenNguoiThucHien = lichSu.TenNguoiThucHien ?? "Không xác định";
+            this.TinhTrangTaiSan = lichSu.TinhTrangTaiSan ?? "Không xác định";
+            this.GhiChu = lichSu.GhiChu ?? "";
+
+            // Tạo chi tiết hoạt động dựa trên thông tin có sẵn
+            this.ChiTietHoatDong = $"Người thực hiện: {this.TenNguoiThucHien}\n" +
+                                  $"Ngày: {this.NgayThucHien:dd/MM/yyyy HH:mm:ss}\n" +
+                                  $"Tài sản: {this.TenTaiSan}\n" +
+                                  $"Số seri: {this.SoSeri}\n" +
+                                  $"Tình trạng: {this.TinhTrangTaiSan}\n" +
+                                  $"Chi tiết: {this.GhiChu}";
+        }
+
+        public new event PropertyChangedEventHandler PropertyChanged;
+        protected new void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

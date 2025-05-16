@@ -14,8 +14,8 @@ using Project_QLTS_DNC.ViewModel.Baotri;
 
 namespace Project_QLTS_DNC.Services
 {
-    public class PhieuBaoTriService
-    {
+   public class PhieuBaoTriService
+{
         // Trong PhieuBaoTriService.cs
         public async Task<List<PhieuBaoTri>> GetPhieuBaoTriAsync()
         {
@@ -29,13 +29,11 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
                 Console.WriteLine("Kết nối Supabase thành công, bắt đầu truy vấn...");
-
                 // Lấy danh sách phiếu bảo trì
                 var response = await client.From<PhieuBaoTri>().Get();
                 Console.WriteLine($"Nhận được phản hồi: {response != null}");
                 var danhSachPhieu = response.Models;
                 Console.WriteLine($"Số lượng phiếu: {danhSachPhieu?.Count ?? 0}");
-
                 return danhSachPhieu;
             }
             catch (Exception ex)
@@ -47,13 +45,13 @@ namespace Project_QLTS_DNC.Services
                 {
                     Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 }
-
                 MessageBox.Show($"Lỗi khi truy vấn dữ liệu: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return new List<PhieuBaoTri>();
             }
         }
 
+      
         // Lấy thông tin một phiếu bảo trì theo mã
         public async Task<PhieuBaoTri> GetPhieuBaoTriByIdAsync(int maBaoTri)
         {
@@ -78,7 +76,6 @@ namespace Project_QLTS_DNC.Services
                 return null;
             }
         }
-
         public async Task<bool> AddPhieuBaoTriAsync(PhieuBaoTri phieuBaoTri)
         {
             try
@@ -89,43 +86,175 @@ namespace Project_QLTS_DNC.Services
                     throw new Exception("Không thể kết nối Supabase Client");
                 }
 
-                // Bỏ qua phần kiểm tra phiên đăng nhập
-                // var session = client.Auth.CurrentSession;
-                // bool sessionExpired = session == null || DateTime.Compare(session.ExpiresAt(), DateTime.UtcNow) < 0;
-                // ...
-
                 // Kiểm tra các giá trị bắt buộc
-                if (phieuBaoTri.MaTaiSan == null)
+                if (phieuBaoTri.MaTaiSan == null || phieuBaoTri.MaTaiSan <= 0)
                 {
-                    MessageBox.Show("Mã tài sản không được để trống", "Lỗi dữ liệu",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Mã tài sản không được để trống hoặc không hợp lệ", "Lỗi dữ liệu",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                     return false;
                 }
 
                 if (string.IsNullOrEmpty(phieuBaoTri.NoiDung))
                 {
-                    MessageBox.Show("Nội dung không được để trống", "Lỗi dữ liệu",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Nội dung không được để trống", "Lỗi dữ liệu",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                     return false;
                 }
 
                 if (string.IsNullOrEmpty(phieuBaoTri.TrangThai))
                 {
-                    MessageBox.Show("Trạng thái không được để trống", "Lỗi dữ liệu",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Trạng thái không được để trống", "Lỗi dữ liệu",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                     return false;
                 }
 
                 Console.WriteLine($"Đang thêm phiếu bảo trì mới: MaTaiSan={phieuBaoTri.MaTaiSan}, NoiDung={phieuBaoTri.NoiDung}");
 
-                // Thực hiện thêm mới
+                // Đặt ngày bảo trì là ngày hiện tại nếu chưa có
+                if (!phieuBaoTri.NgayBaoTri.HasValue)
+                {
+                    phieuBaoTri.NgayBaoTri = DateTime.Now;
+                }
+
+                // Lấy thông tin tài sản trước khi thêm phiếu
+                Models.QLTaiSan.TaiSanModel taiSanInfo = null;
+                if (phieuBaoTri.MaTaiSan.HasValue)
+                {
+                    try
+                    {
+                        taiSanInfo = await client.From<Models.QLTaiSan.TaiSanModel>()
+                            .Where(t => t.MaTaiSan == phieuBaoTri.MaTaiSan.Value)
+                            .Single();
+
+                        // Cập nhật thông tin tài sản vào phiếu nếu chưa có
+                        if (string.IsNullOrEmpty(phieuBaoTri.TenTaiSan) && taiSanInfo != null)
+                        {
+                            phieuBaoTri.TenTaiSan = taiSanInfo.TenTaiSan;
+                            phieuBaoTri.SoSeri = taiSanInfo.SoSeri;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Cảnh báo: Không lấy được thông tin tài sản: {ex.Message}");
+                        // Không cần ném lỗi, vẫn tiếp tục quy trình
+                    }
+                }
+
+                // Chuẩn bị lưu thông tin lịch sử trước
+                var lichSu = new LichSuBaoTri
+                {
+                    MaTaiSan = phieuBaoTri.MaTaiSan,
+                    TenTaiSan = phieuBaoTri.TenTaiSan ?? taiSanInfo?.TenTaiSan ?? "Không xác định",
+                    SoSeri = phieuBaoTri.SoSeri ?? taiSanInfo?.SoSeri ?? "",
+                    NgayThucHien = DateTime.Now,
+                    MaNguoiThucHien = phieuBaoTri.MaNV,
+                    TenNguoiThucHien = await GetTenNhanVienAsync(phieuBaoTri.MaNV ?? 0),
+                    TinhTrangTaiSan = phieuBaoTri.TrangThai ?? taiSanInfo?.TinhTrangSP ?? "Không xác định",
+                    GhiChu = $"Thêm phiếu bảo trì mới: {phieuBaoTri.NoiDung}. Chi phí: {phieuBaoTri.ChiPhi ?? 0:N0} VNĐ"
+                };
+
+                // Thực hiện thêm mới phiếu bảo trì
+                Console.WriteLine("Bắt đầu thêm phiếu bảo trì...");
                 var response = await client.From<PhieuBaoTri>().Insert(phieuBaoTri);
 
-                if (response == null)
+                if (response == null || response.Models.Count == 0)
                 {
-                    MessageBox.Show("Không thể thêm phiếu bảo trì. Vui lòng kiểm tra lại dữ liệu!", "Lỗi",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Không thể thêm phiếu bảo trì. Vui lòng kiểm tra lại dữ liệu!", "Lỗi",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                     return false;
+                }
+
+                var phieuDaLuu = response.Models[0];
+                Console.WriteLine($"Đã thêm phiếu bảo trì thành công, mã phiếu: {phieuDaLuu.MaBaoTri}");
+
+                // Nếu thêm thành công, thực hiện lưu lịch sử
+                bool ketQuaLuuLichSu = false;
+
+                // Phương pháp 1: Thử sử dụng trực tiếp Insert thông qua SQL
+                try
+                {
+                    Console.WriteLine("Phương pháp 1: Lưu lịch sử bằng SQL...");
+                    var sqlCommand = @"
+                        INSERT INTO lichsu_baotri 
+                        (ma_tai_san, ten_tai_san, so_seri, ngay_thuc_hien, ma_nv, ten_nv, tinh_trang_tai_san, ghi_chu) 
+                        VALUES 
+                        (@maTaiSan, @tenTaiSan, @soSeri, CURRENT_TIMESTAMP, @maNV, @tenNV, @tinhTrang, @ghiChu)
+                    ";
+
+                    var parameters = new Dictionary<string, object> {
+                        { "maTaiSan", lichSu.MaTaiSan },
+                        { "tenTaiSan", lichSu.TenTaiSan ?? "Không xác định" },
+                        { "soSeri", lichSu.SoSeri ?? "" },
+                        { "maNV", lichSu.MaNguoiThucHien ?? 0 },
+                        { "tenNV", lichSu.TenNguoiThucHien ?? "Người dùng hệ thống" },
+                        { "tinhTrang", lichSu.TinhTrangTaiSan ?? "Không xác định" },
+                        { "ghiChu", lichSu.GhiChu }
+                    };
+
+                    await client.Rpc(sqlCommand, parameters);
+                    Console.WriteLine("Phương pháp 1: Lưu lịch sử thành công");
+                    ketQuaLuuLichSu = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Phương pháp 1 thất bại: {ex.Message}");
+                    ketQuaLuuLichSu = false;
+                }
+
+                // Phương pháp 2: Dùng hàm lưu trữ RPC
+                if (!ketQuaLuuLichSu)
+                {
+                    try
+                    {
+                        Console.WriteLine("Phương pháp 2: Thử sử dụng hàm insert_lichsu_baotri...");
+                        var parameters = new Dictionary<string, object> {
+                            { "ma_tai_san", lichSu.MaTaiSan },
+                            { "ten_tai_san", lichSu.TenTaiSan ?? "Không xác định" },
+                            { "so_seri", lichSu.SoSeri ?? "" },
+                            { "ma_nv", lichSu.MaNguoiThucHien ?? 0 },
+                            { "ten_nv", lichSu.TenNguoiThucHien ?? "Người dùng hệ thống" },
+                            { "tinh_trang_tai_san", lichSu.TinhTrangTaiSan ?? "Không xác định" },
+                            { "ghi_chu", lichSu.GhiChu }
+                        };
+
+                        await client.Rpc("insert_lichsu_baotri", parameters);
+                        Console.WriteLine("Phương pháp 2: Lưu lịch sử thành công");
+                        ketQuaLuuLichSu = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Phương pháp 2 thất bại: {ex.Message}");
+                        ketQuaLuuLichSu = false;
+                    }
+                }
+
+                // Phương pháp 3: Sử dụng Insert thông thường
+                if (!ketQuaLuuLichSu)
+                {
+                    try
+                    {
+                        Console.WriteLine("Phương pháp 3: Thử sử dụng Insert trực tiếp...");
+                        var lichSuResponse = await client.From<LichSuBaoTri>().Insert(lichSu);
+                        ketQuaLuuLichSu = lichSuResponse != null && lichSuResponse.Models.Count > 0;
+                        Console.WriteLine($"Phương pháp 3: {(ketQuaLuuLichSu ? "Thành công" : "Thất bại")}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Phương pháp 3 thất bại: {ex.Message}");
+                        ketQuaLuuLichSu = false;
+                    }
+                }
+
+                // Hiển thị thông báo dựa trên kết quả
+                if (ketQuaLuuLichSu)
+                {
+                    System.Windows.MessageBox.Show("Đã thêm phiếu bảo trì và lưu lịch sử thành công!", "Thành công",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Đã thêm phiếu bảo trì nhưng không thể lưu lịch sử. Vui lòng kiểm tra kết nối mạng!",
+                        "Cảnh báo", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 }
 
                 return true;
@@ -133,15 +262,191 @@ namespace Project_QLTS_DNC.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Chi tiết lỗi thêm phiếu: {ex.Message}");
-
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
                 }
+                System.Windows.MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return false;
+            }
+        }
+        public async Task<bool> LuuLichSuPhieuMoiAsync(PhieuBaoTri phieuMoi)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null)
+                {
+                    Console.WriteLine("Không thể kết nối đến cơ sở dữ liệu (client là null)");
+                    return false;
+                }
 
-                MessageBox.Show($"Lỗi khi thêm phiếu bảo trì: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
 
+                
+                // Lấy thông tin người dùng hiện tại
+                var userInfo = await UserService.GetCurrentUserInfoAsync();
+                if (userInfo == null)
+                {
+                    Console.WriteLine("Không thể lấy thông tin người dùng hiện tại");
+
+                    // Sử dụng thông tin từ phiếu bảo trì nếu không lấy được thông tin người dùng
+                    if (phieuMoi.MaNV.HasValue)
+                    {
+                        try
+                        {
+                            var nhanVienResponse = await client.From<NhanVienModel>()
+                                .Where(nv => nv.MaNV == phieuMoi.MaNV.Value)
+                                .Single();
+
+                            if (nhanVienResponse != null)
+                            {
+                                userInfo = nhanVienResponse;
+                            }
+                            else
+                            {
+                                userInfo = new NhanVienModel
+                                {
+                                    MaNV = phieuMoi.MaNV.Value,
+                                    TenNV = "Không xác định"
+                                };
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Lỗi khi lấy thông tin nhân viên: {ex.Message}");
+                            userInfo = new NhanVienModel
+                            {
+                                MaNV = phieuMoi.MaNV ?? 0,
+                                TenNV = "Không xác định"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        userInfo = new NhanVienModel
+                        {
+                            MaNV = 0,
+                            TenNV = "Hệ thống"
+                        };
+                    }
+                }
+
+                // Lấy thông tin tài sản
+                TaiSanModel taiSanInfo = null;
+                if (phieuMoi.MaTaiSan.HasValue)
+                {
+                    try
+                    {
+                        var taiSanQuery = client.From<TaiSanModel>();
+                        var taiSanFilter = taiSanQuery.Filter("ma_tai_san", Supabase.Postgrest.Constants.Operator.Equals, phieuMoi.MaTaiSan.Value);
+                        var taiSanResponse = await taiSanFilter.Get();
+
+                        if (taiSanResponse.Models.Count > 0)
+                        {
+                            taiSanInfo = taiSanResponse.Models[0];
+                            Console.WriteLine($"Đã lấy thông tin tài sản: {taiSanInfo.TenTaiSan}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Không tìm thấy thông tin tài sản có mã {phieuMoi.MaTaiSan.Value}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Lỗi khi lấy thông tin tài sản: {ex.Message}");
+                        // Tiếp tục với thông tin sẵn có
+                    }
+                }
+
+                // Tạo bản ghi lịch sử với đầy đủ thông tin nhất có thể
+                var lichSu = new LichSuBaoTri
+                {
+                    MaTaiSan = phieuMoi.MaTaiSan,
+                    TenTaiSan = taiSanInfo?.TenTaiSan ?? phieuMoi.TenTaiSan ?? "Không xác định",
+                    SoSeri = taiSanInfo?.SoSeri ?? phieuMoi.SoSeri ?? "",
+                    NgayThucHien = DateTime.Now,
+                    MaNguoiThucHien = userInfo.MaNV,
+                    TenNguoiThucHien = userInfo.TenNV,
+                    TinhTrangTaiSan = phieuMoi.TrangThai ?? taiSanInfo?.TinhTrangSP ?? "Không xác định",
+                    GhiChu = $"Thêm phiếu bảo trì mới: {phieuMoi.NoiDung}. Chi phí: {phieuMoi.ChiPhi ?? 0:N0} VNĐ"
+                };
+
+                // Log thông tin trước khi lưu
+                Console.WriteLine($"Chuẩn bị lưu lịch sử: MaTaiSan={lichSu.MaTaiSan}, TenTaiSan={lichSu.TenTaiSan}, " +
+                                $"NguoiThucHien={lichSu.TenNguoiThucHien}, TinhTrang={lichSu.TinhTrangTaiSan}");
+
+                // Thêm cơ chế thử lại nhiều lần khi lưu lịch sử
+                int maxRetries = 3;
+                for (int retry = 0; retry < maxRetries; retry++)
+                {
+                    try
+                    {
+                        var lichSuTable = client.From<LichSuBaoTri>();
+                        var lichSuResponse = await lichSuTable.Insert(lichSu);
+
+                        if (lichSuResponse != null && lichSuResponse.Models.Count > 0)
+                        {
+                            Console.WriteLine($"Đã lưu lịch sử thành công, mã lịch sử: {lichSuResponse.Models[0].MaLichSu}");
+                            return true;
+                        }
+
+                        Console.WriteLine($"Lần thử {retry + 1}: Lưu lịch sử không thành công - response không có dữ liệu");
+                        await Task.Delay(500); // Chờ 500ms trước khi thử lại
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Lần thử {retry + 1}: Lỗi khi thực hiện Insert lịch sử: {ex.Message}");
+                        if (retry < maxRetries - 1)
+                        {
+                            await Task.Delay(1000); // Chờ 1 giây trước khi thử lại
+                        }
+                    }
+                }
+
+               
+                try
+                {
+                    // Tạo một phiếu bảo trì trực tiếp
+                    var lichSuTrucTiep = new LichSuBaoTri
+                    {
+                        MaTaiSan = phieuMoi.MaTaiSan,
+                        TenTaiSan = lichSu.TenTaiSan,
+                        SoSeri = lichSu.SoSeri,
+                        NgayThucHien = DateTime.Now,
+                        MaNguoiThucHien = lichSu.MaNguoiThucHien,
+                        TenNguoiThucHien = lichSu.TenNguoiThucHien,
+                        TinhTrangTaiSan = lichSu.TinhTrangTaiSan,
+                        GhiChu = $"(Phương pháp thay thế) Thêm phiếu bảo trì: {phieuMoi.NoiDung}. Chi phí: {phieuMoi.ChiPhi ?? 0:N0} VNĐ"
+                    };
+
+                    // Lưu trực tiếp vào bảng lichsu_baotri
+                    var lichSuTable = client.From<LichSuBaoTri>();
+                    var response = await lichSuTable.Insert(lichSuTrucTiep);
+
+                    if (response != null && response.Models.Count > 0)
+                    {
+                        Console.WriteLine("Đã lưu lịch sử thành công bằng phương pháp thay thế trực tiếp");
+                        return true;
+                    }
+
+                    Console.WriteLine("Không thể lưu lịch sử bằng phương pháp thay thế trực tiếp");
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi khi thử phương pháp thay thế trực tiếp: {ex.Message}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi tổng thể khi lưu lịch sử phiếu mới: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -686,6 +991,60 @@ namespace Project_QLTS_DNC.Services
                 return 0;
             }
         }
+        // Thêm vào PhieuBaoTriService.cs
+        public async Task<bool> ThemPhieuBaoTriVaLuuLichSuAsync(PhieuBaoTri phieuMoi)
+        {
+            try
+            {
+                var client = await SupabaseService.GetClientAsync();
+                if (client == null) return false;
 
+                // Kiểm tra dữ liệu đầu vào
+                if (!phieuMoi.MaTaiSan.HasValue || string.IsNullOrEmpty(phieuMoi.NoiDung) || string.IsNullOrEmpty(phieuMoi.TrangThai))
+                {
+                    Console.WriteLine("Thiếu thông tin bắt buộc cho phiếu bảo trì");
+                    MessageBox.Show("Thiếu thông tin bắt buộc cho phiếu bảo trì", "Lỗi dữ liệu",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                Console.WriteLine($"Đang thêm phiếu bảo trì mới: MaTaiSan={phieuMoi.MaTaiSan}, NoiDung={phieuMoi.NoiDung}");
+
+                // Thêm phiếu bảo trì mới
+                var response = await client.From<PhieuBaoTri>().Insert(phieuMoi);
+
+                if (response == null || response.Models.Count == 0)
+                {
+                    MessageBox.Show("Không thể thêm phiếu bảo trì. Vui lòng kiểm tra lại dữ liệu!", "Lỗi",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                // Lưu lịch sử bảo trì
+                var lichSuService = new LichSuBaoTriService();
+                bool lichSuResult = await lichSuService.LuuLichSuPhieuMoiAsync(phieuMoi);
+
+                // Hiển thị thông báo kết quả
+                if (lichSuResult)
+                {
+                    MessageBox.Show("Đã thêm phiếu bảo trì và lưu lịch sử thành công!", "Thành công",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Đã thêm phiếu bảo trì nhưng không lưu được lịch sử. Vui lòng kiểm tra lại!",
+                        "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi thêm phiếu bảo trì và lưu lịch sử: {ex.Message}");
+                MessageBox.Show($"Lỗi khi thêm phiếu bảo trì và lưu lịch sử: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
     }
 }

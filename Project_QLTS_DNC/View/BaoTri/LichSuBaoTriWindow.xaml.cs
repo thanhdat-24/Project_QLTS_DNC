@@ -1,4 +1,5 @@
 ﻿using Project_QLTS_DNC.ViewModel.Baotri;
+using Project_QLTS_DNC.Models.BaoTri;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace Project_QLTS_DNC.Views
     {
         private readonly LichSuBaoTriViewModel _viewModel;
         private List<int> _filteredMaTaiSanList;
+        private DateTime? _tuNgayFilter;
+        private DateTime? _denNgayFilter;
 
         // Constructor gốc
         public LichSuBaoTriWindow()
@@ -26,7 +29,7 @@ namespace Project_QLTS_DNC.Views
             Loaded += LichSuBaoTriWindow_Loaded;
         }
 
-        // Constructor mới để hỗ trợ lọc theo mã tài sản
+        // Constructor để hỗ trợ lọc theo mã tài sản
         public LichSuBaoTriWindow(List<int> maTaiSanList)
         {
             InitializeComponent();
@@ -47,66 +50,50 @@ namespace Project_QLTS_DNC.Views
             try
             {
                 Mouse.OverrideCursor = Cursors.Wait;
-                await _viewModel.LoadDataAsync();
 
-                // Thêm delay ngắn để đảm bảo DataGrid đã render xong
-                await Task.Delay(100);
-
-                // Cập nhật STT cho DataGrid
-                UpdateSTTColumn();
-
-                // Hiển thị thông tin về bộ lọc (nếu có)
+                // Debug info
                 if (_filteredMaTaiSanList != null && _filteredMaTaiSanList.Count > 0)
                 {
-                    lblFilterInfo.Visibility = Visibility.Visible;
-                    lblFilterInfo.Text = $"Đang xem lịch sử cho {_filteredMaTaiSanList.Count} tài sản được chọn";
+                    Console.WriteLine($"[DEBUG] LichSuBaoTriWindow_Loaded với {_filteredMaTaiSanList.Count} mã tài sản");
+                }
+
+                // Tải dữ liệu
+                await _viewModel.LoadDataAsync();
+
+                // Kiểm tra nếu không có dữ liệu
+                if (_viewModel.DanhSachLichSu.Count == 0)
+                {
+                    Console.WriteLine("[DEBUG] Không có dữ liệu để hiển thị!");
+
+                    if (_filteredMaTaiSanList != null && _filteredMaTaiSanList.Count > 0)
+                    {
+                        lblFilterInfo.Visibility = Visibility.Visible;
+                        lblFilterInfo.Text = $"Không có lịch sử bảo trì cho {_filteredMaTaiSanList.Count} tài sản được chọn";
+                    }
                 }
                 else
                 {
-                    lblFilterInfo.Visibility = Visibility.Collapsed;
+                    // Hiển thị thông tin về bộ lọc (nếu có)
+                    if (_filteredMaTaiSanList != null && _filteredMaTaiSanList.Count > 0)
+                    {
+                        lblFilterInfo.Visibility = Visibility.Visible;
+                        lblFilterInfo.Text = $"Đang xem lịch sử cho {_filteredMaTaiSanList.Count} tài sản được chọn";
+                    }
+                    else
+                    {
+                        lblFilterInfo.Visibility = Visibility.Collapsed;
+                    }
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[ERROR] LichSuBaoTriWindow_Loaded Exception: {ex.Message}");
                 MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 Mouse.OverrideCursor = null;
-            }
-        }
-
-        // Các phương thức khác giữ nguyên như cũ
-        private void UpdateSTTColumn()
-        {
-            try
-            {
-                if (dgLichSu.Items.Count > 0)
-                {
-                    // Đảm bảo DataGrid đã render
-                    dgLichSu.UpdateLayout();
-
-                    for (int i = 0; i < dgLichSu.Items.Count; i++)
-                    {
-                        // Lấy DataGridRow
-                        if (dgLichSu.ItemContainerGenerator.ContainerFromIndex(i) is DataGridRow row)
-                        {
-                            if (dgLichSu.Columns.Count > 0 && dgLichSu.Columns[0] != null)
-                            {
-                                // Lấy cell của cột STT
-                                if (dgLichSu.Columns[0].GetCellContent(row) is TextBlock cell)
-                                {
-                                    cell.Text = (i + 1).ToString();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi cập nhật STT: {ex.Message}");
             }
         }
 
@@ -117,23 +104,13 @@ namespace Project_QLTS_DNC.Views
             if (string.IsNullOrEmpty(keyword))
             {
                 // Hiển thị tất cả
-                dgLichSu.ItemsSource = _viewModel.DanhSachLichSu;
+                _viewModel.ReloadData();
             }
             else
             {
                 // Lọc theo từ khóa
-                var filteredList = _viewModel.DanhSachLichSu.Where(item =>
-                    (item.LichSu.TenTaiSan?.ToLower().Contains(keyword) ?? false) ||
-                    (item.LichSu.SoSeri?.ToLower().Contains(keyword) ?? false) ||
-                    (item.LichSu.TenNguoiThucHien?.ToLower().Contains(keyword) ?? false) ||
-                    (item.LichSu.GhiChu?.ToLower().Contains(keyword) ?? false)
-                ).ToList();
-
-                dgLichSu.ItemsSource = filteredList;
+                _viewModel.FilterByKeyword(keyword);
             }
-
-            // Cập nhật lại STT
-            UpdateRowNumbers();
         }
 
         private void txtTimKiem_KeyDown(object sender, KeyEventArgs e)
@@ -152,34 +129,87 @@ namespace Project_QLTS_DNC.Views
 
             if (selectedValue == "Tất cả hoạt động")
             {
-                dgLichSu.ItemsSource = _viewModel.DanhSachLichSu;
+                _viewModel.ReloadData();
+            }
+            else if (!string.IsNullOrEmpty(selectedValue))
+            {
+                // Lọc theo từ khóa trong ghi chú
+                string keyword = selectedValue.ToLower();
+                _viewModel.FilterByKeyword(keyword);
+            }
+        }
+
+        // Thêm phương thức xử lý sự kiện lọc theo ngày
+        private void btnLocTheoNgay_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Lấy giá trị từ DatePicker
+                _tuNgayFilter = dpTuNgay.SelectedDate;
+                _denNgayFilter = dpDenNgay.SelectedDate;
+
+                // Nếu ngày kết thúc được chọn, đảm bảo là cuối ngày (23:59:59)
+                if (_denNgayFilter.HasValue)
+                {
+                    _denNgayFilter = _denNgayFilter.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                }
+
+                // Hiển thị thông báo lọc
+                UpdateFilterInfoText();
+
+                // Nếu cả hai giá trị đều null, hiển thị tất cả dữ liệu
+                if (!_tuNgayFilter.HasValue && !_denNgayFilter.HasValue)
+                {
+                    _viewModel.ReloadData();
+                    lblFilterInfo.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                // Lọc dữ liệu - Sử dụng phương thức trong ViewModel
+                _viewModel.FilterByDateRange(_tuNgayFilter, _denNgayFilter);
+
+                // Hiển thị thông báo nếu không có dữ liệu
+                if (_viewModel.DanhSachLichSu.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu nào trong khoảng thời gian đã chọn.",
+                        "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi lọc dữ liệu theo ngày: {ex.Message}", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Phương thức cập nhật thông báo lọc
+        private void UpdateFilterInfoText()
+        {
+            // Định dạng chuỗi thông báo lọc
+            string filterText = "";
+
+            if (_tuNgayFilter.HasValue && _denNgayFilter.HasValue)
+            {
+                filterText = $"Đang lọc từ ngày {_tuNgayFilter.Value:dd/MM/yyyy} đến ngày {_denNgayFilter.Value:dd/MM/yyyy}";
+            }
+            else if (_tuNgayFilter.HasValue)
+            {
+                filterText = $"Đang lọc từ ngày {_tuNgayFilter.Value:dd/MM/yyyy} đến nay";
+            }
+            else if (_denNgayFilter.HasValue)
+            {
+                filterText = $"Đang lọc đến ngày {_denNgayFilter.Value:dd/MM/yyyy}";
+            }
+
+            // Cập nhật và hiển thị thông báo lọc
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                lblFilterInfo.Text = filterText;
+                lblFilterInfo.Visibility = Visibility.Visible;
             }
             else
             {
-                var filteredList = _viewModel.DanhSachLichSu.Where(item =>
-                    item.LichSu.LoaiHoatDong == selectedValue
-                ).ToList();
-
-                dgLichSu.ItemsSource = filteredList;
-            }
-
-            // Cập nhật lại STT
-            UpdateRowNumbers();
-        }
-
-        private void UpdateRowNumbers()
-        {
-            for (int i = 0; i < dgLichSu.Items.Count; i++)
-            {
-                var row = (DataGridRow)dgLichSu.ItemContainerGenerator.ContainerFromIndex(i);
-                if (row != null)
-                {
-                    var cell = dgLichSu.Columns[0].GetCellContent(row) as TextBlock;
-                    if (cell != null)
-                    {
-                        cell.Text = (i + 1).ToString();
-                    }
-                }
+                lblFilterInfo.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -214,40 +244,75 @@ namespace Project_QLTS_DNC.Views
                             worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                             // Thêm thông tin ngày xuất báo cáo
-                            worksheet.Cell("A2").Value = $"Ngày xuất báo cáo: {DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")}";
+                            worksheet.Cell("A2").Value = $"Ngày xuất báo cáo: {DateTime.Now:dd/MM/yyyy HH:mm:ss}";
                             worksheet.Range("A2:G2").Merge();
                             worksheet.Cell("A2").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+                            // Thêm thông tin lọc (nếu có)
+                            if (_tuNgayFilter.HasValue || _denNgayFilter.HasValue || (_filteredMaTaiSanList != null && _filteredMaTaiSanList.Count > 0))
+                            {
+                                string filterInfo = "Bộ lọc: ";
+
+                                if (_tuNgayFilter.HasValue && _denNgayFilter.HasValue)
+                                {
+                                    filterInfo += $"Từ ngày {_tuNgayFilter.Value:dd/MM/yyyy} đến ngày {_denNgayFilter.Value:dd/MM/yyyy}";
+                                }
+                                else if (_tuNgayFilter.HasValue)
+                                {
+                                    filterInfo += $"Từ ngày {_tuNgayFilter.Value:dd/MM/yyyy}";
+                                }
+                                else if (_denNgayFilter.HasValue)
+                                {
+                                    filterInfo += $"Đến ngày {_denNgayFilter.Value:dd/MM/yyyy}";
+                                }
+
+                                if (_filteredMaTaiSanList != null && _filteredMaTaiSanList.Count > 0)
+                                {
+                                    if (_tuNgayFilter.HasValue || _denNgayFilter.HasValue)
+                                    {
+                                        filterInfo += ", ";
+                                    }
+                                    filterInfo += $"{_filteredMaTaiSanList.Count} tài sản được chọn";
+                                }
+
+                                worksheet.Cell("A3").Value = filterInfo;
+                                worksheet.Range("A3:G3").Merge();
+                                worksheet.Cell("A3").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                                worksheet.Cell("A3").Style.Font.Italic = true;
+                            }
 
                             // Thêm header cho bảng
                             worksheet.Cell("A4").Value = "STT";
                             worksheet.Cell("B4").Value = "Ngày thực hiện";
-                            worksheet.Cell("C4").Value = "Loại hoạt động";
-                            worksheet.Cell("D4").Value = "Thông tin tài sản";
-                            worksheet.Cell("E4").Value = "Số lượng tài sản";
-                            worksheet.Cell("F4").Value = "Người thực hiện";
-                            worksheet.Cell("G4").Value = "Ghi chú";
+                            worksheet.Cell("C4").Value = "Mã tài sản";
+                            worksheet.Cell("D4").Value = "Tên tài sản";
+                            worksheet.Cell("E4").Value = "Số seri";
+                            worksheet.Cell("F4").Value = "Tình trạng tài sản";
+                            worksheet.Cell("G4").Value = "Người thực hiện";
+                            worksheet.Cell("H4").Value = "Ghi chú";
 
                             // Format header
-                            var headerRange = worksheet.Range("A4:G4");
+                            var headerRange = worksheet.Range("A4:H4");
                             headerRange.Style.Font.Bold = true;
                             headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
                             headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                             headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
                             // Điền dữ liệu
-                            var currentItems = dgLichSu.Items.Cast<LichSuBaoTriItem>().ToList();
+                            var currentItems = _viewModel.DanhSachLichSu.ToList();
                             for (int i = 0; i < currentItems.Count; i++)
                             {
                                 var item = currentItems[i];
                                 int row = i + 5; // Bắt đầu từ dòng 5
 
                                 worksheet.Cell(row, 1).Value = i + 1; // STT
-                                worksheet.Cell(row, 2).Value = item.LichSu.NgayThucHien.ToString("dd/MM/yyyy HH:mm:ss");
-                                worksheet.Cell(row, 3).Value = item.LichSu.LoaiHoatDong;
-                                worksheet.Cell(row, 4).Value = $"{item.LichSu.TenTaiSan} (SN: {item.LichSu.SoSeri})";
-                                worksheet.Cell(row, 5).Value = item.SoLuongTaiSan;
-                                worksheet.Cell(row, 6).Value = item.LichSu.TenNguoiThucHien;
-                                worksheet.Cell(row, 7).Value = item.LichSu.GhiChu;
+                                worksheet.Cell(row, 2).Value = item.NgayThucHien.ToString("dd/MM/yyyy HH:mm:ss");
+                                worksheet.Cell(row, 3).Value = item.MaTaiSan?.ToString() ?? "";
+                                worksheet.Cell(row, 4).Value = item.TenTaiSan;
+                                worksheet.Cell(row, 5).Value = item.SoSeri;
+                                worksheet.Cell(row, 6).Value = item.TinhTrangTaiSan;
+                                worksheet.Cell(row, 7).Value = item.TenNguoiThucHien;
+                                worksheet.Cell(row, 8).Value = item.GhiChu;
                             }
 
                             // Auto-fit columns

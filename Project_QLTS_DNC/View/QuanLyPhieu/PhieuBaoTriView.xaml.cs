@@ -180,7 +180,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Xử lý sự kiện khi ấn nút thêm phiếu bảo trì
+        // Xử lý sự kiện khi ấn nút thêm phiếu bảo trì - ĐÃ CẬP NHẬT
         private async void btnThem_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -201,19 +201,27 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         $"MaTaiSan={addWindow.PhieuBaoTri.MaTaiSan}, " +
                         $"NoiDung={addWindow.PhieuBaoTri.NoiDung}, " +
                         $"TrangThai={addWindow.PhieuBaoTri.TrangThai}");
-                    // Thêm phiếu bảo trì vào cơ sở dữ liệu
-                    bool success = await _viewModel.AddPhieuBaoTriAsync(addWindow.PhieuBaoTri);
-                    if (success)
+
+                    // Hiển thị con trỏ chờ
+                    Mouse.OverrideCursor = Cursors.Wait;
+
+                    try
                     {
-                        MessageBox.Show("Thêm phiếu bảo trì thành công!", "Thông báo",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-                        // Tải lại danh sách bảo trì để cập nhật giao diện
-                        await LoadDSBaoTriAsync();
+                        // Thêm phiếu bảo trì vào cơ sở dữ liệu - sử dụng PhieuBaoTriService để lưu phiếu và lịch sử
+                        bool success = await _phieuBaoTriService.AddPhieuBaoTriAsync(addWindow.PhieuBaoTri);
+
+                        // _phieuBaoTriService.AddPhieuBaoTriAsync đã bao gồm việc lưu lịch sử và hiển thị thông báo
+
+                        if (success)
+                        {
+                            // Tải lại danh sách bảo trì để cập nhật giao diện
+                            await LoadDSBaoTriAsync();
+                        }
                     }
-                    else
+                    finally
                     {
-                        MessageBox.Show("Không thể thêm phiếu bảo trì. Vui lòng kiểm tra lại dữ liệu!", "Lỗi",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        // Đảm bảo bỏ con trỏ chờ
+                        Mouse.OverrideCursor = null;
                     }
                 }
             }
@@ -223,7 +231,6 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         // Xử lý sự kiện khi ấn nút tìm kiếm
         private async void btnTimKiem_Click(object sender, RoutedEventArgs e)
         {
@@ -500,9 +507,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         // Gọi phương thức xuất Excel từ service
                         _phieuBaoTriService.ExportToExcel(danhSachXuat, saveFileDialog.FileName);
 
-                        // THAY ĐỔI: Sử dụng LichSuBaoTriService thay vì phương thức cục bộ
-                        await _lichSuService.LuuLichSuHoatDongAsync("Xuất Excel", danhSachXuat,
-                            $"Xuất file Excel {System.IO.Path.GetFileName(saveFileDialog.FileName)}");
+                       
 
                         MessageBox.Show("Xuất Excel thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -773,10 +778,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                         printDialog.PrintDocument(((System.Windows.Documents.IDocumentPaginatorSource)document).DocumentPaginator,
                             "In phiếu bảo trì");
 
-                        // THAY ĐỔI: Sử dụng LichSuBaoTriService thay vì phương thức cục bộ
-                        await _lichSuService.LuuLichSuHoatDongAsync("In phiếu", selectedPhieu,
-                            $"In {selectedPhieu.Count} phiếu bảo trì");
-
+                      
                         MessageBox.Show($"Đã in {selectedPhieu.Count} phiếu bảo trì thành công!", "Thông báo",
                             MessageBoxButton.OK, MessageBoxImage.Information);
                     }
@@ -910,8 +912,29 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
         {
             try
             {
-                // Tạo và hiển thị cửa sổ lịch sử bảo trì
-                Project_QLTS_DNC.Views.LichSuBaoTriWindow lichSuWindow = new Project_QLTS_DNC.Views.LichSuBaoTriWindow();
+                // Lấy danh sách mã tài sản của các phiếu được chọn
+                List<int> selectedMaTaiSanList = null;
+                List<PhieuBaoTri> selectedPhieu = GetSelectedPhieuBaoTri();
+
+                if (selectedPhieu.Count > 0)
+                {
+                    // Nếu có phiếu được chọn, chỉ xem lịch sử của những tài sản này
+                    selectedMaTaiSanList = selectedPhieu
+                        .Where(p => p.MaTaiSan.HasValue)
+                        .Select(p => p.MaTaiSan.Value)
+                        .Distinct()
+                        .ToList();
+
+                    // Nếu không có phiếu nào có mã tài sản (hiếm khi xảy ra)
+                    if (selectedMaTaiSanList.Count == 0)
+                    {
+                        selectedMaTaiSanList = null; // Xem tất cả lịch sử
+                    }
+                }
+
+                // Tạo và hiển thị cửa sổ lịch sử bảo trì với mã tài sản đã chọn
+                Project_QLTS_DNC.Views.LichSuBaoTriWindow lichSuWindow =
+                    new Project_QLTS_DNC.Views.LichSuBaoTriWindow(selectedMaTaiSanList);
                 lichSuWindow.Owner = Window.GetWindow(this);
                 lichSuWindow.ShowDialog();
             }
@@ -921,6 +944,5 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
     }
 }

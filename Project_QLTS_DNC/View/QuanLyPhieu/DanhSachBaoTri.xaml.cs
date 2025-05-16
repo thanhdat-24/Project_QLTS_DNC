@@ -48,7 +48,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             btnXuatExcel.Click += BtnXuatExcel_Click;
 
             // Đăng ký sự kiện cho nút xem lịch sử
-            btnXemLichSu.Click += BtnXemLichSu_Click;
+            btnXemLichSu.Click += btnXemLichSu_Click;
 
             // Đăng ký sự kiện cho checkbox chọn tất cả
             chkSelectAll.Checked += ChkSelectAll_CheckedChanged;
@@ -613,12 +613,12 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 throw; // Rethrow để caller biết lỗi
             }
         }
-        private void BtnXemLichSu_Click(object sender, RoutedEventArgs e)
+        private void btnXemLichSu_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 // Lấy danh sách tài sản đã được chọn hoặc hiển thị
-                var selectedItems = new List<KiemKeTaiSan>(); // Thay KiemKeTaiSanModel thành KiemKeTaiSan
+                var selectedItems = new List<KiemKeTaiSan>();
 
                 // Nếu có tài sản được chọn, lấy danh sách tài sản đã chọn
                 foreach (var item in dgDanhSachTaiSan.Items)
@@ -634,7 +634,7 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
                 {
                     foreach (var item in dgDanhSachTaiSan.Items)
                     {
-                        if (item is KiemKeTaiSan kiemKeTaiSan) // Đã khai báo kiemKeTaiSan ở đây
+                        if (item is KiemKeTaiSan kiemKeTaiSan)
                         {
                             selectedItems.Add(kiemKeTaiSan);
                         }
@@ -658,15 +658,38 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
         }
 
-        // Phần 2: Cập nhật phương thức OpenLichSuBaoTriWindow
-        private void OpenLichSuBaoTriWindow(List<KiemKeTaiSan> selectedItems) // Thay KiemKeTaiSanModel thành KiemKeTaiSan
+        private void OpenLichSuBaoTriWindow(List<KiemKeTaiSan> selectedItems)
         {
             try
             {
                 // Tạo danh sách mã tài sản để lọc
-                var maTaiSanList = selectedItems.Select(item => item.MaTaiSan.HasValue ? item.MaTaiSan.Value : 0)
-                    .Where(id => id > 0)
+                var maTaiSanList = selectedItems
+                    .Where(item => item.MaTaiSan.HasValue && item.MaTaiSan.Value > 0)
+                    .Select(item => item.MaTaiSan.Value)
+                    .Distinct() // Loại bỏ mã trùng lặp
                     .ToList();
+
+                // Hiển thị chi tiết từng item được chọn
+                Console.WriteLine($"[DEBUG] Tổng số tài sản được chọn: {selectedItems.Count}");
+                foreach (var item in selectedItems)
+                {
+                    Console.WriteLine($"[DEBUG] Tài sản: ID={item.MaTaiSan}, Tên={item.TenTaiSan}, Mã={item.MaTaiSan}");
+                }
+
+                Console.WriteLine($"[DEBUG] Chuẩn bị mở cửa sổ lịch sử với {maTaiSanList.Count} mã tài sản hợp lệ");
+                foreach (var id in maTaiSanList)
+                {
+                    Console.WriteLine($"[DEBUG] Mã tài sản đã lọc: {id}");
+                }
+
+                if (maTaiSanList.Count == 0)
+                {
+                    MessageBox.Show("Không có mã tài sản hợp lệ để xem lịch sử.",
+                        "Thông báo",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
 
                 // Tạo và mở cửa sổ lịch sử, truyền danh sách mã tài sản
                 var lichSuWindow = new LichSuBaoTriWindow(maTaiSanList);
@@ -676,24 +699,11 @@ namespace Project_QLTS_DNC.View.QuanLyPhieu
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[ERROR] OpenLichSuBaoTriWindow Exception: {ex.Message}");
                 MessageBox.Show($"Lỗi khi mở cửa sổ lịch sử: {ex.Message}", "Lỗi",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        private void btnXemLichSu_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Tạo và hiển thị cửa sổ lịch sử bảo trì
-                Project_QLTS_DNC.Views.LichSuBaoTriWindow lichSuWindow = new Project_QLTS_DNC.Views.LichSuBaoTriWindow();
-                lichSuWindow.Owner = Window.GetWindow(this);
-                lichSuWindow.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi mở cửa sổ lịch sử: {ex.Message}", "Lỗi",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+
     }
 }
