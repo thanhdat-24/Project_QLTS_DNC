@@ -27,6 +27,8 @@ using VerticalAlignment = iText.Layout.Properties.VerticalAlignment;
 using Project_QLTS_DNC.Helpers;
 using Project_QLTS_DNC.Services.ThongBao;
 using Project_QLTS_DNC.View.Common;
+using Project_QLTS_DNC.Models.ThongTinCongTy;
+using System.Text.Json;
 
 namespace Project_QLTS_DNC.View.QuanLyTaiSan
 {
@@ -360,6 +362,17 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
         }
         private void TaoFilePDF(string filePath)
         {
+            ThongTinCongTy thongTinCongTy = null;
+            try
+            {
+                if (File.Exists("thongtincongty.json"))
+                {
+                    string json = File.ReadAllText("thongtincongty.json");
+                    thongTinCongTy = JsonSerializer.Deserialize<ThongTinCongTy>(json);
+                }
+            }
+            catch { /* log lỗi nếu cần */ }
+
             // Khởi tạo writer và document
             using (PdfWriter writer = new PdfWriter(filePath))
             using (PdfDocument pdf = new PdfDocument(writer))
@@ -367,8 +380,7 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                 // Thiết lập kích thước giấy A4
                 PageSize pageSize = PageSize.A4;
                 Document document = new Document(pdf, pageSize);
-                document.SetMargins(36, 36, 36, 36); // 36 points = 0.5 inch margins
-
+                document.SetMargins(36, 36, 36, 36);
                 // Tạo font tiếng Việt từ font có sẵn trong Windows
                 PdfFont font = null;
                 try
@@ -409,6 +421,41 @@ namespace Project_QLTS_DNC.View.QuanLyTaiSan
                     // Nếu có lỗi, sử dụng font mặc định
                     font = PdfFontFactory.CreateFont();
                 }
+                // Header: Logo trái - Thông tin phải
+                if (thongTinCongTy != null)
+                {
+                    Table headerTable = new Table(new float[] { 1, 3 });
+                    headerTable.SetWidth(UnitValue.CreatePercentValue(100));
+                    headerTable.SetBorder(Border.NO_BORDER);
+
+                    // Logo
+                    Cell logoCell = new Cell().SetBorder(Border.NO_BORDER);
+                    if (!string.IsNullOrWhiteSpace(thongTinCongTy.LogoPath) && File.Exists(thongTinCongTy.LogoPath))
+                    {
+                        ImageData imageData = ImageDataFactory.Create(thongTinCongTy.LogoPath);
+                        iText.Layout.Element.Image logo = new iText.Layout.Element.Image(imageData)
+                            .ScaleToFit(60, 60)
+                            .SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.LEFT);
+                        logoCell.Add(logo);
+                    }
+                    headerTable.AddCell(logoCell);
+
+                    // Thông tin công ty
+                    Cell infoCell = new Cell().SetBorder(Border.NO_BORDER);
+                    infoCell.Add(new Paragraph(thongTinCongTy.Ten).SetFont(font).SetBold().SetFontSize(14));
+                    infoCell.Add(new Paragraph($"Địa chỉ: {thongTinCongTy.DiaChi}").SetFont(font).SetFontSize(11));
+                    infoCell.Add(new Paragraph($"Mã số thuế: {thongTinCongTy.MaSoThue}").SetFont(font).SetFontSize(11));
+                    infoCell.Add(new Paragraph($"SĐT: {thongTinCongTy.SoDienThoai}").SetFont(font).SetFontSize(11));
+                    infoCell.Add(new Paragraph($"Email: {thongTinCongTy.Email}").SetFont(font).SetFontSize(11));
+
+                    headerTable.AddCell(infoCell);
+
+                    document.Add(headerTable);
+                    document.Add(new Paragraph("\n").SetFont(font)); // khoảng cách với tiêu đề
+                }
+
+
+    
 
                 // Tiêu đề phiếu
                 Paragraph title = new Paragraph("PHIẾU BÀN GIAO TÀI SẢN")
